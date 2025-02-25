@@ -45,6 +45,8 @@ export class MarkerParser extends BaseParser {
   private readonly pollInterval: number;
   private readonly logger: Logger = new Logger(MarkerParser.name);
 
+  name = 'marker';
+
   constructor(
     private readonly config: ConfigService,
     options: MarkerOptions = {},
@@ -105,7 +107,7 @@ export class MarkerParser extends BaseParser {
       // Add the file content
       const fileBuf = Buffer.isBuffer(input) ? input : Buffer.from(input);
       const blob = new Blob([fileBuf], { type: 'application/pdf' });
-      formData.append('file', blob, 'document.pdf');
+      formData.append('file', blob, `${this.options.resourceId || 'document'}.pdf`);
 
       // formData.append('langs', 'English');
       formData.append('force_ocr', 'false');

@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PlainTextParser extends BaseParser {
+  name = 'plain-text';
+
   constructor(
     private readonly config: ConfigService,
     options: ParserOptions = {},

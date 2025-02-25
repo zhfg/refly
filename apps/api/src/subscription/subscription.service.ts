@@ -8,6 +8,7 @@ import {
   CreateCheckoutSessionRequest,
   SubscriptionInterval,
   SubscriptionPlanType,
+  SubscriptionUsageData,
   User,
 } from '@refly-packages/openapi-schema';
 import { genTokenUsageMeterID, genStorageUsageMeterID } from '@refly-packages/utils';
@@ -20,6 +21,7 @@ import {
   CheckRequestUsageResult,
   CheckStorageUsageResult,
   SyncRequestUsageJobData,
+  CheckFileParseUsageResult,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import {
@@ -467,6 +469,43 @@ export class SubscriptionService implements OnModuleInit {
     };
   }
 
+  async checkFileParseUsage(user: User): Promise<CheckFileParseUsageResult> {
+    const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
+    if (!userModel) {
+      this.logger.error(`No user found for uid ${user.uid}`);
+      return { pageUsed: 0, pageLimit: 0, available: 0 };
+    }
+
+    const pageSum = await this.prisma.fileParseRecord.aggregate({
+      _sum: { numPages: true },
+      where: {
+        uid: user.uid,
+        createdAt: { gte: startOfDay(new Date()) },
+      },
+    });
+    const pageUsed = pageSum._sum.numPages ?? 0;
+
+    let sub: SubscriptionModel | null = null;
+    if (userModel.subscriptionId) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: userModel.subscriptionId },
+      });
+    }
+
+    const planType = sub?.planType || 'free';
+    const plan = await this.prisma.subscriptionPlan.findFirst({
+      select: { fileParsePageLimit: true },
+      where: { planType },
+    });
+    const pageLimit = plan?.fileParsePageLimit ?? this.config.get('quota.fileParse.page');
+
+    return {
+      pageUsed,
+      pageLimit,
+      available: pageLimit < 0 ? Number.POSITIVE_INFINITY : pageLimit - pageUsed,
+    };
+  }
+
   async getOrCreateTokenUsageMeter(user: User, _sub?: SubscriptionModel) {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
@@ -598,7 +637,10 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateUsageMeter(user: User, _sub?: SubscriptionModel) {
+  async getOrCreateUsageMeter(
+    user: User,
+    _sub?: SubscriptionModel,
+  ): Promise<SubscriptionUsageData> {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
       select: { subscriptionId: true },
@@ -618,14 +660,24 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    const [tokenMeter, storageMeter] = await Promise.all([
+    const [tokenMeter, storageMeter, fileParseMeter] = await Promise.all([
       this.getOrCreateTokenUsageMeter(user, sub),
       this.getOrCreateStorageUsageMeter(user, sub),
+      this.getFileParseUsageMeter(user),
     ]);
 
     return {
       token: tokenUsageMeterPO2DTO(tokenMeter),
       storage: storageUsageMeterPO2DTO(storageMeter),
+      fileParsing: fileParseMeter,
+    };
+  }
+
+  async getFileParseUsageMeter(user: User) {
+    const usage = await this.checkFileParseUsage(user);
+    return {
+      pagesParsed: usage.pageUsed,
+      pagesLimit: usage.pageLimit,
     };
   }
 

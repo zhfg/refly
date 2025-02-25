@@ -268,22 +268,47 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const t2ModelName = t('settings.subscription.t2Requests');
   const t1ModalTooltipContent = t('settings.subscription.t1RequestsDescription');
   const t2ModalTooltipContent = t('settings.subscription.t2RequestsDescription');
-  const libraryTooltipContent = t('settings.subscription.fileCountDescription');
+  const libraryStorage = t('settings.subscription.libraryStorage');
+  const libraryTooltipContent = t('settings.subscription.libraryStorageDescription');
+  const advancedFileParsing = t('settings.subscription.advancedFileParsing');
+  const advancedFileParsingTooltip = t('settings.subscription.advancedFileParsingDescription');
+
   const unlimited = t('settings.subscription.subscribe.unlimited');
-  const libraryStorage = t('settings.subscription.subscribe.libraryStorage');
 
   const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
     const configs = {
-      free: { t1Count: 3, t2Count: 30, fileLimit: 10, t1Period: 'daily', t2Period: 'daily' },
+      free: {
+        t1Count: 3,
+        t2Count: 30,
+        fileLimit: 10,
+        t1Period: 'daily',
+        t2Period: 'daily',
+        fileParseLimit: 50,
+      },
       plus: {
         t1Count: 100,
         t2Count: 1500,
         fileLimit: 200,
         t1Period: 'monthly',
         t2Period: 'monthly',
+        fileParseLimit: 100,
       },
-      pro: { t1Count: 300, t2Count: -1, fileLimit: 500, t1Period: 'monthly', t2Period: 'monthly' },
-      max: { t1Count: -1, t2Count: -1, fileLimit: 2000, t1Period: 'monthly', t2Period: 'monthly' },
+      pro: {
+        t1Count: 300,
+        t2Count: -1,
+        fileLimit: 500,
+        t1Period: 'monthly',
+        t2Period: 'monthly',
+        fileParseLimit: 300,
+      },
+      max: {
+        t1Count: -1,
+        t2Count: -1,
+        fileLimit: 2000,
+        t1Period: 'monthly',
+        t2Period: 'monthly',
+        fileParseLimit: 1000,
+      },
     };
 
     const config = configs[plan];
@@ -318,6 +343,13 @@ export const PriceContent = (props: { source: PriceSource }) => {
         name: libraryStorage,
         count: t('settings.subscription.subscribe.fileCounts', { count: config.fileLimit }),
         tooltip: libraryTooltipContent,
+      },
+      {
+        name: advancedFileParsing,
+        count: t('settings.subscription.subscribe.dailyPagesCount', {
+          count: config.fileParseLimit,
+        }),
+        tooltip: advancedFileParsingTooltip,
       },
       {
         name: t(`settings.subscription.subscribe.${plan}.serviceSupport.name`),

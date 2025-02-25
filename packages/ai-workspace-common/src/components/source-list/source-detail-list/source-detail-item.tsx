@@ -60,7 +60,7 @@ export const SourceDetailItem = memo((props: SourceDetailItemProps) => {
         </Tooltip>
         {!small && (
           <div className="site-intro-content">
-            <p className="site-intro-site-name">{item.title}</p>
+            <p className="">{item.title}</p>
             <a className="site-intro-site-url" href={item.url} target="_blank" rel="noreferrer">
               {item.url}
             </a>

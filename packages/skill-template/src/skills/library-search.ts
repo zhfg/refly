@@ -101,7 +101,23 @@ export class LibrarySearch extends BaseSkill {
     };
 
     if (sources.length > 0) {
-      this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
+      // Split sources into smaller chunks based on size and emit them separately
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              // Build your event data here
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
     }
 
     const requestMessages = buildFinalRequestMessages({

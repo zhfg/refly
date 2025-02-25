@@ -350,6 +350,30 @@ model CanvasEntityRelation {
   @@map("canvas_entity_relations")
 }
 
+model FileParseRecord {
+  /// Primary key
+  pk          BigInt   @id @default(autoincrement())
+  /// Resource id
+  resourceId  String   @map("resource_id")
+  /// UID
+  uid         String   @map("uid")
+  /// Parser used
+  parser      String   @map("parser")
+  /// Content type
+  contentType String   @map("content_type")
+  /// Number of pages
+  numPages    Int      @default(0) @map("num_pages")
+  /// Storage key
+  storageKey  String   @map("storage_key")
+  /// Create timestamp
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid, createdAt])
+  @@map("file_parse_records")
+}
+
 model Resource {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())
@@ -373,6 +397,8 @@ model Resource {
   rawFileKey     String?   @map("raw_file_key")
   /// Index status
   indexStatus    String    @default("init") @map("index_status")
+  /// Index error (JSON of `IndexError`)
+  indexError     String?   @map("index_error")
   /// Title
   title          String    @map("title")
   /// Resource identifier
@@ -605,6 +631,8 @@ model SubscriptionPlan {
   objectStorageQuota BigInt   @default(1000000000) @map("object_storage_quota")
   /// Vector storage quota (in bytes)
   vectorStorageQuota BigInt   @default(1000000000) @map("vector_storage_quota")
+  /// File parse limit (in pages)
+  fileParsePageLimit Int      @default(-1) @map("file_parse_page_limit")
   /// Create timestamp
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

@@ -27,6 +27,7 @@ import { IconRerun } from '@refly-packages/ai-workspace-common/components/common
 
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
+
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
   resultId: string;

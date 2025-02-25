@@ -54,6 +54,8 @@ const translations = {
     thread: 'Thread',
     meta: 'Meta',
     project: 'Project',
+    upgrade: 'Upgrade',
+    upgradeSubscription: 'Upgrade Subscription',
     copy: {
       title: 'Copy',
       success: 'Content has been copied to the clipboard!',
@@ -117,7 +119,7 @@ const translations = {
         'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'Refly Chrome Extension web clipper launched! ⚡️! ',
+    messageText: 'Support file upload and multi-modal image processing⚡️ ',
     tryForFree: 'Get Started',
     addToChrome: 'Add to Chrome',
     contactUs: 'Contact Us',
@@ -126,10 +128,10 @@ const translations = {
     downloadBtn: 'Download Extension',
     loginBtn: 'Login',
     dashboard: 'Dashboard',
-    features: {
-      tag: 'Features',
-      title: "An Overview of Refly's Primary Features",
-      featureOne: {
+    workflow: {
+      tag: 'Workflow',
+      title: "An Overview of Refly's",
+      workflowOne: {
         tag: 'Planning',
         title:
           'Transform chaos into clarity with our free-form canvas for professional content creation',
@@ -139,7 +141,7 @@ const translations = {
           'Build deep thought connections through your growing personal knowledge base',
         ],
       },
-      featureTwo: {
+      workflowTwo: {
         tag: 'Explore & Import',
         title:
           'Break down knowledge barriers, turning fragmented information into creative resources',
@@ -149,7 +151,7 @@ const translations = {
           'Automatic knowledge linking for cross-domain insights',
         ],
       },
-      featureThree: {
+      workflowThree: {
         tag: 'Research',
         title: 'Spark insights through multi-threaded dialogues, making research more illuminating',
         bulletPoints: [
@@ -158,7 +160,7 @@ const translations = {
           'Flexible knowledge base integration for accelerated breakthroughs',
         ],
       },
-      featureFour: {
+      workflowFour: {
         tag: 'Thinking & Creation',
         title:
           'From ideation to completion, elevate your professional content with deeper insights',
@@ -168,7 +170,7 @@ const translations = {
           'AI editing assistant for quality professional output',
         ],
       },
-      featureFive: {
+      workflowFive: {
         tag: 'Clip & Save',
         title: 'One-click content saving from any webpage to build your second brain',
         bulletPoints: [
@@ -176,6 +178,126 @@ const translations = {
           'Support private webpage content saving and organization',
           'Continuously build your personal knowledge base',
           'Seamlessly integrate with your second brain',
+        ],
+      },
+    },
+    features: {
+      tag: 'Core Features',
+      title: "Refly's Key Features",
+      fileFormats: {
+        pdf: {
+          name: 'document.pdf',
+          body: 'Professional PDF documents with rich text, images, and interactive elements that maintain consistent formatting.',
+        },
+        markdown: {
+          name: 'notes.md',
+          body: 'Clean and simple Markdown files for documentation, notes, and formatted text with support for code blocks.',
+        },
+        word: {
+          name: 'report.docx',
+          body: 'Microsoft Word documents with advanced formatting, track changes, and collaborative editing features.',
+        },
+        html: {
+          name: 'webpage.html',
+          body: 'Web pages with structured content, styling, and interactive elements for browser viewing.',
+        },
+        epub: {
+          name: 'book.epub',
+          body: 'Digital books in EPUB format with reflowable content, chapters, and multimedia support.',
+        },
+        jpg: {
+          name: 'photo.jpg',
+          body: 'High-quality compressed photos and images, perfect for web and print usage.',
+        },
+        gif: {
+          name: 'animation.gif',
+          body: 'Animated GIF images for short loops, reactions, and simple motion graphics.',
+        },
+        png: {
+          name: 'screenshot.png',
+          body: 'Lossless PNG images with transparency support, ideal for UI elements and screenshots.',
+        },
+      },
+      models: {
+        deepseekR1: {
+          name: 'DeepSeek R1',
+          description: 'Advanced language understanding',
+          provider: 'DeepSeek',
+        },
+        o3mini: {
+          name: 'o3-mini',
+          description: 'Advanced reasoning and creativity',
+          provider: 'OpenAI',
+        },
+        claude35: {
+          name: 'Claude 3.5 Sonnet',
+          description: 'Most capable model for highly complex tasks',
+          provider: 'Anthropic',
+        },
+        gemini: {
+          name: 'Gemini Flash 2.0',
+          description: 'Fast and efficient for everyday tasks',
+          provider: 'Google',
+        },
+        qwen: {
+          name: 'Qwen-Max',
+          description: 'Powerful multilingual capabilities',
+          provider: 'Qwen',
+        },
+        llama: {
+          name: 'Llama 3.3 70B',
+          description: 'Open source foundation model',
+          provider: 'Meta',
+        },
+        mistral: {
+          name: 'Mistral 8x7B Instruct',
+          description: 'Efficient and powerful language model',
+          provider: 'Mistral',
+        },
+      },
+      featureOne: {
+        tag: 'Multimodal Support',
+        title: 'Support for 14+ File and Image Formats for Comprehensive Creation',
+        bulletPoints: [
+          'Support for PDF, DOCX, RTF, TXT, MD, HTML, EPUB and other document formats',
+          'Support for JPG, PNG, JPEG, WEBP, GIF, TIFF, BMP and other image formats',
+          'Intelligent recognition and processing of multiple file types for a unified experience',
+        ],
+      },
+      featureTwo: {
+        tag: 'Multiple Models',
+        title: 'Integration of 13+ Top AI Models for Various Scenarios',
+        bulletPoints: [
+          'Support for advanced models like Claude, DeepSeek, Gemini, GPT-4o',
+          'Standard models including Claude Haiku, DeepSeek V3, Llama',
+          'Intelligent model recommendations based on task requirements',
+        ],
+      },
+      featureThree: {
+        tag: 'Branching Dialogue',
+        title: 'Flexible Branching Dialogue and Smart Context Selection',
+        bulletPoints: [
+          'Support for branching conversations to explore multiple thought paths simultaneously',
+          'Freely select knowledge base or canvas cards as context for enhanced responses',
+          'Smart context memory ensures conversation coherence across different branches',
+        ],
+      },
+      featureFour: {
+        tag: 'Knowledge Base',
+        title: 'Powerful Knowledge Base Management with Data Connector and Browser Extension',
+        bulletPoints: [
+          'Build personalized knowledge bases for information retention and reuse',
+          'Convenient browser extension for one-click web content saving',
+          'Smart knowledge association and retrieval for creative inspiration',
+        ],
+      },
+      featureFive: {
+        tag: 'WYSIWYG AI Document Editor',
+        title: 'Intelligent AI-Assisted Editor',
+        bulletPoints: [
+          'Real-time AI writing suggestions and refinements',
+          'Support for multiple writing styles and format adjustments',
+          'Intelligent text analysis and improvement recommendations',
         ],
       },
     },
@@ -286,6 +408,11 @@ const translations = {
       Q4: 'Is a refund available?',
       A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
     },
+    testimonials: {
+      tag: 'User Testimonials',
+      title: 'Thousands love their creation with Refly',
+      description: 'Join 4000+ Reflyers to unleash inspiration and accelerate creation 👩‍🎨🧑‍🎨',
+    },
   },
   priceContent: {
     freeCapabilities: [
@@ -301,7 +428,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'limited size',
         after: '.',
       },
@@ -324,7 +451,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'large capacity',
         after: '.',
       },
@@ -900,6 +1027,8 @@ const translations = {
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
       supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
+      fileParsingUsage:
+        'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -935,13 +1064,17 @@ const translations = {
       recommendedPlatforms: 'Recommended Platforms',
     },
     wait_parse: 'Parsing',
-    parse_failed: 'Parse Failed, click to retry',
+    parse_failed: 'Parse Failed',
     wait_index: 'Memorizing',
     wait_index_tip:
       'The resource is temporarily not ready for AI search and needs to wait for memorization to complete',
     index_failed: 'Memorization Failed',
     index_failed_tip: 'Click to retry',
     finish: 'Finished',
+    clickToPreview: 'Click to Preview Details',
+    pageLimitExceeded:
+      'This file has {{numPages}} pages, which exceeds the daily page limit for advanced file parsing ({{used}}/{{limit}} pages used today).',
+    unknownError: 'Unknown error, please try again later',
   },
   resourceDetail: {
     back: 'All Resources',
@@ -1272,8 +1405,11 @@ const translations = {
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
       requestsRefresh: 'Request count will be reset every day for users on free plan.',
-      fileCount: 'Library Storage',
-      fileCountDescription: 'Each resource and document in your library counts as one file.',
+      libraryStorage: 'Library Storage',
+      libraryStorageDescription: 'Each resource and document in your library counts as one file.',
+      advancedFileParsing: 'Advanced File Parsing',
+      advancedFileParsingDescription:
+        'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1305,19 +1441,14 @@ const translations = {
         t2Model: 'Standard Models',
         freeModel: 'Free Models',
         mediaCredit: 'Media Credit (Coming Soon)',
-        fileStorageType: {
-          note: 'Canvases',
-          resource: 'Resources',
-          file: 'Uploaded Files',
-        },
         upgrade: 'Upgrade Now',
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
-        libraryStorage: 'Library Storage',
         fileCounts: '{{count}} files',
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
+        dailyPagesCount: '{{count}} pages/day',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {

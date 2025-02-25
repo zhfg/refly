@@ -139,7 +139,22 @@ export class CommonQnA extends BaseSkill {
     config.metadata.step = { name: 'answerQuestion' };
 
     if (sources.length > 0) {
-      this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
+      // Truncate sources before emitting
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
     }
 
     const model = this.engine.chatModel({ temperature: 0.1 });

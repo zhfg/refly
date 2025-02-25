@@ -27,6 +27,10 @@ const translations = {
     title: 'Select Related Results',
     description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
   },
+  generateAnswer: {
+    title: 'Generate Answer',
+    description: 'Start to generate answer...',
+  },
 };
 
 export default translations;

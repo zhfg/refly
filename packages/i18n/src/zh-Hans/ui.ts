@@ -62,6 +62,8 @@ const translations = {
     thread: '会话',
     meta: '元信息',
     project: '项目',
+    upgrade: '升级',
+    upgradeSubscription: '升级订阅',
     copy: {
       title: '复制',
       success: '内容已复制到剪切板！',
@@ -128,7 +130,7 @@ const translations = {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: 'Refly 网页剪存 Chrome 插件发布! ⚡️! ',
+    messageText: '支持文件上传和多模态图片处理⚡️ ',
     tryForFree: '开始使用',
     addToChrome: '添加到 Chrome',
     contactUs: '联系我们',
@@ -138,52 +140,122 @@ const translations = {
     loginBtn: '登录',
     dashboard: '主页',
     features: {
-      tag: '功能',
-      title: 'Refly 的主要功能总览',
+      tag: '核心功能',
+      title: 'Refly 的主要功能',
+      fileFormats: {
+        pdf: {
+          name: 'document.pdf',
+          body: '专业的 PDF 文档，支持富文本、图片和交互元素，保持一致的格式排版。',
+        },
+        markdown: {
+          name: 'notes.md',
+          body: '简洁的 Markdown 文件，用于文档编写、笔记和格式化文本，支持代码块。',
+        },
+        word: {
+          name: 'report.docx',
+          body: 'Microsoft Word 文档，具有高级格式设置、修订跟踪和协作编辑功能。',
+        },
+        html: {
+          name: 'webpage.html',
+          body: '网页文件，包含结构化内容、样式和交互元素，适用于浏览器查看。',
+        },
+        epub: {
+          name: 'book.epub',
+          body: 'EPUB 格式的电子书，支持自适应内容排版、章节和多媒体。',
+        },
+        jpg: {
+          name: 'photo.jpg',
+          body: '高质量压缩的照片和图像，适用于网页和打印。',
+        },
+        gif: {
+          name: 'animation.gif',
+          body: '动态 GIF 图像，用于短循环动画、表情包和简单动态图形。',
+        },
+        png: {
+          name: 'screenshot.png',
+          body: '无损 PNG 图像，支持透明度，适用于 UI 元素和截图。',
+        },
+      },
+      models: {
+        deepseekR1: {
+          name: 'DeepSeek R1',
+          description: '先进的语言理解能力',
+          provider: 'DeepSeek',
+        },
+        o3mini: {
+          name: 'o3-mini',
+          description: '高级推理和创造力',
+          provider: 'OpenAI',
+        },
+        claude35: {
+          name: 'Claude 3.5 Sonnet',
+          description: '最适合处理高度复杂任务的模型',
+          provider: 'Anthropic',
+        },
+        gemini: {
+          name: 'Gemini Flash 2.0',
+          description: '快速高效的日常任务处理',
+          provider: 'Google',
+        },
+        qwen: {
+          name: 'Qwen-Max',
+          description: '强大的多语言处理能力',
+          provider: 'Qwen',
+        },
+        llama: {
+          name: 'Llama 3.3 70B',
+          description: '开源基础模型',
+          provider: 'Meta',
+        },
+        mistral: {
+          name: 'Mistral 8x7B Instruct',
+          description: '高效强大的语言模型',
+          provider: 'Mistral',
+        },
+      },
       featureOne: {
-        tag: '规划',
-        title: '在自由画布中梳理思路，让专业创作从混沌到有序',
+        tag: '多模态支持',
+        title: '支持 14+ 文件和图片类型，打造全方位创作体验',
         bulletPoints: [
-          '覆盖学术研究、技术文档等 20+ 专业场景模板',
-          'AI 协助分析主题，智能构建研究框架',
-          '基于个人知识库持续积累，建立深度思维链接',
+          '支持 PDF、DOCX、RTF、TXT、MD、HTML、EPUB 等多种文档格式',
+          '支持 JPG、PNG、JPEG、WEBP、GIF、TIFF、BMP 等图片格式',
+          '智能识别和处理多种文件类型，提供统一的使用体验',
         ],
       },
       featureTwo: {
-        tag: '探索与导入',
-        title: '打通知识壁垒，让零散资料化为创作养分',
+        tag: '多模型支持',
+        title: '集成 13+ 顶尖 AI 模型，满足不同场景需求',
         bulletPoints: [
-          '一键导入论文、网页等多源专业资料',
-          'AI 智能检索，快速定位核心参考内容',
-          '自动建立知识关联，激发跨领域洞见',
+          '支持 Claude、DeepSeek、Gemini、GPT-4o 等高级模型',
+          '提供 Claude Haiku、DeepSeek V3、Llama 等标准模型',
+          '根据任务智能推荐最佳模型，确保输出质量',
         ],
       },
       featureThree: {
-        tag: '研究',
-        title: '多线程对话激发思维，让研究过程更富启发',
+        tag: '多分支对话',
+        title: '灵活的多分支对话与智能上下文选择',
         bulletPoints: [
-          '在画布中自由发散对话，深入探索观点',
-          '智能上下文管理，确保研究方向精准',
-          '灵活调用知识库，加速研究突破',
+          '支持对话分支，同时探索多条思维路径',
+          '自由选择知识库或画布卡片作为上下文，提升回答质量',
+          '智能的上下文记忆，确保不同分支间对话的连贯性',
         ],
       },
       featureFour: {
-        tag: '思考与创作',
-        title: '从构思到成稿，让专业创作更具洞察力',
+        tag: '知识库集成',
+        title: '具有数据连接器和浏览器扩展的强大知识库管理',
         bulletPoints: [
-          '自由选择上下文，打造个性化写作环境',
-          'N+ 专业写作辅助工具，提升学术/技术写作效率',
-          'AI 编辑助手，确保专业输出质量',
+          '构建个性化知识库，实现知识沉淀与复用',
+          '便捷的浏览器插件，一键保存网页内容',
+          '智能的知识关联与检索，激发创作灵感',
         ],
       },
       featureFive: {
-        tag: '剪存',
-        title: '一键剪存任意网页内容，持续打造第二大脑',
+        tag: '可见即可得的 AI 文档编辑器',
+        title: '智能的 AI 辅助编辑器',
         bulletPoints: [
-          '一键保存任意网页内容（Twitter、小红书、Notion 等）',
-          '支持私有网页内容剪存与整理',
-          '持续积累个人知识库',
-          '无缝集成到第二大脑',
+          '实时的 AI 写作建议和润色优化',
+          '支持多种写作风格和格式调整',
+          '智能的文本分析和改进建议',
         ],
       },
     },
@@ -286,6 +358,61 @@ const translations = {
       Q4: '是否支持退款？',
       A4: '目前暂不开放退款入口，如果您有强烈的退款需求，请联系 Refly 团队为您解决。',
     },
+    testimonials: {
+      tag: '用户评价',
+      title: '数千名用户在 Refly 创作',
+      description: '加入 4000+ Reflyer，一起释放灵感，加速创作 👩‍🎨🧑‍🎨',
+    },
+    workflow: {
+      tag: '工作流',
+      title: 'Refly 的',
+      workflowOne: {
+        tag: '规划',
+        title: '在自由画布中梳理思路，让专业创作从混沌到有序',
+        bulletPoints: [
+          '覆盖学术研究、技术文档等 20+ 专业场景模板',
+          'AI 协助分析主题，智能构建研究框架',
+          '基于个人知识库持续积累，建立深度思维链接',
+        ],
+      },
+      workflowTwo: {
+        tag: '探索与导入',
+        title: '打通知识壁垒，让零散资料化为创作养分',
+        bulletPoints: [
+          '一键导入论文、网页等多源专业资料',
+          'AI 智能检索，快速定位核心参考内容',
+          '自动建立知识关联，激发跨领域洞见',
+        ],
+      },
+      workflowThree: {
+        tag: '研究',
+        title: '多线程对话激发思维，让研究过程更富启发',
+        bulletPoints: [
+          '在画布中自由发散对话，深入探索观点',
+          '智能上下文管理，确保研究方向精准',
+          '灵活调用知识库，加速研究突破',
+        ],
+      },
+      workflowFour: {
+        tag: '思考与创作',
+        title: '从构思到成稿，让专业创作更具洞察力',
+        bulletPoints: [
+          '自由选择上下文，打造个性化写作环境',
+          'N+ 专业写作辅助工具，提升学术/技术写作效率',
+          'AI 编辑助手，确保专业输出质量',
+        ],
+      },
+      workflowFive: {
+        tag: '剪存',
+        title: '一键剪存任意网页内容，持续打造第二大脑',
+        bulletPoints: [
+          '一键保存任意网页内容（Twitter、小红书、Notion 等）',
+          '支持私有网页内容剪存与整理',
+          '持续积累个人知识库',
+          '无缝集成到第二大脑',
+        ],
+      },
+    },
   },
   priceContent: {
     freeCapabilities: [
@@ -300,7 +427,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '有限大小',
         after: '的个人知识库',
       },
@@ -322,7 +449,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '庞大',
         after: '的个人知识库',
       },
@@ -885,6 +1012,7 @@ const translations = {
       dragOrClick: '点击或拖拽文件到此区域上传',
       unsupportedFileType: '请上传指定类型的文件',
       supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
+      fileParsingUsage: '高级文件解析（包括 PDF）：今日已使用 {{used}}/{{limit}} 页',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
       webLinkPlaceholer: '输入或粘贴有效的网页链接，每行一个....',
@@ -919,12 +1047,16 @@ const translations = {
       recommendedPlatforms: '推荐平台',
     },
     wait_parse: '内容解析中',
-    parse_failed: '解析失败，点击重试',
+    parse_failed: '解析失败',
     wait_index: '模型记忆中',
     wait_index_tip: '该资源暂时不支持 AI 搜索，需等待模型记忆完成',
     index_failed: '模型记忆失败',
     index_failed_tip: '点击重试',
     finish: '已索引',
+    clickToPreview: '点击查看详情',
+    pageLimitExceeded:
+      '此文件有 {{numPages}} 页，超出高级文件解析的每日页数限制（今日已使用 {{used}}/{{limit}} 页）。',
+    unknownError: '未知错误，请稍后再试',
   },
   resourceDetail: {
     back: '所有资源',
@@ -1245,8 +1377,10 @@ const translations = {
       t2RequestsDescription:
         '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
       requestsRefresh: '免费用户每天会重置次数。',
-      fileCount: '知识库文件数',
-      fileCountDescription: '知识库中每个资源和文档计为一个文件。',
+      libraryStorage: '知识库文件数',
+      libraryStorageDescription: '知识库中每个资源和文档计为一个文件。',
+      advancedFileParsing: '高级文件解析',
+      advancedFileParsingDescription: '支持表格、图片和公式提取的 PDF 解析，按解析页数计算用量。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
@@ -1276,11 +1410,6 @@ const translations = {
         t2Model: '基础模型',
         freeModel: '免费模型',
         mediaCredit: '多媒体积分（即将推出）',
-        fileStorageType: {
-          note: '画布',
-          resource: '资源',
-          file: '上传文件',
-        },
         upgrade: '立即升级',
         continueFree: '继续免费',
         oneTime: '一次性',
@@ -1289,6 +1418,7 @@ const translations = {
         fileCounts: '{{count}} 个文件',
         dailyCounts: '{{count}} 次/每天',
         monthlyCounts: '{{count}} 次/每月',
+        dailyPagesCount: '{{count}} 页/每天',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

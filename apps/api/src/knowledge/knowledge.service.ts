@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import pdf from 'pdf-parse';
 import pLimit from 'p-limit';
 import crypto from 'node:crypto';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -10,6 +11,7 @@ import {
   Resource as ResourceModel,
   Document as DocumentModel,
   StaticFile as StaticFileModel,
+  User as UserModel,
 } from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
@@ -33,6 +35,7 @@ import {
   GetDocumentDetailData,
   UpsertDocumentRequest,
   DeleteDocumentRequest,
+  IndexError,
 } from '@refly-packages/openapi-schema';
 import {
   QUEUE_SIMPLE_EVENT,
@@ -70,7 +73,7 @@ import {
 import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
 import { ParserFactory } from '@/knowledge/parsers/factory';
 import { ConfigService } from '@nestjs/config';
-import { ParseResult } from './parsers/base';
+import { ParseResult, ParserOptions } from './parsers/base';
 
 @Injectable()
 export class KnowledgeService {
@@ -148,6 +151,7 @@ export class KnowledgeService {
 
     let identifier: string;
     let staticFile: StaticFileModel | null = null;
+    let staticFileBuf: Buffer | null = null;
 
     if (resourceType === 'text') {
       if (!content) {
@@ -176,8 +180,10 @@ export class KnowledgeService {
       }
       const sha = crypto.createHash('sha256');
       const fileStream = await this.minio.client.getObject(staticFile.storageKey);
-      sha.update(await streamToBuffer(fileStream));
 
+      staticFileBuf = await streamToBuffer(fileStream);
+
+      sha.update(staticFileBuf);
       identifier = `file://${sha.digest('hex')}`;
     } else {
       throw new ParamsError('Invalid resource type');
@@ -290,6 +296,9 @@ export class KnowledgeService {
         data: { entityId: resource.resourceId, entityType: 'resource' },
       });
     }
+
+    // Sync storage usage
+    await this.syncStorageUsage(user);
 
     // Add to queue to be processed by worker
     await this.queue.add('finalizeResource', {
@@ -442,7 +451,7 @@ export class KnowledgeService {
    * Parse resource content from remote URL into markdown.
    * Currently only weblinks are supported.
    */
-  async parseResource(user: User, resource: ResourceModel): Promise<ResourceModel> {
+  async parseResource(user: UserModel, resource: ResourceModel): Promise<ResourceModel> {
     if (resource.indexStatus !== 'wait_parse' && resource.indexStatus !== 'parse_failed') {
       this.logger.warn(
         `Resource ${resource.resourceId} is not in wait_parse or parse_failed status, skip parse`,
@@ -450,21 +459,58 @@ export class KnowledgeService {
       return resource;
     }
 
-    const { resourceId, resourceType, meta } = resource;
+    const { resourceId, resourceType, rawFileKey, meta } = resource;
     const { url, contentType } = JSON.parse(meta) as ResourceMeta;
 
     const parserFactory = new ParserFactory(this.config);
+    const parserOptions: ParserOptions = { resourceId };
 
     let result: ParseResult;
 
     if (resourceType === 'weblink') {
-      const parser = parserFactory.createParser('jina');
+      const parser = parserFactory.createParser('jina', parserOptions);
       result = await parser.parse(url);
-    } else if (resource.rawFileKey) {
-      const parser = parserFactory.createParserByContentType(contentType);
-      const fileStream = await this.minio.client.getObject(resource.rawFileKey);
+    } else if (rawFileKey) {
+      const parser = parserFactory.createParserByContentType(contentType, parserOptions);
+      const fileStream = await this.minio.client.getObject(rawFileKey);
       const fileBuffer = await streamToBuffer(fileStream);
+
+      let numPages = 0;
+      if (contentType === 'application/pdf') {
+        const { numpages } = await pdf(fileBuffer);
+        numPages = numpages;
+
+        const { available, pageUsed, pageLimit } =
+          await this.subscriptionService.checkFileParseUsage(user);
+
+        if (numPages > available) {
+          this.logger.log(
+            `Resource ${resourceId} parse failed due to page limit, numpages: ${numPages}, available: ${available}`,
+          );
+          return this.prisma.resource.update({
+            where: { resourceId },
+            data: {
+              indexStatus: 'parse_failed',
+              indexError: JSON.stringify({
+                type: 'pageLimitExceeded',
+                metadata: { numPages, pageLimit, pageUsed },
+              } as IndexError),
+            },
+          });
+        }
+      }
       result = await parser.parse(fileBuffer);
+
+      await this.prisma.fileParseRecord.create({
+        data: {
+          resourceId,
+          uid: user.uid,
+          contentType,
+          storageKey: rawFileKey,
+          parser: parser.name,
+          numPages,
+        },
+      });
     } else {
       throw new Error(`Cannot parse resource ${resourceId} with no content or rawFileKey`);
     }
@@ -563,7 +609,7 @@ export class KnowledgeService {
   async finalizeResource(param: FinalizeResourceParam): Promise<ResourceModel | null> {
     const { resourceId, uid } = param;
 
-    const user = await this.prisma.user.findFirst({ where: { uid } });
+    const user = await this.prisma.user.findUnique({ where: { uid } });
     if (!user) {
       this.logger.warn(`User not found, userId: ${uid}`);
       return null;
@@ -583,7 +629,10 @@ export class KnowledgeService {
       this.logger.error(`parse resource error: ${err?.stack}`);
       return this.prisma.resource.update({
         where: { resourceId, uid: user.uid },
-        data: { indexStatus: 'parse_failed' },
+        data: {
+          indexStatus: 'parse_failed',
+          indexError: JSON.stringify({ type: 'unknownError' } as IndexError),
+        },
       });
     }
 
@@ -593,17 +642,22 @@ export class KnowledgeService {
       this.logger.error(`index resource error: ${err?.stack}`);
       return this.prisma.resource.update({
         where: { resourceId, uid: user.uid },
-        data: { indexStatus: 'index_failed' },
+        data: {
+          indexStatus: 'index_failed',
+          indexError: JSON.stringify({ type: 'unknownError' } as IndexError),
+        },
       });
     }
 
     // Send simple event
-    await this.simpleEventQueue.add('simpleEvent', {
-      entityType: 'resource',
-      entityId: resourceId,
-      name: 'onResourceReady',
-      uid: user.uid,
-    });
+    if (resource.indexStatus === 'finish') {
+      await this.simpleEventQueue.add('simpleEvent', {
+        entityType: 'resource',
+        entityId: resourceId,
+        name: 'onResourceReady',
+        uid: user.uid,
+      });
+    }
 
     // Sync storage usage
     await this.syncStorageUsage(user);

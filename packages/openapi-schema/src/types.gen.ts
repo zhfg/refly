@@ -218,6 +218,27 @@ export type ResourceMeta = {
  */
 export type ResourceType = 'weblink' | 'text' | 'file';
 
+/**
+ * Error message for resource indexing
+ */
+export type IndexError = {
+  /**
+   * Error type
+   */
+  type?: 'pageLimitExceeded' | 'unknownError';
+  /**
+   * Error metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * Error type
+ */
+export type type = 'pageLimitExceeded' | 'unknownError';
+
 export type Resource = {
   /**
    * Resource ID (empty if it's external)
@@ -239,6 +260,10 @@ export type Resource = {
    * Resource index status
    */
   indexStatus?: IndexStatus;
+  /**
+   * Error message for resource indexing
+   */
+  indexError?: IndexError;
   /**
    * Resource storage size (in bytes)
    */
@@ -808,7 +833,7 @@ export type SourceSelection = {
 /**
  * Selection type
  */
-export type type = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
+export type type2 = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
 
 /**
  * Source of the message
@@ -1250,6 +1275,17 @@ export type StorageUsageMeter = {
    * @deprecated
    */
   vectorStorageUsed: string;
+};
+
+export type FileParsingMeter = {
+  /**
+   * File pages parsed
+   */
+  pagesParsed: number;
+  /**
+   * File pages limit
+   */
+  pagesLimit: number;
 };
 
 /**
@@ -2631,6 +2667,10 @@ export type SubscriptionUsageData = {
    * Storage usage meter
    */
   storage?: StorageUsageMeter;
+  /**
+   * File parsing meter
+   */
+  fileParsing?: FileParsingMeter;
 };
 
 export type GetSubscriptionUsageResponse = BaseResponse & {
@@ -2945,6 +2985,10 @@ export type ModelCapabilities = {
    * Whether this model can take images as input
    */
   vision?: boolean;
+  /**
+   * Whether this model includes reasoning content
+   */
+  reasoning?: boolean;
 };
 
 export type ModelInfo = {

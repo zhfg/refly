@@ -168,10 +168,12 @@ export class SkillEngine {
       });
     }
 
+    const config = this.config?.configurable;
+
     return new ChatDeepSeek({
       model: useDefaultChatModel
         ? this.options.defaultModel
-        : this.config?.configurable?.modelInfo?.name || this.options.defaultModel,
+        : config.modelInfo?.name || this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: {
         baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1',
@@ -181,7 +183,7 @@ export class SkillEngine {
         },
       },
       ...params,
-      include_reasoning: true,
+      include_reasoning: config?.modelInfo?.capabilities?.reasoning,
     });
   }
 }
