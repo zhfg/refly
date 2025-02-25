@@ -16,6 +16,8 @@ services:
       qdrant:
         condition: service_healthy
     working_dir: /app/apps/api/dist
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: >
       sh -c "node scripts/sync-db-schema.js && node main.js"
     ports:
