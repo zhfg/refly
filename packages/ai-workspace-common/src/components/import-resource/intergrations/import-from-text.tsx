@@ -13,6 +13,7 @@ import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/us
 import { TbClipboard } from 'react-icons/tb';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from './storageLimit';
+import { getAvailableFileCount } from '@refly-packages/utils/quota';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -34,7 +35,7 @@ export const ImportFromText = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
 
-  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const canImportCount = getAvailableFileCount(storageUsage);
   const disableSave = () => {
     return !copiedTextPayload?.content || canImportCount < 1;
   };

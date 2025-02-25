@@ -1,9 +1,19 @@
+import { useCallback } from 'react';
+import { Resource } from '@refly/openapi-schema';
 import { serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useDownloadFile = () => {
-  const downloadFile = (rawFileKey: string) => {
-    const fileUrl = `${serverOrigin}/v1/misc/${rawFileKey}`;
-    window.open(fileUrl, '_blank');
-  };
+  const downloadFile = useCallback((resource: Resource) => {
+    if (resource.downloadURL) {
+      window.open(resource.downloadURL, '_blank');
+      return;
+    }
+
+    if (resource.rawFileKey) {
+      const fileUrl = `${serverOrigin}/v1/misc/${resource.rawFileKey}`;
+      window.open(fileUrl, '_blank');
+    }
+  }, []);
+
   return { downloadFile };
 };

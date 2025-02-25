@@ -6,10 +6,7 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { IconLoading, IconRefresh } from '@arco-design/web-react/icon';
-import {
-  IconQuote,
-  IconSubscription,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
@@ -18,8 +15,6 @@ import { IndexError, Resource } from '@refly/openapi-schema';
 
 import './index.scss';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { TFunction } from 'i18next';
@@ -31,24 +26,6 @@ interface ResourceViewProps {
   deckSize: number;
   setDeckSize: (size: number) => void;
 }
-
-const _TopBar = memo(
-  ({ deckSize, setDeckSize }: { deckSize: number; setDeckSize: (size: number) => void }) => {
-    return (
-      <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
-        <Button
-          type="text"
-          size="small"
-          style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
-          icon={<IconQuote />}
-          onClick={() => {
-            setDeckSize(deckSize ? 0 : 200);
-          }}
-        />
-      </div>
-    );
-  },
-);
 
 const ResourceMeta = memo(
   ({
@@ -107,7 +84,7 @@ const ResourceMeta = memo(
             <ResourceIcon
               url={resourceDetail?.data?.url}
               resourceType={resourceDetail?.resourceType}
-              extension={resourceDetail?.rawFileKey?.split('.').pop()}
+              extension={resourceDetail?.downloadURL?.split('.').pop()}
               size={24}
             />
           </div>
@@ -211,17 +188,13 @@ const ResourceContent = memo(
 
 export const ResourceView = memo(
   (props: ResourceViewProps) => {
-    const { resourceId, nodeId } = props;
+    const { resourceId } = props;
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
-    const { updateNodePreviewRawFileKey } = useCanvasStoreShallow((state) => ({
-      updateNodePreviewRawFileKey: state.updateNodePreviewRawFileKey,
-    }));
     const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
       setSubscribeModalVisible: state.setSubscribeModalVisible,
     }));
 
-    const canvasId = useCanvasId();
     const {
       data,
       refetch: refetchResourceDetail,
@@ -268,12 +241,6 @@ export const ResourceView = memo(
         }
       };
     }, [resourceDetail?.indexStatus, refetchResourceDetail]);
-
-    useEffect(() => {
-      if (resourceDetail?.resourceType === 'file' && resourceDetail?.rawFileKey) {
-        updateNodePreviewRawFileKey(canvasId, nodeId, resourceDetail?.rawFileKey);
-      }
-    }, [resourceDetail, canvasId, nodeId, resourceId, updateNodePreviewRawFileKey]);
 
     if (!resourceId) {
       return (

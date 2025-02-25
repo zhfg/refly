@@ -37,6 +37,8 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
@@ -154,15 +156,23 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   }, [isPinned, pinNode, unpinNode, node]);
 
   const { setNodeCenter } = useNodePosition();
-  const canExport = useMemo(() => {
+
+  const canDownload = useMemo(() => {
     const metadata = node.data?.metadata || {};
-    const { rawFileKey, resourceType } = metadata;
-    return node.type === 'resource' && rawFileKey && resourceType === 'file';
+    const { resourceType } = metadata;
+    return node.type === 'resource' && resourceType === 'file';
   }, [node]);
 
-  const handleExport = useCallback(() => {
-    downloadFile(node.data?.metadata?.rawFileKey);
-  }, [node]);
+  const handleDownload = useCallback(async () => {
+    const { data } = await getClient().listResources({
+      query: {
+        resourceId: node.data?.entityId,
+      },
+    });
+    if (data.data?.[0]) {
+      downloadFile(data.data[0]);
+    }
+  }, [node, downloadFile]);
 
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
@@ -186,15 +196,15 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       ),
       onClick: handleAddToContext,
     },
-    canExport && {
-      key: 'export',
+    canDownload && {
+      key: 'downloadFile',
       label: (
         <div className="flex items-center gap-2 whitespace-nowrap">
           <IconDownloadFile className="w-4 h-4 flex-shrink-0" />
           {t('canvas.nodeActions.downloadFile')}
         </div>
       ),
-      onClick: handleExport,
+      onClick: handleDownload,
     },
     {
       type: 'divider',

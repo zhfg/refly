@@ -194,6 +194,10 @@ export type Resource = {
    * Document content for this resource (only returned in getResourceDetail API)
    */
   content?: string;
+  /**
+   * Download URL for this resource (for file type only)
+   */
+  downloadURL?: string;
 };
 
 /**

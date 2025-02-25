@@ -21,6 +21,13 @@ const formatDate = (date: string) => {
   return dayjs(date).format('YYYY-MM-DD');
 };
 
+const formatNumber = (num: number) => {
+  if (num < 0) {
+    return '∞';
+  }
+  return num?.toLocaleString() || '0';
+};
+
 const UsageItem = ({
   title,
   used,
@@ -35,12 +42,6 @@ const UsageItem = ({
   endAt?: string;
 }) => {
   const { t } = useTranslation();
-  const formatNumber = (num: number) => {
-    if (num < 0) {
-      return '∞';
-    }
-    return num?.toLocaleString() || '0';
-  };
 
   return (
     <div className="subscription-usage-item">

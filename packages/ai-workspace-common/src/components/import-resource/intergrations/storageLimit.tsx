@@ -3,6 +3,7 @@ import { Button, Alert } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { getAvailableFileCount } from '@refly-packages/utils/quota';
 
 interface StorageLimitProps {
   resourceCount: number;
@@ -19,7 +20,7 @@ export const StorageLimit: FC<StorageLimitProps> = memo(({ resourceCount }) => {
   };
 
   const { storageUsage } = useSubscriptionUsage();
-  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const canImportCount = getAvailableFileCount(storageUsage);
   const storageLimitTip = () => {
     if (canImportCount <= 0) {
       return t('resource.import.storageLimited');

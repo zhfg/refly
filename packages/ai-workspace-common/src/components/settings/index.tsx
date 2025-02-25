@@ -18,6 +18,8 @@ import {
   IconSettings,
   IconSubscription,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+import { useEffect } from 'react';
 
 const iconStyle = { fontSize: 16, transform: 'translateY(3px)' };
 
@@ -35,12 +37,16 @@ export const SettingModal = (props: SettingModalProps) => {
   }));
 
   const tabs = [
-    {
-      key: 'subscription',
-      label: t('settings.tabs.subscription'),
-      icon: <IconSubscription style={iconStyle} />,
-      children: <Subscription />,
-    },
+    ...(subscriptionEnabled
+      ? [
+          {
+            key: 'subscription',
+            label: t('settings.tabs.subscription'),
+            icon: <IconSubscription style={iconStyle} />,
+            children: <Subscription />,
+          },
+        ]
+      : []),
     {
       key: 'account',
       label: t('settings.tabs.account'),
@@ -54,6 +60,12 @@ export const SettingModal = (props: SettingModalProps) => {
       children: <LanguageSetting />,
     },
   ];
+
+  useEffect(() => {
+    if (!settingsModalActiveTab) {
+      setSettingsModalActiveTab(tabs[0].key as SettingsModalActiveTab);
+    }
+  }, [subscriptionEnabled]);
 
   return (
     <Modal

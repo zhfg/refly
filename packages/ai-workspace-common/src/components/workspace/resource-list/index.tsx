@@ -78,7 +78,8 @@ const ActionDropdown = ({
 
   const handleDownloadFile: MenuProps['onClick'] = ({ domEvent }) => {
     domEvent.stopPropagation();
-    downloadFile(resource.rawFileKey);
+    downloadFile(resource);
+    setPopupVisible(false);
   };
 
   const items: MenuProps['items'] = [
@@ -103,7 +104,7 @@ const ActionDropdown = ({
       onClick: handleOpenWebpage,
       disabled: !resource.data?.url,
     },
-    resource.rawFileKey &&
+    resource.downloadURL &&
       resource.resourceType === 'file' && {
         label: (
           <div className="flex items-center">
@@ -203,7 +204,7 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
           <ResourceIcon
             url={url}
             resourceType={item?.resourceType}
-            extension={item?.rawFileKey?.split('.').pop()}
+            extension={item?.downloadURL?.split('.').pop()}
             size={24}
           />
           <div className="flex-1 min-w-0">

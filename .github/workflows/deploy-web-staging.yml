@@ -42,6 +42,7 @@ jobs:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           VITE_API_URL: https://staging-api.refly.ai
           VITE_COLLAB_URL: https://staging-collab.refly.ai
+          VITE_SUBSCRIPTION_ENABLED: true
 
       - name: Deploy web to Cloudflare Pages
         uses: cloudflare/pages-action@v1.5.0

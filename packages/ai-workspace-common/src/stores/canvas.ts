@@ -13,10 +13,7 @@ interface CanvasData {
 }
 
 interface NodePreviewData {
-  metadata?: {
-    rawFileKey?: string;
-    [key: string]: any;
-  };
+  metadata?: Record<string, unknown>;
   [key: string]: any;
 }
 
@@ -62,7 +59,6 @@ export interface CanvasState {
   setClickToPreview: (enabled: boolean) => void;
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
   setAutoLayout: (enabled: boolean) => void;
-  updateNodePreviewRawFileKey: (canvasId: string, nodeId: string, rawFileKey: string) => void;
   clearState: () => void;
 }
 
@@ -225,25 +221,6 @@ export const useCanvasStore = create<CanvasState>()(
           state.autoLayout = enabled;
         }),
       clearState: () => set(defaultCanvasState()),
-      updateNodePreviewRawFileKey: (canvasId, nodeId, rawFileKey) =>
-        set((state) => {
-          state.config[canvasId] ??= defaultCanvasConfig();
-          state.config[canvasId].nodePreviews ??= [];
-          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.map((n) =>
-            n.id === nodeId
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    metadata: {
-                      ...(n.data?.metadata ?? {}),
-                      rawFileKey,
-                    },
-                  },
-                }
-              : n,
-          );
-        }),
     })),
     {
       name: 'canvas-storage',

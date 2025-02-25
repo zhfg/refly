@@ -113,12 +113,21 @@ export class KnowledgeService {
 
     const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
 
-    return this.prisma.resource.findMany({
+    const resources = await this.prisma.resource.findMany({
       where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
     });
+
+    return resources.map((resource) => ({
+      ...resource,
+      downloadURL: resource.rawFileKey
+        ? this.miscService.generateFileURL({
+            storageKey: resource.rawFileKey,
+          })
+        : undefined,
+    }));
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
@@ -143,7 +152,11 @@ export class KnowledgeService {
       content = await streamToString(contentStream);
     }
 
-    return { ...resource, content };
+    const downloadURL = this.miscService.generateFileURL({
+      storageKey: resource.rawFileKey,
+    });
+
+    return { ...resource, content, downloadURL };
   }
 
   async prepareResource(user: User, param: UpsertResourceRequest): Promise<ResourcePrepareResult> {
@@ -392,9 +405,8 @@ export class KnowledgeService {
 
         // Handle base64 images
         if (imagePath.startsWith('data:')) {
-          // Skip SVG images, since they tend to be icons for interactive elements
+          // Skip inline SVG images, since they tend to be icons for interactive elements
           if (imagePath.includes('data:image/svg+xml')) {
-            modifiedContent += fullMatch;
             continue;
           }
 

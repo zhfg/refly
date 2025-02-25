@@ -46,8 +46,9 @@ export const isChrome = () => {
 declare global {
   interface Window {
     ENV?: {
-      API_URL: string;
-      COLLAB_URL: string;
+      API_URL?: string;
+      COLLAB_URL?: string;
+      SUBSCRIPTION_ENABLED?: boolean;
     };
   }
 }

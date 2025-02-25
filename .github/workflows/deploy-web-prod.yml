@@ -36,6 +36,7 @@ jobs:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           VITE_API_URL: https://api.refly.ai
           VITE_COLLAB_URL: https://collab.refly.ai
+          VITE_SUBSCRIPTION_ENABLED: true
 
       - name: Create Sentry release
         uses: getsentry/action-release@v1.7.0

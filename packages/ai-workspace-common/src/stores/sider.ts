@@ -24,7 +24,7 @@ interface SiderState {
   showCanvasListModal: boolean;
   showLibraryModal: boolean;
   showSettingModal: boolean;
-  settingsModalActiveTab: SettingsModalActiveTab;
+  settingsModalActiveTab: SettingsModalActiveTab | null;
 
   // method
   setCollapse: (val: boolean) => void;
@@ -47,7 +47,7 @@ export const useSiderStore = create<SiderState>()(
     showLibraryModal: false,
     showCanvasListModal: false,
     showSettingModal: false,
-    settingsModalActiveTab: SettingsModalActiveTab.Subscription,
+    settingsModalActiveTab: null,
 
     setCollapse: (val: boolean) => set({ collapse: val }),
     setShowSiderDrawer: (val: boolean) => set({ showSiderDrawer: val }),
