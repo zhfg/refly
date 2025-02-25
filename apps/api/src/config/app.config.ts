@@ -10,9 +10,15 @@ export interface MinioConfig {
 export default () => ({
   port: Number.parseInt(process.env.PORT) || 5800,
   wsPort: Number.parseInt(process.env.WS_PORT) || 5801,
-  endpoint: process.env.ENDPOINT || 'http://localhost:5800',
   origin: process.env.ORIGIN || 'http://localhost:5700',
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+  static: {
+    public: {
+      endpoint: process.env.STATIC_PUBLIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+    },
+    private: {
+      endpoint: process.env.STATIC_PRIVATE_ENDPOINT || 'http://localhost:5800/v1/misc',
+    },
+  },
   image: {
     maxArea: Number.parseInt(process.env.IMAGE_MAX_AREA) || 600 * 600,
     payloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'
@@ -86,6 +92,9 @@ export default () => ({
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
     },
   },
+  parser: {
+    pdf: process.env.PARSER_PDF || 'pdfjs',
+  },
   embeddings: {
     provider: process.env.EMBEDDINGS_PROVIDER || 'jina',
     modelName: process.env.EMBEDDINGS_MODEL_NAME || 'jina-embeddings-v3',
@@ -121,9 +130,9 @@ export default () => ({
       t2: Number.parseInt(process.env.QUOTA_T2_REQUEST) || -1,
     },
     storage: {
-      file: Number.parseInt(process.env.QUOTA_STORAGE_FILE) || 10000,
-      object: Number.parseInt(process.env.QUOTA_STORAGE_OBJECT) || 1000000000,
-      vector: Number.parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1000000000,
+      file: Number.parseInt(process.env.QUOTA_STORAGE_FILE) || -1,
+      object: Number.parseInt(process.env.QUOTA_STORAGE_OBJECT) || -1,
+      vector: Number.parseInt(process.env.QUOTA_STORAGE_VECTOR) || -1,
     },
     fileParse: {
       page: Number.parseInt(process.env.QUOTA_FILE_PARSE_PAGE) || -1,

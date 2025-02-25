@@ -342,6 +342,10 @@ export const ResourceSchema = {
       type: 'string',
       description: 'Document content for this resource (only returned in getResourceDetail API)',
     },
+    downloadURL: {
+      type: 'string',
+      description: 'Download URL for this resource (for file type only)',
+    },
   },
 } as const;
 

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { BaseParser, ParserOptions, ParseResult } from './base';
+
+interface JinaOptions extends ParserOptions {
+  apiKey?: string;
+  apiUrl?: string;
+}
 
 @Injectable()
 export class JinaParser extends BaseParser {
@@ -9,12 +13,9 @@ export class JinaParser extends BaseParser {
 
   name = 'jina';
 
-  constructor(
-    private readonly config: ConfigService,
-    options: ParserOptions & { apiUrl?: string } = {},
-  ) {
+  constructor(options: JinaOptions = {}) {
     super(options);
-    this.apiKey = this.config.getOrThrow('credentials.jina');
+    this.apiKey = options.apiKey;
     this.apiUrl = options.apiUrl ?? 'https://r.jina.ai/';
   }
 

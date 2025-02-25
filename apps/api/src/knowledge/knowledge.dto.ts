@@ -44,13 +44,21 @@ export type DeleteKnowledgeEntityJobData = {
 export const resourcePO2DTO = (
   resource: ResourceModel & {
     content?: string;
+    downloadURL?: string;
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
   return {
-    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview', 'rawFileKey']),
+    ...pick(resource, [
+      'resourceId',
+      'title',
+      'content',
+      'contentPreview',
+      'rawFileKey',
+      'downloadURL',
+    ]),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     indexError: resource.indexError ? safeParseJSON(resource.indexError) : undefined,

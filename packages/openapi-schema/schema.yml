@@ -1984,6 +1984,7 @@ components:
         rawFileKey:
           type: string
           description: Raw file storage key (used to download the file)
+          deprecated: true
         createdAt:
           type: string
           format: date-time
@@ -1998,6 +1999,9 @@ components:
         content:
           type: string
           description: Document content for this resource (only returned in getResourceDetail API)
+        downloadURL:
+          type: string
+          description: Download URL for this resource (for file type only)
     ReferenceType:
       type: string
       description: Reference type

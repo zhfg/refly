@@ -18,6 +18,6 @@ export const genBaseRespDataFromError = (exception: any) => {
     errCode: err.code,
     errMsg: err.messageDict?.en,
     traceId: activeSpan?.spanContext().traceId,
-    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    stack: process.env.NODE_ENV === 'production' ? undefined : exception.stack,
   };
 };

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseParser, ParserOptions, ParseResult } from './base';
-import { ConfigService } from '@nestjs/config';
 
 interface MarkerParseResponse {
   success?: boolean;
@@ -47,13 +46,10 @@ export class MarkerParser extends BaseParser {
 
   name = 'marker';
 
-  constructor(
-    private readonly config: ConfigService,
-    options: MarkerOptions = {},
-  ) {
+  constructor(options: MarkerOptions = {}) {
     super(options);
     this.apiUrl = options.apiUrl ?? 'https://www.datalab.to/api/v1/marker';
-    this.apiKey = options.apiKey ?? this.config.getOrThrow('credentials.marker');
+    this.apiKey = options.apiKey;
     this.maxPolls = options.maxPolls ?? 30;
     this.pollInterval = options.pollInterval ?? 2000; // 2 seconds
 

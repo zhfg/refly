@@ -12,6 +12,7 @@ import { StorageLimit } from './storageLimit';
 import type { RcFile } from 'antd/es/upload/interface';
 import { genResourceID } from '@refly-packages/utils/id';
 import { LuInfo } from 'react-icons/lu';
+import { getAvailableFileCount } from '@refly-packages/utils/quota';
 
 const { Dragger } = Upload;
 
@@ -172,7 +173,7 @@ export const ImportFromFile = () => {
     }
   };
 
-  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const canImportCount = getAvailableFileCount(storageUsage);
   const disableSave = fileList.length === 0 || fileList.length > canImportCount;
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from '@refly-packages/ai-workspace-common/components/import-resource/intergrations/storageLimit';
+import { getAvailableFileCount } from '@refly-packages/utils/quota';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -136,7 +137,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     handleClose();
   };
 
-  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const canImportCount = getAvailableFileCount(storageUsage);
   const disableSave = () => {
     return selectedItems.length === 0 || selectedItems.length > canImportCount;
   };

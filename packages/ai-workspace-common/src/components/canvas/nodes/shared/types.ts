@@ -45,7 +45,6 @@ export interface ResourceNodeMeta {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
-  rawFileKey?: string;
 }
 
 export type SkillNodeMeta = {

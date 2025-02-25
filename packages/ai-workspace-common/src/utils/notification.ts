@@ -16,17 +16,42 @@ const errTitle = {
 const ignoredErrorCodes = [new ActionResultNotFoundError().code];
 
 export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
-  const { errCode, traceId } = res;
+  const { errCode, traceId, stack } = res;
   if (ignoredErrorCodes.includes(errCode)) {
     return;
   }
 
-  const errMsg = getErrorMessage(errCode || new UnknownError().code, locale);
+  const isUnknownError = !errCode || errCode === new UnknownError().code;
+  const errMsg = getErrorMessage(isUnknownError ? new UnknownError().code : errCode, locale);
 
   const description = React.createElement(
     'div',
     null,
-    React.createElement('div', null, errMsg),
+    React.createElement(
+      'div',
+      {
+        style: { fontSize: 14 },
+      },
+      errMsg,
+    ),
+    isUnknownError &&
+      stack &&
+      React.createElement(
+        'pre',
+        {
+          style: {
+            fontSize: 12,
+            overflow: 'auto',
+            marginTop: 8,
+            border: '1px solid #eee',
+            borderRadius: 8,
+            padding: '10px 16px',
+            color: 'black',
+            backgroundColor: '#eee',
+          },
+        },
+        stack,
+      ),
     traceId &&
       React.createElement(
         'div',
@@ -61,5 +86,6 @@ export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
   notification.error({
     message: errTitle[locale],
     description,
+    duration: isUnknownError ? -1 : 5,
   });
 };

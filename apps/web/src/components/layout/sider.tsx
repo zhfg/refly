@@ -42,6 +42,8 @@ import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hove
 import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -121,14 +123,20 @@ const SettingItem = () => {
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center">
             <Avatar size={32} src={userProfile?.avatar} icon={<AiOutlineUser />} />
-            <span className="ml-2 max-w-[80px] truncate font-semibold text-gray-600">
+            <span
+              className={cn('ml-2 max-w-[180px] truncate font-semibold text-gray-600', {
+                'max-w-[80px]': subscriptionEnabled,
+              })}
+            >
               {userProfile?.nickname}
             </span>
           </div>
 
-          <div className="flex h-6 items-center justify-center rounded-full bg-gray-100 px-3 text-xs font-medium group-hover:bg-white">
-            {t(`settings.subscription.subscriptionStatus.${planType}`)}
-          </div>
+          {subscriptionEnabled && (
+            <div className="flex h-6 items-center justify-center rounded-full bg-gray-100 px-3 text-xs font-medium group-hover:bg-white">
+              {t(`settings.subscription.subscriptionStatus.${planType}`)}
+            </div>
+          )}
         </div>
       </SiderMenuSettingList>
     </div>
@@ -475,7 +483,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
             <div className="mt-auto">
               <div className="mb-2 flex flex-col gap-2">
-                {planType === 'free' && <SubscriptionHint />}
+                {subscriptionEnabled && planType === 'free' && <SubscriptionHint />}
               </div>
               {!!userProfile?.uid && (
                 <MenuItem

@@ -180,9 +180,9 @@ export class MiscService implements OnModuleInit {
 
     let endpoint = '';
     if (visibility === 'public') {
-      endpoint = this.config.get<string>('staticEndpoint')?.replace(/\/$/, '');
+      endpoint = this.config.get<string>('static.public.endpoint')?.replace(/\/$/, '');
     } else {
-      endpoint = `${this.config.get<string>('endpoint')}/v1/misc`;
+      endpoint = this.config.get<string>('static.private.endpoint')?.replace(/\/$/, '');
     }
 
     return `${endpoint}/${storageKey}`;
@@ -440,9 +440,11 @@ export class MiscService implements OnModuleInit {
       return [];
     }
 
+    const staticEndpoint = this.config.get('static.public.endpoint')?.replace(/\/$/, '');
+
     let imageMode = this.config.get('image.payloadMode');
-    if (imageMode === 'url' && !this.config.get('staticEndpoint')) {
-      this.logger.warn('Static endpoint is not configured, fallback to base64 mode');
+    if (imageMode === 'url' && !staticEndpoint) {
+      this.logger.warn('Public static endpoint is not configured, fallback to base64 mode');
       imageMode = 'base64';
     }
 
@@ -492,7 +494,6 @@ export class MiscService implements OnModuleInit {
       }
 
       // URL mode
-      const staticEndpoint = this.config.get('staticEndpoint')?.replace(/\/$/, '') ?? '';
       return await Promise.all(
         files.map(async (file) => {
           const visibility = file.visibility as FileVisibility;

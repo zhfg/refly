@@ -31,6 +31,7 @@ import { IoClose } from 'react-icons/io5';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { omit } from '@refly-packages/utils/index';
 
 const PremiumBanner = () => {
@@ -254,7 +255,7 @@ export const ChatPanel = () => {
             setSelectedSkill={setSelectedSkill}
             onClose={() => setSelectedSkill(null)}
           />
-          {!userProfile?.subscription && <PremiumBanner />}
+          {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
           <ContextManager
             className="p-2 px-3"
             contextItems={contextItems}

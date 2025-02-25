@@ -18,6 +18,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from './storageLimit';
+import { getAvailableFileCount } from '@refly/utils/quota';
 
 const { TextArea } = Input;
 
@@ -164,7 +165,7 @@ export const ImportFromWeblink = () => {
     });
   };
 
-  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const canImportCount = getAvailableFileCount(storageUsage);
   const disableSave = () => {
     return scrapeLinks.length === 0 || scrapeLinks.length > canImportCount;
   };

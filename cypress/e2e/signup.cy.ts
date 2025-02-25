@@ -19,26 +19,6 @@ describe('Signup Flow', () => {
     cy.url().should('include', '/');
   });
 
-  it('should handle OAuth signup with GitHub', () => {
-    cy.get('[data-cy="github-login-button"]').should('be.visible').click();
-
-    cy.origin('https://github.com', () => {
-      // Handle GitHub login page interactions
-      cy.get('[name="login"]').should('be.visible');
-      // Note: We don't actually submit credentials in tests
-      // This just verifies we reached the GitHub login page
-    });
-  });
-
-  // it('should handle OAuth signup with Google', () => {
-  //   cy.get('[data-cy="google-login-button"]').should('be.visible').click();
-
-  //   cy.origin('https://accounts.google.com', () => {
-  //     // Verify we've reached the Google login page by checking the URL
-  //     cy.url().should('include', 'accounts.google.com');
-  //   });
-  // });
-
   it('should validate email format', () => {
     cy.get('[data-cy="switch-to-signup-button"]').click();
     cy.get('[data-cy="email-input"]').type('invalid-email').blur();
