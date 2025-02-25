@@ -833,6 +833,8 @@ const translations = {
       completeTutorial: 'Complete Tutorial',
       deleteCanvasConfirm: 'Confirm to delete canvas {{title}} permanently?',
       deleteCanvasFile: 'Delete resources and documents in the canvas',
+      hideTemplates: 'Hide Templates',
+      showTemplates: 'Show Templates',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

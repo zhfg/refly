@@ -825,6 +825,8 @@ const translations = {
       exitFullscreen: '退出全屏',
       completeTutorial: '完成教程',
       deleteCanvasFile: '同时删除画布中的资源和文档',
+      hideTemplates: '隐藏模板',
+      showTemplates: '显示模板',
     },
     connectionTimeout: {
       title: '连接超时',

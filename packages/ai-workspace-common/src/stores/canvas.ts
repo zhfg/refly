@@ -39,6 +39,7 @@ export interface CanvasState {
   clickToPreview: boolean;
   nodeSizeMode: 'compact' | 'adaptive';
   autoLayout: boolean;
+  showTemplates: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -59,6 +60,7 @@ export interface CanvasState {
   setClickToPreview: (enabled: boolean) => void;
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
   setAutoLayout: (enabled: boolean) => void;
+  setShowTemplates: (show: boolean) => void;
   clearState: () => void;
 }
 
@@ -85,6 +87,7 @@ const defaultCanvasState = () => ({
   clickToPreview: true,
   nodeSizeMode: 'adaptive' as const,
   autoLayout: true,
+  showTemplates: true,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -219,6 +222,10 @@ export const useCanvasStore = create<CanvasState>()(
       setAutoLayout: (enabled) =>
         set((state) => {
           state.autoLayout = enabled;
+        }),
+      setShowTemplates: (show) =>
+        set((state) => {
+          state.showTemplates = show;
         }),
       clearState: () => set(defaultCanvasState()),
     })),

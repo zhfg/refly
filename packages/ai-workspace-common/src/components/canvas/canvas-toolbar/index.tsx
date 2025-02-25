@@ -18,6 +18,7 @@ import {
   IconImportResource,
   IconMemo,
   IconResource,
+  IconTemplate,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -36,9 +37,10 @@ interface ToolbarProps {
 
 const useToolbarConfig = () => {
   const { t } = useTranslation();
-  const { showLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
+  const { showLaunchpad, showEdges, showTemplates } = useCanvasStoreShallow((state) => ({
     showLaunchpad: state.showLaunchpad,
     showEdges: state.showEdges,
+    showTemplates: state.showTemplates,
   }));
 
   const sourceListDrawerVisible = useKnowledgeBaseStoreShallow(
@@ -143,12 +145,19 @@ const useToolbarConfig = () => {
               'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
           },
         },
+        {
+          icon: IconTemplate,
+          value: 'showTemplates',
+          type: 'button',
+          domain: 'template',
+          tooltip: t(`canvas.toolbar.${showTemplates ? 'hideTemplates' : 'showTemplates'}`),
+        },
       ] as ToolbarItem[],
       modals: {
         sourceList: sourceListDrawerVisible && isWeb,
       },
     }),
-    [t, showEdges, showLaunchpad, sourceListDrawerVisible, isWeb],
+    [t, showEdges, showLaunchpad, sourceListDrawerVisible, isWeb, showTemplates],
   );
 };
 
@@ -216,11 +225,14 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { addNode } = useAddNode();
 
   // 4. 使用 selector 函数分离状态
-  const { showLaunchpad, setShowLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
-    showLaunchpad: state.showLaunchpad,
-    setShowLaunchpad: state.setShowLaunchpad,
-    showEdges: state.showEdges,
-  }));
+  const { showLaunchpad, setShowLaunchpad, showEdges, showTemplates, setShowTemplates } =
+    useCanvasStoreShallow((state) => ({
+      showLaunchpad: state.showLaunchpad,
+      setShowLaunchpad: state.setShowLaunchpad,
+      showEdges: state.showEdges,
+      showTemplates: state.showTemplates,
+      setShowTemplates: state.setShowTemplates,
+    }));
 
   const { setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     setImportResourceModalVisible: state.setImportResourceModalVisible,
@@ -234,11 +246,12 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
 
   const getIconColor = useCallback(
     (tool: string) => {
+      if (tool === 'showTemplates' && !showTemplates) return '#9CA3AF';
       if (tool === 'showEdges' && !showEdges) return '#9CA3AF';
       if (tool === 'handleLaunchpad' && !showLaunchpad) return '#9CA3AF';
       return '';
     },
-    [showEdges, showLaunchpad],
+    [showEdges, showLaunchpad, showTemplates],
   );
 
   const getIsLoading = useCallback(
@@ -284,6 +297,9 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
         case 'createMemo':
           createMemo();
           break;
+        case 'showTemplates':
+          setShowTemplates(!showTemplates);
+          break;
       }
       onToolSelect?.(tool);
     },
@@ -296,6 +312,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
       createSkillNode,
       createMemo,
       onToolSelect,
+      setShowTemplates,
     ],
   );
 
