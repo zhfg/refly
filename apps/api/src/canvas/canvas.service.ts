@@ -108,6 +108,7 @@ export class CanvasService {
       title: canvas.title,
       nodes: doc.getArray('nodes').toJSON(),
       edges: doc.getArray('edges').toJSON(),
+      permissions: JSON.parse(canvas.permissions),
     };
   }
 

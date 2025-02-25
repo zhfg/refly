@@ -56,6 +56,10 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const [connectionTimeout, setConnectionTimeout] = useState(false);
 
   useEffect(() => {
+    if (readonly) {
+      return;
+    }
+
     let timeoutId: NodeJS.Timeout;
 
     if (provider?.status !== 'connected') {
@@ -71,11 +75,11 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
         clearTimeout(timeoutId);
       }
     };
-  }, [provider?.status]);
+  }, [readonly, provider?.status]);
 
   const canvasTitle = data?.title;
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
-  const showWarning = connectionTimeout && !hasCanvasSynced && provider.status !== 'connected';
+  const showWarning = connectionTimeout && !hasCanvasSynced && provider?.status !== 'connected';
 
   return (
     <>

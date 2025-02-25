@@ -323,6 +323,7 @@ export const ResourceSchema = {
     rawFileKey: {
       type: 'string',
       description: 'Raw file storage key (used to download the file)',
+      deprecated: true,
     },
     createdAt: {
       type: 'string',
@@ -2019,6 +2020,11 @@ export const RawCanvasDataSchema = {
       items: {
         type: 'object',
       },
+    },
+    permissions: {
+      type: 'object',
+      description: 'Canvas permissions',
+      $ref: '#/components/schemas/Permissions',
     },
   },
 } as const;

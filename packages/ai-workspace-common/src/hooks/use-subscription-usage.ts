@@ -1,6 +1,8 @@
 import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries/queries';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const useSubscriptionUsage = () => {
+  const isLogin = useUserStoreShallow((state) => state.isLogin);
   const {
     data,
     isLoading: isUsageLoading,
@@ -11,6 +13,7 @@ export const useSubscriptionUsage = () => {
     refetchOnReconnect: false,
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 60 * 1000, // Cache for 1 minute
+    enabled: isLogin,
   });
   const { token, storage, fileParsing } = data?.data ?? {};
 

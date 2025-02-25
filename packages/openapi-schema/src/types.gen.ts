@@ -274,6 +274,7 @@ export type Resource = {
   vectorSize?: string;
   /**
    * Raw file storage key (used to download the file)
+   * @deprecated
    */
   rawFileKey?: string;
   /**
@@ -1586,6 +1587,10 @@ export type RawCanvasData = {
   edges?: Array<{
     [key: string]: unknown;
   }>;
+  /**
+   * Canvas permissions
+   */
+  permissions?: Permissions;
 };
 
 export type ExportCanvasResponse = BaseResponse & {

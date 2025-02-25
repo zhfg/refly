@@ -3297,6 +3297,10 @@ components:
           description: Canvas edges
           items:
             type: object
+        permissions:
+          type: object
+          description: Canvas permissions
+          $ref: '#/components/schemas/Permissions'
     ExportCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

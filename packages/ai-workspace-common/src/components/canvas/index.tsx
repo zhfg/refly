@@ -636,7 +636,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     <Spin
       className="w-full h-full"
       style={{ maxHeight: '100%' }}
-      spinning={!hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout}
+      spinning={
+        !readonly && !hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout
+      }
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <div className="w-full h-screen relative flex flex-col overflow-hidden">

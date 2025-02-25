@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
+import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -101,14 +102,14 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     },
   ];
 
-  const getCanvasSettingInfo = useCallback(async () => {
-    const { data } = await getClient().getCanvasDetail({ query: { canvasId } });
-    if (data.data) {
-      const { permissions, title } = data.data;
-      setAccess(permissions?.public ? 'anyone' : 'off');
-      setTitle(title || '');
+  const { data: canvasData } = useGetCanvasData({ query: { canvasId } });
+
+  useEffect(() => {
+    if (canvasData?.data) {
+      setAccess(canvasData.data.permissions?.public ? 'anyone' : 'off');
+      setTitle(canvasData.data.title || '');
     }
-  }, [canvasId]);
+  }, [canvasData?.data]);
 
   const updateCanvasPermission = useCallback(
     async (value: ShareAccess) => {
@@ -129,14 +130,6 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     },
     [updateCanvasPermission],
   );
-
-  useEffect(() => {
-    if (canvasId) {
-      setTimeout(() => {
-        getCanvasSettingInfo();
-      }, 1000);
-    }
-  }, [canvasId]);
 
   // Memoize content to prevent unnecessary re-renders
   const content = useMemo(
