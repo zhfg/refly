@@ -43,6 +43,7 @@ import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
@@ -506,6 +507,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
         <SettingsGuideModal />
         <TourModal />
         <StorageExceededModal />
+        <CanvasTemplateModal />
       </div>
     </Sider>
   );

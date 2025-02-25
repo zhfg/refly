@@ -9,7 +9,6 @@ import { SubscribeModal } from '@refly-packages/ai-workspace-common/components/s
 import { ErrorBoundary } from '@sentry/react';
 import { VerificationModal } from '@/components/verification-modal';
 import { ResetPasswordModal } from '@/components/reset-password-modal';
-import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 
 import './index.scss';
 
@@ -54,7 +53,6 @@ export const AppLayout = (props: AppLayoutProps) => {
         <LoginModal />
         <VerificationModal />
         <ResetPasswordModal />
-        <CanvasTemplateModal />
         <SubscribeModal />
       </Layout>
     </ErrorBoundary>
