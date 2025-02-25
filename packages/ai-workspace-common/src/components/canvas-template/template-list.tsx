@@ -7,7 +7,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { CanvasTemplate } from '@refly/openapi-schema';
 import { IoPersonOutline } from 'react-icons/io5';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
-
+import { useDebouncedCallback } from 'use-debounce';
 const TemplateCard = ({ template }: { template: CanvasTemplate }) => {
   const { t } = useTranslation();
 
@@ -71,9 +71,10 @@ const TemplateCard = ({ template }: { template: CanvasTemplate }) => {
 interface TemplateListProps {
   language: string;
   categoryId: string;
+  searchQuery?: string;
 }
 
-export const TemplateList = ({ language, categoryId }: TemplateListProps) => {
+export const TemplateList = ({ language, categoryId, searchQuery }: TemplateListProps) => {
   const { t } = useTranslation();
   const { visible } = useCanvasTemplateModal((state) => ({
     visible: state.visible,
@@ -97,6 +98,14 @@ export const TemplateList = ({ language, categoryId }: TemplateListProps) => {
     if (!visible) return;
     reload();
   }, [language, categoryId, visible]);
+
+  const debounced = useDebouncedCallback(() => {
+    reload();
+  }, 300);
+
+  useEffect(() => {
+    debounced();
+  }, [searchQuery]);
 
   return (
     <div className="w-full h-full overflow-y-auto bg-[#F8F9FA] p-4">
