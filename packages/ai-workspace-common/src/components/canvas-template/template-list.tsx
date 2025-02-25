@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Spin, Empty, Avatar, Button, Typography } from 'antd';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +8,10 @@ import { CanvasTemplate } from '@refly/openapi-schema';
 import { IoPersonOutline } from 'react-icons/io5';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { useDebouncedCallback } from 'use-debounce';
+import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
 const TemplateCard = ({ template }: { template: CanvasTemplate }) => {
   const { t } = useTranslation();
+  const [visible, setVisible] = useState(false);
 
   const handlePreview = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -18,7 +20,7 @@ const TemplateCard = ({ template }: { template: CanvasTemplate }) => {
 
   const handleUse = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    console.log('use');
+    setVisible(true);
   };
 
   return (
@@ -64,6 +66,12 @@ const TemplateCard = ({ template }: { template: CanvasTemplate }) => {
           {t('template.use')}
         </Button>
       </div>
+
+      <DuplicateCanvasModal
+        canvasId={template.originCanvasId}
+        visible={visible}
+        setVisible={setVisible}
+      />
     </div>
   );
 };

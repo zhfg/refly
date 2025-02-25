@@ -1973,6 +1973,9 @@ const translations = {
     createSuccess: 'Template created successfully, please view in template library',
     preview: 'Preview',
     use: 'Use',
+    duplicateCanvas: 'Duplicate Canvas',
+    canvasTitle: 'Canvas Name',
+    duplicateCanvasTitlePlaceholder: 'Please enter canvas name',
   },
 };
 

@@ -1921,6 +1921,9 @@ const translations = {
     createSuccess: '模板创建成功, 请在模板库中查看',
     preview: '预览',
     use: '使用',
+    duplicateCanvas: '复制画布',
+    canvasTitle: '画布名称',
+    duplicateCanvasTitlePlaceholder: '请输入新画布名称',
   },
 };
 
