@@ -1,5 +1,5 @@
 import { RiRobot2Fill, RiMarkdownLine, RiFile2Fill } from 'react-icons/ri';
-import { Share2Icon, GitBranchIcon } from 'lucide-react';
+import { Share2Icon, GitBranchIcon, LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import AnimatedBeamMultipleOutputDemo from '@refly-packages/ai-workspace-common/components/magicui/animated-beam-multiple-outputs';
@@ -79,16 +79,14 @@ export default function FeatureBlocks() {
               className={cn(
                 'relative w-32 cursor-pointer overflow-hidden rounded-xl border p-4',
                 'border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]',
-                'dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]',
-                'transform-gpu blur-[1px] transition-all duration-300 ease-out hover:blur-none',
               )}
             >
               <div className="flex flex-row items-center gap-2">
                 <div className="flex flex-col">
-                  <figcaption className="text-sm font-medium dark:text-white ">{f.name}</figcaption>
+                  <figcaption className="text-sm font-medium">{f?.name}</figcaption>
                 </div>
               </div>
-              <blockquote className="mt-2 text-xs">{f.body}</blockquote>
+              <blockquote className="mt-2 text-xs">{f?.body}</blockquote>
             </figure>
           ))}
         </Marquee>
@@ -213,7 +211,7 @@ export default function FeatureBlocks() {
               key={idx}
               {...feature}
               className={cn(
-                'group relative overflow-hidden rounded-xl border border-transparent bg-gradient-to-b from-neutral-50 to-neutral-100 p-6 shadow-md transition-all hover:shadow-xl dark:from-neutral-900 dark:to-neutral-800',
+                'group relative overflow-hidden rounded-xl border border-transparent bg-gradient-to-b from-neutral-50 to-neutral-100 p-6 shadow-md transition-all hover:shadow-xl',
                 feature.className,
               )}
             >
@@ -229,10 +227,10 @@ export default function FeatureBlocks() {
                   }}
                 >
                   <feature.Icon className="mr-2 h-4 w-4" />
-                  <span>{feature.name}</span>
+                  <span>{feature?.name}</span>
                 </span>
-                <h3 className="mt-4 text-xl font-semibold">{feature.description}</h3>
-                {feature.bulletPoints && (
+                <h3 className="mt-4 text-xl font-semibold">{feature?.description}</h3>
+                {feature?.bulletPoints && (
                   <ul className="mt-4 space-y-2">
                     {feature.bulletPoints.map((point: string, i: number) => (
                       <li key={i} className="flex items-center gap-2">
@@ -242,9 +240,7 @@ export default function FeatureBlocks() {
                         >
                           ✓
                         </span>
-                        <span className="text-sm text-neutral-600 dark:text-neutral-300">
-                          {point}
-                        </span>
+                        <span className="text-sm text-neutral-600">{point}</span>
                       </li>
                     ))}
                   </ul>

@@ -43,19 +43,25 @@ const WorkflowCard = ({
           isReversed ? 'md:flex-row-reverse' : ''
         }`}
       >
-        {/* Image Section - Updated with hover animation */}
-        <div className="relative h-[260px] cursor-pointer overflow-visible transition-transform duration-300 ease-out hover:scale-95 md:h-auto md:w-1/2">
-          <img
-            src={workflow?.imageSrc ?? '/fallback-image.png'}
-            alt={`${workflow?.title ?? 'Workflow'} visualization`}
-            className="absolute h-full w-[130%] rounded-[20px] object-contain"
-            style={{
-              [isReversed ? 'right' : 'left']: '-30%',
-              opacity: 1,
-              boxSizing: 'border-box',
-              transformOrigin: 'center',
-            }}
-          />
+        {/* Image Section - Final optimized solution to fix hover jitter */}
+        <div className="relative h-[260px] md:h-auto md:w-1/2">
+          <div className="absolute h-full w-full">
+            <div
+              className="group absolute h-full w-[130%] cursor-pointer"
+              style={{ [isReversed ? 'right' : 'left']: '-30%' }}
+            >
+              <div className="relative h-full w-full transition-transform duration-300 ease-out group-hover:scale-95">
+                <img
+                  src={workflow?.imageSrc ?? '/fallback-image.png'}
+                  alt={`${workflow?.title ?? 'Workflow'} visualization`}
+                  className="h-full w-full rounded-[20px] object-contain"
+                  style={{
+                    transformOrigin: 'center',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Content Section */}

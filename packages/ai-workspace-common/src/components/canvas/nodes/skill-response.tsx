@@ -599,7 +599,6 @@ export const SkillResponseNode = memo(
                       sizeMode={sizeMode}
                       isOperating={isOperating}
                       maxCompactLength={10}
-                      isLoading={false}
                       sources={sources}
                     />
                   )}
