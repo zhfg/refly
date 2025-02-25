@@ -1976,6 +1976,7 @@ const translations = {
     duplicateCanvas: 'Duplicate Canvas',
     canvasTitle: 'Canvas Name',
     duplicateCanvasTitlePlaceholder: 'Please enter canvas name',
+    moreTemplates: 'More Templates',
   },
 };
 

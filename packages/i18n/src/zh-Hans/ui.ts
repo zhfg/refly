@@ -1924,6 +1924,7 @@ const translations = {
     duplicateCanvas: '复制画布',
     canvasTitle: '画布名称',
     duplicateCanvasTitlePlaceholder: '请输入新画布名称',
+    moreTemplates: '更多模版',
   },
 };
 

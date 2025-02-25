@@ -9,7 +9,6 @@ import {
   Node,
   Edge,
 } from '@xyflow/react';
-import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -17,7 +16,6 @@ import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -54,10 +52,11 @@ import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
-import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { ShareCanvas } from './share-canvas';
+import { EmptyGuide } from './empty-guide';
+
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -129,8 +128,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       setInitialFitViewCompleted: state.setInitialFitViewCompleted,
     }));
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
-
-  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
 
   const { handleNodePreview } = useNodePreviewControl({ canvasId });
 
@@ -664,23 +661,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodesFocusable={true}
             onEdgeClick={handleEdgeClick}
           >
-            {nodes?.length === 0 && hasCanvasSynced && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-                <div className="flex items-center justify-center text-gray-500 text-center">
-                  <div className="text-[20px]">{t('canvas.emptyText')}</div>
-                  <Button
-                    loading={isCreatingDocument}
-                    icon={<IconCreateDocument className="-mr-1 flex items-center justify-center" />}
-                    type="text"
-                    className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
-                    onClick={() => createSingleDocumentInCanvas()}
-                    data-cy="canvas-create-document-button"
-                  >
-                    {t('canvas.toolbar.createDocument')}
-                  </Button>
-                </div>
-              </div>
-            )}
+            {nodes?.length === 0 && hasCanvasSynced && <EmptyGuide />}
 
             {memoizedBackground}
             {memoizedMiniMap}
