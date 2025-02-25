@@ -661,7 +661,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodesFocusable={true}
             onEdgeClick={handleEdgeClick}
           >
-            {nodes?.length === 0 && hasCanvasSynced && <EmptyGuide />}
+            {nodes?.length === 0 && hasCanvasSynced && <EmptyGuide canvasId={canvasId} />}
 
             {memoizedBackground}
             {memoizedMiniMap}

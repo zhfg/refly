@@ -1977,6 +1977,8 @@ const translations = {
     canvasTitle: 'Canvas Name',
     duplicateCanvasTitlePlaceholder: 'Please enter canvas name',
     moreTemplates: 'More Templates',
+    searchPlaceholder: 'Please enter keyword to search template',
+    noRelatedTemplates: 'No related templates',
   },
 };
 

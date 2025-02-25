@@ -1925,6 +1925,8 @@ const translations = {
     canvasTitle: '画布名称',
     duplicateCanvasTitlePlaceholder: '请输入新画布名称',
     moreTemplates: '更多模版',
+    searchPlaceholder: '请输入关键词搜索模板',
+    noRelatedTemplates: '暂无相关模板',
   },
 };
 

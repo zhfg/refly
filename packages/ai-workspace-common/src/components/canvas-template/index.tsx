@@ -50,7 +50,7 @@ const TitleRender = ({
         </div>
         <Input
           className="w-80"
-          placeholder="Search"
+          placeholder={t('template.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
