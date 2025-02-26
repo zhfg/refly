@@ -599,7 +599,6 @@ export const SkillResponseNode = memo(
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}
                       isOperating={isOperating}
-                      maxCompactLength={10}
                       sources={sources}
                     />
                   )}

@@ -65,7 +65,6 @@ const NodeContent = memo(
         content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
         sizeMode={sizeMode}
         isOperating={isOperating}
-        maxCompactLength={10}
       />
     );
   },
