@@ -88,11 +88,14 @@ export class CanvasService {
       where: {
         canvasId,
         deletedAt: null,
-        ...(user ? { uid: user.uid } : { isPublic: true }),
       },
     });
 
     if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    if ((!user || user.uid !== canvas.uid) && !canvas.isPublic) {
       throw new CanvasNotFoundError();
     }
 
