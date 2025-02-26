@@ -172,6 +172,10 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       {
         resultId,
         query: title,
+        selectedSkill: {
+          name: actionMeta?.name || 'CommonQnA',
+        },
+        contextItems,
       },
       {
         entityId: canvasId,
