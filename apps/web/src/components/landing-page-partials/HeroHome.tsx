@@ -73,7 +73,7 @@ function HeroHome() {
                       window.open('https://docs.refly.ai/changelog/v0.3.0', '_blank');
                     }}
                     className={cn(
-                      'group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5',
+                      'group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50',
                       'px-4',
                       'py-2',
                       'w-auto',
@@ -247,15 +247,15 @@ function HeroHome() {
           </div> */}
 
           {/* Hero image */}
-          <div className="relative mt-6 flex justify-center overflow-hidden sm:mt-10">
+          <div className="group relative mt-6 flex justify-center overflow-hidden sm:mt-10">
             <div
               onClick={() => setIsVideoModalOpen(true)}
               className={cn(
-                'group relative mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid border-black/5',
+                'relative mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid border-black/5',
                 'bg-[rgba(242,246,253,0.92)] p-1 sm:p-2',
                 'will-change-transform',
                 'scale-100 transition-[transform] duration-200 ease-out',
-                'hover:scale-[0.95]',
+                'group-hover:scale-[0.95]',
               )}
             >
               <div className="absolute inset-0 z-10 rounded-md bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-50" />
