@@ -67,7 +67,6 @@ import {
   QUEUE_SKILL_TIMEOUT_CHECK,
   QUEUE_SYNC_REQUEST_USAGE,
   QUEUE_AUTO_NAME_CANVAS,
-  mergeContextWithHistory,
 } from '@/utils';
 import { InvokeSkillJobData, SkillTimeoutCheckJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -670,11 +669,10 @@ export class SkillService {
 
     // Merge the current context with contexts from result history
     // Current context items have priority, and duplicates are removed
-    const mergedContext = mergeContextWithHistory(context, resultHistory);
 
     const config: SkillRunnableConfig = {
       configurable: {
-        ...mergedContext,
+        ...context,
         user,
         modelInfo,
         locale: displayLocale,
