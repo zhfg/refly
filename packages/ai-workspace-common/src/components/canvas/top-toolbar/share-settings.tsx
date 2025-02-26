@@ -106,7 +106,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
 
   useEffect(() => {
     if (canvasData?.data) {
-      setAccess(canvasData.data.permissions?.public ? 'anyone' : 'off');
+      setAccess(canvasData.data.isPublic ? 'anyone' : 'off');
       setTitle(canvasData.data.title || '');
     }
   }, [canvasData?.data]);
@@ -114,7 +114,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const updateCanvasPermission = useCallback(
     async (value: ShareAccess) => {
       const { data } = await getClient().updateCanvas({
-        body: { canvasId, permissions: { public: value === 'anyone' } },
+        body: { canvasId, isPublic: value === 'anyone' },
       });
       if (data.success) {
         message.success(t('shareContent.updateCanvasPermissionSuccess'));

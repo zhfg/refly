@@ -419,9 +419,9 @@ export class MiscService implements OnModuleInit {
     }
   }
 
-  async getInternalFileStream(user: User, storageKey: string): Promise<StreamableFile> {
+  async getInternalFileStream(user: User | null, storageKey: string): Promise<StreamableFile> {
     const file = await this.prisma.staticFile.findFirst({
-      where: { uid: user.uid, storageKey, deletedAt: null },
+      where: { deletedAt: null, ...(user ? { uid: user?.uid } : {}) },
     });
     if (!file) {
       throw new NotFoundException();

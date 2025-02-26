@@ -27,6 +27,7 @@ import {
   CreateCanvasTemplateRequest,
   UpdateCanvasTemplateRequest,
 } from '@refly-packages/openapi-schema';
+import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/canvas')
 export class CanvasController {
@@ -50,16 +51,10 @@ export class CanvasController {
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('data')
-  async getCanvasData(@Query('canvasId') canvasId: string) {
-    const data = await this.canvasService.exportCanvas(null, canvasId);
-    return buildSuccessResponse(data);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('export')
-  async exportCanvas(@LoginedUser() user: User, @Query('canvasId') canvasId: string) {
-    const data = await this.canvasService.exportCanvas(user, canvasId);
+  async getCanvasData(@LoginedUser() user: User | null, @Query('canvasId') canvasId: string) {
+    const data = await this.canvasService.getCanvasRawData(user, canvasId);
     return buildSuccessResponse(data);
   }
 

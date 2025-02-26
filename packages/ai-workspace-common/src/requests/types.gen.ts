@@ -77,16 +77,6 @@ export type BaseReference = {
   targetId: string;
 };
 
-/**
- * Entity permissions
- */
-export type Permissions = {
-  /**
-   * Whether the entity is publicly accessible
-   */
-  public?: boolean;
-};
-
 export type Canvas = {
   /**
    * Canvas ID
@@ -101,9 +91,9 @@ export type Canvas = {
    */
   readOnly?: boolean;
   /**
-   * Canvas permissions
+   * Whether this canvas is public
    */
-  permissions?: Permissions;
+  isPublic?: boolean;
   /**
    * Canvas creation time
    */
@@ -1588,9 +1578,9 @@ export type RawCanvasData = {
     [key: string]: unknown;
   }>;
   /**
-   * Canvas permissions
+   * Whether this canvas is public
    */
-  permissions?: Permissions;
+  isPublic?: boolean;
 };
 
 export type ExportCanvasResponse = BaseResponse & {
@@ -1621,9 +1611,9 @@ export type UpsertCanvasRequest = {
    */
   canvasId?: string;
   /**
-   * Canvas permissions
+   * Whether this canvas is public
    */
-  permissions?: Permissions;
+  isPublic?: boolean;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {

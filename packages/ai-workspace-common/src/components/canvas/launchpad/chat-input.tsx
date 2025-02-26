@@ -6,7 +6,7 @@ import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/store
 import type { Skill } from '@refly/openapi-schema';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { cn } from '@refly-packages/utils/cn';
-import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
+import { useListSkills } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
@@ -78,14 +78,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       [onUploadImage, readonly],
     );
 
-    const { data } = useListSkills({}, null, {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-      gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    });
-    const skills = data?.data ?? [];
+    const skills = useListSkills();
 
     const skillOptions = useMemo(() => {
       return skills.map((skill) => ({

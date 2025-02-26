@@ -21,7 +21,6 @@ import {
   RawCanvasData,
   UpsertCanvasRequest,
   User,
-  Permissions,
   ShareUser,
   CreateCanvasTemplateRequest,
   UpdateCanvasTemplateRequest,
@@ -78,23 +77,22 @@ export class CanvasService {
     return canvas;
   }
 
-  async exportCanvas(user: User | null, canvasId: string): Promise<RawCanvasData> {
+  async getCanvasRawData(user: User | null, canvasId: string): Promise<RawCanvasData> {
     const canvas = await this.prisma.canvas.findFirst({
       select: {
         title: true,
         uid: true,
-        permissions: true,
+        isPublic: true,
         stateStorageKey: true,
       },
-      where: { canvasId, deletedAt: null },
+      where: {
+        canvasId,
+        deletedAt: null,
+        ...(user ? { uid: user.uid } : { isPublic: true }),
+      },
     });
 
     if (!canvas) {
-      throw new CanvasNotFoundError();
-    }
-
-    const permissions: Permissions = JSON.parse(canvas.permissions);
-    if (!permissions.public && canvas.uid !== user?.uid) {
       throw new CanvasNotFoundError();
     }
 
@@ -108,7 +106,7 @@ export class CanvasService {
       title: canvas.title,
       nodes: doc.getArray('nodes').toJSON(),
       edges: doc.getArray('edges').toJSON(),
-      permissions: JSON.parse(canvas.permissions),
+      isPublic: canvas.isPublic,
     };
   }
 
@@ -116,11 +114,10 @@ export class CanvasService {
     const { title, canvasId } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, deletedAt: null },
+      where: { canvasId, deletedAt: null, OR: [{ uid: user.uid }, { isPublic: true }] },
     });
 
-    const permissions: Permissions = JSON.parse(canvas.permissions);
-    if (!permissions.public && canvas.uid !== user?.uid) {
+    if (!canvas) {
       throw new CanvasNotFoundError();
     }
 
@@ -150,7 +147,7 @@ export class CanvasService {
         canvasId,
         title: param.title,
         stateStorageKey,
-        permissions: JSON.stringify(param.permissions),
+        isPublic: param.isPublic,
       },
     });
 
@@ -173,20 +170,32 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title, permissions = {} } = param;
+    const { canvasId, title, isPublic } = param;
 
     const updates: Prisma.CanvasUpdateInput = {};
 
     if (title !== undefined) {
       updates.title = title;
     }
-    if (permissions !== undefined) {
-      updates.permissions = JSON.stringify(permissions);
+    if (isPublic !== undefined) {
+      updates.isPublic = isPublic;
     }
 
-    const updatedCanvas = await this.prisma.canvas.update({
-      where: { canvasId, uid: user.uid, deletedAt: null },
-      data: updates,
+    const updatedCanvas = await this.prisma.$transaction(async (tx) => {
+      const canvas = await tx.canvas.update({
+        where: { canvasId, uid: user.uid, deletedAt: null },
+        data: updates,
+      });
+
+      if (updates.isPublic !== undefined) {
+        // Create share records for all entities in this canvas
+        await tx.canvasEntityRelation.updateMany({
+          where: { canvasId, deletedAt: null },
+          data: { isPublic: updates.isPublic },
+        });
+      }
+
+      return canvas;
     });
 
     if (!updatedCanvas) {

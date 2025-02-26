@@ -259,8 +259,8 @@ model Canvas {
   stateStorageKey String?   @map("state_storage_key")
   /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
-  /// Canvas permissions (JSON of `Permissions`)
-  permissions     String    @default("{}") @map("permissions")
+  /// Whether this canvas is public
+  isPublic        Boolean   @default(false) @map("is_public")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
@@ -340,6 +340,8 @@ model CanvasEntityRelation {
   entityId   String    @map("entity_id")
   /// Entity type
   entityType String    @map("entity_type")
+  /// Whether the canvas is public
+  isPublic   Boolean   @default(false) @map("is_public")
   /// Create timestamp
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Soft delete timestamp

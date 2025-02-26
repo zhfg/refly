@@ -1790,13 +1790,6 @@ components:
         targetId:
           type: string
           description: Target entity ID
-    Permissions:
-      type: object
-      description: Entity permissions
-      properties:
-        public:
-          type: boolean
-          description: Whether the entity is publicly accessible
     Canvas:
       type: object
       required:
@@ -1816,9 +1809,9 @@ components:
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
-        permissions:
-          description: Canvas permissions
-          $ref: '#/components/schemas/Permissions'
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
         createdAt:
           type: string
           format: date-time
@@ -3297,10 +3290,9 @@ components:
           description: Canvas edges
           items:
             type: object
-        permissions:
-          type: object
-          description: Canvas permissions
-          $ref: '#/components/schemas/Permissions'
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
     ExportCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3332,9 +3324,9 @@ components:
           type: string
           description: Canvas ID (only used for update)
           example: c-g30e1b80b5g1itbemc0g5jj3
-        permissions:
-          description: Canvas permissions
-          $ref: '#/components/schemas/Permissions'
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
     UpsertCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -85,17 +85,6 @@ export const BaseReferenceSchema = {
   },
 } as const;
 
-export const PermissionsSchema = {
-  type: 'object',
-  description: 'Entity permissions',
-  properties: {
-    public: {
-      type: 'boolean',
-      description: 'Whether the entity is publicly accessible',
-    },
-  },
-} as const;
-
 export const CanvasSchema = {
   type: 'object',
   required: ['canvasId', 'title', 'createdAt', 'updatedAt'],
@@ -114,9 +103,9 @@ export const CanvasSchema = {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
     },
-    permissions: {
-      description: 'Canvas permissions',
-      $ref: '#/components/schemas/Permissions',
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
     },
     createdAt: {
       type: 'string',
@@ -2021,10 +2010,9 @@ export const RawCanvasDataSchema = {
         type: 'object',
       },
     },
-    permissions: {
-      type: 'object',
-      description: 'Canvas permissions',
-      $ref: '#/components/schemas/Permissions',
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
     },
   },
 } as const;
@@ -2075,9 +2063,9 @@ export const UpsertCanvasRequestSchema = {
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
-    permissions: {
-      description: 'Canvas permissions',
-      $ref: '#/components/schemas/Permissions',
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
     },
   },
 } as const;
