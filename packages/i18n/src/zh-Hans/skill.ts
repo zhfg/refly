@@ -12,6 +12,19 @@ const translations = {
       },
     },
   },
+  customPrompt: {
+    name: '自定义提示',
+    description: '基于自定义系统提示和上下文回答问题',
+    placeholder: '让 AI 基于自定义系统提示回答问题...',
+    steps: {
+      analyzeContext: {
+        name: '上下文分析',
+      },
+      answerQuestion: {
+        name: '问题回答',
+      },
+    },
+  },
   generateDoc: {
     name: '文档写作',
     description: '根据需求和上下文进行写作',

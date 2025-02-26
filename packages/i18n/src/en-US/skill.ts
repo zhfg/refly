@@ -12,6 +12,19 @@ const translations = {
       },
     },
   },
+  customPrompt: {
+    name: 'Custom Prompt',
+    description: 'Answer questions based on the custom system prompt and context',
+    placeholder: 'Let AI help you answer questions with a custom system prompt...',
+    steps: {
+      analyzeContext: {
+        name: 'Context Analysis',
+      },
+      answerQuestion: {
+        name: 'Question Answering',
+      },
+    },
+  },
   generateDoc: {
     name: 'Document Writing',
     description: 'Generate documents based on the question and context',

@@ -248,21 +248,21 @@ export const ChatPanel = () => {
 
   return (
     <div className="relative w-full" data-cy="launchpad-chat-panel">
-      <div className="ai-copilot-chat-container">
-        <div className="chat-input-container rounded-[7px] overflow-hidden">
-          <SelectedSkillHeader
-            skill={selectedSkill}
-            setSelectedSkill={setSelectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
+      <div className="ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden">
+        <SelectedSkillHeader
+          skill={selectedSkill}
+          setSelectedSkill={setSelectedSkill}
+          onClose={() => setSelectedSkill(null)}
+        />
+        <div className="px-3">
           {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
           <ContextManager
-            className="p-2 px-3"
+            className="py-2"
             contextItems={contextItems}
             setContextItems={setContextItems}
             filterErrorInfo={filterErrorInfo}
           />
-          <div className="px-3">
+          <div>
             <ChatInput
               query={chatStore.newQAText}
               setQuery={chatStore.setNewQAText}
@@ -291,7 +291,7 @@ export const ChatPanel = () => {
           )}
 
           <ChatActions
-            className="p-2 px-3"
+            className="py-2"
             query={chatStore.newQAText}
             model={chatStore.selectedModel}
             setModel={chatStore.setSelectedModel}
