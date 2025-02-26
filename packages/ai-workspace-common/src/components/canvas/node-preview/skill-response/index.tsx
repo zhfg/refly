@@ -146,6 +146,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const actionMeta = result?.actionMeta ?? data?.metadata?.actionMeta;
   const version = result?.version ?? data?.metadata?.version ?? 0;
   const modelInfo = result?.modelInfo ?? data?.metadata?.modelInfo;
+  const tplConfig = result?.tplConfig ?? {};
 
   const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {
@@ -221,6 +222,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
             actionMeta={actionMeta}
             modelInfo={modelInfo}
             setEditMode={setEditMode}
+            tplConfig={tplConfig}
           />
           <PreviewChatInput
             enabled={!editMode}
