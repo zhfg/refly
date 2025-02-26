@@ -122,6 +122,8 @@ const translations = {
     },
     messageText: 'Support file upload and multi-modal image processing⚡️ ',
     tryForFree: 'Get Started',
+    tryItNow: 'Try It Now',
+    creationEngine: 'Creation Engine',
     addToChrome: 'Add to Chrome',
     contactUs: 'Contact Us',
     watchVideo: 'Watch Video',

@@ -133,6 +133,8 @@ const translations = {
     },
     messageText: '支持文件上传和多模态图片处理⚡️ ',
     tryForFree: '开始使用',
+    tryItNow: '立即体验',
+    creationEngine: '创作引擎',
     addToChrome: '添加到 Chrome',
     contactUs: '联系我们',
     watchVideo: '观看视频',

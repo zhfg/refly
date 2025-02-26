@@ -25,6 +25,7 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { LuPlus } from 'react-icons/lu';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
+import { useMatch } from 'react-router-dom';
 
 const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () => void }) => {
   const { t } = useTranslation();
@@ -34,6 +35,7 @@ const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () =
   const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
   const handleDelete = async () => {
     const success = await deleteDocument(doc.docId);
@@ -57,7 +59,7 @@ const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () =
   };
 
   const items: MenuProps['items'] = [
-    {
+    !isShareCanvas && {
       label: (
         <div className="flex items-center">
           <LuPlus size={16} className="mr-2" />

@@ -27,6 +27,7 @@ import { getClientOrigin } from '@refly-packages/utils/url';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
+import { useMatch } from 'react-router-dom';
 
 const ActionDropdown = ({
   resource,
@@ -41,6 +42,7 @@ const ActionDropdown = ({
   }));
   const { deleteResource } = useDeleteResource();
   const { downloadFile } = useDownloadFile();
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -83,7 +85,7 @@ const ActionDropdown = ({
   };
 
   const items: MenuProps['items'] = [
-    {
+    !isShareCanvas && {
       label: (
         <div className="flex items-center">
           <LuPlus size={16} className="mr-2" />

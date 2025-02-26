@@ -17,6 +17,7 @@ import { RecommendQuestions } from '@refly-packages/ai-workspace-common/componen
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'
@@ -104,6 +105,7 @@ const StepContent = memo(
     buildContextItem: (text: string) => IContextItem;
     step: ActionStep;
   }) => {
+    const { readonly } = useCanvasContext();
     const getSourceNode = useCallback(() => {
       return {
         type: 'skillResponse' as const,
@@ -115,11 +117,13 @@ const StepContent = memo(
       <div className="my-3 text-gray-600 text-base">
         <div className={`skill-response-content-${resultId}-${step.name}`}>
           <Markdown content={content} sources={sources} />
-          <SelectionContext
-            containerClass={`skill-response-content-${resultId}-${step.name}`}
-            getContextItem={buildContextItem}
-            getSourceNode={getSourceNode}
-          />
+          {!readonly && (
+            <SelectionContext
+              containerClass={`skill-response-content-${resultId}-${step.name}`}
+              getContextItem={buildContextItem}
+              getSourceNode={getSourceNode}
+            />
+          )}
         </div>
       </div>
     );

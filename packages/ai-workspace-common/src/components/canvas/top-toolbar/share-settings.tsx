@@ -5,7 +5,6 @@ import {
   IconClose,
   IconLink,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { MdOutlinePublish } from 'react-icons/md';
 import { RiUserForbidLine } from 'react-icons/ri';
 import { GrLanguage } from 'react-icons/gr';
 import { useTranslation } from 'react-i18next';
@@ -91,15 +90,16 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
       },
       disabled: access === 'off',
     },
-    {
-      label: 'publishTemplate',
-      icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
-      onClick: () => {
-        setCreateTemplateModalVisible(true);
-        setOpen(false);
-      },
-      disabled: false,
-    },
+    // TODO: do not delete this
+    // {
+    //   label: 'publishTemplate',
+    //   icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
+    //   onClick: () => {
+    //     setCreateTemplateModalVisible(true);
+    //     setOpen(false);
+    //   },
+    //   disabled: false,
+    // },
   ];
 
   const { data: canvasData } = useGetCanvasData({ query: { canvasId } });
@@ -134,7 +134,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   // Memoize content to prevent unnecessary re-renders
   const content = useMemo(
     () => (
-      <div className="w-[350px]">
+      <div className="w-[300px]">
         <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-2">
             <IconShare className="w-4 h-4 flex items-center justify-center" />
@@ -162,9 +162,11 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
             />
           </div>
         </div>
-        <div className="px-3 py-4 bg-[#F5F6F7] flex items-center gap-2 rounded-b-lg">
+        <div className="px-3 py-4 bg-[#F5F6F7] flex items-center justify-center gap-2 rounded-b-lg">
           {buttons.map((button) => (
             <Button
+              className="w-full"
+              type="primary"
               key={button.label}
               icon={button.icon}
               disabled={button.disabled}

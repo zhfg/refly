@@ -5,6 +5,7 @@ import { SiderLogo } from './layout';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import { LuCheck } from 'react-icons/lu';
 
 import {
   IconX,
@@ -31,40 +32,32 @@ export const SiderLoggedOut = (props: { source: 'sider' | 'popover' }) => {
 
   const keyFeaturesDict = [
     {
-      en: '🧵 Multi-threaded Conversation System',
-      'zh-CN': '🧵 多线程对话系统',
+      en: 'Multi-threaded Conversation',
+      'zh-CN': '多线程对话',
     },
     {
-      en: '🤖 Multi-model Integration Framework',
-      'zh-CN': '🤖 多模型集成框架',
+      en: 'Multi-model Integration',
+      'zh-CN': '多模型集成',
     },
     {
-      en: '🎨 Multi-Modal Processing Capabilities',
-      'zh-CN': '🎨 多模态处理能力',
+      en: 'Multi-Modal Processing',
+      'zh-CN': '多模态处理',
     },
     {
-      en: '⚡️ AI-Powered Skill System',
-      'zh-CN': '⚡️ AI驱动的技能系统',
+      en: 'AI-Powered Skill System',
+      'zh-CN': 'AI驱动的技能系统',
     },
     {
-      en: '🔍 Context-Aware Knowledge Base',
-      'zh-CN': '🔍 上下文管理系统',
+      en: 'Knowledge Base Engine',
+      'zh-CN': '知识库引擎',
     },
     {
-      en: '📚 Knowledge Base Engine',
-      'zh-CN': '📚 知识库引擎',
+      en: 'Intelligent Content Capture',
+      'zh-CN': '智能内容采集',
     },
     {
-      en: '✂️ Intelligent Content Capture',
-      'zh-CN': '✂️ 智能内容采集',
-    },
-    {
-      en: '📌 Citation System',
-      'zh-CN': '📌 引用系统',
-    },
-    {
-      en: '✍️ AI-Enhanced Editor',
-      'zh-CN': '✍️ AI增强编辑器',
+      en: 'AI-Enhanced Editor',
+      'zh-CN': 'AI增强编辑器',
     },
   ];
 
@@ -79,16 +72,17 @@ export const SiderLoggedOut = (props: { source: 'sider' | 'popover' }) => {
       <div className="flex h-full flex-col overflow-y-auto">
         <SiderLogo source={source} navigate={(path) => navigate(path)} setCollapse={setCollapse} />
         <div className="flex-grow flex flex-col items-center justify-center px-3">
-          <div className="text-2xl font-bold mb-4">Refly.AI</div>
+          <div className="text-xl font-bold">AI Native</div>
+          <div className="text-xl font-bold mb-4">{t('landingPage.creationEngine')}</div>
           <div className="flex flex-col gap-2">
             {keyFeaturesDict.map((item) => (
-              <div className="text-[13px] font-medium" key={item.en}>
-                {item[i18n.language]}
+              <div className="text-[12px] text-gray-500" key={item.en}>
+                <LuCheck className="w-4 h-4 translate-y-1 text-green-500" /> {item[i18n.language]}
               </div>
             ))}
           </div>
           <Button type="primary" className="w-full mt-4" onClick={() => setLoginModalOpen(true)}>
-            {t('common.login')}
+            {t('landingPage.tryItNow')}
           </Button>
         </div>
         <Divider className="my-2" />

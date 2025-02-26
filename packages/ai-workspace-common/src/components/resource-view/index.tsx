@@ -19,6 +19,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { TFunction } from 'i18next';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface ResourceViewProps {
   resourceId: string;
@@ -142,6 +143,7 @@ const ResourceContent = memo(
     resourceDetail: Resource;
     resourceId: string;
   }) => {
+    const { readonly } = useCanvasContext();
     const buildContextItem = useCallback(
       (text: string) => {
         return {
@@ -170,11 +172,13 @@ const ResourceContent = memo(
       <div className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`)}>
         <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
         <Markdown content={resourceDetail?.content || ''} className="text-base" />
-        <SelectionContext
-          containerClass={`resource-content-${resourceId}`}
-          getContextItem={buildContextItem}
-          getSourceNode={getSourceNode}
-        />
+        {!readonly && (
+          <SelectionContext
+            containerClass={`resource-content-${resourceId}`}
+            getContextItem={buildContextItem}
+            getSourceNode={getSourceNode}
+          />
+        )}
       </div>
     );
   },

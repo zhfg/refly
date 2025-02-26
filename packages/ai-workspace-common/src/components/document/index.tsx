@@ -24,6 +24,7 @@ import { ydoc2Markdown } from '@refly-packages/utils/editor';
 import { time } from '@refly-packages/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-document-sync';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const StatusBar = memo(
   ({ docId }: { docId: string }) => {
@@ -219,6 +220,7 @@ export const DocumentEditor = memo(
     const { resetState } = useDocumentStoreShallow((state) => ({
       resetState: state.resetState,
     }));
+    const { readonly: canvasReadOnly } = useCanvasContext();
 
     useEffect(() => {
       return () => {
@@ -229,7 +231,7 @@ export const DocumentEditor = memo(
     return (
       <DocumentProvider docId={docId} readonly={readonly}>
         <div className="flex flex-col ai-note-container">
-          <StatusBar docId={docId} />
+          {!canvasReadOnly && <StatusBar docId={docId} />}
           <DocumentBody docId={docId} />
         </div>
       </DocumentProvider>
