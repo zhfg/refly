@@ -15,7 +15,10 @@ import { ToolbarButtons, WarningButton } from './buttons';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import ShareSettings from './share-settings';
 import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
-
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import Logo from '@/assets/logo.svg';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import './index.scss';
 
 interface TopToolbarProps {
@@ -29,6 +32,14 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
+
+  const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
+    setLoginModalOpen: state.setLoginModalOpen,
+  }));
+  const navigate = useNavigate();
 
   const { provider, readonly } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
@@ -95,11 +106,21 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
       </Helmet>
       <div
         className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 bg-transparent ${
-          collapse ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
+          collapse || !isLogin ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
         }`}
       >
         <div className="flex items-center relative z-10">
-          {collapse && (
+          {!isLogin && (
+            <div
+              className="flex h-full cursor-pointer items-center mr-4"
+              onClick={() => navigate('/')}
+            >
+              <img src={Logo} className="w-[30px]" alt="Refly Logo" />
+              <span className="ml-2 text-base font-bold">Refly</span>
+            </div>
+          )}
+
+          {collapse && isLogin && (
             <>
               <SiderPopover>
                 <Button
@@ -142,9 +163,14 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
 
-          {readonly && (
+          {readonly && isLogin && (
             <Button type="primary" onClick={handleDuplicate}>
               {t('common.duplicate')}
+            </Button>
+          )}
+          {!isLogin && (
+            <Button type="primary" onClick={() => setLoginModalOpen(true)}>
+              {t('common.login')}
             </Button>
           )}
         </div>

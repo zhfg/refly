@@ -7,11 +7,7 @@ import {
   useSearchParams,
 } from '@refly-packages/ai-workspace-common/utils/router';
 
-import {
-  IconCanvas,
-  IconPlus,
-  IconTemplate,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import cn from 'classnames';
 
 import Logo from '@/assets/logo.svg';
@@ -334,11 +330,12 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   }
 
   const siderSections: SiderCenterProps[] = [
-    {
-      key: 'Template',
-      name: 'template',
-      icon: <IconTemplate key="template" className="arco-icon" style={{ fontSize: 20 }} />,
-    },
+    // TODO: do not delete this, it's for future use
+    // {
+    //   key: 'Template',
+    //   name: 'template',
+    //   icon: <IconTemplate key="template" className="arco-icon" style={{ fontSize: 20 }} />,
+    // },
     {
       key: 'Canvas',
       name: 'canvas',
