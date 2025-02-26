@@ -25,7 +25,7 @@ export const AppLayout = (props: AppLayoutProps) => {
     isLogin: state.isLogin,
   }));
 
-  const matchShare = useMatch('/share/:shareCode');
+  const matchShare = useMatch('/share/canvas/:canvasId');
   const matchPricing = useMatch('/pricing');
   const matchLogin = useMatch('/login');
 
@@ -33,7 +33,7 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   const hasBetaAccess = userStore.isLogin ? userStore.userProfile?.hasBetaAccess || false : true;
 
-  const showSider = !matchShare && !!userStore.userProfile && !matchPricing && !matchLogin;
+  const showSider = matchShare || (!!userStore.userProfile && !matchPricing && !matchLogin);
 
   return (
     <ErrorBoundary>

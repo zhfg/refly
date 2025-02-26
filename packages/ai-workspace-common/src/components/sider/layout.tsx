@@ -40,12 +40,12 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
-
+import { SiderLoggedOut } from './sider-logged-out';
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
 
-const SiderLogo = (props: {
+export const SiderLogo = (props: {
   source: 'sider' | 'popover';
   navigate: (path: string) => void;
   setCollapse: (collapse: boolean) => void;
@@ -277,7 +277,7 @@ const getSelectedKey = (pathname: string) => {
   return '';
 };
 
-export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
+const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
   const { source = 'sider' } = props;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -508,4 +508,13 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
       </div>
     </Sider>
   );
+};
+
+export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
+  const { source = 'sider' } = props;
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
+
+  return isLogin ? <SiderLoggedIn source={source} /> : <SiderLoggedOut source={source} />;
 };
