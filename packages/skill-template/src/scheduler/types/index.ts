@@ -38,11 +38,24 @@ export interface MentionedContextItem {
 }
 
 export interface QueryAnalysis {
-  intent: 'WRITING' | 'READING_COMPREHENSION' | 'SEARCH_QA' | 'OTHER';
-  confidence: number;
-  reasoning: string;
+  analysis: {
+    queryAnalysis: string;
+    queryRewriteStrategy: string;
+    summary: string;
+  };
+  rewrittenQueries: string[];
   optimizedQuery: string;
   mentionedContext: IContext;
+}
+
+export interface QueryProcessorResult {
+  optimizedQuery: string;
+  query: string;
+  usedChatHistory: any[];
+  hasContext: boolean;
+  remainingTokens: number;
+  mentionedContext: any;
+  rewrittenQueries: string[];
 }
 
 export interface IContext {
@@ -51,6 +64,7 @@ export interface IContext {
   documents: SkillContextDocumentItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];
+  librarySearchSources?: Source[];
   locale?: string | LOCALE;
 }
 

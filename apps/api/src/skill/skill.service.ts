@@ -667,6 +667,9 @@ export class SkillService {
       userPo.uiLocale ||
       'en';
 
+    // Merge the current context with contexts from result history
+    // Current context items have priority, and duplicates are removed
+
     const config: SkillRunnableConfig = {
       configurable: {
         ...context,

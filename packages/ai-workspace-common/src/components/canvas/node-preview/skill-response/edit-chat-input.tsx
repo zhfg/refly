@@ -17,6 +17,9 @@ import { useReactFlow } from '@xyflow/react';
 import { GrRevert } from 'react-icons/gr';
 import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { Form } from '@arco-design/web-react';
+import { notification } from 'antd';
+import { ConfigManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/config-manager';
 
 interface EditChatInputProps {
   enabled: boolean;
@@ -31,6 +34,7 @@ interface EditChatInputProps {
   };
   setEditMode: (mode: boolean) => void;
   readonly?: boolean;
+  tplConfig?: any;
 }
 
 const EditChatInputComponent = (props: EditChatInputProps) => {
@@ -44,17 +48,21 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     actionMeta,
     setEditMode,
     readonly,
+    tplConfig: initialTplConfig,
   } = props;
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
   const [editContextItems, setEditContextItems] = useState<IContextItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { t } = useTranslation();
   const [localActionMeta, setLocalActionMeta] = useState<{
     name?: string;
     icon?: any;
   } | null>(actionMeta);
+
+  const [form] = Form.useForm();
 
   const hideSelectedSkillHeader = useMemo(
     () => !localActionMeta || localActionMeta?.name === 'commonQnA' || !localActionMeta?.name,
@@ -79,7 +87,50 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     }
   }, [enabled]);
 
+  // Initialize form with tplConfig when skill changes
+  useEffect(() => {
+    if (!skill?.configSchema?.items?.length) {
+      form.setFieldValue('tplConfig', undefined);
+    } else {
+      // Create a new config object
+      const newConfig = {};
+
+      // Process each item in the schema
+      for (const item of skill?.configSchema?.items || []) {
+        const key = item.key;
+
+        // Priority 1: Check if the key exists in initialTplConfig
+        if (initialTplConfig && initialTplConfig[key] !== undefined) {
+          newConfig[key] = initialTplConfig[key];
+        }
+        // Priority 2: Fall back to schema default value
+        else if (item.defaultValue !== undefined) {
+          newConfig[key] = {
+            value: item.defaultValue,
+            label: item.labelDict?.en ?? item.key,
+            displayValue: String(item.defaultValue),
+          };
+        }
+      }
+
+      // Set the form value with the properly prioritized config
+      form.setFieldValue('tplConfig', newConfig);
+    }
+  }, [skill, form, initialTplConfig]);
+
   const handleSendMessage = useCallback(() => {
+    // Check for form errors
+    if (formErrors && Object.keys(formErrors).length > 0) {
+      notification.error({
+        message: t('copilot.configManager.errorTipTitle'),
+        description: t('copilot.configManager.errorTip'),
+      });
+      return;
+    }
+
+    // Get tplConfig from form
+    const tplConfig = form?.getFieldValue('tplConfig');
+
     // Synchronize edges with latest context items
     const nodes = getNodes();
     const currentNode = nodes.find((node) => node.data?.entityId === resultId);
@@ -105,6 +156,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
         contextItems: editContextItems,
         modelInfo: editModelInfo,
         selectedSkill: skill,
+        tplConfig,
       },
       {
         entityId: canvasId,
@@ -126,6 +178,9 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     deleteElements,
     invokeAction,
     setEditMode,
+    formErrors,
+    t,
+    form,
   ]);
 
   const customActions: CustomAction[] = useMemo(
@@ -138,18 +193,46 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           setEditQuery(query);
           setEditContextItems(contextItems);
           setEditModelInfo(modelInfo);
+
+          // Reset form values
+          if (initialTplConfig) {
+            form.setFieldValue('tplConfig', initialTplConfig);
+          }
         },
       },
     ],
-    [setEditMode, contextItems, query, modelInfo, t],
+    [setEditMode, contextItems, query, modelInfo, t, form, initialTplConfig],
   );
 
-  const handleSelectSkill = useCallback((skill: Skill) => {
-    setLocalActionMeta({
-      icon: skill.icon,
-      name: skill.name,
-    });
-  }, []);
+  const handleSelectSkill = useCallback(
+    (skill: Skill) => {
+      setLocalActionMeta({
+        icon: skill.icon,
+        name: skill.name,
+      });
+
+      // Reset form when skill changes
+      if (skill.configSchema?.items?.length > 0) {
+        const newConfig = {};
+
+        // Process each item in the schema to create default values
+        for (const item of skill.configSchema.items) {
+          if (item.defaultValue !== undefined) {
+            newConfig[item.key] = {
+              value: item.defaultValue,
+              label: item.labelDict?.en ?? item.key,
+              displayValue: String(item.defaultValue),
+            };
+          }
+        }
+
+        form.setFieldValue('tplConfig', newConfig);
+      } else {
+        form.setFieldValue('tplConfig', undefined);
+      }
+    },
+    [form],
+  );
 
   const handleImageUpload = async (file: File) => {
     const nodeData = await handleUploadImage(file, canvasId);
@@ -203,6 +286,40 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
             onUploadImage={handleImageUpload}
           />
         </div>
+
+        {skill?.configSchema?.items?.length > 0 && (
+          <div className="px-3">
+            <ConfigManager
+              key={skill?.name}
+              form={form}
+              formErrors={formErrors}
+              setFormErrors={setFormErrors}
+              schema={skill?.configSchema}
+              tplConfig={initialTplConfig}
+              fieldPrefix="tplConfig"
+              configScope="runtime"
+              resetConfig={() => {
+                // Reset to skill's tplConfig if available, otherwise create a new default config
+                if (skill?.tplConfig) {
+                  form.setFieldValue('tplConfig', skill.tplConfig);
+                } else {
+                  const defaultConfig = {};
+                  for (const item of skill?.configSchema?.items || []) {
+                    if (item.defaultValue !== undefined) {
+                      defaultConfig[item.key] = {
+                        value: item.defaultValue,
+                        label: item.labelDict?.en ?? item.key,
+                        displayValue: String(item.defaultValue),
+                      };
+                    }
+                  }
+                  form.setFieldValue('tplConfig', defaultConfig);
+                }
+              }}
+            />
+          </div>
+        )}
+
         <ChatActions
           className="p-2 px-3"
           query={editQuery}
@@ -213,22 +330,8 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           customActions={customActions}
           onUploadImage={handleImageUpload}
           contextItems={editContextItems}
+          form={form}
         />
-
-        {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
-      <ConfigManager
-        form={form}
-        formErrors={formErrors}
-        setFormErrors={setFormErrors}
-        schema={skillStore.selectedSkill?.configSchema}
-        tplConfig={skillStore.selectedSkill?.config}
-        fieldPrefix="tplConfig"
-        configScope="runtime"
-        resetConfig={() => {
-          form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
-        }}
-      />
-    )} */}
       </div>
     </div>
   );
@@ -242,7 +345,8 @@ const arePropsEqual = (prevProps: EditChatInputProps, nextProps: EditChatInputPr
     prevProps.modelInfo === nextProps.modelInfo &&
     prevProps.readonly === nextProps.readonly &&
     prevProps.contextItems === nextProps.contextItems &&
-    prevProps.actionMeta?.name === nextProps.actionMeta?.name
+    prevProps.actionMeta?.name === nextProps.actionMeta?.name &&
+    prevProps.tplConfig === nextProps.tplConfig
   );
 };
 

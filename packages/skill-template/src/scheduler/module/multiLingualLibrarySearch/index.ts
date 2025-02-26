@@ -7,37 +7,36 @@ import {
   buildRewriteQuerySystemPrompt,
   buildRewriteQueryUserPrompt,
   rewriteQueryOutputSchema,
-} from './rewriteQuery';
+} from '../multiLingualSearch/rewriteQuery';
 import {
   mergeSearchResults,
   searchResultsToSources,
   sourcesToSearchResults,
 } from '@refly-packages/utils';
-import { translateResults } from './translateResult';
-import { performConcurrentWebSearch } from './webSearch';
-import { getOptimizedSearchLocales, normalizeLocale } from './locale';
+import { translateResults } from '../multiLingualSearch/translateResult';
+import { getOptimizedSearchLocales, normalizeLocale } from '../multiLingualSearch/locale';
 import { extractStructuredData } from '../../utils/extractor';
+import { performConcurrentLibrarySearch } from './librarySearch';
 
 /**
- * 目标：
- * 1. 基于用户输入的 query，结合 searchLocaleList 和 resultDisplayLocale，进行多轮搜索，得到最终的 sources
- * 2. 返回 sources 给前端进行展示
+ * Goal:
+ * 1. Based on user input query, combined with searchLocaleList and resultDisplayLocale, perform multi-round search to get final sources
+ * 2. Return sources for display
  *
- * 输入：
- * 1. 选择 searchLocaleList: string[], 和结果展示的 resultDisplayLocale: string | auto
- * 2. 输入查询 Query
+ * Input:
+ * 1. Select searchLocaleList: string[], and result display locale resultDisplayLocale: string | auto
+ * 2. Input query
  *
- * 输出：
- * 1. 多步推理：
- * 1.1 rewrite to multi query：比如存在多个意图，则需要拆分为多个 query 或者将不完整的某个意图补充完整
- * 1.2 基于 searchLocaleList 将 rewrite 后的 query 翻译为多语言，然后合并成一组 list query
- * 1.3 基于 list query 进行多轮搜索，得到初始的 sources
- * 1.4 将初始的 sources(title、description/snippet) 翻译为 resultDisplayLocale 对应的语言，整体组成 list sources
- * 1.5 基于 list sources 进行 rerank 排序生成最终的 sources 并返回
- *
+ * Output:
+ * 1. Multi-step reasoning:
+ * 1.1 Rewrite to multi query: If there are multiple intents, split into multiple queries or complete incomplete intents
+ * 1.2 Translate rewritten queries to multiple languages based on searchLocaleList, then merge into a list of queries
+ * 1.3 Perform multi-round search based on the list of queries to get initial sources
+ * 1.4 Translate initial sources (title, description/snippet) to the language corresponding to resultDisplayLocale
+ * 1.5 Rerank the list of sources to generate final sources and return
  */
 
-interface CallMultiLingualWebSearchParams {
+interface CallMultiLingualLibrarySearchParams {
   rewrittenQueries?: string[];
   searchLimit: number;
   searchLocaleList: string[];
@@ -48,14 +47,15 @@ interface CallMultiLingualWebSearchParams {
   rerankRelevanceThreshold?: number;
   rerankLimit?: number;
   translateConcurrencyLimit: number;
-  webSearchConcurrencyLimit: number;
+  libraryConcurrencyLimit: number;
   batchSize: number;
-  enableDeepReasonWebSearch: boolean;
+  enableDeepSearch: boolean;
   enableQueryRewrite: boolean;
+  enableSearchWholeSpace?: boolean;
 }
 
-export const callMultiLingualWebSearch = async (
-  params: CallMultiLingualWebSearchParams,
+export const callMultiLingualLibrarySearch = async (
+  params: CallMultiLingualLibrarySearchParams,
   ctx: {
     config: SkillRunnableConfig;
     ctxThis: BaseSkill;
@@ -67,7 +67,6 @@ export const callMultiLingualWebSearch = async (
 
   const { query } = state;
 
-  // TODO: 针对在 scheduler 里面调用,
   const { rewrittenQueries } = params;
   let searchLocaleList = params.searchLocaleList || ['en'];
   const resultDisplayLocale = params.resultDisplayLocale || 'auto';
@@ -78,9 +77,10 @@ export const callMultiLingualWebSearch = async (
   const rerankRelevanceThreshold = params.rerankRelevanceThreshold || 0.1;
   const rerankLimit = params.rerankLimit;
   const translateConcurrencyLimit = params.translateConcurrencyLimit || 10;
-  const webSearchConcurrencyLimit = params.webSearchConcurrencyLimit || 3;
+  const libraryConcurrencyLimit = params.libraryConcurrencyLimit || 3;
   const batchSize = params.batchSize || 5;
-  const enableDeepReasonWebSearch = params.enableDeepReasonWebSearch || false;
+  const enableDeepSearch = params.enableDeepSearch || false;
+  const enableSearchWholeSpace = params.enableSearchWholeSpace || false;
   const timeTracker = new TimeTracker();
   let finalResults: Source[] = [];
 
@@ -146,7 +146,7 @@ export const callMultiLingualWebSearch = async (
 
     // Determine display locale
     const displayLocale = resultDisplayLocale;
-    const searchLocaleListLen = enableDeepReasonWebSearch ? 3 : 2;
+    const searchLocaleListLen = enableDeepSearch ? 3 : 2;
     const optimizedSearchLocales = getOptimizedSearchLocales(displayLocale, searchLocaleListLen);
     searchLocaleList = optimizedSearchLocales;
 
@@ -158,25 +158,22 @@ export const callMultiLingualWebSearch = async (
     if (enableTranslateQuery) {
       timeTracker.startStep('translateQuery');
       try {
-        // 构建翻译结果对象
-        const _translations: Record<string, string[]> = {};
-
-        // 为每个目标语言进行翻译
+        // For each target language
         for (const targetLocale of searchLocaleList) {
           try {
-            // 使用标准化的 locale 进行比较
+            // If target locale is the same as display locale, no need to translate
             if (normalizeLocale(targetLocale) === normalizeLocale(resultDisplayLocale)) {
               queryMap[targetLocale] = queries;
               continue;
             }
 
-            // 批量翻译查询，使用标准化的 locale 进行翻译
+            // Use batchTranslateText from utils instead of service.translate
             const translatedQueries = await batchTranslateText(
               queries,
               normalizeLocale(targetLocale),
               normalizeLocale(resultDisplayLocale),
             );
-            queryMap[targetLocale] = translatedQueries;
+            queryMap[targetLocale] = translatedQueries || queries;
           } catch (localeError) {
             engine.logger.error(
               `Error translating for locale ${targetLocale}: ${localeError.stack}`,
@@ -216,27 +213,28 @@ export const callMultiLingualWebSearch = async (
       }
     }
 
-    // Step 3: Perform concurrent web search
-    timeTracker.startStep('webSearch');
+    // Step 3: Perform concurrent library search
+    timeTracker.startStep('librarySearch');
     let allResults = [];
     try {
-      allResults = await performConcurrentWebSearch({
+      allResults = await performConcurrentLibrarySearch({
         queryMap,
         searchLimit,
-        concurrencyLimit: webSearchConcurrencyLimit,
+        concurrencyLimit: libraryConcurrencyLimit,
         user: config.configurable.user,
         engine: engine,
         enableTranslateQuery,
+        enableSearchWholeSpace,
       });
-      const webSearchDuration = timeTracker.endStep('webSearch');
-      engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
+      const librarySearchDuration = timeTracker.endStep('librarySearch');
+      engine.logger.log(`Library search completed in ${librarySearchDuration}ms`);
 
       ctxThis.emitEvent(
         {
           log: {
-            key: 'webSearchCompleted',
+            key: 'librarySearchCompleted',
             descriptionArgs: {
-              duration: webSearchDuration,
+              duration: librarySearchDuration,
               totalResults: allResults?.length,
             },
           },
@@ -244,9 +242,9 @@ export const callMultiLingualWebSearch = async (
         config,
       );
     } catch (error) {
-      engine.logger.error(`Error in web search: ${error.stack}`);
-      timeTracker.endStep('webSearch');
-      // Continue with empty results if web search fails
+      engine.logger.error(`Error in library search: ${error.stack}`);
+      timeTracker.endStep('librarySearch');
+      // Continue with empty results if library search fails
       allResults = [];
     }
 
@@ -357,7 +355,7 @@ export const callMultiLingualWebSearch = async (
       sources: finalResults,
     };
   } catch (error) {
-    engine.logger.error(`Error in multilingual search: ${error.stack}`);
+    engine.logger.error(`Error in multilingual library search: ${error.stack}`);
     // Return empty results in case of catastrophic failure
     return {
       sources: [],

@@ -4,21 +4,12 @@ import { checkHasContext, countToken, countMessagesTokens } from './token';
 import { isEmptyMessage, truncateMessages } from './truncator';
 import { analyzeQueryAndContext, preprocessQuery } from './query-rewrite/index';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { checkIsSupportedModel } from './model';
+import { QueryProcessorResult } from '../types';
 
 interface QueryProcessorOptions {
   config: SkillRunnableConfig;
   ctxThis: BaseSkill;
   state: GraphState;
-}
-
-interface QueryProcessorResult {
-  optimizedQuery: string;
-  query: string;
-  usedChatHistory: any[];
-  hasContext: boolean;
-  remainingTokens: number;
-  mentionedContext: any;
 }
 
 export async function processQuery(options: QueryProcessorOptions): Promise<QueryProcessorResult> {
@@ -34,7 +25,7 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
   const { tplConfig } = config?.configurable || {};
 
   let optimizedQuery = '';
-  let mentionedContext: any;
+  let rewrittenQueries: string[] = [];
 
   // Preprocess query
   const query = preprocessQuery(originalQuery, {
@@ -68,28 +59,19 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
     `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
   );
 
-  // Only do advanced query processing for supported models
-  if (checkIsSupportedModel(modelInfo)) {
-    // Define query rewrite conditions
-    const LONG_QUERY_TOKENS_THRESHOLD = 500;
-    const needRewriteQuery =
-      queryTokens < LONG_QUERY_TOKENS_THRESHOLD && (hasContext || chatHistoryTokens > 0);
-    ctxThis.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}`);
-
-    if (needRewriteQuery) {
-      const analyzedRes = await analyzeQueryAndContext(query, {
-        config,
-        ctxThis,
-        state,
-        tplConfig,
-      });
-      optimizedQuery = analyzedRes.optimizedQuery;
-      mentionedContext = analyzedRes.mentionedContext;
-    }
-  }
+  const analyzedRes = await analyzeQueryAndContext(query, {
+    config,
+    ctxThis,
+    state,
+    tplConfig,
+  });
+  optimizedQuery = analyzedRes.analysis.summary;
+  const mentionedContext = analyzedRes.mentionedContext;
+  rewrittenQueries = analyzedRes.rewrittenQueries;
 
   ctxThis.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
   ctxThis.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+  ctxThis.engine.logger.log(`rewrittenQueries: ${safeStringifyJSON(rewrittenQueries)}`);
 
   return {
     optimizedQuery,
@@ -98,5 +80,6 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
     hasContext,
     remainingTokens,
     mentionedContext,
+    rewrittenQueries,
   };
 }
