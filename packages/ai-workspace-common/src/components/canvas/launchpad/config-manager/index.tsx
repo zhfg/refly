@@ -138,7 +138,7 @@ const ConfigItem = React.memo(
           ref={inputRef}
           mode="button"
           value={initialValue !== null ? Number(initialValue) : undefined}
-          className="w-full"
+          className="w-full bg-transparent hover:bg-transparent focus:bg-transparent border-none hover:border-none focus:border-none"
           {...(item?.inputProps || {})}
           onChange={(val) => {
             setInitialValue(val);

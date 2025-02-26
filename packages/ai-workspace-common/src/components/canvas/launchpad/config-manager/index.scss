@@ -56,6 +56,17 @@
     border-radius: 4px;
   }
 
+  .arco-input-inner-wrapper {
+    border: none !important;
+  }
+
+  .arco-input-number-step-button,
+  .arco-input-group-addbefore,
+  .arco-input-group-addafter {
+    border-radius: 4px !important;
+    border: none !important;
+  }
+
   // 确保 input 和 textarea 背景透明
   .arco-input,
   .arco-textarea {
