@@ -4,6 +4,7 @@ import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 interface BlurImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   wrapperClassName?: string;
   aspectRatio?: string | number;
+  hoverEffect?: boolean;
 }
 
 const BlurImage = ({
@@ -13,6 +14,7 @@ const BlurImage = ({
   wrapperClassName,
   aspectRatio = '16/9',
   style,
+  hoverEffect = false,
   ...props
 }: BlurImageProps) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +27,7 @@ const BlurImage = ({
 
   return (
     <div
-      className={cn('relative w-full overflow-hidden rounded-[12px]', wrapperClassName)}
+      className={cn('group relative w-full overflow-hidden rounded-[12px]', wrapperClassName)}
       style={{
         paddingBottom,
       }}
@@ -45,26 +47,37 @@ const BlurImage = ({
         )}
       </div>
 
-      {/* Actual image */}
-      <img
-        src={src}
-        alt={alt ?? ''}
+      {/* Image wrapper for hover effect */}
+      <div
         className={cn(
-          'absolute inset-0 h-full w-full rounded-[12px] transition-opacity duration-300',
-          isLoading || hasError ? 'opacity-0' : 'opacity-100',
-          className,
+          'absolute inset-0 transition-transform duration-300 ease-out',
+          hoverEffect ? 'group-hover:scale-95' : '',
         )}
-        style={style}
-        onLoad={() => {
-          setIsLoading(false);
-          setHasError(false);
-        }}
-        onError={() => {
-          setIsLoading(false);
-          setHasError(true);
-        }}
-        {...props}
-      />
+      >
+        {/* Actual image */}
+        <img
+          src={src}
+          alt={alt ?? ''}
+          className={cn(
+            'absolute inset-0 h-full w-full rounded-[12px] transition-opacity duration-300',
+            isLoading || hasError ? 'opacity-0' : 'opacity-100',
+            className,
+          )}
+          style={{
+            ...style,
+            transformOrigin: 'center',
+          }}
+          onLoad={() => {
+            setIsLoading(false);
+            setHasError(false);
+          }}
+          onError={() => {
+            setIsLoading(false);
+            setHasError(true);
+          }}
+          {...props}
+        />
+      </div>
     </div>
   );
 };

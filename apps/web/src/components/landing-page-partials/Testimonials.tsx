@@ -53,7 +53,6 @@ const ReviewCard = ({ id }: TweetData) => {
       className={cn(
         'relative h-full w-64 cursor-pointer overflow-hidden rounded-xl border p-4',
         'border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]',
-        'dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]',
       )}
     >
       <div className="flex flex-row items-center justify-between">
@@ -66,10 +65,8 @@ const ReviewCard = ({ id }: TweetData) => {
             src={tweet.user.profile_image_url_https}
           />
           <div className="flex flex-col">
-            <figcaption className="text-sm font-medium dark:text-white">
-              {tweet.user.name}
-            </figcaption>
-            <p className="text-xs font-medium dark:text-white/40">@{tweet.user.screen_name}</p>
+            <figcaption className="text-sm font-medium">{tweet.user.name}</figcaption>
+            <p className="text-xs font-medium">@{tweet.user.screen_name}</p>
           </div>
         </div>
         <a
