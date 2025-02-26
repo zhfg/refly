@@ -77,6 +77,7 @@ const translations = {
     uploadFailed: '上传失败',
     dropImageHere: '拖放图片到这里',
     presetColors: '预设颜色',
+    duplicate: '复制',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',

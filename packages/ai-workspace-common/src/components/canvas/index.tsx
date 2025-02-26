@@ -642,7 +642,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
-        <CanvasToolbar onToolSelect={handleToolSelect} />
+        {!readonly && (
+          <CanvasToolbar onToolSelect={handleToolSelect} nodeLength={nodes?.length || 0} />
+        )}
         <TopToolbar canvasId={canvasId} />
         <div className="flex-grow relative">
           <style>{selectionStyles}</style>
@@ -688,7 +690,11 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             {memoizedMiniMap}
           </ReactFlow>
 
-          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
+          <LayoutControl
+            mode={interactionMode}
+            changeMode={toggleInteractionMode}
+            readonly={readonly}
+          />
 
           {memoizedLaunchPad}
         </div>

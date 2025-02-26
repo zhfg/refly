@@ -33,9 +33,10 @@ import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hove
 
 interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
+  nodeLength: number;
 }
 
-const useToolbarConfig = () => {
+const useToolbarConfig = (nodeLength: number) => {
   const { t } = useTranslation();
   const { showLaunchpad, showEdges, showTemplates } = useCanvasStoreShallow((state) => ({
     showLaunchpad: state.showLaunchpad,
@@ -48,6 +49,14 @@ const useToolbarConfig = () => {
   );
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
+
+  const showTemplateConfig = {
+    icon: IconTemplate,
+    value: 'showTemplates',
+    type: 'button',
+    domain: 'template',
+    tooltip: t(`canvas.toolbar.${showTemplates ? 'hideTemplates' : 'showTemplates'}`),
+  };
 
   return useMemo(
     () => ({
@@ -145,19 +154,13 @@ const useToolbarConfig = () => {
               'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
           },
         },
-        {
-          icon: IconTemplate,
-          value: 'showTemplates',
-          type: 'button',
-          domain: 'template',
-          tooltip: t(`canvas.toolbar.${showTemplates ? 'hideTemplates' : 'showTemplates'}`),
-        },
+        ...(nodeLength === 0 ? [showTemplateConfig] : []),
       ] as ToolbarItem[],
       modals: {
         sourceList: sourceListDrawerVisible && isWeb,
       },
     }),
-    [t, showEdges, showLaunchpad, sourceListDrawerVisible, isWeb, showTemplates],
+    [t, showEdges, showLaunchpad, sourceListDrawerVisible, isWeb, showTemplates, nodeLength],
   );
 };
 
@@ -220,7 +223,7 @@ const SearchListWrapper = memo(
   },
 );
 
-export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
+export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) => {
   const { t } = useTranslation();
   const { addNode } = useAddNode();
 
@@ -242,7 +245,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
-  const { tools, modals } = useToolbarConfig();
+  const { tools, modals } = useToolbarConfig(nodeLength);
 
   const getIconColor = useCallback(
     (tool: string) => {

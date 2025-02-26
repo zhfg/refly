@@ -1,4 +1,5 @@
 import { useEffect, FC, useState, useCallback, memo } from 'react';
+
 import { Button, Divider } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,8 @@ import { CanvasTitle, ReadonlyCanvasTitle } from './canvas-title';
 import { ToolbarButtons, WarningButton } from './buttons';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import ShareSettings from './share-settings';
+import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
+
 import './index.scss';
 
 interface TopToolbarProps {
@@ -22,7 +25,6 @@ interface TopToolbarProps {
 export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const { i18n, t } = useTranslation();
   const language = i18n.language as LOCALE;
-
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,
     setCollapse: state.setCollapse,
@@ -81,6 +83,11 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
   const showWarning = connectionTimeout && !hasCanvasSynced && provider?.status !== 'connected';
 
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const handleDuplicate = () => {
+    setShowDuplicateModal(true);
+  };
+
   return (
     <>
       <Helmet>
@@ -128,13 +135,25 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          <ShareSettings canvasId={canvasId} />
-
           {!readonly && (
-            <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
+            <>
+              <ShareSettings canvasId={canvasId} />
+              <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
+            </>
+          )}
+
+          {readonly && (
+            <Button type="primary" onClick={handleDuplicate}>
+              {t('common.duplicate')}
+            </Button>
           )}
         </div>
       </div>
+      <DuplicateCanvasModal
+        canvasId={canvasId}
+        visible={showDuplicateModal}
+        setVisible={setShowDuplicateModal}
+      />
     </>
   );
 });
