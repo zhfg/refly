@@ -421,11 +421,38 @@ export class MiscService implements OnModuleInit {
 
   async getInternalFileStream(user: User | null, storageKey: string): Promise<StreamableFile> {
     const file = await this.prisma.staticFile.findFirst({
-      where: { deletedAt: null, ...(user ? { uid: user?.uid } : {}) },
+      select: { uid: true, visibility: true, entityId: true, entityType: true },
+      where: { storageKey, deletedAt: null },
     });
     if (!file) {
       throw new NotFoundException();
     }
+
+    if (!user || user.uid !== file.uid) {
+      if (file.entityType === 'canvas') {
+        const canvas = await this.prisma.canvas.findFirst({
+          where: { canvasId: file.entityId, isPublic: true, deletedAt: null },
+        });
+        if (!canvas) {
+          throw new NotFoundException();
+        }
+      } else if (file.entityType === 'resource' || file.entityType === 'document') {
+        const shareRels = await this.prisma.canvasEntityRelation.count({
+          where: {
+            entityId: file.entityId,
+            entityType: file.entityType,
+            isPublic: true,
+            deletedAt: null,
+          },
+        });
+        if (shareRels === 0) {
+          throw new NotFoundException();
+        }
+      } else {
+        throw new NotFoundException();
+      }
+    }
+
     const data = await this.minioClient(file.visibility as FileVisibility).getObject(storageKey);
     return new StreamableFile(data);
   }
