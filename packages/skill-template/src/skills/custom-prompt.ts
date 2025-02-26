@@ -9,11 +9,14 @@ import {
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 
 // utils
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { prepareContext } from '../scheduler/utils/context';
+import { buildFinalRequestMessages } from '../scheduler/utils/message';
+import { truncateSource } from '../scheduler/utils/truncator';
+// prompts
+import * as customPrompt from '../scheduler/module/customPrompt/index';
 
 export class CustomPrompt extends BaseSkill {
   name = 'customPrompt';
@@ -112,7 +115,7 @@ export class CustomPrompt extends BaseSkill {
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
     const { messages = [], images = [] } = state;
-    const { currentSkill, tplConfig } = config.configurable;
+    const { currentSkill, tplConfig, locale = 'en' } = config.configurable;
 
     // Set current step
     config.metadata.step = { name: 'customPrompt' };
@@ -136,7 +139,7 @@ export class CustomPrompt extends BaseSkill {
     });
 
     // Prepare context
-    const { contextStr } = await prepareContext(
+    const { contextStr, sources } = await prepareContext(
       {
         query: optimizedQuery,
         mentionedContext,
@@ -154,32 +157,47 @@ export class CustomPrompt extends BaseSkill {
 
     this.engine.logger.log('Prepared context successfully!');
 
-    // Create messages with custom system prompt
-    const requestMessages = [
-      new SystemMessage(customSystemPrompt),
-      ...usedChatHistory,
-      ...messages,
-    ];
-
-    // Add context as a human message if available
-    if (contextStr) {
-      requestMessages.push(new HumanMessage(`Context information: ${contextStr}`));
+    // Handle sources if available
+    if (sources?.length > 0) {
+      // Split sources into smaller chunks based on size and emit them separately
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
     }
 
-    // Add the user query
-    requestMessages.push(
-      new HumanMessage(
-        images?.length
-          ? {
-              content: [
-                { type: 'text', text: query },
-                ...(images.map((image) => ({ type: 'image_url', image_url: { url: image } })) ||
-                  []),
-              ],
-            }
-          : query,
-      ),
-    );
+    // Build messages for the model using the customPrompt module
+    const module = {
+      buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
+        customPrompt.buildCustomPromptSystemPrompt(customSystemPrompt, locale, needPrepareContext),
+      buildContextUserPrompt: customPrompt.buildCustomPromptContextUserPrompt,
+      buildUserPrompt: customPrompt.buildCustomPromptUserPrompt,
+    };
+
+    // Build messages using the utility function
+    const requestMessages = buildFinalRequestMessages({
+      module,
+      locale,
+      chatHistory: usedChatHistory,
+      messages,
+      needPrepareContext: true,
+      context: contextStr,
+      images,
+      originalQuery: query,
+      optimizedQuery,
+      rewrittenQueries,
+    });
 
     // Generate answer using the model
     const model = this.engine.chatModel({
