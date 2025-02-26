@@ -2,12 +2,6 @@ name: Build and Push Docker Images
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - 'apps/api/**'
-      - 'apps/web/**'
-      - 'packages/**'
 
 jobs:
   build-and-push:

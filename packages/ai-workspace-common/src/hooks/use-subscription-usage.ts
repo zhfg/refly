@@ -1,4 +1,5 @@
 import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries/queries';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useSubscriptionUsage = () => {
   const {
@@ -6,11 +7,13 @@ export const useSubscriptionUsage = () => {
     isLoading: isUsageLoading,
     refetch,
   } = useGetSubscriptionUsage({}, [], {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
-    gcTime: 60 * 1000, // Cache for 1 minute
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchInterval: 15 * 1000, // Refetch every 15 seconds
+    staleTime: 15 * 1000,
+    gcTime: 15 * 1000,
+    enabled: subscriptionEnabled,
   });
   const { token, storage, fileParsing } = data?.data ?? {};
 

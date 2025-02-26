@@ -244,8 +244,6 @@ export const DocumentNode = memo(
                   content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
                   sizeMode={sizeMode}
                   isOperating={isOperating}
-                  isLoading={data.metadata?.status === 'executing' && !data.contentPreview}
-                  maxCompactLength={20}
                   className="min-h-8"
                 />
               </div>

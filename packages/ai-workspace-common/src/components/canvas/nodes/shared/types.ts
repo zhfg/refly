@@ -8,6 +8,7 @@ import {
   IndexError,
   IndexStatus,
   ModelInfo,
+  ResourceType,
   Skill,
   SkillTemplateConfig,
   TokenUsageItem,
@@ -39,7 +40,7 @@ export interface DocumentNodeMeta {
 }
 
 export interface ResourceNodeMeta {
-  resourceType?: string;
+  resourceType?: ResourceType;
   indexStatus?: IndexStatus;
   indexError?: IndexError;
   sizeMode?: 'compact' | 'adaptive';
