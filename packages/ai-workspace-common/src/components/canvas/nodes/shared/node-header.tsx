@@ -1,6 +1,7 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { IconType } from 'react-icons';
-import { Input } from 'antd';
+import { Input, Typography } from 'antd';
+import type { InputRef } from 'antd';
 
 interface NodeHeaderProps {
   title: string;
@@ -13,6 +14,14 @@ interface NodeHeaderProps {
 export const NodeHeader = memo(
   ({ title, Icon, iconBgColor = '#17B26A', canEdit = false, updateTitle }: NodeHeaderProps) => {
     const [editTitle, setEditTitle] = useState(title);
+    const [isEditing, setIsEditing] = useState(false);
+    const inputRef = useRef<InputRef>(null);
+
+    useEffect(() => {
+      if (isEditing && inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [isEditing]);
 
     return (
       <div className="flex-shrink-0 mb-3">
@@ -22,23 +31,33 @@ export const NodeHeader = memo(
             style={{ backgroundColor: iconBgColor }}
           >
             <Icon className="w-4 h-4 text-white" />
+            <div>{isEditing}</div>
           </div>
-          {canEdit ? (
+          {canEdit && isEditing ? (
             <Input
+              ref={inputRef}
               className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0"
               value={editTitle}
               onChange={(e) => {
                 setEditTitle(e.target.value);
                 updateTitle?.(e.target.value);
               }}
+              onBlur={() => {
+                setIsEditing(false);
+              }}
             />
           ) : (
-            <span
-              className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate"
+            <Typography.Text
+              className="text-sm font-bold leading-normal truncate"
               title={title}
+              onClick={() => {
+                if (canEdit) {
+                  setIsEditing(true);
+                }
+              }}
             >
               {title}
-            </span>
+            </Typography.Text>
           )}
         </div>
       </div>

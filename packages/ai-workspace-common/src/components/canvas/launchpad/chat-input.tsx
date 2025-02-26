@@ -8,6 +8,7 @@ import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { cn } from '@refly-packages/utils/cn';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const TextArea = Input.TextArea;
 
@@ -39,6 +40,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     ref,
   ) => {
     const { t } = useTranslation();
+    const { readonly } = useCanvasContext();
     const [isDragging, setIsDragging] = useState(false);
 
     const inputRef = useRef<RefTextAreaType>(null);
@@ -52,7 +54,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
 
     const handlePaste = useCallback(
       async (e: React.ClipboardEvent<HTMLDivElement | HTMLTextAreaElement>) => {
-        if (!onUploadImage) {
+        if (readonly || !onUploadImage) {
           return;
         }
 
@@ -73,7 +75,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           }
         }
       },
-      [onUploadImage],
+      [onUploadImage, readonly],
     );
 
     const { data } = useListSkills({}, null, {
@@ -104,6 +106,11 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (readonly) {
+        e.preventDefault();
+        return;
+      }
+
       if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !showSkillSelector) {
         e.stopPropagation();
         return;
@@ -195,21 +202,24 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         className={cn(
           'w-full h-full flex flex-col flex-grow overflow-y-auto relative',
           isDragging && 'ring-2 ring-green-500 ring-opacity-50 rounded-lg',
+          readonly && 'opacity-70 cursor-not-allowed',
         )}
         onPaste={handlePaste}
         onDragOver={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsDragging(true);
+          if (!readonly) setIsDragging(true);
         }}
         onDragLeave={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsDragging(false);
+          if (!readonly) setIsDragging(false);
         }}
         onDrop={async (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (readonly) return;
+
           setIsDragging(false);
 
           if (!onUploadImage) return;
@@ -226,19 +236,20 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           }
         }}
       >
-        {isDragging && (
+        {isDragging && !readonly && (
           <div className="absolute inset-0 bg-green-50/50 flex items-center justify-center pointer-events-none z-10 rounded-lg border-2 border-green-500/30">
             <div className="text-green-600 text-sm font-medium">{t('common.dropImageHere')}</div>
           </div>
         )}
         <AutoComplete
           className="h-full"
-          autoFocus
-          open={showSkillSelector}
+          autoFocus={!readonly}
+          open={showSkillSelector && !readonly}
           options={options}
           popupMatchSelectWidth={false}
           placement={autoCompletionPlacement}
           value={query ?? ''}
+          disabled={readonly}
           filterOption={(inputValue, option) => {
             const lastSlashIndex = inputValue.lastIndexOf('/');
             const searchText =
@@ -250,13 +261,14 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
               option.textLabel.toLowerCase().includes(searchVal)
             );
           }}
-          onSelect={(value) => handleSearchListConfirm(value)}
-          onSearch={(value) => handleSearch(value)}
+          onSelect={(value) => !readonly && handleSearchListConfirm(value)}
+          onSearch={(value) => !readonly && handleSearch(value)}
         >
           <TextArea
             style={{ paddingLeft: 0, paddingRight: 0, height: '100%' }}
             ref={inputRef}
-            autoFocus
+            autoFocus={!readonly}
+            disabled={readonly}
             onBlur={() => {
               setTimeout(() => {
                 setShowSkillSelector(false);
@@ -266,6 +278,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             onChange={handleInputChange}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             onPaste={(e) => {
+              if (readonly) return;
               if (e.clipboardData?.items) {
                 for (const item of e.clipboardData.items) {
                   if (item.type.startsWith('image/')) {
@@ -279,6 +292,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             className={cn(
               '!m-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
               inputClassName,
+              readonly && 'cursor-not-allowed text-gray-500',
             )}
             placeholder={
               selectedSkillName

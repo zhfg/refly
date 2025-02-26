@@ -33,6 +33,8 @@ import {
   LuZoomIn,
   LuZoomOut,
 } from 'react-icons/lu';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+
 const ICON_CLASS = 'text-xl flex items-center justify-center text-gray-200 hover:text-white';
 export const ImageNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ImageNodeProps) => {
@@ -56,6 +58,7 @@ export const ImageNode = memo(
     const isOperating = operatingNodeId === id;
     const isDragging = draggingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
+    const { readonly } = useCanvasContext();
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
@@ -183,7 +186,7 @@ export const ImageNode = memo(
 
     useEffect(() => {
       setTimeout(() => {
-        if (!targetRef.current) return;
+        if (!targetRef.current || readonly) return;
         const { offsetWidth, offsetHeight } = targetRef.current;
         resizeMoveable(offsetWidth, offsetHeight);
       }, 1);
@@ -205,7 +208,7 @@ export const ImageNode = memo(
             'nodrag nopan select-text': isOperating,
           })}
         >
-          {!isPreview && !hideActions && !isDragging && (
+          {!isPreview && !hideActions && !isDragging && !readonly && (
             <ActionButtons type="image" nodeId={id} isNodeHovered={isHovered} />
           )}
 
@@ -216,7 +219,7 @@ export const ImageNode = memo(
                 ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
               `}
           >
-            {!isPreview && !hideHandles && (
+            {!isPreview && !hideHandles && !readonly && (
               <>
                 <CustomHandle
                   type="target"
@@ -240,7 +243,7 @@ export const ImageNode = memo(
                 title={data.title}
                 Icon={IconImage}
                 iconBgColor="#02b0c7"
-                canEdit={true}
+                canEdit={!readonly}
                 updateTitle={onTitleChange}
               />
 
@@ -316,7 +319,7 @@ export const ImageNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && (
+        {!isPreview && selected && !readonly && (
           <NodeResizerComponent
             moveableRef={moveableRef}
             targetRef={targetRef}

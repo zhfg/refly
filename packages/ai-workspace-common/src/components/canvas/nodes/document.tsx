@@ -28,6 +28,7 @@ import { ContentPreview } from './shared/content-preview';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const DocumentNode = memo(
   ({
@@ -39,6 +40,7 @@ export const DocumentNode = memo(
     hideHandles = false,
     onNodeClick,
   }: DocumentNodeProps) => {
+    const { readonly } = useCanvasContext();
     const [isHovered, setIsHovered] = useState(false);
     const { edges } = useCanvasData();
     const { i18n, t } = useTranslation();
@@ -202,7 +204,7 @@ export const DocumentNode = memo(
           onClick={onNodeClick}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
         >
-          {!isPreview && !hideActions && !isDragging && (
+          {!isPreview && !hideActions && !isDragging && !readonly && (
             <ActionButtons type="document" nodeId={id} isNodeHovered={isHovered} />
           )}
 
@@ -212,7 +214,7 @@ export const DocumentNode = memo(
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
-            {!isPreview && !hideHandles && (
+            {!isPreview && !hideHandles && !readonly && (
               <>
                 <CustomHandle
                   type="target"
@@ -244,7 +246,6 @@ export const DocumentNode = memo(
                   content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
                   sizeMode={sizeMode}
                   isOperating={isOperating}
-                  isLoading={data.metadata?.status === 'executing' && !data.contentPreview}
                   maxCompactLength={20}
                   className="min-h-8"
                 />
@@ -259,14 +260,16 @@ export const DocumentNode = memo(
           </div>
         </div>
 
-        <NodeResizerComponent
-          targetRef={targetRef}
-          isSelected={selected}
-          isHovered={isHovered}
-          isPreview={isPreview}
-          sizeMode={sizeMode}
-          onResize={handleResize}
-        />
+        {!readonly && (
+          <NodeResizerComponent
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={isPreview}
+            sizeMode={sizeMode}
+            onResize={handleResize}
+          />
+        )}
       </div>
     );
   },

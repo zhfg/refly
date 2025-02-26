@@ -9,6 +9,7 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface ContextManagerProps {
   className?: string;
@@ -23,6 +24,7 @@ const ContextManagerComponent = ({
   setContextItems,
   filterErrorInfo,
 }: ContextManagerProps) => {
+  const { readonly } = useCanvasContext();
   const { getNodes } = useReactFlow();
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
@@ -47,7 +49,10 @@ const ContextManagerComponent = ({
   return (
     <div className={cn('flex flex-col', className)}>
       <div className="flex flex-wrap content-start gap-1 w-full">
-        <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
+        {!readonly && (
+          <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
+        )}
+
         {contextItems.filter(Boolean).map((item) => (
           <ContextItem
             key={item.entityId}

@@ -2,7 +2,8 @@ import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
-import { Divider, Input, message } from 'antd';
+import { Divider, Input, message, Typography } from 'antd';
+import type { InputRef } from 'antd';
 import { CanvasNode, SkillResponseNodeProps } from './shared/types';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './shared/custom-handle';
@@ -49,6 +50,7 @@ import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import cn from 'classnames';
 const POLLING_WAIT_TIME = 15000;
 
 const NodeHeader = memo(
@@ -56,9 +58,25 @@ const NodeHeader = memo(
     query,
     skillName,
     skill,
+    disabled,
     updateTitle,
-  }: { query: string; skillName: string; skill: any; updateTitle: (title: string) => void }) => {
+  }: {
+    query: string;
+    skillName: string;
+    skill: any;
+    disabled: boolean;
+    updateTitle: (title: string) => void;
+  }) => {
     const [editTitle, setEditTitle] = useState(query);
+    const inputRef = useRef<InputRef>(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+      if (isEditing && inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [isEditing]);
+
     return (
       <>
         <div className="flex-shrink-0 mb-3" data-cy="skill-response-node-header">
@@ -66,21 +84,31 @@ const NodeHeader = memo(
             <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
               <IconResponse className="w-4 h-4 text-white" />
             </div>
-            <Input
-              className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0"
-              value={editTitle}
-              data-cy="skill-response-node-header-input"
-              onChange={(e) => {
-                setEditTitle(e.target.value);
-                updateTitle?.(e.target.value);
-              }}
-            />
-            {/* <span
-              className="text-sm font-medium leading-normal truncate block cursor-pointer"
-              title={query}
-            >
-              {query}
-            </span> */}
+            {isEditing ? (
+              <Input
+                ref={inputRef}
+                className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0 !bg-transparent !text-gray-700"
+                value={editTitle}
+                data-cy="skill-response-node-header-input"
+                onBlur={() => {
+                  setIsEditing(false);
+                }}
+                onChange={(e) => {
+                  setEditTitle(e.target.value);
+                  updateTitle?.(e.target.value);
+                }}
+              />
+            ) : (
+              <Typography.Text
+                className="text-sm font-bold leading-normal truncate block"
+                title={editTitle}
+                onClick={() => {
+                  !disabled && setIsEditing(true);
+                }}
+              >
+                {editTitle}
+              </Typography.Text>
+            )}
           </div>
         </div>
         {skillName && skillName !== 'commonQnA' && (
@@ -178,7 +206,7 @@ export const SkillResponseNode = memo(
     const { t, i18n } = useTranslation();
     const language = i18n.languages?.[0];
 
-    const { canvasId } = useCanvasContext();
+    const { canvasId, readonly } = useCanvasContext();
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
 
@@ -267,6 +295,10 @@ export const SkillResponseNode = memo(
     const { invokeAction } = useInvokeAction();
 
     const handleRerun = useCallback(() => {
+      if (readonly) {
+        return;
+      }
+
       if (['executing', 'waiting'].includes(data?.metadata?.status)) {
         message.info(t('canvas.skillResponse.executing'));
         return;
@@ -295,7 +327,7 @@ export const SkillResponseNode = memo(
           entityId: canvasId,
         },
       );
-    }, [data, entityId, canvasId, id, title, t, updateSize, invokeAction, patchNodeData]);
+    }, [data, entityId, canvasId, id, title, t, updateSize, invokeAction, patchNodeData, readonly]);
 
     const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {
@@ -500,12 +532,12 @@ export const SkillResponseNode = memo(
           onMouseLeave={handleMouseLeave}
           onClick={onNodeClick}
         >
-          {!isPreview && !hideActions && !isDragging && (
+          {!isPreview && !hideActions && !isDragging && !readonly && (
             <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />
           )}
 
           <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
-            {!isPreview && !hideHandles && (
+            {!isPreview && !hideHandles && !readonly && (
               <>
                 <CustomHandle
                   type="target"
@@ -526,6 +558,7 @@ export const SkillResponseNode = memo(
 
             <div className="flex flex-col h-full p-3 box-border">
               <NodeHeader
+                disabled={readonly}
                 query={query}
                 skillName={skillName}
                 skill={skill}
@@ -536,7 +569,10 @@ export const SkillResponseNode = memo(
                 <div className="flex flex-col gap-3">
                   {status === 'failed' && (
                     <div
-                      className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
+                      className={cn(
+                        'flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2',
+                        readonly ? 'cursor-not-allowed' : 'cursor-pointer',
+                      )}
                       onClick={() => handleRerun()}
                     >
                       <IconError className="h-4 w-4 text-red-500" />
@@ -616,7 +652,7 @@ export const SkillResponseNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && sizeMode === 'adaptive' && (
+        {!isPreview && selected && sizeMode === 'adaptive' && !readonly && (
           <NodeResizerComponent
             moveableRef={moveableRef}
             targetRef={targetRef}

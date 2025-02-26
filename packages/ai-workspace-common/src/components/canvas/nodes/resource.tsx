@@ -34,6 +34,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { message, Result } from 'antd';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const NodeContent = memo(
   ({ data, isOperating }: { data: CanvasNodeData<ResourceNodeMeta>; isOperating: boolean }) => {
@@ -96,6 +97,8 @@ export const ResourceNode = memo(
     const isOperating = operatingNodeId === id;
     const isDragging = draggingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
+
+    const { readonly } = useCanvasContext();
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
@@ -296,7 +299,7 @@ export const ResourceNode = memo(
             'nodrag nopan select-text': isOperating,
           })}
         >
-          {!isPreview && !hideActions && !isDragging && (
+          {!isPreview && !hideActions && !isDragging && !readonly && (
             <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />
           )}
 
@@ -331,7 +334,7 @@ export const ResourceNode = memo(
             </div>
 
             {/* Handles */}
-            {!isPreview && !hideHandles && (
+            {!isPreview && !hideHandles && !readonly && (
               <>
                 <CustomHandle
                   type="target"
@@ -352,7 +355,7 @@ export const ResourceNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && sizeMode === 'adaptive' && (
+        {!isPreview && selected && sizeMode === 'adaptive' && !readonly && (
           <NodeResizerComponent
             targetRef={targetRef}
             isSelected={selected}
