@@ -1982,6 +1982,7 @@ const translations = {
     moreTemplates: 'More Templates',
     searchPlaceholder: 'Please enter keyword to search template',
     noRelatedTemplates: 'No related templates',
+    hideTemplates: 'Hide Template',
   },
 };
 

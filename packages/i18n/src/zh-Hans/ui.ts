@@ -1930,6 +1930,7 @@ const translations = {
     moreTemplates: '更多模版',
     searchPlaceholder: '请输入关键词搜索模板',
     noRelatedTemplates: '暂无相关模板',
+    hideTemplates: '隐藏模板',
   },
 };
 
