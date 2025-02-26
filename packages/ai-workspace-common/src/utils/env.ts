@@ -4,5 +4,5 @@ export const wsServerOrigin =
   (typeof window !== 'undefined' && window.ENV?.COLLAB_URL) || import.meta.env.VITE_COLLAB_URL;
 
 export const subscriptionEnabled =
-  (typeof window !== 'undefined' && window.ENV?.SUBSCRIPTION_ENABLED) ||
-  import.meta.env.VITE_SUBSCRIPTION_ENABLED;
+  Boolean(typeof window !== 'undefined' && window.ENV?.SUBSCRIPTION_ENABLED) ||
+  Boolean(import.meta.env.VITE_SUBSCRIPTION_ENABLED);
