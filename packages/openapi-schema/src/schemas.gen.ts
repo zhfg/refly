@@ -208,6 +208,7 @@ export const ResourceSchema = {
     rawFileKey: {
       type: 'string',
       description: 'Raw file storage key (used to download the file)',
+      deprecated: true,
     },
     createdAt: {
       type: 'string',
@@ -483,6 +484,28 @@ export const DynamicConfigItemSchema = {
       description: 'Config options',
       items: {
         $ref: '#/components/schemas/SelectOption',
+      },
+    },
+    inputProps: {
+      type: 'object',
+      description: 'Additional input properties',
+      properties: {
+        min: {
+          type: 'number',
+          description: 'Minimum value for number input',
+        },
+        max: {
+          type: 'number',
+          description: 'Maximum value for number input',
+        },
+        step: {
+          type: 'number',
+          description: 'Step value for number input',
+        },
+        precision: {
+          type: 'number',
+          description: 'Decimal precision for number input',
+        },
       },
     },
   },

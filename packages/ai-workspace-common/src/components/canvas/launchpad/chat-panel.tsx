@@ -125,11 +125,20 @@ export const ChatPanel = () => {
     if (!selectedSkill?.configSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);
     } else {
-      // Create default config from schema if no config exists
-      const defaultConfig = {};
+      // Create a new config object
+      const newConfig = {};
+
+      // Process each item in the schema
       for (const item of selectedSkill?.configSchema?.items || []) {
-        if (item.defaultValue !== undefined) {
-          defaultConfig[item.key] = {
+        const key = item.key;
+
+        // Priority 1: Check if the key exists in selectedSkill.tplConfig
+        if (selectedSkill?.tplConfig && selectedSkill.tplConfig[key] !== undefined) {
+          newConfig[key] = selectedSkill.tplConfig[key];
+        }
+        // Priority 2: Fall back to schema default value
+        else if (item.defaultValue !== undefined) {
+          newConfig[key] = {
             value: item.defaultValue,
             label: item.labelDict?.en ?? item.key,
             displayValue: String(item.defaultValue),
@@ -137,11 +146,10 @@ export const ChatPanel = () => {
         }
       }
 
-      // Use existing config or fallback to default config
-      const initialConfig = selectedSkill?.tplConfig ?? defaultConfig;
-      form.setFieldValue('tplConfig', initialConfig);
+      // Set the form value with the properly prioritized config
+      form.setFieldValue('tplConfig', newConfig);
     }
-  }, [selectedSkill, form.setFieldValue]);
+  }, [selectedSkill, form]);
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -280,12 +288,24 @@ export const ChatPanel = () => {
               formErrors={formErrors}
               setFormErrors={setFormErrors}
               schema={selectedSkill?.configSchema}
-              tplConfig={selectedSkill?.tplConfig}
               fieldPrefix="tplConfig"
               configScope="runtime"
               resetConfig={() => {
-                const defaultConfig = selectedSkill?.tplConfig ?? {};
-                form.setFieldValue('tplConfig', defaultConfig);
+                if (selectedSkill?.tplConfig) {
+                  form.setFieldValue('tplConfig', selectedSkill.tplConfig);
+                } else {
+                  const defaultConfig = {};
+                  for (const item of selectedSkill?.configSchema?.items || []) {
+                    if (item.defaultValue !== undefined) {
+                      defaultConfig[item.key] = {
+                        value: item.defaultValue,
+                        label: item.labelDict?.en ?? item.key,
+                        displayValue: String(item.defaultValue),
+                      };
+                    }
+                  }
+                  form.setFieldValue('tplConfig', defaultConfig);
+                }
               }}
             />
           )}

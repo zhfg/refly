@@ -35,6 +35,62 @@ export class CustomPrompt extends BaseSkill {
           'zh-CN': '定义您自己的系统提示词以控制助手行为',
         },
       },
+      {
+        key: 'temperature',
+        inputMode: 'inputNumber',
+        defaultValue: 0.1,
+        labelDict: {
+          en: 'Temperature',
+          'zh-CN': 'Temperature',
+        },
+        descriptionDict: {
+          en: 'Controls randomness in the output (0.0-1.0)',
+          'zh-CN': '控制输出的随机性 (0.0-1.0)',
+        },
+        inputProps: {
+          min: 0,
+          max: 1,
+          step: 0.1,
+          precision: 2,
+        },
+      },
+      {
+        key: 'topP',
+        inputMode: 'inputNumber',
+        defaultValue: 1,
+        labelDict: {
+          en: 'Top P',
+          'zh-CN': 'Top P',
+        },
+        descriptionDict: {
+          en: 'Controls diversity via nucleus sampling (0.0-1.0)',
+          'zh-CN': '通过核采样控制多样性 (0.0-1.0)',
+        },
+        inputProps: {
+          min: 0,
+          max: 1,
+          step: 0.1,
+          precision: 2,
+        },
+      },
+      {
+        key: 'maxTokens',
+        inputMode: 'inputNumber',
+        defaultValue: 2000,
+        labelDict: {
+          en: 'Max Output Tokens',
+          'zh-CN': '最大输出令牌数',
+        },
+        descriptionDict: {
+          en: 'Maximum number of tokens to generate',
+          'zh-CN': '生成的最大令牌数',
+        },
+        inputProps: {
+          min: 1,
+          step: 1,
+          precision: 0,
+        },
+      },
     ],
   };
 
@@ -126,7 +182,11 @@ export class CustomPrompt extends BaseSkill {
     );
 
     // Generate answer using the model
-    const model = this.engine.chatModel({ temperature: 0.1 });
+    const model = this.engine.chatModel({
+      temperature: Number(tplConfig?.temperature?.value ?? 0.1),
+      topP: Number(tplConfig?.topP?.value ?? 1),
+      maxTokens: Number(tplConfig?.maxTokens?.value ?? 2000),
+    });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {

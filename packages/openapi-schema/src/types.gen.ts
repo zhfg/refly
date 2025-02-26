@@ -176,6 +176,7 @@ export type Resource = {
   vectorSize?: string;
   /**
    * Raw file storage key (used to download the file)
+   * @deprecated
    */
   rawFileKey?: string;
   /**
@@ -397,6 +398,27 @@ export type DynamicConfigItem = {
    * Config options
    */
   options?: Array<SelectOption>;
+  /**
+   * Additional input properties
+   */
+  inputProps?: {
+    /**
+     * Minimum value for number input
+     */
+    min?: number;
+    /**
+     * Maximum value for number input
+     */
+    max?: number;
+    /**
+     * Step value for number input
+     */
+    step?: number;
+    /**
+     * Decimal precision for number input
+     */
+    precision?: number;
+  };
 };
 
 /**

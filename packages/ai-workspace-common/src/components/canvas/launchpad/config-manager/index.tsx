@@ -48,18 +48,34 @@ const ConfigItem = React.memo(
     const { item, form, field, locale, configValue } = props;
     // Use refs to store input values to maintain state across renders
     const inputRef = useRef<any>(null);
+    const [initialValue, setInitialValue] = useState<any>(null);
 
+    // Handle initial value setup
     useEffect(() => {
-      const formValue = form.getFieldValue(field);
-      if (item?.defaultValue && !formValue) {
-        const defaultConfigValue = {
-          value: item.defaultValue,
-          label: getDictValue(item.labelDict, locale),
-          displayValue: String(item.defaultValue),
-        };
-        form.setFieldValue(field, defaultConfigValue);
+      if (!initialValue) {
+        // Priority 1: Use existing configValue if available
+        if (configValue?.value !== undefined) {
+          setInitialValue(configValue.value);
+        }
+        // Priority 2: Use form value if available
+        else {
+          const formValue = form.getFieldValue(field);
+          if (formValue?.value !== undefined) {
+            setInitialValue(formValue.value);
+          }
+          // Priority 3: Use default value from schema
+          else if (item?.defaultValue !== undefined) {
+            const defaultConfigValue = {
+              value: item.defaultValue,
+              label: getDictValue(item.labelDict, locale),
+              displayValue: String(item.defaultValue),
+            };
+            form.setFieldValue(field, defaultConfigValue);
+            setInitialValue(item.defaultValue);
+          }
+        }
       }
-    }, [item?.defaultValue, item?.labelDict, field, form, locale]);
+    }, [configValue, item, field, form, locale, initialValue]);
 
     if (!item) {
       return null;
@@ -79,15 +95,17 @@ const ConfigItem = React.memo(
       props.onValueChange(field, val, displayValue);
     };
 
+    console.log('item', item, configValue);
+
     if (item.inputMode === 'input') {
       return (
         <Input
           ref={inputRef}
           placeholder={placeholder}
-          defaultValue={String(configValue?.value || '')}
+          value={initialValue !== null ? String(initialValue) : undefined}
           className="bg-transparent hover:bg-transparent focus:bg-transparent"
           onChange={(val) => {
-            // Arco Design Input onChange 直接传入值
+            setInitialValue(val);
             onValueChange(val, String(val));
           }}
         />
@@ -99,7 +117,7 @@ const ConfigItem = React.memo(
         <TextArea
           ref={inputRef}
           placeholder={placeholder}
-          defaultValue={String(configValue?.value || '')}
+          value={initialValue !== null ? String(initialValue) : undefined}
           rows={4}
           className="bg-transparent hover:bg-transparent focus:bg-transparent"
           autoSize={{
@@ -107,7 +125,7 @@ const ConfigItem = React.memo(
             maxRows: 10,
           }}
           onChange={(val) => {
-            // Arco Design TextArea onChange 直接传入值
+            setInitialValue(val);
             onValueChange(val, String(val));
           }}
         />
@@ -119,8 +137,13 @@ const ConfigItem = React.memo(
         <InputNumber
           ref={inputRef}
           mode="button"
-          defaultValue={Number(configValue?.value)}
-          onChange={(val) => onValueChange(val, val || val === 0 ? String(val) : '')}
+          value={initialValue !== null ? Number(initialValue) : undefined}
+          className="w-full"
+          {...(item?.inputProps || {})}
+          onChange={(val) => {
+            setInitialValue(val);
+            onValueChange(val, val || val === 0 ? String(val) : '');
+          }}
         />
       );
     }
@@ -261,7 +284,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
       // Create default values for all items in the schema
       for (const item of schema.items || []) {
         if (item.defaultValue !== undefined) {
-          defaultConfig[item.key] = {
+          defaultConfig[getFormField(fieldPrefix, item.key)] = {
             value: item.defaultValue,
             label: getDictValue(item.labelDict, locale),
             displayValue: String(item.defaultValue),
@@ -270,13 +293,24 @@ export const ConfigManager = (props: ConfigManagerProps) => {
       }
 
       if (Object.keys(defaultConfig).length > 0) {
-        form.setFieldValue(fieldPrefix, defaultConfig);
+        // Set each field individually to ensure proper form initialization
+        for (const [field, value] of Object.entries(defaultConfig)) {
+          form.setFieldValue(field, value);
+        }
         setFormValues(defaultConfig);
       }
     } else {
       // Use the provided tplConfig
-      form.setFieldValue(fieldPrefix, tplConfig);
-      setFormValues(tplConfig);
+      const formattedConfig = {};
+      for (const [key, value] of Object.entries(tplConfig)) {
+        formattedConfig[getFormField(fieldPrefix, key)] = value;
+      }
+
+      // Set each field individually
+      for (const [field, value] of Object.entries(formattedConfig)) {
+        form.setFieldValue(field, value);
+      }
+      setFormValues(formattedConfig);
     }
 
     if (tplConfig && Object.keys(tplConfig).length > 0) {
