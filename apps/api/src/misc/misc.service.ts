@@ -626,4 +626,105 @@ export class MiscService implements OnModuleInit {
       throw error;
     }
   }
+
+  /**
+   * Duplicates an existing static file and returns the new file information
+   * @param user - The user requesting the duplication
+   * @param storageKey - The storage key of the file to duplicate
+   * @param param - Optional parameters for the new file (entityId, entityType, visibility)
+   * @returns The new file information including storage key and URL
+   */
+  async duplicateFile(
+    user: User,
+    storageKey: string,
+    param?: {
+      entityId?: string;
+      entityType?: EntityType;
+      visibility?: FileVisibility;
+    },
+  ): Promise<UploadResponse['data']> {
+    // Find the original file
+    const originalFile = await this.prisma.staticFile.findFirst({
+      where: {
+        storageKey,
+        uid: user.uid,
+        deletedAt: null,
+      },
+    });
+
+    if (!originalFile) {
+      throw new NotFoundException('Original file not found');
+    }
+
+    // Check entity if provided
+    if (param?.entityId && param?.entityType) {
+      await this.checkEntity(user, param.entityId, param.entityType);
+    }
+
+    // Generate new storage key
+    const objectKey = randomUUID();
+    const extension = path.extname(storageKey);
+    const newStorageKey = `static/${objectKey}${extension}`;
+    const visibility = param?.visibility ?? (originalFile.visibility as FileVisibility);
+
+    try {
+      // Copy the file content
+      const sourceStream = await this.minioClient(
+        originalFile.visibility as FileVisibility,
+      ).getObject(storageKey);
+      const buffer = await streamToBuffer(sourceStream);
+
+      // Create new file record
+      await this.prisma.staticFile.create({
+        data: {
+          uid: user.uid,
+          storageKey: newStorageKey,
+          storageSize: originalFile.storageSize,
+          entityId: param?.entityId ?? null,
+          entityType: param?.entityType ?? null,
+          contentType: originalFile.contentType,
+          visibility,
+        },
+      });
+
+      // Upload the duplicated file
+      await this.minioClient(visibility).putObject(newStorageKey, buffer, {
+        'Content-Type': originalFile.contentType,
+      });
+
+      // If there's a processed image, duplicate that too
+      if (originalFile.processedImageKey) {
+        const processedStream = await this.minioClient(
+          originalFile.visibility as FileVisibility,
+        ).getObject(originalFile.processedImageKey);
+        const processedBuffer = await streamToBuffer(processedStream);
+
+        const processedExtension = path.extname(originalFile.processedImageKey);
+        const newProcessedKey = `static-processed/${createId()}-${Date.now()}${processedExtension}`;
+
+        await this.minioClient(visibility).putObject(newProcessedKey, processedBuffer, {
+          'Content-Type': mime.getType(processedExtension) ?? 'image/webp',
+        });
+
+        // Update the new file record with the processed image key
+        await this.prisma.staticFile.update({
+          where: { pk: originalFile.pk },
+          data: { processedImageKey: newProcessedKey },
+        });
+      }
+
+      return {
+        storageKey: newStorageKey,
+        url: this.generateFileURL({ visibility, storageKey: newStorageKey }),
+      };
+    } catch (error) {
+      // Clean up any created resources if there's an error
+      await this.prisma.staticFile.deleteMany({
+        where: { storageKey: newStorageKey },
+      });
+
+      this.logger.error(`Failed to duplicate file ${storageKey}: ${error?.stack}`);
+      throw error;
+    }
+  }
 }

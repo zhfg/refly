@@ -24,17 +24,20 @@ import {
   ShareUser,
   CreateCanvasTemplateRequest,
   UpdateCanvasTemplateRequest,
+  CanvasNode,
 } from '@refly-packages/openapi-schema';
 import { Prisma } from '@prisma/client';
 import { genCanvasID, genCanvasTemplateID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
-import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
+import { QUEUE_DELETE_KNOWLEDGE_ENTITY, QUEUE_DUPLICATE_CANVAS } from '@/utils/const';
 import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage } from '@langchain/core/messages';
 import { SystemMessage } from '@langchain/core/messages';
-import { AutoNameCanvasJobData } from './canvas.dto';
+import { AutoNameCanvasJobData, DuplicateCanvasJobData } from './canvas.dto';
 import { streamToBuffer } from '@/utils';
 import { SubscriptionService } from '@/subscription/subscription.service';
+import { KnowledgeService } from '@/knowledge/knowledge.service';
+import { ActionService } from '@/action/action.service';
 
 @Injectable()
 export class CanvasService {
@@ -45,10 +48,14 @@ export class CanvasService {
     private elasticsearch: ElasticsearchService,
     private collabService: CollabService,
     private miscService: MiscService,
+    private actionService: ActionService,
+    private knowledgeService: KnowledgeService,
     private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_DELETE_KNOWLEDGE_ENTITY)
     private deleteKnowledgeQueue: Queue<DeleteKnowledgeEntityJobData>,
+    @InjectQueue(QUEUE_DUPLICATE_CANVAS)
+    private duplicateCanvasQueue: Queue<DuplicateCanvasJobData>,
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
@@ -114,7 +121,7 @@ export class CanvasService {
   }
 
   async duplicateCanvas(user: User, param: DuplicateCanvasRequest) {
-    const { title, canvasId } = param;
+    const { title, canvasId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
       where: { canvasId, deletedAt: null, OR: [{ uid: user.uid }, { isPublic: true }] },
@@ -135,10 +142,152 @@ export class CanvasService {
         canvasId: newCanvasId,
         stateStorageKey,
         title: title || canvas.title,
+        status: 'duplicating',
       },
     });
 
+    // Queue the duplication job
+    await this.duplicateCanvasQueue.add(
+      'duplicateCanvas',
+      {
+        uid: user.uid,
+        sourceCanvasId: canvasId,
+        targetCanvasId: newCanvasId,
+        title: title || canvas.title,
+        duplicateEntities: canvas.uid !== user.uid || duplicateEntities,
+      },
+      {
+        jobId: `duplicate_${newCanvasId}`,
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
+    );
+
     return newCanvas;
+  }
+
+  async _duplicateCanvas(jobData: DuplicateCanvasJobData) {
+    const { uid, sourceCanvasId, targetCanvasId, duplicateEntities } = jobData;
+
+    const user = await this.prisma.user.findUnique({
+      where: { uid },
+    });
+    if (!user) {
+      this.logger.error(`User ${uid} not found`);
+      return;
+    }
+
+    const canvas = await this.prisma.canvas.findFirst({
+      where: { canvasId: sourceCanvasId, deletedAt: null },
+    });
+
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    const readable = await this.minio.client.getObject(canvas.stateStorageKey);
+    const state = await streamToBuffer(readable);
+
+    const doc = new Y.Doc();
+    Y.applyUpdate(doc, state);
+
+    const nodes: CanvasNode[] = doc.getArray('nodes').toJSON();
+    this.logger.log(
+      `Duplicating ${nodes.length} nodes from canvas ${sourceCanvasId} to ${targetCanvasId}`,
+    );
+
+    if (duplicateEntities) {
+      // Duplicate each entity
+      const limit = pLimit(3); // Limit concurrent operations
+
+      await Promise.all(
+        nodes.map((node) =>
+          limit(async () => {
+            const entityType = node.type;
+            const { entityId } = node.data;
+
+            // Create new entity based on type
+            switch (entityType) {
+              case 'document': {
+                const doc = await this.knowledgeService.duplicateDocument(user, {
+                  docId: entityId,
+                  title: node.data?.title,
+                });
+                if (doc) {
+                  node.data.entityId = doc.docId;
+                }
+                break;
+              }
+              case 'resource': {
+                const resource = await this.knowledgeService.duplicateResource(user, {
+                  resourceId: entityId,
+                  title: node.data?.title,
+                });
+                if (resource) {
+                  node.data.entityId = resource.resourceId;
+                }
+                break;
+              }
+              case 'skillResponse': {
+                const result = await this.actionService.duplicateActionResult(user, entityId);
+                if (result) {
+                  node.data.entityId = result.resultId;
+                }
+                break;
+              }
+              case 'image': {
+                if (node.data?.metadata?.storageKey) {
+                  const file = await this.miscService.duplicateFile(
+                    user,
+                    node.data.metadata.storageKey as string,
+                  );
+                  if (file) {
+                    node.data.metadata.storageKey = file.storageKey;
+                  }
+                }
+                break;
+              }
+            }
+          }),
+        ),
+      );
+    }
+
+    doc.transact(() => {
+      doc.getArray('nodes').delete(0, doc.getArray('nodes').length);
+      doc.getArray('nodes').insert(0, nodes);
+    });
+
+    const stateStorageKey = `state/${targetCanvasId}`;
+    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(doc)));
+
+    // Update canvas status to completed
+    await this.prisma.canvas.update({
+      where: { canvasId: targetCanvasId },
+      data: { status: 'ready' },
+    });
+
+    this.logger.log(`Successfully duplicated canvas ${sourceCanvasId} to ${targetCanvasId}`);
+  }
+
+  async duplicateCanvasFromQueue(jobData: DuplicateCanvasJobData) {
+    const { sourceCanvasId, targetCanvasId } = jobData;
+
+    try {
+      await this._duplicateCanvas(jobData);
+    } catch (error) {
+      this.logger.error(
+        `Error duplicating canvas ${sourceCanvasId} to ${targetCanvasId}: ${error?.stack}`,
+      );
+
+      // Update canvas status to failed
+      await this.prisma.canvas.update({
+        where: { canvasId: targetCanvasId },
+        data: { status: 'failed' },
+      });
+      throw error;
+    }
   }
 
   async createCanvas(user: User, param: UpsertCanvasRequest) {

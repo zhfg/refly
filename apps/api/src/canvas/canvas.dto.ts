@@ -24,6 +24,14 @@ export interface AutoNameCanvasJobData {
   canvasId: string;
 }
 
+export interface DuplicateCanvasJobData {
+  uid: string;
+  sourceCanvasId: string;
+  targetCanvasId: string;
+  title?: string;
+  duplicateEntities?: boolean;
+}
+
 export function canvasPO2DTO(canvas: CanvasModel): Canvas {
   return {
     ...pick(canvas, ['canvasId', 'title', 'isPublic']),

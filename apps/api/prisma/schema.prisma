@@ -261,6 +261,8 @@ model Canvas {
   readOnly        Boolean   @default(false) @map("read_only")
   /// Whether this canvas is public
   isPublic        Boolean   @default(false) @map("is_public")
+  /// Canvas status
+  status          String    @default("ready") @map("status")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

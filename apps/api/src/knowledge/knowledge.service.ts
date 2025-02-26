@@ -36,6 +36,8 @@ import {
   UpsertDocumentRequest,
   DeleteDocumentRequest,
   IndexError,
+  DuplicateDocumentRequest,
+  DuplicateResourceRequest,
 } from '@refly-packages/openapi-schema';
 import {
   QUEUE_SIMPLE_EVENT,
@@ -855,10 +857,16 @@ export class KnowledgeService {
     return { ...doc, content };
   }
 
-  async createDocument(user: User, param: UpsertDocumentRequest) {
-    const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (usageResult.available < 1) {
-      throw new StorageQuotaExceeded();
+  async createDocument(
+    user: User,
+    param: UpsertDocumentRequest,
+    options?: { checkStorageQuota?: boolean },
+  ) {
+    if (options?.checkStorageQuota) {
+      const usageResult = await this.subscriptionService.checkStorageUsage(user);
+      if (usageResult.available < 1) {
+        throw new StorageQuotaExceeded();
+      }
     }
 
     param.docId = genDocumentID();
@@ -995,6 +1003,104 @@ export class KnowledgeService {
 
     // Sync storage usage after all the cleanups
     await this.syncStorageUsage(user);
+  }
+
+  /**
+   * Duplicate an existing document
+   * @param user The user duplicating the document
+   * @param param The duplicate document request param
+   * @returns The newly created document
+   */
+  async duplicateDocument(user: User, param: DuplicateDocumentRequest) {
+    const { docId: sourceDocId, title: newTitle } = param;
+
+    // Check storage quota
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (usageResult.available < 1) {
+      throw new StorageQuotaExceeded();
+    }
+
+    // Find the source document
+    const sourceDoc = await this.prisma.document.findFirst({
+      where: { docId: sourceDocId, deletedAt: null },
+    });
+    if (!sourceDoc) {
+      throw new DocumentNotFoundError(`Document ${sourceDocId} not found`);
+    }
+
+    // Get the content of the source document
+    let content = '';
+    if (sourceDoc.storageKey) {
+      const contentStream = await this.minio.client.getObject(sourceDoc.storageKey);
+      content = await streamToString(contentStream);
+    }
+
+    // Generate a new document ID
+    const newDocId = genDocumentID();
+
+    // Set the title for the new document
+    const title = newTitle || `${sourceDoc.title} (Copy)`;
+
+    // Create the new document using the existing createDocument method
+    const newDoc = await this.createDocument(user, {
+      docId: newDocId,
+      title,
+      initialContent: content,
+      readOnly: sourceDoc.readOnly,
+    });
+
+    return newDoc;
+  }
+
+  /**
+   * Duplicate an existing resource
+   * @param user The user duplicating the resource
+   * @param param The duplicate resource request param
+   * @returns The newly created resource
+   */
+  async duplicateResource(user: User, param: DuplicateResourceRequest) {
+    const { resourceId: sourceResourceId, title: newTitle } = param;
+
+    // Check storage quota
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (usageResult.available < 1) {
+      throw new StorageQuotaExceeded();
+    }
+
+    // Find the source resource
+    const sourceResource = await this.prisma.resource.findFirst({
+      where: { resourceId: sourceResourceId, deletedAt: null },
+    });
+    if (!sourceResource) {
+      throw new ResourceNotFoundError(`Resource ${sourceResourceId} not found`);
+    }
+
+    // Get the content of the source resource
+    let content = '';
+    if (sourceResource.storageKey) {
+      const contentStream = await this.minio.client.getObject(sourceResource.storageKey);
+      content = await streamToString(contentStream);
+    }
+
+    // Parse the metadata
+    const meta = JSON.parse(sourceResource.meta || '{}') as ResourceMeta;
+
+    // Set the title for the new resource
+    const title = newTitle || `${sourceResource.title} (Copy)`;
+
+    // Create a new resource ID
+    const newResourceId = genResourceID();
+
+    // Create the new resource
+    const newResource = await this.createResource(user, {
+      resourceId: newResourceId,
+      resourceType: sourceResource.resourceType as ResourceType,
+      title,
+      content,
+      data: meta,
+    });
+
+    return newResource;
   }
 
   async queryReferences(

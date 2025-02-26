@@ -77,6 +77,11 @@ export type BaseReference = {
   targetId: string;
 };
 
+/**
+ * Canvas status
+ */
+export type CanvasStatus = 'ready' | 'duplicating' | 'duplicate_failed';
+
 export type Canvas = {
   /**
    * Canvas ID
@@ -94,6 +99,10 @@ export type Canvas = {
    * Whether this canvas is public
    */
   isPublic?: boolean;
+  /**
+   * Canvas status
+   */
+  status?: CanvasStatus;
   /**
    * Canvas creation time
    */
@@ -1597,6 +1606,32 @@ export type DuplicateCanvasRequest = {
   canvasId: string;
   /**
    * Custom canvas title
+   */
+  title?: string;
+  /**
+   * Whether to duplicate entities within the canvas
+   */
+  duplicateEntities?: boolean;
+};
+
+export type DuplicateDocumentRequest = {
+  /**
+   * Document ID to duplicate
+   */
+  docId: string;
+  /**
+   * Custom document title for the duplicate
+   */
+  title?: string;
+};
+
+export type DuplicateResourceRequest = {
+  /**
+   * Resource ID to duplicate
+   */
+  resourceId: string;
+  /**
+   * Custom resource title for the duplicate
    */
   title?: string;
 };

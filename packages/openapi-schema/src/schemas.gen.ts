@@ -85,6 +85,12 @@ export const BaseReferenceSchema = {
   },
 } as const;
 
+export const CanvasStatusSchema = {
+  type: 'string',
+  description: 'Canvas status',
+  enum: ['ready', 'duplicating', 'duplicate_failed'],
+} as const;
+
 export const CanvasSchema = {
   type: 'object',
   required: ['canvasId', 'title', 'createdAt', 'updatedAt'],
@@ -106,6 +112,11 @@ export const CanvasSchema = {
     isPublic: {
       type: 'boolean',
       description: 'Whether this canvas is public',
+    },
+    status: {
+      type: 'string',
+      description: 'Canvas status',
+      $ref: '#/components/schemas/CanvasStatus',
     },
     createdAt: {
       type: 'string',
@@ -2046,6 +2057,40 @@ export const DuplicateCanvasRequestSchema = {
     title: {
       type: 'string',
       description: 'Custom canvas title',
+    },
+    duplicateEntities: {
+      type: 'boolean',
+      description: 'Whether to duplicate entities within the canvas',
+    },
+  },
+} as const;
+
+export const DuplicateDocumentRequestSchema = {
+  type: 'object',
+  required: ['docId'],
+  properties: {
+    docId: {
+      type: 'string',
+      description: 'Document ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom document title for the duplicate',
+    },
+  },
+} as const;
+
+export const DuplicateResourceRequestSchema = {
+  type: 'object',
+  required: ['resourceId'],
+  properties: {
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom resource title for the duplicate',
     },
   },
 } as const;

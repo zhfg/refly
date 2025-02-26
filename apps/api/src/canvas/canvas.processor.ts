@@ -7,11 +7,13 @@ import {
   QUEUE_CLEAR_CANVAS_ENTITY,
   QUEUE_SYNC_CANVAS_ENTITY,
   QUEUE_AUTO_NAME_CANVAS,
+  QUEUE_DUPLICATE_CANVAS,
 } from '@/utils/const';
 import {
   DeleteCanvasNodesJobData,
   SyncCanvasEntityJobData,
   AutoNameCanvasJobData,
+  DuplicateCanvasJobData,
 } from './canvas.dto';
 
 @Processor(QUEUE_SYNC_CANVAS_ENTITY)
@@ -66,5 +68,21 @@ export class AutoNameCanvasProcessor extends WorkerHost {
   async process(job: Job<AutoNameCanvasJobData>) {
     this.logger.log(`Processing auto name canvas job ${job.id} for canvas ${job.data.canvasId}`);
     await this.canvasService.autoNameCanvasFromQueue(job.data);
+  }
+}
+
+@Processor(QUEUE_DUPLICATE_CANVAS)
+export class DuplicateCanvasProcessor extends WorkerHost {
+  private logger = new Logger(DuplicateCanvasProcessor.name);
+
+  constructor(private canvasService: CanvasService) {
+    super();
+  }
+
+  async process(job: Job<DuplicateCanvasJobData>) {
+    this.logger.log(
+      `Processing duplicate canvas job ${job.id} for canvas ${job.data.sourceCanvasId}`,
+    );
+    await this.canvasService.duplicateCanvasFromQueue(job.data);
   }
 }

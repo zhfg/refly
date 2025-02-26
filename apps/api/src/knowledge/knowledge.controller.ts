@@ -206,7 +206,9 @@ export class KnowledgeController {
     @LoginedUser() user: User,
     @Body() body: UpsertDocumentRequest,
   ): Promise<UpsertDocumentResponse> {
-    const document = await this.knowledgeService.createDocument(user, body);
+    const document = await this.knowledgeService.createDocument(user, body, {
+      checkStorageQuota: true,
+    });
     return buildSuccessResponse(documentPO2DTO(document));
   }
 
