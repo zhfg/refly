@@ -17,6 +17,7 @@ import * as webSearch from '../scheduler/module/webSearch/index';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 export class WebSearch extends BaseSkill {
   name = 'webSearch';
