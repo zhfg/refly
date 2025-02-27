@@ -72,6 +72,7 @@ export type ResponseNodeMeta = {
   currentLog?: ActionLog;
   structuredData?: Record<string, unknown>;
   contextItems?: IContextItem[];
+  tplConfig?: SkillTemplateConfig;
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;

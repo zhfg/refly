@@ -95,8 +95,6 @@ const ConfigItem = React.memo(
       props.onValueChange(field, val, displayValue);
     };
 
-    console.log('item', item, configValue);
-
     if (item.inputMode === 'input') {
       return (
         <Input
@@ -222,13 +220,23 @@ interface ConfigManagerProps {
   formErrors: Record<string, string>;
   resetConfig?: () => void;
   setFormErrors: (errors: any) => void;
+  onFormValuesChange?: (changedValues: any, allValues: any) => void;
 }
 
 export const ConfigManager = (props: ConfigManagerProps) => {
   const { i18n, t } = useTranslation();
   const locale = i18n.languages?.[0] || 'en';
 
-  const { schema, fieldPrefix, form, tplConfig, configScope, formErrors, setFormErrors } = props;
+  const {
+    schema,
+    fieldPrefix,
+    form,
+    tplConfig,
+    configScope,
+    formErrors,
+    setFormErrors,
+    onFormValuesChange,
+  } = props;
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [formValues, setFormValues] = useState<Record<string, DynamicConfigValue>>({});
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -387,6 +395,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
             for (const field of Object.keys(changedValues)) {
               validateField(field, changedValues[field]);
             }
+            onFormValuesChange?.(changedValues, _allValues);
           }}
         >
           <Space direction="vertical" style={{ width: '100%' }}>

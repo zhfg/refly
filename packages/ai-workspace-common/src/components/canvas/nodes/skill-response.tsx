@@ -424,7 +424,7 @@ export const SkillResponseNode = memo(
         return;
       }
 
-      const { context, history, title, modelInfo, actionMeta } = resultData.data;
+      const { context, history, title, modelInfo, actionMeta, tplConfig } = resultData.data;
       const contextItems = context ? convertResultContextToItems(context, history) : [];
 
       // Create new skill node with context, similar to group node implementation
@@ -445,6 +445,7 @@ export const SkillResponseNode = memo(
               query: title,
               modelInfo,
               selectedSkill: actionMeta,
+              tplConfig,
             },
           },
         },
