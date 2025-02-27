@@ -118,9 +118,6 @@ export async function analyzeQueryAndContext(
     tplConfig: SkillTemplateConfig;
   },
 ): Promise<QueryAnalysis> {
-  // set current step
-  ctx.config.metadata.step = { name: 'analyzeContext' };
-
   const { chatHistory, resources, documents, contentList, modelInfo } = ctx.config.configurable;
   const context: IContext = {
     resources,
