@@ -147,7 +147,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
           )}
 
           {readonly && isLogin && (
-            <Button type="primary" onClick={handleDuplicate}>
+            <Button type="primary" onClick={handleDuplicate} className="hidden">
               {t('common.duplicate')}
             </Button>
           )}
