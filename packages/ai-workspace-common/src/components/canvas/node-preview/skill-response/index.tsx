@@ -70,7 +70,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const patchNodeData = usePatchNodeData();
   const { deleteNode } = useDeleteNode();
 
-  const { canvasId } = useCanvasContext();
+  const { canvasId, readonly } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
 
   const { t } = useTranslation();
@@ -243,7 +243,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       )}
 
       <div
-        className={cn('h-full transition-opacity duration-500', { 'opacity-30': editMode })}
+        className={cn('flex-grow transition-opacity duration-500', { 'opacity-30': editMode })}
         onClick={() => {
           if (editMode) {
             setEditMode(false);
@@ -257,6 +257,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
               subTitle={t('canvas.skillResponse.executionFailed')}
               extra={
                 <Button
+                  disabled={readonly}
                   icon={<IconRerun className="text-sm flex items-center justify-center" />}
                   onClick={handleRetry}
                 >

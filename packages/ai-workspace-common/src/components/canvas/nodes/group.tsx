@@ -20,6 +20,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
 import Moveable from 'react-moveable';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface GroupMetadata {
   label?: string;
@@ -82,6 +83,7 @@ export const GroupNode = memo(
     const [size, setSize] = useState(initialSize);
 
     const targetRef = useRef<HTMLDivElement>(null);
+    const { readonly } = useCanvasContext();
 
     // Add useEffect to update node data when size changes
     useEffect(() => {
@@ -302,6 +304,7 @@ export const GroupNode = memo(
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={false}
@@ -309,6 +312,7 @@ export const GroupNode = memo(
                   nodeType="group"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={false}
@@ -318,7 +322,7 @@ export const GroupNode = memo(
               </>
             )}
 
-            {!isPreview && !hideActions && (
+            {!isPreview && !hideActions && !readonly && (
               <>
                 {!isDragging && (
                   <ActionButtons type="group" nodeId={id} isNodeHovered={isHovered} />
@@ -333,7 +337,7 @@ export const GroupNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && (
+        {!isPreview && selected && !readonly && (
           <Moveable
             target={targetRef}
             resizable={true}

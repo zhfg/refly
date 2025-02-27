@@ -79,7 +79,7 @@ export const documentPO2DTO = (
     return null;
   }
   const res: Document = {
-    ...pick(doc, ['docId', 'title', 'content', 'contentPreview', 'shareCode', 'readOnly']),
+    ...pick(doc, ['docId', 'title', 'content', 'contentPreview', 'readOnly']),
     createdAt: doc.createdAt.toJSON(),
     updatedAt: doc.updatedAt.toJSON(),
   };

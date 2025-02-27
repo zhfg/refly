@@ -16,6 +16,30 @@ export const UserSchema = {
   },
 } as const;
 
+export const ShareUserSchema = {
+  type: 'object',
+  description: 'Refly user, used as JWT payload',
+  required: ['uid'],
+  properties: {
+    uid: {
+      type: 'string',
+      description: 'UID',
+    },
+    name: {
+      type: 'string',
+      description: 'User name',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
+    },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+    },
+  },
+} as const;
+
 export const ListOrderSchema = {
   type: 'string',
   description: 'List order',
@@ -61,6 +85,12 @@ export const BaseReferenceSchema = {
   },
 } as const;
 
+export const CanvasStatusSchema = {
+  type: 'string',
+  description: 'Canvas status',
+  enum: ['ready', 'duplicating', 'duplicate_failed'],
+} as const;
+
 export const CanvasSchema = {
   type: 'object',
   required: ['canvasId', 'title', 'createdAt', 'updatedAt'],
@@ -75,13 +105,18 @@ export const CanvasSchema = {
       description: 'Canvas title',
       example: 'My canvas',
     },
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
+    },
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
+    },
+    status: {
+      type: 'string',
+      description: 'Canvas status',
+      $ref: '#/components/schemas/CanvasStatus',
     },
     createdAt: {
       type: 'string',
@@ -92,6 +127,86 @@ export const CanvasSchema = {
       type: 'string',
       format: 'date-time',
       description: 'Canvas update time',
+    },
+  },
+} as const;
+
+export const CanvasTemplateCategorySchema = {
+  type: 'object',
+  required: ['categoryId', 'name', 'labelDict', 'descriptionDict'],
+  properties: {
+    categoryId: {
+      type: 'string',
+      description: 'Category ID',
+    },
+    name: {
+      type: 'string',
+      description: 'Category name',
+    },
+    labelDict: {
+      type: 'object',
+      description: 'Category label dictionary',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+    descriptionDict: {
+      type: 'object',
+      description: 'Category description dictionary',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const CanvasTemplateSchema = {
+  type: 'object',
+  required: ['templateId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
+  properties: {
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+      example: 'ct-g30e1b80b5g1itbemc0g5jj3',
+    },
+    originCanvasId: {
+      type: 'string',
+      description: 'Origin canvas ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    shareUser: {
+      description: 'Share user',
+      $ref: '#/components/schemas/ShareUser',
+    },
+    version: {
+      type: 'integer',
+      description: 'Canvas template version',
+    },
+    category: {
+      description: 'Canvas template category',
+      $ref: '#/components/schemas/CanvasTemplateCategory',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas template creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas template update time',
     },
   },
 } as const;
@@ -262,10 +377,6 @@ export const DocumentSchema = {
     content: {
       type: 'string',
       description: 'Full document content (only returned in detail api)',
-    },
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
     },
     readOnly: {
       type: 'boolean',
@@ -1903,13 +2014,107 @@ export const GetCanvasDetailResponseSchema = {
       type: 'object',
       properties: {
         data: {
-          type: 'object',
-          description: 'Canvas data',
           $ref: '#/components/schemas/Canvas',
         },
       },
     },
   ],
+} as const;
+
+export const RawCanvasDataSchema = {
+  type: 'object',
+  description: 'Raw canvas data',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Canvas title',
+    },
+    nodes: {
+      type: 'array',
+      description: 'Canvas nodes',
+      items: {
+        type: 'object',
+      },
+    },
+    edges: {
+      type: 'array',
+      description: 'Canvas edges',
+      items: {
+        type: 'object',
+      },
+    },
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
+    },
+  },
+} as const;
+
+export const ExportCanvasResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Canvas data',
+          $ref: '#/components/schemas/RawCanvasData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const DuplicateCanvasRequestSchema = {
+  type: 'object',
+  required: ['canvasId'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom canvas title',
+    },
+    duplicateEntities: {
+      type: 'boolean',
+      description: 'Whether to duplicate entities within the canvas',
+    },
+  },
+} as const;
+
+export const DuplicateDocumentRequestSchema = {
+  type: 'object',
+  required: ['docId'],
+  properties: {
+    docId: {
+      type: 'string',
+      description: 'Document ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom document title for the duplicate',
+    },
+  },
+} as const;
+
+export const DuplicateResourceRequestSchema = {
+  type: 'object',
+  required: ['resourceId'],
+  properties: {
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom resource title for the duplicate',
+    },
+  },
 } as const;
 
 export const UpsertCanvasRequestSchema = {
@@ -1924,6 +2129,10 @@ export const UpsertCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    isPublic: {
+      type: 'boolean',
+      description: 'Whether this canvas is public',
     },
   },
 } as const;
@@ -1993,6 +2202,117 @@ export const AutoNameCanvasResponseSchema = {
               type: 'string',
               description: 'New canvas title',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ListCanvasTemplateResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Canvas template list',
+          items: {
+            $ref: '#/components/schemas/CanvasTemplate',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const CreateCanvasTemplateRequestSchema = {
+  type: 'object',
+  required: ['canvasId', 'title', 'description', 'language'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    categoryId: {
+      type: 'string',
+      description: 'Canvas template category ID',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+  },
+} as const;
+
+export const UpdateCanvasTemplateRequestSchema = {
+  type: 'object',
+  required: ['templateId'],
+  properties: {
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    categoryId: {
+      type: 'string',
+      description: 'Canvas template category ID',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+  },
+} as const;
+
+export const UpsertCanvasTemplateResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Canvas template',
+          $ref: '#/components/schemas/CanvasTemplate',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ListCanvasTemplateCategoryResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Canvas template category list',
+          items: {
+            $ref: '#/components/schemas/CanvasTemplateCategory',
           },
         },
       },
@@ -2423,115 +2743,6 @@ export const SkillEventSchema = {
       $ref: '#/components/schemas/BaseResponse',
     },
   },
-} as const;
-
-export const CreateShareRequestSchema = {
-  type: 'object',
-  required: ['entityType', 'entityId'],
-  properties: {
-    entityType: {
-      $ref: '#/components/schemas/EntityType',
-    },
-    entityId: {
-      type: 'string',
-      description: 'Entity ID',
-    },
-  },
-} as const;
-
-export const CreateShareResultSchema = {
-  type: 'object',
-  required: ['shareCode'],
-  properties: {
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
-  },
-} as const;
-
-export const CreateShareResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/CreateShareResult',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const DeleteShareRequestSchema = {
-  type: 'object',
-  required: ['shareCode'],
-  properties: {
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
-  },
-} as const;
-
-export const ShareUserSchema = {
-  type: 'object',
-  properties: {
-    username: {
-      type: 'string',
-      description: 'User name',
-    },
-    nickname: {
-      type: 'string',
-      description: 'User nickname',
-    },
-    avatar: {
-      type: 'string',
-      description: 'User avatar',
-    },
-  },
-} as const;
-
-export const SharedContentSchema = {
-  type: 'object',
-  properties: {
-    canvas: {
-      description: 'Shared canvas data',
-      $ref: '#/components/schemas/Canvas',
-    },
-    document: {
-      description: 'Selected document detail',
-      $ref: '#/components/schemas/Document',
-    },
-    users: {
-      type: 'array',
-      description: 'Share users',
-      items: {
-        $ref: '#/components/schemas/ShareUser',
-      },
-    },
-  },
-} as const;
-
-export const GetShareContentResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Shared content data',
-          $ref: '#/components/schemas/SharedContent',
-        },
-      },
-    },
-  ],
 } as const;
 
 export const ListLabelClassesResponseSchema = {

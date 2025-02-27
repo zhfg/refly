@@ -1,17 +1,26 @@
 import { useMemo } from 'react';
-import { useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { useListSkills as useListSkillsQuery } from '@refly-packages/ai-workspace-common/queries';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
-export const useFindSkill = (skillName: string) => {
-  const { data: skillData } = useListSkills({}, null, {
+export const useListSkills = () => {
+  const isLogin = useUserStoreShallow((state) => state.isLogin);
+  const { data: skillData } = useListSkillsQuery({}, null, {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     staleTime: 60 * 1000, // Data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    enabled: isLogin,
   });
+
+  return skillData?.data ?? [];
+};
+
+export const useFindSkill = (skillName: string) => {
+  const skills = useListSkills();
   const skill = useMemo(
-    () => skillData?.data?.find((skill) => skill.name === skillName),
-    [skillData?.data, skillName],
+    () => skills?.find((skill) => skill.name === skillName),
+    [skills, skillName],
   );
   return skill;
 };

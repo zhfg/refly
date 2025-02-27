@@ -69,6 +69,7 @@ const translations = {
     uploadFailed: 'Upload failed',
     dropImageHere: 'Drop image here',
     presetColors: 'Preset Colors',
+    duplicate: 'Duplicate',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -121,6 +122,8 @@ const translations = {
     },
     messageText: 'Support file upload and multi-modal image processing⚡️ ',
     tryForFree: 'Get Started',
+    tryItNow: 'Try It Now',
+    creationEngine: 'Creation Engine',
     addToChrome: 'Add to Chrome',
     contactUs: 'Contact Us',
     watchVideo: 'Watch Video',
@@ -506,6 +509,17 @@ const translations = {
   shareContent: {
     title: 'Share',
     login: 'Start Writing with Refly',
+    copyLink: 'Copy Link',
+    publishTemplate: 'Publish Template',
+    linkShare: 'Link Share',
+    updateCanvasPermissionSuccess: 'Update canvas permission successfully',
+    copyLinkSuccess: 'Share link copied to clipboard!',
+    accessOptions: {
+      anyone: 'Anyone with the link',
+      anyoneDescription: 'Anyone with the link can view',
+      off: 'Not enabled',
+      offDescription: 'Not enabled access permission',
+    },
   },
   workspace: {
     addToCanvas: 'Add to Canvas',
@@ -725,6 +739,11 @@ const translations = {
       skill: 'Skill',
       image: 'Image',
     },
+    export: {
+      success: 'Image exported successfully',
+      error: 'Failed to export image',
+      noNodes: 'Canvas is empty, cannot export image',
+    },
     contextMenu: {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
@@ -822,6 +841,10 @@ const translations = {
       completeTutorial: 'Complete Tutorial',
       deleteCanvasConfirm: 'Confirm to delete canvas {{title}} permanently?',
       deleteCanvasFile: 'Delete resources and documents in the canvas',
+      hideTemplates: 'Hide Templates',
+      showTemplates: 'Show Templates',
+      exportImage: 'Export Image',
+      copyLink: 'Copy Link',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -1166,6 +1189,7 @@ const translations = {
       viewMore: 'View More',
       viewTutorial: 'View Docs',
       tour: 'View Tutorial',
+      template: 'Template',
     },
   },
   knowledgeLibrary: {
@@ -1950,6 +1974,25 @@ const translations = {
         'You have reached your storage limit. Upgrade your plan to continue using our services with expanded storage capacity.',
       upgrade: 'Upgrade Now',
     },
+  },
+  template: {
+    templateLibrary: 'Template Library',
+    myTemplates: 'My Templates',
+    createTemplate: 'Create Template',
+    templateTitle: 'Template Name',
+    templateTitlePlaceholder: 'Please enter template name',
+    templateDescription: 'Template Description',
+    templateDescriptionPlaceholder: 'Please enter template description',
+    createSuccess: 'Template created successfully, please view in template library',
+    preview: 'Preview',
+    use: 'Use',
+    duplicateCanvas: 'Duplicate Canvas',
+    canvasTitle: 'Canvas Name',
+    duplicateCanvasTitlePlaceholder: 'Please enter canvas name',
+    moreTemplates: 'More Templates',
+    searchPlaceholder: 'Please enter keyword to search template',
+    noRelatedTemplates: 'No related templates',
+    hideTemplates: 'Hide Template',
   },
 };
 

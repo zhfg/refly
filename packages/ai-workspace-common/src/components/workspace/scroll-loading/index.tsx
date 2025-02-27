@@ -14,7 +14,7 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
 
   if (!hasMore) {
     return (
-      <div className="w-full flex justify-center my-6">
+      <div className="w-full flex justify-center py-6">
         <span>{t('knowledgeLibrary.archive.item.noMoreText')}</span>
       </div>
     );

@@ -28,6 +28,7 @@ import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
+  readonly: boolean;
 }
 
 const iconClass = 'flex items-center justify-center text-base';
@@ -197,189 +198,193 @@ const ZoomControls = memo(
 );
 ZoomControls.displayName = 'ZoomControls';
 
-export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const { onLayout } = useCanvasLayout();
-  const reactFlowInstance = useReactFlow();
-  const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
-  const minZoom = 0.1;
-  const maxZoom = 2;
-  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } =
-    useUserStoreShallow((state) => ({
-      helpModalVisible: state.helpModalVisible,
-      setShowTourModal: state.setShowTourModal,
-      setShowSettingsGuideModal: state.setShowSettingsGuideModal,
-      setHelpModalVisible: state.setHelpModalVisible,
-    }));
+export const LayoutControl: React.FC<LayoutControlProps> = memo(
+  ({ mode, changeMode, readonly }) => {
+    const { t } = useTranslation();
+    const [open, setOpen] = useState(false);
+    const { onLayout } = useCanvasLayout();
+    const reactFlowInstance = useReactFlow();
+    const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
+    const minZoom = 0.1;
+    const maxZoom = 2;
+    const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } =
+      useUserStoreShallow((state) => ({
+        helpModalVisible: state.helpModalVisible,
+        setShowTourModal: state.setShowTourModal,
+        setShowSettingsGuideModal: state.setShowSettingsGuideModal,
+        setHelpModalVisible: state.setHelpModalVisible,
+      }));
 
-  // Use ref to avoid recreating the timeout on each render
-  const timeoutRef = useRef<NodeJS.Timeout>();
+    // Use ref to avoid recreating the timeout on each render
+    const timeoutRef = useRef<NodeJS.Timeout>();
 
-  // Optimize viewport change handling
-  useOnViewportChange({
-    onChange: useCallback(
-      ({ zoom }) => {
+    // Optimize viewport change handling
+    useOnViewportChange({
+      onChange: useCallback(
+        ({ zoom }) => {
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+
+          timeoutRef.current = setTimeout(() => {
+            if (Math.abs(zoom - currentZoom) > 0.01) {
+              setCurrentZoom(zoom);
+            }
+          }, 100);
+        },
+        [currentZoom],
+      ),
+    });
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+      return () => {
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
+      };
+    }, []);
 
-        timeoutRef.current = setTimeout(() => {
-          if (Math.abs(zoom - currentZoom) > 0.01) {
-            setCurrentZoom(zoom);
-          }
-        }, 100);
-      },
-      [currentZoom],
-    ),
-  });
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+    const handleZoomIn = useCallback(() => {
+      if (currentZoom < maxZoom) {
+        reactFlowInstance?.zoomIn?.();
       }
-    };
-  }, []);
+    }, [currentZoom, reactFlowInstance]);
 
-  const handleZoomIn = useCallback(() => {
-    if (currentZoom < maxZoom) {
-      reactFlowInstance?.zoomIn?.();
-    }
-  }, [currentZoom, reactFlowInstance]);
+    const handleZoomOut = useCallback(() => {
+      if (currentZoom > minZoom) {
+        reactFlowInstance?.zoomOut?.();
+      }
+    }, [currentZoom, reactFlowInstance]);
 
-  const handleZoomOut = useCallback(() => {
-    if (currentZoom > minZoom) {
-      reactFlowInstance?.zoomOut?.();
-    }
-  }, [currentZoom, reactFlowInstance]);
+    const handleFitView = useCallback(() => {
+      reactFlowInstance?.fitView();
+    }, [reactFlowInstance]);
 
-  const handleFitView = useCallback(() => {
-    reactFlowInstance?.fitView();
-  }, [reactFlowInstance]);
+    const canZoomIn = currentZoom < maxZoom;
+    const canZoomOut = currentZoom > minZoom;
 
-  const canZoomIn = currentZoom < maxZoom;
-  const canZoomOut = currentZoom > minZoom;
+    // Memoize static configurations
+    const items = useMemo(
+      () => [
+        {
+          key: 'mouse',
+          label: (
+            <Space>
+              <IconMouse className={iconClass} />
+              {t('canvas.toolbar.mouse')}
+            </Space>
+          ),
+        },
+        {
+          key: 'touchpad',
+          label: (
+            <Space>
+              <IconTouchpad className={iconClass} />
+              {t('canvas.toolbar.touchpad')}
+            </Space>
+          ),
+        },
+      ],
+      [t],
+    );
 
-  // Memoize static configurations
-  const items = useMemo(
-    () => [
-      {
-        key: 'mouse',
-        label: (
-          <Space>
-            <IconMouse className={iconClass} />
-            {t('canvas.toolbar.mouse')}
-          </Space>
-        ),
-      },
-      {
-        key: 'touchpad',
-        label: (
-          <Space>
-            <IconTouchpad className={iconClass} />
-            {t('canvas.toolbar.touchpad')}
-          </Space>
-        ),
-      },
-    ],
-    [t],
-  );
+    // Add these new hooks
+    const { nodeSizeMode, setNodeSizeMode } = useCanvasStoreShallow((state) => ({
+      nodeSizeMode: state.nodeSizeMode,
+      setNodeSizeMode: state.setNodeSizeMode,
+    }));
+    const { updateAllNodesSizeMode } = useNodeOperations();
+    const { undoManager } = useCanvasSync();
 
-  // Add these new hooks
-  const { nodeSizeMode, setNodeSizeMode } = useCanvasStoreShallow((state) => ({
-    nodeSizeMode: state.nodeSizeMode,
-    setNodeSizeMode: state.setNodeSizeMode,
-  }));
-  const { updateAllNodesSizeMode } = useNodeOperations();
-  const { undoManager } = useCanvasSync();
+    // Add handler for size mode toggle
+    const handleToggleSizeMode = useCallback(() => {
+      const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
+      setNodeSizeMode(newMode);
+      updateAllNodesSizeMode(newMode);
+    }, [nodeSizeMode, setNodeSizeMode, updateAllNodesSizeMode]);
 
-  // Add handler for size mode toggle
-  const handleToggleSizeMode = useCallback(() => {
-    const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
-    setNodeSizeMode(newMode);
-    updateAllNodesSizeMode(newMode);
-  }, [nodeSizeMode, setNodeSizeMode, updateAllNodesSizeMode]);
+    const helpMenuItems = useMemo(
+      () => [
+        {
+          key: 'settings',
+          icon: <LuShipWheel className={iconClass} size={14} />,
+          label: <Space>{t('canvas.toolbar.openSettings')}</Space>,
+          onClick: () => setShowSettingsGuideModal(true),
+        },
+        {
+          key: 'tour',
+          icon: <LuLightbulb className={iconClass} size={14} />,
+          label: <Space>{t('canvas.toolbar.openTour')}</Space>,
+          onClick: () => setShowTourModal(true),
+        },
+        {
+          key: 'guide',
+          icon: <LuCompass className={iconClass} size={14} />,
+          label: <Space>{t('canvas.toolbar.openGuide')}</Space>,
+          onClick: () => setHelpModalVisible(true),
+        },
+        {
+          key: 'docs',
+          icon: <IconDocumentation className={iconClass} size={14} />,
+          label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
+          onClick: () => window.open('https://docs.refly.ai', '_blank'),
+        },
+      ],
+      [t, setShowSettingsGuideModal, setShowTourModal, setHelpModalVisible],
+    );
 
-  const helpMenuItems = useMemo(
-    () => [
-      {
-        key: 'settings',
-        icon: <LuShipWheel className={iconClass} size={14} />,
-        label: <Space>{t('canvas.toolbar.openSettings')}</Space>,
-        onClick: () => setShowSettingsGuideModal(true),
-      },
-      {
-        key: 'tour',
-        icon: <LuLightbulb className={iconClass} size={14} />,
-        label: <Space>{t('canvas.toolbar.openTour')}</Space>,
-        onClick: () => setShowTourModal(true),
-      },
-      {
-        key: 'guide',
-        icon: <LuCompass className={iconClass} size={14} />,
-        label: <Space>{t('canvas.toolbar.openGuide')}</Space>,
-        onClick: () => setHelpModalVisible(true),
-      },
-      {
-        key: 'docs',
-        icon: <IconDocumentation className={iconClass} size={14} />,
-        label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
-        onClick: () => window.open('https://docs.refly.ai', '_blank'),
-      },
-    ],
-    [t, setShowSettingsGuideModal, setShowTourModal, setHelpModalVisible],
-  );
+    return (
+      <>
+        <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
+          <ZoomControls
+            currentZoom={currentZoom}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            canZoomIn={canZoomIn}
+            canZoomOut={canZoomOut}
+            t={t}
+          />
 
-  return (
-    <>
-      <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
-        <ZoomControls
-          currentZoom={currentZoom}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          canZoomIn={canZoomIn}
-          canZoomOut={canZoomOut}
-          t={t}
-        />
+          <Divider type="vertical" className="h-full" />
 
-        <Divider type="vertical" className="h-full" />
+          {!readonly && (
+            <ActionButtons
+              onFitView={handleFitView}
+              onLayout={onLayout}
+              onToggleSizeMode={handleToggleSizeMode}
+              nodeSizeMode={nodeSizeMode}
+              undoManager={undoManager}
+              t={t}
+            />
+          )}
 
-        <ActionButtons
-          onFitView={handleFitView}
-          onLayout={onLayout}
-          onToggleSizeMode={handleToggleSizeMode}
-          nodeSizeMode={nodeSizeMode}
-          undoManager={undoManager}
-          t={t}
-        />
+          <ModeSelector
+            mode={mode}
+            open={open}
+            setOpen={setOpen}
+            items={items}
+            onModeChange={changeMode}
+            t={t}
+          />
 
-        <ModeSelector
-          mode={mode}
-          open={open}
-          setOpen={setOpen}
-          items={items}
-          onModeChange={changeMode}
-          t={t}
-        />
+          <Divider type="vertical" className="h-full mx-0.5" />
 
-        <Divider type="vertical" className="h-full mx-0.5" />
-
-        <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
-          <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
-            <Button type="text" className={buttonClass}>
-              <FiHelpCircle className={iconClass} size={16} />
-            </Button>
-          </Tooltip>
-        </Dropdown>
-      </div>
-      {helpModalVisible ? (
-        <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} />
-      ) : null}
-    </>
-  );
-});
+          <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
+            <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
+              <Button type="text" className={buttonClass}>
+                <FiHelpCircle className={iconClass} size={16} />
+              </Button>
+            </Tooltip>
+          </Dropdown>
+        </div>
+        {helpModalVisible ? (
+          <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} />
+        ) : null}
+      </>
+    );
+  },
+);
 
 // Add display name for better debugging
 LayoutControl.displayName = 'LayoutControl';

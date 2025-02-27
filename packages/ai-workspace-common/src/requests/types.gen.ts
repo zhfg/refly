@@ -15,6 +15,28 @@ export type User = {
 };
 
 /**
+ * Refly user, used as JWT payload
+ */
+export type ShareUser = {
+  /**
+   * UID
+   */
+  uid: string;
+  /**
+   * User name
+   */
+  name?: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
+  /**
+   * User avatar
+   */
+  avatar?: string;
+};
+
+/**
  * List order
  */
 export type ListOrder = 'creationAsc' | 'creationDesc';
@@ -55,6 +77,11 @@ export type BaseReference = {
   targetId: string;
 };
 
+/**
+ * Canvas status
+ */
+export type CanvasStatus = 'ready' | 'duplicating' | 'duplicate_failed';
+
 export type Canvas = {
   /**
    * Canvas ID
@@ -65,19 +92,89 @@ export type Canvas = {
    */
   title: string;
   /**
-   * Share code
-   */
-  shareCode?: string;
-  /**
    * Whether this canvas is read-only
    */
   readOnly?: boolean;
+  /**
+   * Whether this canvas is public
+   */
+  isPublic?: boolean;
+  /**
+   * Canvas status
+   */
+  status?: CanvasStatus;
   /**
    * Canvas creation time
    */
   createdAt: string;
   /**
    * Canvas update time
+   */
+  updatedAt: string;
+};
+
+export type CanvasTemplateCategory = {
+  /**
+   * Category ID
+   */
+  categoryId: string;
+  /**
+   * Category name
+   */
+  name: string;
+  /**
+   * Category label dictionary
+   */
+  labelDict: {
+    [key: string]: string;
+  };
+  /**
+   * Category description dictionary
+   */
+  descriptionDict: {
+    [key: string]: string;
+  };
+};
+
+export type CanvasTemplate = {
+  /**
+   * Canvas template ID
+   */
+  templateId: string;
+  /**
+   * Origin canvas ID
+   */
+  originCanvasId?: string;
+  /**
+   * Share user
+   */
+  shareUser?: ShareUser;
+  /**
+   * Canvas template version
+   */
+  version?: number;
+  /**
+   * Canvas template category
+   */
+  category?: CanvasTemplateCategory;
+  /**
+   * Canvas template title
+   */
+  title: string;
+  /**
+   * Canvas template description
+   */
+  description: string;
+  /**
+   * Canvas template language code
+   */
+  language: string;
+  /**
+   * Canvas template creation time
+   */
+  createdAt: string;
+  /**
+   * Canvas template update time
    */
   updatedAt: string;
 };
@@ -223,10 +320,6 @@ export type Document = {
    * Full document content (only returned in detail api)
    */
   content?: string;
-  /**
-   * Share code
-   */
-  shareCode?: string;
   /**
    * Whether this document is read-only
    */
@@ -1491,10 +1584,77 @@ export type ListCanvasResponse = BaseResponse & {
 };
 
 export type GetCanvasDetailResponse = BaseResponse & {
+  data?: Canvas;
+};
+
+/**
+ * Raw canvas data
+ */
+export type RawCanvasData = {
+  /**
+   * Canvas title
+   */
+  title?: string;
+  /**
+   * Canvas nodes
+   */
+  nodes?: Array<{
+    [key: string]: unknown;
+  }>;
+  /**
+   * Canvas edges
+   */
+  edges?: Array<{
+    [key: string]: unknown;
+  }>;
+  /**
+   * Whether this canvas is public
+   */
+  isPublic?: boolean;
+};
+
+export type ExportCanvasResponse = BaseResponse & {
   /**
    * Canvas data
    */
-  data?: Canvas;
+  data?: RawCanvasData;
+};
+
+export type DuplicateCanvasRequest = {
+  /**
+   * Canvas ID to duplicate
+   */
+  canvasId: string;
+  /**
+   * Custom canvas title
+   */
+  title?: string;
+  /**
+   * Whether to duplicate entities within the canvas
+   */
+  duplicateEntities?: boolean;
+};
+
+export type DuplicateDocumentRequest = {
+  /**
+   * Document ID to duplicate
+   */
+  docId: string;
+  /**
+   * Custom document title for the duplicate
+   */
+  title?: string;
+};
+
+export type DuplicateResourceRequest = {
+  /**
+   * Resource ID to duplicate
+   */
+  resourceId: string;
+  /**
+   * Custom resource title for the duplicate
+   */
+  title?: string;
 };
 
 export type UpsertCanvasRequest = {
@@ -1506,6 +1666,10 @@ export type UpsertCanvasRequest = {
    * Canvas ID (only used for update)
    */
   canvasId?: string;
+  /**
+   * Whether this canvas is public
+   */
+  isPublic?: boolean;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {
@@ -1544,6 +1708,73 @@ export type AutoNameCanvasResponse = BaseResponse & {
      */
     title?: string;
   };
+};
+
+export type ListCanvasTemplateResponse = BaseResponse & {
+  /**
+   * Canvas template list
+   */
+  data?: Array<CanvasTemplate>;
+};
+
+export type CreateCanvasTemplateRequest = {
+  /**
+   * Canvas ID
+   */
+  canvasId: string;
+  /**
+   * Canvas template title
+   */
+  title: string;
+  /**
+   * Canvas template description
+   */
+  description: string;
+  /**
+   * Canvas template category ID
+   */
+  categoryId?: string;
+  /**
+   * Canvas template language code
+   */
+  language: string;
+};
+
+export type UpdateCanvasTemplateRequest = {
+  /**
+   * Canvas template ID
+   */
+  templateId: string;
+  /**
+   * Canvas template title
+   */
+  title?: string;
+  /**
+   * Canvas template description
+   */
+  description?: string;
+  /**
+   * Canvas template category ID
+   */
+  categoryId?: string;
+  /**
+   * Canvas template language code
+   */
+  language?: string;
+};
+
+export type UpsertCanvasTemplateResponse = BaseResponse & {
+  /**
+   * Canvas template
+   */
+  data?: CanvasTemplate;
+};
+
+export type ListCanvasTemplateCategoryResponse = BaseResponse & {
+  /**
+   * Canvas template category list
+   */
+  data?: Array<CanvasTemplateCategory>;
 };
 
 export type UpsertResourceRequest = {
@@ -1783,69 +2014,6 @@ export type SkillEvent = {
    * Error data. Only present when `event` is `error`.
    */
   error?: BaseResponse;
-};
-
-export type CreateShareRequest = {
-  entityType: EntityType;
-  /**
-   * Entity ID
-   */
-  entityId: string;
-};
-
-export type CreateShareResult = {
-  /**
-   * Share code
-   */
-  shareCode: string;
-};
-
-export type CreateShareResponse = BaseResponse & {
-  data?: CreateShareResult;
-};
-
-export type DeleteShareRequest = {
-  /**
-   * Share code
-   */
-  shareCode: string;
-};
-
-export type ShareUser = {
-  /**
-   * User name
-   */
-  username?: string;
-  /**
-   * User nickname
-   */
-  nickname?: string;
-  /**
-   * User avatar
-   */
-  avatar?: string;
-};
-
-export type SharedContent = {
-  /**
-   * Shared canvas data
-   */
-  canvas?: Canvas;
-  /**
-   * Selected document detail
-   */
-  document?: Document;
-  /**
-   * Share users
-   */
-  users?: Array<ShareUser>;
-};
-
-export type GetShareContentResponse = BaseResponse & {
-  /**
-   * Shared content data
-   */
-  data?: SharedContent;
 };
 
 export type ListLabelClassesResponse = BaseResponse & {
@@ -3054,6 +3222,53 @@ export type ListCanvasesResponse = ListCanvasResponse;
 
 export type ListCanvasesError = unknown;
 
+export type GetCanvasDetailData = {
+  query: {
+    /**
+     * Canvas ID
+     */
+    canvasId: string;
+  };
+};
+
+export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
+
+export type GetCanvasDetailError = unknown;
+
+export type GetCanvasDataData = {
+  query: {
+    /**
+     * Canvas ID
+     */
+    canvasId: string;
+  };
+};
+
+export type GetCanvasDataResponse = ExportCanvasResponse;
+
+export type GetCanvasDataError = unknown;
+
+export type ExportCanvasData = {
+  query: {
+    /**
+     * Canvas ID
+     */
+    canvasId: string;
+  };
+};
+
+export type ExportCanvasResponse2 = ExportCanvasResponse;
+
+export type ExportCanvasError = unknown;
+
+export type ImportCanvasData = {
+  body: RawCanvasData;
+};
+
+export type ImportCanvasResponse = UpsertCanvasResponse;
+
+export type ImportCanvasError = unknown;
+
 export type CreateCanvasData = {
   body: UpsertCanvasRequest;
 };
@@ -3061,6 +3276,14 @@ export type CreateCanvasData = {
 export type CreateCanvasResponse = UpsertCanvasResponse;
 
 export type CreateCanvasError = unknown;
+
+export type DuplicateCanvasData = {
+  body: DuplicateCanvasRequest;
+};
+
+export type DuplicateCanvasResponse = UpsertCanvasResponse;
+
+export type DuplicateCanvasError = unknown;
 
 export type UpdateCanvasData = {
   body: UpsertCanvasRequest;
@@ -3085,6 +3308,55 @@ export type AutoNameCanvasData = {
 export type AutoNameCanvasResponse2 = AutoNameCanvasResponse;
 
 export type AutoNameCanvasError = unknown;
+
+export type ListCanvasTemplatesData = {
+  query?: {
+    /**
+     * Canvas template category ID
+     */
+    categoryId?: string;
+    /**
+     * Language code
+     */
+    language?: string;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Scope
+     */
+    scope?: 'public' | 'private';
+  };
+};
+
+export type ListCanvasTemplatesResponse = ListCanvasTemplateResponse;
+
+export type ListCanvasTemplatesError = unknown;
+
+export type CreateCanvasTemplateData = {
+  body: CreateCanvasTemplateRequest;
+};
+
+export type CreateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
+
+export type CreateCanvasTemplateError = unknown;
+
+export type UpdateCanvasTemplateData = {
+  body: UpdateCanvasTemplateRequest;
+};
+
+export type UpdateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
+
+export type UpdateCanvasTemplateError = unknown;
+
+export type ListCanvasTemplateCategoriesResponse = ListCanvasTemplateCategoryResponse;
+
+export type ListCanvasTemplateCategoriesError = unknown;
 
 export type ListResourcesData = {
   query?: {
@@ -3301,35 +3573,6 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
-
-export type CreateShareData = {
-  body: CreateShareRequest;
-};
-
-export type CreateShareResponse2 = CreateShareResponse;
-
-export type CreateShareError = unknown;
-
-export type DeleteShareData = {
-  body: DeleteShareRequest;
-};
-
-export type DeleteShareResponse = BaseResponse;
-
-export type DeleteShareError = unknown;
-
-export type GetShareContentData = {
-  query: {
-    /**
-     * Share code
-     */
-    shareCode: string;
-  };
-};
-
-export type GetShareContentResponse2 = GetShareContentResponse;
-
-export type GetShareContentError = unknown;
 
 export type ListLabelClassesData = {
   query?: {

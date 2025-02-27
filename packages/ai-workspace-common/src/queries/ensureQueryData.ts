@@ -4,17 +4,21 @@ import { type Options } from '@hey-api/client-fetch';
 import { type QueryClient } from '@tanstack/react-query';
 import {
   checkSettingsField,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -27,11 +31,14 @@ import {
 } from '../requests/services.gen';
 import {
   CheckSettingsFieldData,
+  ExportCanvasData,
   GetActionResultData,
+  GetCanvasDataData,
+  GetCanvasDetailData,
   GetDocumentDetailData,
   GetResourceDetailData,
-  GetShareContentData,
   ListCanvasesData,
+  ListCanvasTemplatesData,
   ListDocumentsData,
   ListLabelClassesData,
   ListLabelInstancesData,
@@ -64,6 +71,47 @@ export const ensureUseListCanvasesData = (
     queryKey: Common.UseListCanvasesKeyFn(clientOptions),
     queryFn: () => listCanvases({ ...clientOptions }).then((response) => response.data),
   });
+export const ensureUseGetCanvasDetailData = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDetailData, true>,
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions),
+    queryFn: () => getCanvasDetail({ ...clientOptions }).then((response) => response.data),
+  });
+export const ensureUseGetCanvasDataData = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDataData, true>,
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions),
+    queryFn: () => getCanvasData({ ...clientOptions }).then((response) => response.data),
+  });
+export const ensureUseExportCanvasData = (
+  queryClient: QueryClient,
+  clientOptions: Options<ExportCanvasData, true>,
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions),
+    queryFn: () => exportCanvas({ ...clientOptions }).then((response) => response.data),
+  });
+export const ensureUseListCanvasTemplatesData = (
+  queryClient: QueryClient,
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions),
+    queryFn: () => listCanvasTemplates({ ...clientOptions }).then((response) => response.data),
+  });
+export const ensureUseListCanvasTemplateCategoriesData = (
+  queryClient: QueryClient,
+  clientOptions: Options<unknown, true> = {},
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then((response) => response.data),
+  });
 export const ensureUseListResourcesData = (
   queryClient: QueryClient,
   clientOptions: Options<ListResourcesData, true> = {},
@@ -95,14 +143,6 @@ export const ensureUseGetDocumentDetailData = (
   queryClient.ensureQueryData({
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions),
     queryFn: () => getDocumentDetail({ ...clientOptions }).then((response) => response.data),
-  });
-export const ensureUseGetShareContentData = (
-  queryClient: QueryClient,
-  clientOptions: Options<GetShareContentData, true>,
-) =>
-  queryClient.ensureQueryData({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions),
-    queryFn: () => getShareContent({ ...clientOptions }).then((response) => response.data),
   });
 export const ensureUseListLabelClassesData = (
   queryClient: QueryClient,

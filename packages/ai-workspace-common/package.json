@@ -71,6 +71,7 @@
     "dayjs": "~1.11.7",
     "highlight.js": "^11.9.0",
     "hotkeys-js": "~3.10.2",
+    "html2canvas": "^1.4.1",
     "i18next": "^23.11.2",
     "i18next-browser-languagedetector": "^8.0.2",
     "immer": "^10.1.1",

@@ -112,6 +112,7 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
         `}
       >
         <CustomHandle
+          id={`${id}-target`}
           type="target"
           position={Position.Left}
           isConnected={isTargetConnected}
@@ -119,6 +120,7 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
           nodeType="tool"
         />
         <CustomHandle
+          id={`${id}-source`}
           type="source"
           position={Position.Right}
           isConnected={isSourceConnected}

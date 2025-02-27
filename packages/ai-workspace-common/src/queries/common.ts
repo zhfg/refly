@@ -11,6 +11,7 @@ import {
   checkVerification,
   convert,
   createCanvas,
+  createCanvasTemplate,
   createCheckoutSession,
   createDocument,
   createLabelClass,
@@ -18,7 +19,6 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
-  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,23 +28,28 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
-  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
+  duplicateCanvas,
   emailLogin,
   emailSignup,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
+  importCanvas,
   invokeSkill,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -66,6 +71,7 @@ import {
   streamInvokeSkill,
   unpinSkillInstance,
   updateCanvas,
+  updateCanvasTemplate,
   updateDocument,
   updateLabelClass,
   updateLabelInstance,
@@ -105,6 +111,60 @@ export const UseListCanvasesKeyFn = (
   clientOptions: Options<unknown, true> = {},
   queryKey?: Array<unknown>,
 ) => [useListCanvasesKey, ...(queryKey ?? [clientOptions])];
+export type GetCanvasDetailDefaultResponse = Awaited<ReturnType<typeof getCanvasDetail>>['data'];
+export type GetCanvasDetailQueryResult<
+  TData = GetCanvasDetailDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useGetCanvasDetailKey = 'GetCanvasDetail';
+export const UseGetCanvasDetailKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useGetCanvasDetailKey, ...(queryKey ?? [clientOptions])];
+export type GetCanvasDataDefaultResponse = Awaited<ReturnType<typeof getCanvasData>>['data'];
+export type GetCanvasDataQueryResult<
+  TData = GetCanvasDataDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useGetCanvasDataKey = 'GetCanvasData';
+export const UseGetCanvasDataKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useGetCanvasDataKey, ...(queryKey ?? [clientOptions])];
+export type ExportCanvasDefaultResponse = Awaited<ReturnType<typeof exportCanvas>>['data'];
+export type ExportCanvasQueryResult<
+  TData = ExportCanvasDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useExportCanvasKey = 'ExportCanvas';
+export const UseExportCanvasKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useExportCanvasKey, ...(queryKey ?? [clientOptions])];
+export type ListCanvasTemplatesDefaultResponse = Awaited<
+  ReturnType<typeof listCanvasTemplates>
+>['data'];
+export type ListCanvasTemplatesQueryResult<
+  TData = ListCanvasTemplatesDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useListCanvasTemplatesKey = 'ListCanvasTemplates';
+export const UseListCanvasTemplatesKeyFn = (
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: Array<unknown>,
+) => [useListCanvasTemplatesKey, ...(queryKey ?? [clientOptions])];
+export type ListCanvasTemplateCategoriesDefaultResponse = Awaited<
+  ReturnType<typeof listCanvasTemplateCategories>
+>['data'];
+export type ListCanvasTemplateCategoriesQueryResult<
+  TData = ListCanvasTemplateCategoriesDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useListCanvasTemplateCategoriesKey = 'ListCanvasTemplateCategories';
+export const UseListCanvasTemplateCategoriesKeyFn = (
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: Array<unknown>,
+) => [useListCanvasTemplateCategoriesKey, ...(queryKey ?? [clientOptions])];
 export type ListResourcesDefaultResponse = Awaited<ReturnType<typeof listResources>>['data'];
 export type ListResourcesQueryResult<
   TData = ListResourcesDefaultResponse,
@@ -149,16 +209,6 @@ export const UseGetDocumentDetailKeyFn = (
   clientOptions: Options<unknown, true>,
   queryKey?: Array<unknown>,
 ) => [useGetDocumentDetailKey, ...(queryKey ?? [clientOptions])];
-export type GetShareContentDefaultResponse = Awaited<ReturnType<typeof getShareContent>>['data'];
-export type GetShareContentQueryResult<
-  TData = GetShareContentDefaultResponse,
-  TError = unknown,
-> = UseQueryResult<TData, TError>;
-export const useGetShareContentKey = 'GetShareContent';
-export const UseGetShareContentKeyFn = (
-  clientOptions: Options<unknown, true>,
-  queryKey?: Array<unknown>,
-) => [useGetShareContentKey, ...(queryKey ?? [clientOptions])];
 export type ListLabelClassesDefaultResponse = Awaited<ReturnType<typeof listLabelClasses>>['data'];
 export type ListLabelClassesQueryResult<
   TData = ListLabelClassesDefaultResponse,
@@ -343,10 +393,22 @@ export const UseLogoutKeyFn = (mutationKey?: Array<unknown>) => [
   useLogoutKey,
   ...(mutationKey ?? []),
 ];
+export type ImportCanvasMutationResult = Awaited<ReturnType<typeof importCanvas>>;
+export const useImportCanvasKey = 'ImportCanvas';
+export const UseImportCanvasKeyFn = (mutationKey?: Array<unknown>) => [
+  useImportCanvasKey,
+  ...(mutationKey ?? []),
+];
 export type CreateCanvasMutationResult = Awaited<ReturnType<typeof createCanvas>>;
 export const useCreateCanvasKey = 'CreateCanvas';
 export const UseCreateCanvasKeyFn = (mutationKey?: Array<unknown>) => [
   useCreateCanvasKey,
+  ...(mutationKey ?? []),
+];
+export type DuplicateCanvasMutationResult = Awaited<ReturnType<typeof duplicateCanvas>>;
+export const useDuplicateCanvasKey = 'DuplicateCanvas';
+export const UseDuplicateCanvasKeyFn = (mutationKey?: Array<unknown>) => [
+  useDuplicateCanvasKey,
   ...(mutationKey ?? []),
 ];
 export type UpdateCanvasMutationResult = Awaited<ReturnType<typeof updateCanvas>>;
@@ -365,6 +427,18 @@ export type AutoNameCanvasMutationResult = Awaited<ReturnType<typeof autoNameCan
 export const useAutoNameCanvasKey = 'AutoNameCanvas';
 export const UseAutoNameCanvasKeyFn = (mutationKey?: Array<unknown>) => [
   useAutoNameCanvasKey,
+  ...(mutationKey ?? []),
+];
+export type CreateCanvasTemplateMutationResult = Awaited<ReturnType<typeof createCanvasTemplate>>;
+export const useCreateCanvasTemplateKey = 'CreateCanvasTemplate';
+export const UseCreateCanvasTemplateKeyFn = (mutationKey?: Array<unknown>) => [
+  useCreateCanvasTemplateKey,
+  ...(mutationKey ?? []),
+];
+export type UpdateCanvasTemplateMutationResult = Awaited<ReturnType<typeof updateCanvasTemplate>>;
+export const useUpdateCanvasTemplateKey = 'UpdateCanvasTemplate';
+export const UseUpdateCanvasTemplateKeyFn = (mutationKey?: Array<unknown>) => [
+  useUpdateCanvasTemplateKey,
   ...(mutationKey ?? []),
 ];
 export type UpdateResourceMutationResult = Awaited<ReturnType<typeof updateResource>>;
@@ -445,18 +519,6 @@ export type DeleteReferencesMutationResult = Awaited<ReturnType<typeof deleteRef
 export const useDeleteReferencesKey = 'DeleteReferences';
 export const UseDeleteReferencesKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteReferencesKey,
-  ...(mutationKey ?? []),
-];
-export type CreateShareMutationResult = Awaited<ReturnType<typeof createShare>>;
-export const useCreateShareKey = 'CreateShare';
-export const UseCreateShareKeyFn = (mutationKey?: Array<unknown>) => [
-  useCreateShareKey,
-  ...(mutationKey ?? []),
-];
-export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;
-export const useDeleteShareKey = 'DeleteShare';
-export const UseDeleteShareKeyFn = (mutationKey?: Array<unknown>) => [
-  useDeleteShareKey,
   ...(mutationKey ?? []),
 ];
 export type CreateLabelClassMutationResult = Awaited<ReturnType<typeof createLabelClass>>;

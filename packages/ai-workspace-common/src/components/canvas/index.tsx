@@ -9,7 +9,6 @@ import {
   Node,
   Edge,
 } from '@xyflow/react';
-import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -17,7 +16,6 @@ import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -52,11 +50,11 @@ import { CustomEdge } from './edges/custom-edge';
 import '@xyflow/react/dist/style.css';
 import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
-import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
+import { EmptyGuide } from './empty-guide';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -119,7 +117,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
-  const { provider } = useCanvasContext();
+  const { provider, readonly } = useCanvasContext();
 
   const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } =
     useCanvasStoreShallow((state) => ({
@@ -130,25 +128,29 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }));
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
 
-  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
-
   const { handleNodePreview } = useNodePreviewControl({ canvasId });
 
   const interactionMode = useUserStore.getState().localSettings.canvasMode;
   const { localSettings, setLocalSettings } = useUserStore.getState();
   const { mutate: updateSettings } = useUpdateSettings();
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
+
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setLocalSettings({
       ...localSettings,
       canvasMode: mode,
     });
-    updateSettings({
-      body: {
-        preferences: {
-          operationMode: mode,
+    if (isLogin) {
+      updateSettings({
+        body: {
+          preferences: {
+            operationMode: mode,
+          },
         },
-      },
-    });
+      });
+    }
   };
 
   useEffect(() => {
@@ -442,10 +444,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedLaunchPad = useMemo(
     () => (
       <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-        <LaunchPad visible={showLaunchpad} />
+        <LaunchPad visible={!readonly && showLaunchpad} />
       </div>
     ),
-    [showLaunchpad],
+    [readonly, showLaunchpad],
   );
 
   // Memoize MiniMap styles
@@ -474,6 +476,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   // Memoize the node types configuration
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+
+  const readonlyNodesChange = useCallback(() => {
+    // No-op function for readonly mode
+    return nodes;
+  }, [nodes]);
+
+  const readonlyEdgesChange = useCallback(() => {
+    // No-op function for readonly mode
+    return edges;
+  }, [edges]);
+
+  const readonlyConnect = useCallback(() => {
+    // No-op function for readonly mode
+    return;
+  }, []);
 
   // Optimize node dragging performance
   const { setIsNodeDragging, setDraggingNodeId } = useEditorPerformance();
@@ -542,6 +559,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Update handleKeyDown to handle edge deletion
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Skip all keyboard handling in readonly mode
+      if (readonly) return;
+
       const target = e.target as HTMLElement;
 
       // Ignore input, textarea and contentEditable elements
@@ -575,7 +595,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         setSelectedEdgeId(null);
       }
     },
-    [selectedEdgeId, reactFlowInstance, undoManager],
+    [selectedEdgeId, reactFlowInstance, undoManager, readonly],
   );
 
   // Add edge click handler for delete button
@@ -622,11 +642,15 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     <Spin
       className="w-full h-full"
       style={{ maxHeight: '100%' }}
-      spinning={!hasCanvasSynced && provider.status !== 'connected' && !connectionTimeout}
+      spinning={
+        !readonly && !hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout
+      }
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
-        <CanvasToolbar onToolSelect={handleToolSelect} />
+        {!readonly && (
+          <CanvasToolbar onToolSelect={handleToolSelect} nodeLength={nodes?.length || 0} />
+        )}
         <TopToolbar canvasId={canvasId} />
         <div className="flex-grow relative">
           <style>{selectionStyles}</style>
@@ -638,55 +662,45 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             zoomOnScroll={interactionMode === 'mouse'}
             zoomOnPinch={interactionMode === 'touchpad'}
             zoomOnDoubleClick={false}
-            selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
-            selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
+            selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse' && !readonly}
+            selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad' && !readonly}
             nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
+            onNodesChange={readonly ? readonlyNodesChange : onNodesChange}
+            onEdgesChange={readonly ? readonlyEdgesChange : onEdgesChange}
+            onConnect={readonly ? readonlyConnect : onConnect}
             onNodeClick={handleNodeClick}
             onPaneClick={handlePanelClick}
-            onPaneContextMenu={onPaneContextMenu}
-            onNodeContextMenu={onNodeContextMenu}
-            onNodeDragStart={onNodeDragStart}
-            onNodeDragStop={onNodeDragStop}
+            onPaneContextMenu={readonly ? undefined : onPaneContextMenu}
+            onNodeContextMenu={readonly ? undefined : onNodeContextMenu}
+            onNodeDragStart={readonly ? undefined : onNodeDragStart}
+            onNodeDragStop={readonly ? undefined : onNodeDragStop}
             nodeDragThreshold={10}
-            nodesDraggable={!operatingNodeId}
-            onSelectionContextMenu={onSelectionContextMenu}
-            deleteKeyCode={['Backspace', 'Delete']}
-            multiSelectionKeyCode={['Shift', 'Meta']}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
+            nodesDraggable={!operatingNodeId && !readonly}
+            nodesConnectable={!readonly}
+            elementsSelectable={!readonly}
+            onSelectionContextMenu={readonly ? undefined : onSelectionContextMenu}
+            deleteKeyCode={readonly ? null : ['Backspace', 'Delete']}
+            multiSelectionKeyCode={readonly ? null : ['Shift', 'Meta']}
+            onDragOver={readonly ? undefined : handleDragOver}
+            onDrop={readonly ? undefined : handleDrop}
             connectOnClick={false}
-            edgesFocusable={true}
-            nodesFocusable={true}
-            onEdgeClick={handleEdgeClick}
+            edgesFocusable={false}
+            nodesFocusable={!readonly}
+            onEdgeClick={readonly ? undefined : handleEdgeClick}
           >
-            {nodes?.length === 0 && hasCanvasSynced && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-                <div className="flex items-center justify-center text-gray-500 text-center">
-                  <div className="text-[20px]">{t('canvas.emptyText')}</div>
-                  <Button
-                    loading={isCreatingDocument}
-                    icon={<IconCreateDocument className="-mr-1 flex items-center justify-center" />}
-                    type="text"
-                    className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
-                    onClick={() => createSingleDocumentInCanvas()}
-                    data-cy="canvas-create-document-button"
-                  >
-                    {t('canvas.toolbar.createDocument')}
-                  </Button>
-                </div>
-              </div>
-            )}
+            {nodes?.length === 0 && hasCanvasSynced && <EmptyGuide canvasId={canvasId} />}
 
             {memoizedBackground}
             {memoizedMiniMap}
           </ReactFlow>
 
-          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
+          <LayoutControl
+            mode={interactionMode}
+            changeMode={toggleInteractionMode}
+            readonly={readonly}
+          />
 
           {memoizedLaunchPad}
         </div>
@@ -752,11 +766,15 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   );
 });
 
-export const Canvas = (props: { canvasId: string }) => {
-  const { canvasId } = props;
+export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
+  const { canvasId, readonly } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
 
   useEffect(() => {
+    if (readonly) {
+      return;
+    }
+
     if (canvasId && canvasId !== 'empty') {
       setCurrentCanvasId(canvasId);
     } else {
@@ -766,7 +784,7 @@ export const Canvas = (props: { canvasId: string }) => {
 
   return (
     <EditorPerformanceProvider>
-      <CanvasProvider canvasId={canvasId}>
+      <CanvasProvider readonly={readonly} canvasId={canvasId}>
         <ReactFlowProvider>
           <Flow canvasId={canvasId} />
         </ReactFlowProvider>

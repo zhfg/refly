@@ -8,7 +8,7 @@ import { omit } from '@refly/utils';
 
 export const useCanvasSync = () => {
   const { provider } = useCanvasContext();
-  const ydoc = provider.document;
+  const ydoc = provider?.document;
 
   const undoManager = useMemo(() => {
     if (!ydoc) return null;

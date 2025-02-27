@@ -17,8 +17,6 @@ tags:
     description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
-  - name: share
-    description: Share management endpoints
   - name: label
     description: Label management endpoints
   - name: action
@@ -214,6 +212,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListCanvasResponse'
+  /canvas/detail:
+    get:
+      tags:
+        - canvas
+      summary: Get canvas detail
+      description: Get canvas detail
+      operationId: getCanvasDetail
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCanvasDetailResponse'
+  /canvas/data:
+    get:
+      tags:
+        - canvas
+      summary: Get canvas data
+      description: Get public canvas data without checking user identity
+      operationId: getCanvasData
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportCanvasResponse'
+  /canvas/export:
+    get:
+      tags:
+        - canvas
+      summary: Export canvas
+      description: Export canvas
+      operationId: exportCanvas
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportCanvasResponse'
+  /canvas/import:
+    post:
+      tags:
+        - canvas
+      summary: Import canvas
+      description: Import canvas
+      operationId: importCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RawCanvasData'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
   /canvas/create:
     post:
       tags:
@@ -227,6 +308,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/duplicate:
+    post:
+      tags:
+        - canvas
+      summary: Duplicate canvas
+      description: Duplicate an existing canvas
+      operationId: duplicateCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicateCanvasRequest'
       responses:
         '200':
           description: Successful operation
@@ -294,6 +395,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoNameCanvasResponse'
+  /canvas/template/list:
+    get:
+      tags:
+        - canvas
+      summary: List canvas templates
+      description: List all canvas templates
+      operationId: listCanvasTemplates
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+        - name: language
+          in: query
+          description: Language code
+          example: en
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          description: Canvas template category ID
+          schema:
+            type: string
+        - name: scope
+          in: query
+          description: Scope
+          schema:
+            type: string
+            default: public
+            enum:
+              - public
+              - private
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCanvasTemplateResponse'
+  /canvas/template/create:
+    post:
+      tags:
+        - canvas
+      summary: Create canvas template
+      description: Create a new canvas template
+      operationId: createCanvasTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCanvasTemplateRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
+  /canvas/template/update:
+    post:
+      tags:
+        - canvas
+      summary: Update canvas template
+      description: Update an existing canvas template
+      operationId: updateCanvasTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCanvasTemplateRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
+  /canvas/template/category/list:
+    get:
+      tags:
+        - canvas
+      summary: List canvas template categories
+      description: List all canvas template categories
+      operationId: listCanvasTemplateCategories
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCanvasTemplateCategoryResponse'
   /knowledge/resource/list:
     get:
       tags:
@@ -726,67 +928,6 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /share/new:
-    post:
-      tags:
-        - share
-      summary: Create share
-      description: Create new share for canvas
-      operationId: createShare
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateShareRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateShareResponse'
-  /share/delete:
-    post:
-      tags:
-        - share
-      summary: Delete share
-      description: Delete an existing share
-      operationId: deleteShare
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteShareRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-  /share/content:
-    get:
-      tags:
-        - share
-      summary: Get share content
-      description: Get share content by share code
-      operationId: getShareContent
-      parameters:
-        - name: shareCode
-          in: query
-          description: Share code
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetShareContentResponse'
   /label/class/list:
     get:
       tags:
@@ -1594,6 +1735,24 @@ components:
         email:
           type: string
           description: Email
+    ShareUser:
+      type: object
+      description: Refly user, used as JWT payload
+      required:
+        - uid
+      properties:
+        uid:
+          type: string
+          description: UID
+        name:
+          type: string
+          description: User name
+        nickname:
+          type: string
+          description: User nickname
+        avatar:
+          type: string
+          description: User avatar
     ListOrder:
       type: string
       description: List order
@@ -1631,6 +1790,13 @@ components:
         targetId:
           type: string
           description: Target entity ID
+    CanvasStatus:
+      type: string
+      description: Canvas status
+      enum:
+        - ready
+        - duplicating
+        - duplicate_failed
     Canvas:
       type: object
       required:
@@ -1647,12 +1813,16 @@ components:
           type: string
           description: Canvas title
           example: My canvas
-        shareCode:
-          type: string
-          description: Share code
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
+        status:
+          type: string
+          description: Canvas status
+          $ref: '#/components/schemas/CanvasStatus'
         createdAt:
           type: string
           format: date-time
@@ -1661,6 +1831,74 @@ components:
           type: string
           format: date-time
           description: Canvas update time
+    CanvasTemplateCategory:
+      type: object
+      required:
+        - categoryId
+        - name
+        - labelDict
+        - descriptionDict
+      properties:
+        categoryId:
+          type: string
+          description: Category ID
+        name:
+          type: string
+          description: Category name
+        labelDict:
+          type: object
+          description: Category label dictionary
+          additionalProperties:
+            type: string
+        descriptionDict:
+          type: object
+          description: Category description dictionary
+          additionalProperties:
+            type: string
+    CanvasTemplate:
+      type: object
+      required:
+        - templateId
+        - title
+        - description
+        - language
+        - createdAt
+        - updatedAt
+      properties:
+        templateId:
+          type: string
+          description: Canvas template ID
+          example: ct-g30e1b80b5g1itbemc0g5jj3
+        originCanvasId:
+          type: string
+          description: Origin canvas ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        shareUser:
+          description: Share user
+          $ref: '#/components/schemas/ShareUser'
+        version:
+          type: integer
+          description: Canvas template version
+        category:
+          description: Canvas template category
+          $ref: '#/components/schemas/CanvasTemplateCategory'
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        language:
+          type: string
+          description: Canvas template language code
+        createdAt:
+          type: string
+          format: date-time
+          description: Canvas template creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Canvas template update time
     Reference:
       allOf:
         - $ref: '#/components/schemas/BaseReference'
@@ -1794,9 +2032,6 @@ components:
         content:
           type: string
           description: Full document content (only returned in detail api)
-        shareCode:
-          type: string
-          description: Share code
         readOnly:
           type: boolean
           description: Whether this document is read-only
@@ -3064,9 +3299,72 @@ components:
         - type: object
           properties:
             data:
+              $ref: '#/components/schemas/Canvas'
+    RawCanvasData:
+      type: object
+      description: Raw canvas data
+      properties:
+        title:
+          type: string
+          description: Canvas title
+        nodes:
+          type: array
+          description: Canvas nodes
+          items:
+            type: object
+        edges:
+          type: array
+          description: Canvas edges
+          items:
+            type: object
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
+    ExportCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
               type: object
               description: Canvas data
-              $ref: '#/components/schemas/Canvas'
+              $ref: '#/components/schemas/RawCanvasData'
+    DuplicateCanvasRequest:
+      type: object
+      required:
+        - canvasId
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID to duplicate
+        title:
+          type: string
+          description: Custom canvas title
+        duplicateEntities:
+          type: boolean
+          description: Whether to duplicate entities within the canvas
+    DuplicateDocumentRequest:
+      type: object
+      required:
+        - docId
+      properties:
+        docId:
+          type: string
+          description: Document ID to duplicate
+        title:
+          type: string
+          description: Custom document title for the duplicate
+    DuplicateResourceRequest:
+      type: object
+      required:
+        - resourceId
+      properties:
+        resourceId:
+          type: string
+          description: Resource ID to duplicate
+        title:
+          type: string
+          description: Custom resource title for the duplicate
     UpsertCanvasRequest:
       type: object
       properties:
@@ -3078,6 +3376,9 @@ components:
           type: string
           description: Canvas ID (only used for update)
           example: c-g30e1b80b5g1itbemc0g5jj3
+        isPublic:
+          type: boolean
+          description: Whether this canvas is public
     UpsertCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3122,6 +3423,77 @@ components:
                 title:
                   type: string
                   description: New canvas title
+    ListCanvasTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas template list
+              items:
+                $ref: '#/components/schemas/CanvasTemplate'
+    CreateCanvasTemplateRequest:
+      type: object
+      required:
+        - canvasId
+        - title
+        - description
+        - language
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        categoryId:
+          type: string
+          description: Canvas template category ID
+        language:
+          type: string
+          description: Canvas template language code
+    UpdateCanvasTemplateRequest:
+      type: object
+      required:
+        - templateId
+      properties:
+        templateId:
+          type: string
+          description: Canvas template ID
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        categoryId:
+          type: string
+          description: Canvas template category ID
+        language:
+          type: string
+          description: Canvas template language code
+    UpsertCanvasTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Canvas template
+              $ref: '#/components/schemas/CanvasTemplate'
+    ListCanvasTemplateCategoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas template category list
+              items:
+                $ref: '#/components/schemas/CanvasTemplateCategory'
     UpsertResourceRequest:
       type: object
       required:
@@ -3385,75 +3757,6 @@ components:
         error:
           description: Error data. Only present when `event` is `error`.
           $ref: '#/components/schemas/BaseResponse'
-    CreateShareRequest:
-      type: object
-      required:
-        - entityType
-        - entityId
-      properties:
-        entityType:
-          $ref: '#/components/schemas/EntityType'
-        entityId:
-          type: string
-          description: Entity ID
-    CreateShareResult:
-      type: object
-      required:
-        - shareCode
-      properties:
-        shareCode:
-          type: string
-          description: Share code
-    CreateShareResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/CreateShareResult'
-    DeleteShareRequest:
-      type: object
-      required:
-        - shareCode
-      properties:
-        shareCode:
-          type: string
-          description: Share code
-    ShareUser:
-      type: object
-      properties:
-        username:
-          type: string
-          description: User name
-        nickname:
-          type: string
-          description: User nickname
-        avatar:
-          type: string
-          description: User avatar
-    SharedContent:
-      type: object
-      properties:
-        canvas:
-          description: Shared canvas data
-          $ref: '#/components/schemas/Canvas'
-        document:
-          description: Selected document detail
-          $ref: '#/components/schemas/Document'
-        users:
-          type: array
-          description: Share users
-          items:
-            $ref: '#/components/schemas/ShareUser'
-    GetShareContentResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Shared content data
-              $ref: '#/components/schemas/SharedContent'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface DocumentNodePreviewProps {
   nodeData?: {
@@ -12,6 +13,8 @@ interface DocumentNodePreviewProps {
 
 export const DocumentNodePreview = memo(
   ({ nodeData }: DocumentNodePreviewProps) => {
+    const { readonly } = useCanvasContext();
+
     // Early return if no node data
     if (!nodeData?.entityId || !nodeData?.entityType) {
       return (
@@ -25,7 +28,7 @@ export const DocumentNodePreview = memo(
 
     return (
       <div className="h-full overflow-hidden">
-        <DocumentEditor docId={entityId} />
+        <DocumentEditor docId={entityId} readonly={readonly} />
       </div>
     );
   },

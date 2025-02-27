@@ -11,6 +11,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { editorEmitter, EditorOperation } from '@refly-packages/utils/event-emitter/editor';
 import { Dropdown, Menu } from '@arco-design/web-react';
 import { HiOutlineCircleStack } from 'react-icons/hi2';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface ActionContainerProps {
   step: ActionStep;
@@ -20,6 +21,7 @@ interface ActionContainerProps {
 const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
   const { t } = useTranslation();
   const { debouncedCreateDocument } = useCreateDocument();
+  const { readonly } = useCanvasContext();
   const { hasEditorSelection, activeDocumentId } = useDocumentStoreShallow((state) => ({
     hasEditorSelection: state.hasEditorSelection,
     activeDocumentId: state.activeDocumentId,
@@ -129,7 +131,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
           </Dropdown>
         )}
       </div>
-      {!isPending && (
+      {!isPending && !readonly && (
         <div className="flex flex-row justify-between items-center text-sm">
           <div className="-ml-1 text-sm flex flex-row items-center">
             {step.content && (

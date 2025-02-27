@@ -4,17 +4,21 @@ import { type Options } from '@hey-api/client-fetch';
 import { UseQueryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import {
   checkSettingsField,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -28,22 +32,29 @@ import {
 import {
   CheckSettingsFieldData,
   CheckSettingsFieldError,
+  ExportCanvasData,
+  ExportCanvasError,
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDataData,
+  GetCanvasDataError,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
   GetCollabTokenError,
   GetDocumentDetailData,
   GetDocumentDetailError,
   GetResourceDetailData,
   GetResourceDetailError,
   GetSettingsError,
-  GetShareContentData,
-  GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
   ListActionsError,
   ListCanvasesData,
   ListCanvasesError,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
   ListDocumentsData,
   ListDocumentsError,
   ListLabelClassesData,
@@ -106,6 +117,83 @@ export const useListCanvasesSuspense = <
       listCanvases({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
+export const useGetCanvasDetailSuspense = <
+  TData = Common.GetCanvasDetailDefaultResponse,
+  TError = GetCanvasDetailError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDetailData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useGetCanvasDataSuspense = <
+  TData = Common.GetCanvasDataDefaultResponse,
+  TError = GetCanvasDataError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDataData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasData({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useExportCanvasSuspense = <
+  TData = Common.ExportCanvasDefaultResponse,
+  TError = ExportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ExportCanvasData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplatesSuspense = <
+  TData = Common.ListCanvasTemplatesDefaultResponse,
+  TError = ListCanvasTemplatesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplates({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplateCategoriesSuspense = <
+  TData = Common.ListCanvasTemplateCategoriesDefaultResponse,
+  TError = ListCanvasTemplateCategoriesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then(
+        (response) => response.data as TData,
+      ) as TData,
+    ...options,
+  });
 export const useListResourcesSuspense = <
   TData = Common.ListResourcesDefaultResponse,
   TError = ListResourcesError,
@@ -164,21 +252,6 @@ export const useGetDocumentDetailSuspense = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
-    ...options,
-  });
-export const useGetShareContentSuspense = <
-  TData = Common.GetShareContentDefaultResponse,
-  TError = GetShareContentError,
-  TQueryKey extends Array<unknown> = unknown[],
->(
-  clientOptions: Options<GetShareContentData, true>,
-  queryKey?: TQueryKey,
-  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
-) =>
-  useSuspenseQuery<TData, TError>({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions, queryKey),
-    queryFn: () =>
-      getShareContent({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClassesSuspense = <

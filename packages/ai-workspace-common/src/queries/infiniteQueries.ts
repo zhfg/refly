@@ -4,6 +4,7 @@ import { type Options } from '@hey-api/client-fetch';
 import { InfiniteData, useInfiniteQuery, UseInfiniteQueryOptions } from '@tanstack/react-query';
 import {
   listCanvases,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -14,6 +15,8 @@ import {
 import {
   ListCanvasesData,
   ListCanvasesError,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
   ListDocumentsData,
   ListDocumentsError,
   ListLabelClassesData,
@@ -41,6 +44,31 @@ export const useListCanvasesInfinite = <
     queryKey: Common.UseListCanvasesKeyFn(clientOptions, queryKey),
     queryFn: ({ pageParam }) =>
       listCanvases({
+        ...clientOptions,
+        query: { ...clientOptions.query, page: pageParam as number },
+      }).then((response) => response.data as TData) as TData,
+    initialPageParam: '1',
+    getNextPageParam: (response) =>
+      (
+        response as {
+          nextPage: number;
+        }
+      ).nextPage,
+    ...options,
+  });
+export const useListCanvasTemplatesInfinite = <
+  TData = InfiniteData<Common.ListCanvasTemplatesDefaultResponse>,
+  TError = ListCanvasTemplatesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseInfiniteQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useInfiniteQuery({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions, queryKey),
+    queryFn: ({ pageParam }) =>
+      listCanvasTemplates({
         ...clientOptions,
         query: { ...clientOptions.query, page: pageParam as number },
       }).then((response) => response.data as TData) as TData,

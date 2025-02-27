@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore, useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { InvalidVerificationSession } from '@refly/errors';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 
 const RESEND_INTERVAL = 30;
 
@@ -15,6 +16,7 @@ export const VerificationModal = () => {
     setVerificationModalOpen: state.setVerificationModalOpen,
     reset: state.reset,
   }));
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
   const [isLoading, setIsLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [otp, setOtp] = useState('');
@@ -60,7 +62,7 @@ export const VerificationModal = () => {
 
     if (data?.success) {
       authStore.reset();
-      window.location.replace('/');
+      window.location.replace(isShareCanvas ? window.location.href : '/');
     }
   };
 

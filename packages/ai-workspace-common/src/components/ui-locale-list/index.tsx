@@ -8,7 +8,12 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useLocation } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const UILocaleList = React.memo(
-  (props: { children: React.ReactNode; width?: number; onChange?: (lng: LOCALE) => void }) => {
+  (props: {
+    children: React.ReactNode;
+    width?: number;
+    className?: string;
+    onChange?: (lng: LOCALE) => void;
+  }) => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
     const isLandingPage =
@@ -65,7 +70,7 @@ export const UILocaleList = React.memo(
     ];
 
     return (
-      <div>
+      <div className={props.className}>
         <Dropdown
           menu={{
             selectedKeys: [i18n.languages?.[0]],

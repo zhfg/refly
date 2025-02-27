@@ -186,7 +186,7 @@ export class SearchService {
     const documents = await this.prisma.document.findMany({
       where: {
         docId: { in: docIds },
-        OR: [{ uid: user.uid }, { shareCode: { not: null } }],
+        uid: user.uid,
         deletedAt: null,
       },
     });

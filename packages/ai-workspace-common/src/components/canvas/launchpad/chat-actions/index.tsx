@@ -45,7 +45,7 @@ export const ChatActions = memo(
       contextItems,
     } = props;
     const { t } = useTranslation();
-    const { canvasId } = useCanvasContext();
+    const { canvasId, readonly } = useCanvasContext();
     const { handleUploadImage } = useUploadImage();
 
     const handleSendClick = () => {
@@ -76,7 +76,7 @@ export const ChatActions = memo(
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    return (
+    return readonly ? null : (
       <div className={cn('flex justify-between items-center', className)} ref={containerRef}>
         <div className="flex gap-2.5">
           <ModelSelector

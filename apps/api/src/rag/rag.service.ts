@@ -324,6 +324,69 @@ export class RAGService {
     });
   }
 
+  async duplicateDocument(param: {
+    sourceUid: string;
+    targetUid: string;
+    sourceDocId: string;
+    targetDocId: string;
+  }) {
+    const { sourceUid, targetUid, sourceDocId, targetDocId } = param;
+
+    try {
+      this.logger.log(
+        `Duplicating document ${sourceDocId} from user ${sourceUid} to user ${targetUid}`,
+      );
+
+      // Fetch all points for the source document
+      const points = await this.qdrant.scroll({
+        filter: {
+          must: [
+            { key: 'tenantId', match: { value: sourceUid } },
+            { key: 'docId', match: { value: sourceDocId } },
+          ],
+        },
+        with_payload: true,
+        with_vector: true,
+      });
+
+      if (!points?.length) {
+        this.logger.warn(`No points found for document ${sourceDocId}`);
+        return { size: 0, pointsCount: 0 };
+      }
+
+      // Prepare points for the target user
+      const pointsToUpsert: PointStruct[] = points.map((point) => ({
+        ...point,
+        id: genResourceUuid(`${sourceUid}-${targetDocId}-${point.payload.seq ?? 0}`),
+        payload: {
+          ...point.payload,
+          tenantId: targetUid,
+        },
+      }));
+
+      // Calculate the size of the points to be upserted
+      const size = QdrantService.estimatePointsSize(pointsToUpsert);
+
+      // Perform the upsert operation
+      await this.qdrant.batchSaveData(pointsToUpsert);
+
+      this.logger.log(
+        `Successfully duplicated ${pointsToUpsert.length} points for document ${sourceDocId} to user ${targetUid}`,
+      );
+
+      return {
+        size,
+        pointsCount: pointsToUpsert.length,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to duplicate document ${sourceDocId} from user ${sourceUid} to ${targetUid}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
   async retrieve(user: User, param: HybridSearchParam): Promise<ContentPayload[]> {
     if (!param.vector) {
       param.vector = await this.embeddings.embedQuery(param.query);

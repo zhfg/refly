@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useRef, useMemo, useCallback, useState } from 'react';
-import { useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { useListSkills } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { Skill } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { Dropdown, MenuProps } from 'antd';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -28,15 +28,7 @@ export const SkillDisplay = () => {
   const skillDisplayRef = useRef<HTMLDivElement>(null);
   const containCnt = 3;
 
-  const { data } = useListSkills({}, [], {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-  });
-
-  const skills = useMemo(() => data?.data ?? [], [data?.data]);
+  const skills = useListSkills();
 
   const handleSkillSelect = useCallback(
     (skill: Skill) => {

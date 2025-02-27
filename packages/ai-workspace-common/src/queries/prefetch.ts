@@ -4,17 +4,21 @@ import { type Options } from '@hey-api/client-fetch';
 import { type QueryClient } from '@tanstack/react-query';
 import {
   checkSettingsField,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -27,11 +31,14 @@ import {
 } from '../requests/services.gen';
 import {
   CheckSettingsFieldData,
+  ExportCanvasData,
   GetActionResultData,
+  GetCanvasDataData,
+  GetCanvasDetailData,
   GetDocumentDetailData,
   GetResourceDetailData,
-  GetShareContentData,
   ListCanvasesData,
+  ListCanvasTemplatesData,
   ListDocumentsData,
   ListLabelClassesData,
   ListLabelInstancesData,
@@ -64,6 +71,47 @@ export const prefetchUseListCanvases = (
     queryKey: Common.UseListCanvasesKeyFn(clientOptions),
     queryFn: () => listCanvases({ ...clientOptions }).then((response) => response.data),
   });
+export const prefetchUseGetCanvasDetail = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDetailData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions),
+    queryFn: () => getCanvasDetail({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseGetCanvasData = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDataData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions),
+    queryFn: () => getCanvasData({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseExportCanvas = (
+  queryClient: QueryClient,
+  clientOptions: Options<ExportCanvasData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions),
+    queryFn: () => exportCanvas({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseListCanvasTemplates = (
+  queryClient: QueryClient,
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions),
+    queryFn: () => listCanvasTemplates({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseListCanvasTemplateCategories = (
+  queryClient: QueryClient,
+  clientOptions: Options<unknown, true> = {},
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then((response) => response.data),
+  });
 export const prefetchUseListResources = (
   queryClient: QueryClient,
   clientOptions: Options<ListResourcesData, true> = {},
@@ -95,14 +143,6 @@ export const prefetchUseGetDocumentDetail = (
   queryClient.prefetchQuery({
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions),
     queryFn: () => getDocumentDetail({ ...clientOptions }).then((response) => response.data),
-  });
-export const prefetchUseGetShareContent = (
-  queryClient: QueryClient,
-  clientOptions: Options<GetShareContentData, true>,
-) =>
-  queryClient.prefetchQuery({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions),
-    queryFn: () => getShareContent({ ...clientOptions }).then((response) => response.data),
   });
 export const prefetchUseListLabelClasses = (
   queryClient: QueryClient,

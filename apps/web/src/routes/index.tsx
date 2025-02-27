@@ -18,6 +18,7 @@ import { HomeRedirect } from '@refly-packages/ai-workspace-common/components/hom
 const Home = lazy(() => import('@/pages/home'));
 const Canvas = lazy(() => import('@/pages/canvas'));
 const Pricing = lazy(() => import('@/pages/pricing'));
+const ShareCanvasPage = lazy(() => import('@/pages/share'));
 
 const prefetchRoutes = () => {
   // Prefetch common routes
@@ -62,10 +63,10 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch('/');
 
-  const isShareContent = useMatch('/share/:shareCode');
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
   const isPricing = useMatch('/pricing');
 
-  if (!isShareContent && !isPricing) {
+  if (!isShareCanvas && !isPricing) {
     if (!userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
       return <SuspenseLoading />;
     }
@@ -83,7 +84,7 @@ export const AppRouter = (props: { layout?: any }) => {
         <Routes>
           <Route path="/" element={<HomeRedirect defaultNode={<Home />} />} />
           <Route path="/pricing" element={<Pricing />} />
-
+          <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}
@@ -92,7 +93,6 @@ export const AppRouter = (props: { layout?: any }) => {
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
           />
-          {/* <Route path="/share/:shareCode" element={<ShareContent />} /> */}
         </Routes>
       </Layout>
     </Suspense>
