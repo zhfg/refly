@@ -167,6 +167,12 @@ importers:
       ioredis:
         specifier: ^5.4.1
         version: 5.4.1
+      json-parse-even-better-errors:
+        specifier: ^4.0.0
+        version: 4.0.0
+      jsonrepair:
+        specifier: ^3.12.0
+        version: 3.12.0
       jsonwebtoken:
         specifier: ~9.0.2
         version: 9.0.2
@@ -254,6 +260,12 @@ importers:
       yjs:
         specifier: ^13.6.8
         version: 13.6.16
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+      zod-to-json-schema:
+        specifier: ^3.24.3
+        version: 3.24.3(zod@3.23.8)
     devDependencies:
       '@golevelup/ts-jest':
         specifier: ^0.6.2
@@ -2396,7 +2408,7 @@ packages:
       openai: 4.83.0(ws@8.17.1)(zod@3.23.8)
       sharp: 0.33.5
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -4404,7 +4416,7 @@ packages:
       uuid: 10.0.0
       ws: 8.17.1
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - '@langchain/anthropic'
       - '@langchain/aws'
@@ -22457,14 +22469,6 @@ packages:
     dependencies:
       async: 3.2.6
       jszip: 3.10.1
-    dev: false
-
-  /zod-to-json-schema@3.23.3(zod@3.23.8):
-    resolution: {integrity: sha512-TYWChTxKQbRJp5ST22o/Irt9KC5nj7CdBKYB/AosCRdj/wxEMvv4NNaj9XVUHDOIp53ZxArGhnw5HMZziPFjog==}
-    peerDependencies:
-      zod: ^3.23.3
-    dependencies:
-      zod: 3.23.8
     dev: false
 
   /zod-to-json-schema@3.24.3(zod@3.23.8):

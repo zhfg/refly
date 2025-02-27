@@ -30,14 +30,12 @@ import { Prisma } from '@prisma/client';
 import { genCanvasID, genCanvasTemplateID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
 import { QUEUE_DELETE_KNOWLEDGE_ENTITY, QUEUE_DUPLICATE_CANVAS } from '@/utils/const';
-import { ChatOpenAI } from '@langchain/openai';
-import { HumanMessage } from '@langchain/core/messages';
-import { SystemMessage } from '@langchain/core/messages';
 import { AutoNameCanvasJobData, DuplicateCanvasJobData } from './canvas.dto';
 import { streamToBuffer } from '@/utils';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import { ActionService } from '@/action/action.service';
+import { generateCanvasTitle, CanvasContentItem } from './canvas-title-generator';
 
 @Injectable()
 export class CanvasService {
@@ -620,7 +618,8 @@ export class CanvasService {
       where: { targetId: canvasId, targetType: 'canvas' },
     });
 
-    const canvasContent = await Promise.all(
+    // Collect content items for title generation
+    const contentItems: CanvasContentItem[] = await Promise.all(
       results.map(async (result) => {
         const { resultId, version, input, title } = result;
         const steps = await this.prisma.actionStep.findMany({
@@ -628,60 +627,54 @@ export class CanvasService {
         });
         const parsedInput = JSON.parse(input ?? '{}');
         const question = parsedInput?.query ?? title;
+        const answer = steps.map((s) => s.content.slice(0, 100)).join('\n');
 
-        return `Question: ${question}\nAnswer: ${steps.map((s) => s.content.slice(0, 100)).join('\n')}`;
+        return {
+          question,
+          answer,
+        };
       }),
     );
 
     // If no action results, try to get all entities associated with the canvas
-    if (canvasContent.length === 0) {
+    if (contentItems.length === 0) {
       const relations = await this.prisma.canvasEntityRelation.findMany({
         where: { canvasId, entityType: { in: ['resource', 'document'] }, deletedAt: null },
       });
+
       const documents = await this.prisma.document.findMany({
         select: { title: true, contentPreview: true },
         where: { docId: { in: relations.map((r) => r.entityId) } },
       });
+
       const resources = await this.prisma.resource.findMany({
         select: { title: true, contentPreview: true },
         where: { resourceId: { in: relations.map((r) => r.entityId) } },
       });
-      canvasContent.push(
-        ...documents.map((d) => `Title: ${d.title}\nContent Preview: ${d.contentPreview}`),
-        ...resources.map((r) => `Title: ${r.title}\nContent Preview: ${r.contentPreview}`),
+
+      contentItems.push(
+        ...documents.map((d) => ({
+          title: d.title,
+          contentPreview: d.contentPreview,
+        })),
+        ...resources.map((r) => ({
+          title: r.title,
+          contentPreview: r.contentPreview,
+        })),
       );
     }
 
-    const combinedContent = canvasContent.filter(Boolean).join('\n\n');
-
-    if (!combinedContent) {
+    if (contentItems.length === 0) {
       return { title: '' };
     }
 
     const defaultModel = await this.subscriptionService.getDefaultModel();
     this.logger.log(`Using default model for auto naming: ${defaultModel?.name}`);
 
-    const model = new ChatOpenAI({
-      model: defaultModel?.name,
-      apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
-      configuration: {
-        baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1',
-        defaultHeaders: {
-          'HTTP-Referer': 'https://refly.ai',
-          'X-Title': 'Refly',
-        },
-      },
-    });
+    // Use the new structured title generation approach
+    const newTitle = await generateCanvasTitle(contentItems, defaultModel, this.logger);
 
-    const systemPrompt =
-      'Given the following content from a canvas, generate a concise and descriptive title (maximum 5 words)';
-    const result = await model.invoke([
-      new SystemMessage(systemPrompt),
-      new HumanMessage(combinedContent),
-    ]);
-    const newTitle = result.content.toString();
-
-    if (directUpdate) {
+    if (directUpdate && newTitle) {
       await this.updateCanvas(user, {
         canvasId,
         title: newTitle,
