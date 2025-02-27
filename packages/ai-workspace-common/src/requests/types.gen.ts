@@ -828,13 +828,13 @@ export type SourceMeta = {
   /**
    * Source type
    */
-  sourceType?: 'webSearch' | 'library' | 'urlSource';
+  sourceType?: 'webSearch' | 'library';
 };
 
 /**
  * Source type
  */
-export type sourceType = 'webSearch' | 'library' | 'urlSource';
+export type sourceType = 'webSearch' | 'library';
 
 /**
  * Source selection

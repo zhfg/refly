@@ -201,15 +201,6 @@ export async function prepareContext(
   const contextStr = concatMergedContextToStr(mergedContext);
   const sources = flattenMergedContextToSources(mergedContext);
 
-  ctx.ctxThis.engine.logger.log(
-    `- contextStr: ${contextStr}
-     - sources: ${safeStringifyJSON(sources)}`,
-  );
-
-  ctx.ctxThis.engine.logger.log(
-    `Prepared context successfully! ${safeStringifyJSON(mergedContext)}`,
-  );
-
   return { contextStr, sources };
 }
 

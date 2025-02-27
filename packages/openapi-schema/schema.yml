@@ -2528,7 +2528,6 @@ components:
           enum:
             - webSearch
             - library
-            - urlSource
     SourceSelection:
       type: object
       description: Source selection
