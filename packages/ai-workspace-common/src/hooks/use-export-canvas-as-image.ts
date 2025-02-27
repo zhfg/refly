@@ -62,7 +62,7 @@ export const useExportCanvasAsImage = () => {
                 }
               }
 
-              // 隐藏 miniMap，防止其被导出到图片中
+              // hide miniMap, prevent it from being exported to the image
               const miniMap = clonedContainer.querySelector('.react-flow__minimap');
               if (miniMap instanceof HTMLElement) {
                 miniMap.style.display = 'none';
