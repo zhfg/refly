@@ -62,7 +62,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const [open, setOpen] = useState(false);
   const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [access, setAccess] = useState<ShareAccess>('off');
-  const shareLink = `${getClientOrigin()}/share/canvas/${canvasId}`;
+  const shareLink = useMemo(() => `${getClientOrigin()}/share/canvas/${canvasId}`, [canvasId]);
   const [title, setTitle] = useState('');
   const accessOptions = useMemo(
     () => [
@@ -80,27 +80,30 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     [t],
   );
 
-  const buttons = [
-    {
-      label: 'copyLink',
-      icon: <IconLink className="w-3.5 h-3.5 flex items-center justify-center" />,
-      onClick: () => {
-        navigator.clipboard.writeText(shareLink);
-        message.success(t('shareContent.copyLinkSuccess'));
+  const buttons = useMemo(
+    () => [
+      {
+        label: 'copyLink',
+        icon: <IconLink className="w-3.5 h-3.5 flex items-center justify-center" />,
+        onClick: (link: string) => {
+          navigator.clipboard.writeText(link);
+          message.success(t('shareContent.copyLinkSuccess'));
+        },
+        disabled: access === 'off',
       },
-      disabled: access === 'off',
-    },
-    // TODO: do not delete this
-    // {
-    //   label: 'publishTemplate',
-    //   icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
-    //   onClick: () => {
-    //     setCreateTemplateModalVisible(true);
-    //     setOpen(false);
-    //   },
-    //   disabled: false,
-    // },
-  ];
+      // TODO: do not delete this
+      // {
+      //   label: 'publishTemplate',
+      //   icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
+      //   onClick: () => {
+      //     setCreateTemplateModalVisible(true);
+      //     setOpen(false);
+      //   },
+      //   disabled: false,
+      // },
+    ],
+    [access, t],
+  );
 
   const { data: canvasData } = useGetCanvasData({ query: { canvasId } });
 
@@ -170,7 +173,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
               key={button.label}
               icon={button.icon}
               disabled={button.disabled}
-              onClick={button.onClick}
+              onClick={() => button.onClick(shareLink)}
             >
               {t(`shareContent.${button.label}`)}
             </Button>
@@ -178,7 +181,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         </div>
       </div>
     ),
-    [accessOptions, access, setAccess, t],
+    [accessOptions, access, setAccess, t, shareLink, buttons],
   );
 
   return (
