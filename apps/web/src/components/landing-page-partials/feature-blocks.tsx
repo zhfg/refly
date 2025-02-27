@@ -10,7 +10,6 @@ import {
   BentoGrid,
 } from '@refly-packages/ai-workspace-common/components/magicui/bento-grid';
 import { Marquee } from '@refly-packages/ai-workspace-common/components/magicui/marquee';
-import GlobeDemo from '@refly-packages/ai-workspace-common/components/magicui/globe-demo';
 import { IconType } from 'react-icons';
 import { AiOutlineAppstore } from 'react-icons/ai';
 
@@ -152,9 +151,7 @@ export default function FeatureBlocks() {
       cta: 'Learn more',
       color: '#F1A62D',
       tagShadow: '0 2px 4px 0 rgba(0,0,0,0.10), inset 0 -4px 0 0 rgba(200,140,44,0.20)',
-      background: (
-        <GlobeDemo className="absolute right-2 top-4 h-[300px] border-none transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105" />
-      ),
+      background: <div> </div>,
     },
   ];
 
