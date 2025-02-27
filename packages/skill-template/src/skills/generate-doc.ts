@@ -19,6 +19,7 @@ import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countToken } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 import { processQuery } from '../scheduler/utils/queryProcessor';
+import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 
 // prompts
 import * as generateDocument from '../scheduler/module/generateDocument';
@@ -61,6 +62,7 @@ export class GenerateDoc extends BaseSkill {
     config: SkillRunnableConfig,
     module: SkillPromptModule,
   ) => {
+    config.metadata.step = { name: 'analyzeQuery' };
     const { messages = [], images = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
     const { tplConfig } = config?.configurable || {};
@@ -80,14 +82,26 @@ export class GenerateDoc extends BaseSkill {
       state,
     });
 
+    // Extract URLs from the query and crawl them with optimized concurrent processing
+    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5, // Increase concurrent URL crawling limit
+      batchSize: 8, // Increase batch size for URL processing
+    });
+
+    this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
+    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+
     let context = '';
     let sources: Source[] = [];
 
-    const needPrepareContext = hasContext && remainingTokens > 0;
+    // Consider URL sources for context preparation
+    const hasUrlSources = urlSources.length > 0;
+    const needPrepareContext = (hasContext || hasUrlSources) && remainingTokens > 0;
     const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
 
     this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+    this.engine.logger.log(`hasUrlSources: ${hasUrlSources}`);
 
     if (needPrepareContext) {
       config.metadata.step = { name: 'analyzeContext' };
@@ -98,6 +112,7 @@ export class GenerateDoc extends BaseSkill {
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
           rewrittenQueries,
+          urlSources, // Pass URL sources to the prepareContext function
         },
         {
           config,

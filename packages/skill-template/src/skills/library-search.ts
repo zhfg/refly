@@ -8,6 +8,7 @@ import {
   SkillTemplateConfigDefinition,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 
@@ -16,6 +17,7 @@ import { prepareContext } from '../scheduler/utils/context';
 import { truncateSource } from '../scheduler/utils/truncator';
 import * as librarySearch from '../scheduler/module/librarySearch';
 import { processQuery } from '../scheduler/utils/queryProcessor';
+import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 
 export class LibrarySearch extends BaseSkill {
   name = 'librarySearch';
@@ -47,7 +49,7 @@ export class LibrarySearch extends BaseSkill {
     const { locale = 'en', currentSkill } = config.configurable;
 
     // Set current step
-    config.metadata.step = { name: 'librarySearch' };
+    config.metadata.step = { name: 'analyzeQuery' };
 
     // Force enable knowledge base search and disable web search
     config.configurable.tplConfig = {
@@ -75,6 +77,18 @@ export class LibrarySearch extends BaseSkill {
       state,
     });
 
+    // Extract URLs from the query and crawl them with optimized concurrent processing
+    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5, // Increase concurrent URL crawling limit
+      batchSize: 8, // Increase batch size for URL processing
+    });
+
+    this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
+    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+
+    // Set current step
+    config.metadata.step = { name: 'librarySearch' };
+
     // Prepare context with library search focus
     const { contextStr, sources } = await prepareContext(
       {
@@ -83,6 +97,7 @@ export class LibrarySearch extends BaseSkill {
         mentionedContext,
         maxTokens: remainingTokens,
         enableMentionedContext: true,
+        urlSources, // Pass URL sources to the prepareContext function
       },
       {
         config,

@@ -901,7 +901,7 @@ export const SourceMetaSchema = {
     sourceType: {
       type: 'string',
       description: 'Source type',
-      enum: ['webSearch', 'library'],
+      enum: ['webSearch', 'library', 'urlSource'],
     },
   },
 } as const;

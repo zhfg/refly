@@ -35,6 +35,18 @@ const translations = {
     title: 'Generate Answer',
     description: 'Start to generate answer...',
   },
+  extractUrls: {
+    title: 'Extract URLs',
+    description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
+  },
+  crawlUrls: {
+    title: 'Read URLs',
+    description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
+  },
+  analyzeQuery: {
+    title: 'Analyze Query',
+    description: 'Analyze query completed, completed in {{duration}}ms',
+  },
 };
 
 export default translations;

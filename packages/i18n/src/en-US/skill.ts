@@ -4,6 +4,9 @@ const translations = {
     description: 'Answer questions based on the context',
     placeholder: 'Ask AI a question, press / to select skill...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       analyzeContext: {
         name: 'Context Analysis',
       },
@@ -17,6 +20,9 @@ const translations = {
     description: 'Answer questions based on the custom system prompt and context',
     placeholder: 'Let AI help you answer questions with a custom system prompt...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       analyzeContext: {
         name: 'Context Analysis',
       },
@@ -30,6 +36,9 @@ const translations = {
     description: 'Generate documents based on the question and context',
     placeholder: 'Let AI help you generate a document...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       analyzeContext: {
         name: 'Context Analysis',
       },
@@ -55,6 +64,9 @@ const translations = {
     description: 'Search the web and get answers',
     placeholder: 'Search the web and get answers...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       analyzeContext: {
         name: 'Context Analysis',
       },
@@ -71,6 +83,9 @@ const translations = {
     description: 'Search the library and get answers',
     placeholder: 'Search the library and get answers...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       analyzeContext: {
         name: 'Context Analysis',
       },
@@ -87,6 +102,9 @@ const translations = {
     description: 'Brainstorm questions based on the context',
     placeholder: 'Let AI recommend questions for you...',
     steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
       recommendQuestions: {
         name: 'Generate Recommended Questions',
       },

@@ -17,6 +17,7 @@ import { prepareContext } from '../scheduler/utils/context';
 import * as webSearch from '../scheduler/module/webSearch/index';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { processQuery } from '../scheduler/utils/queryProcessor';
+import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 
 export class WebSearch extends BaseSkill {
   name = 'webSearch';
@@ -60,9 +61,8 @@ export class WebSearch extends BaseSkill {
   ): Promise<Partial<GraphState>> => {
     const { messages = [], images = [] } = state;
     const { locale = 'en', currentSkill } = config.configurable;
-
     // Set current step
-    config.metadata.step = { name: 'webSearch' };
+    config.metadata.step = { name: 'analyzeQuery' };
 
     // Force enable web search and disable knowledge base search
     config.configurable.tplConfig = {
@@ -89,6 +89,18 @@ export class WebSearch extends BaseSkill {
       state,
     });
 
+    // Extract URLs from the query and crawl them with optimized concurrent processing
+    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5, // Increase concurrent URL crawling limit
+      batchSize: 8, // Increase batch size for URL processing
+    });
+
+    this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
+    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+
+    // Set current step
+    config.metadata.step = { name: 'webSearch' };
+
     // Prepare context with web search focus
     const { contextStr, sources } = await prepareContext(
       {
@@ -97,6 +109,7 @@ export class WebSearch extends BaseSkill {
         maxTokens: remainingTokens,
         enableMentionedContext: true,
         rewrittenQueries,
+        urlSources, // Pass URL sources to the prepareContext function
       },
       {
         config,

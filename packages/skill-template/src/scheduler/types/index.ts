@@ -65,6 +65,7 @@ export interface IContext {
   messages?: BaseMessage[];
   webSearchSources?: Source[];
   librarySearchSources?: Source[];
+  urlSources?: Source[];
   locale?: string | LOCALE;
 }
 
