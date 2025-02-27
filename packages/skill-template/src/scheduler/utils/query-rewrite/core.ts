@@ -15,21 +15,63 @@ import { buildNormalQueryRewriteExamples, buildVagueQueryRewriteExamples } from 
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
+  // Validate context exists and provide defaults with nullish coalescing
+  if (!context) {
+    return { resources: [], documents: [], contentList: [] };
+  }
+
+  // Destructure with default empty arrays for safety
   const { resources = [], documents = [], contentList = [] } = context;
 
-  const preprocessedContext = {
-    resources: resources.map((r, index) => ({
-      ...r,
-      resource: { ...r.resource, resourceId: `resource-${index}` },
-    })),
-    documents: documents.map((c, index) => ({
-      ...c,
-      document: { ...c.document, docId: `document-${index}` },
-    })),
-    contentList: contentList.map((c, index) => ({
-      ...c,
-      metadata: { ...c.metadata, entityId: `content-${index}` },
-    })),
+  const preprocessedContext: IContext = {
+    // Verify resources is an array before mapping
+    resources: Array.isArray(resources)
+      ? resources
+          .map((r, index) => {
+            // Skip null/undefined items
+            if (!r) return null;
+            // Ensure we maintain the original type with added properties
+            return {
+              ...r,
+              resource: r.resource
+                ? { ...r.resource, resourceId: `resource-${index}` }
+                : r.resource,
+            };
+          })
+          .filter(Boolean) // Remove null/undefined items
+      : [],
+
+    // Verify documents is an array before mapping
+    documents: Array.isArray(documents)
+      ? documents
+          .map((c, index) => {
+            // Skip null/undefined items
+            if (!c) return null;
+            // Ensure we maintain the original type with added properties
+            return {
+              ...c,
+              document: c.document ? { ...c.document, docId: `document-${index}` } : c.document,
+            };
+          })
+          .filter(Boolean) // Remove null/undefined items
+      : [],
+
+    // Verify contentList is an array before mapping
+    contentList: Array.isArray(contentList)
+      ? contentList
+          .map((c, index) => {
+            // Skip null/undefined items
+            if (!c) return null;
+            // Ensure we maintain the original type with added properties
+            return {
+              ...c,
+              metadata: c.metadata
+                ? { ...c.metadata, entityId: `content-${index}` }
+                : { entityId: `content-${index}` },
+            };
+          })
+          .filter(Boolean) // Remove null/undefined items
+      : [],
   };
 
   return preprocessedContext;
@@ -39,44 +81,85 @@ export const postprocessContext = (
   mentionedContextList: MentionedContextItem[],
   originalContext: IContext,
 ): IContext => {
+  // Initialize with empty arrays as default
   const context: IContext = {
     resources: [],
     documents: [],
     contentList: [],
   };
 
+  // Validate inputs exist before processing
+  if (!mentionedContextList || !Array.isArray(mentionedContextList) || !originalContext) {
+    return context;
+  }
+
+  // Ensure originalContext properties are arrays
+  const originalDocuments = Array.isArray(originalContext.documents)
+    ? originalContext.documents
+    : [];
+  const originalResources = Array.isArray(originalContext.resources)
+    ? originalContext.resources
+    : [];
+  const originalContentList = Array.isArray(originalContext.contentList)
+    ? originalContext.contentList
+    : [];
+
   for (const item of mentionedContextList) {
+    // Validate item exists and has a type before processing
+    if (!item || !item.type) continue;
+
     if (item.type === 'document') {
-      // Find original document from originalContext by entityId
-      const originalDocument = originalContext.documents.find(
-        (_c, index) => `document-${index}` === item.entityId,
+      // Safely check if entityId exists
+      const entityId = item.entityId;
+      if (!entityId) continue;
+
+      // Find original document from originalContext by entityId with a safe index check
+      const originalDocument = originalDocuments.find(
+        (_c, index) => index >= 0 && `document-${index}` === entityId,
       );
+
       if (originalDocument) {
         context.documents.push({
           ...originalDocument,
-          metadata: { ...originalDocument.metadata, useWholeContent: item?.useWholeContent },
+          metadata: originalDocument.metadata
+            ? { ...originalDocument.metadata, useWholeContent: item.useWholeContent }
+            : { useWholeContent: item.useWholeContent },
         });
       }
     } else if (item.type === 'resource') {
-      // Find original resource from originalContext by entityId
-      const originalResource = originalContext.resources.find(
-        (_r, index) => `resource-${index}` === item.entityId,
+      // Safely check if entityId exists
+      const entityId = item.entityId;
+      if (!entityId) continue;
+
+      // Find original resource from originalContext by entityId with a safe index check
+      const originalResource = originalResources.find(
+        (_r, index) => index >= 0 && `resource-${index}` === entityId,
       );
+
       if (originalResource) {
         context.resources.push({
           ...originalResource,
-          metadata: { ...originalResource.metadata, useWholeContent: item?.useWholeContent },
+          metadata: originalResource.metadata
+            ? { ...originalResource.metadata, useWholeContent: item.useWholeContent }
+            : { useWholeContent: item.useWholeContent },
         });
       }
     } else if (item.type === 'selectedContent') {
-      // Find original selectedContent from originalContext by entityId
-      const originalSelectedContent = originalContext.contentList.find(
-        (_c, index) => `content-${index}` === item.entityId,
+      // Safely check if entityId exists
+      const entityId = item.entityId;
+      if (!entityId) continue;
+
+      // Find original selectedContent from originalContext by entityId with a safe index check
+      const originalSelectedContent = originalContentList.find(
+        (_c, index) => index >= 0 && `content-${index}` === entityId,
       );
+
       if (originalSelectedContent) {
         context.contentList.push({
           ...originalSelectedContent,
-          metadata: { ...originalSelectedContent.metadata, useWholeContent: item?.useWholeContent },
+          metadata: originalSelectedContent.metadata
+            ? { ...originalSelectedContent.metadata, useWholeContent: item.useWholeContent }
+            : { useWholeContent: item.useWholeContent },
         });
       }
     }

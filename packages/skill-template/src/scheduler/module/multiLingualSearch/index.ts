@@ -92,7 +92,10 @@ export const callMultiLingualWebSearch = async (
     let queries = rewrittenQueries || [query]; // Use rewrittenQueries if available
 
     // Step 1: Rewrite query (only if no rewrittenQueries provided)
-    if (enableQueryRewrite && (!rewrittenQueries || rewrittenQueries.length === 0)) {
+    if (
+      enableQueryRewrite &&
+      (!rewrittenQueries || rewrittenQueries.length === 1 || rewrittenQueries.length === 0)
+    ) {
       timeTracker.startStep('rewriteQuery');
       try {
         const rewriteResult = await extractStructuredData(
