@@ -735,13 +735,13 @@ export type SourceMeta = {
   /**
    * Source type
    */
-  sourceType?: 'webSearch' | 'library';
+  sourceType?: 'webSearch' | 'library' | 'urlSource';
 };
 
 /**
  * Source type
  */
-export type sourceType = 'webSearch' | 'library';
+export type sourceType = 'webSearch' | 'library' | 'urlSource';
 
 /**
  * Source selection

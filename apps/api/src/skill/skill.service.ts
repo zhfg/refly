@@ -96,6 +96,7 @@ import { DirectConnection } from '@hocuspocus/server';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
 import { MiscService } from '@/misc/misc.service';
 import { AutoNameCanvasJobData } from '@/canvas/canvas.dto';
+import { ParserFactory } from '@/knowledge/parsers/factory';
 
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   if (param.triggerType === 'simpleEvent') {
@@ -216,6 +217,29 @@ export class SkillService {
       inMemorySearchWithIndexing: async (user, options) => {
         const result = await this.rag.inMemorySearchWithIndexing(user, options);
         return buildSuccessResponse(result);
+      },
+      crawlUrl: async (_user, url) => {
+        try {
+          const parserFactory = new ParserFactory(this.config);
+          const jinaParser = parserFactory.createParser('jina', {
+            resourceId: `temp-${Date.now()}`,
+          });
+
+          const result = await jinaParser.parse(url);
+
+          return {
+            title: result.title,
+            content: result.content,
+            metadata: { ...result.metadata, url },
+          };
+        } catch (error) {
+          this.logger.error(`Failed to crawl URL ${url}: ${error.stack}`);
+          return {
+            title: '',
+            content: '',
+            metadata: { url, error: error.message },
+          };
+        }
       },
     };
   };

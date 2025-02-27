@@ -35,6 +35,18 @@ const translations = {
     title: '生成答案',
     description: '开始生成答案...',
   },
+  extractUrls: {
+    title: '提取网页链接',
+    description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
+  },
+  crawlUrls: {
+    title: '阅读网页链接',
+    description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
+  },
+  analyzeQuery: {
+    title: '分析需求',
+    description: '分析需求完成，耗时 {{duration}} 毫秒',
+  },
 };
 
 export default translations;

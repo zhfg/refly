@@ -28,12 +28,14 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
 };
 
 export const concatMergedContextToStr = (mergedContext: {
+  urlSources?: Source[];
   mentionedContext: IContext | null;
   relevantContext: IContext | null;
   webSearchSources: Source[];
   librarySearchSources?: Source[];
 }) => {
   const {
+    urlSources = [],
     mentionedContext,
     relevantContext,
     webSearchSources,
@@ -42,10 +44,13 @@ export const concatMergedContextToStr = (mergedContext: {
   let contextStr = '';
   const currentIndex = 1; // Start index
 
-  // Process mentioned context first
+  // Process URL sources first (highest priority)
+  const urlSourcesConcatRes = concatContextToStr({ urlSources }, currentIndex);
+
+  // Process mentioned context next
   const mentionedContextConcatRes = mentionedContext
-    ? concatContextToStr(mentionedContext, currentIndex)
-    : { contextStr: '', nextIndex: currentIndex };
+    ? concatContextToStr(mentionedContext, urlSourcesConcatRes.nextIndex)
+    : { contextStr: '', nextIndex: urlSourcesConcatRes.nextIndex };
 
   // Then process relevant context
   const relevantContextConcatRes = relevantContext
@@ -65,6 +70,10 @@ export const concatMergedContextToStr = (mergedContext: {
   );
 
   // Add sections in priority order
+  if (urlSourcesConcatRes.contextStr?.length > 0) {
+    contextStr += `<UrlSources>\n${urlSourcesConcatRes.contextStr}\n</UrlSources>\n\n`;
+  }
+
   if (mentionedContextConcatRes.contextStr?.length > 0) {
     contextStr += `<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
   }
@@ -85,12 +94,14 @@ export const concatMergedContextToStr = (mergedContext: {
 };
 
 export const flattenMergedContextToSources = (mergedContext: {
+  urlSources?: Source[];
   mentionedContext: IContext | null;
   relevantContext: IContext | null;
   webSearchSources: Source[];
   librarySearchSources?: Source[];
 }) => {
   const {
+    urlSources = [],
     mentionedContext,
     relevantContext,
     webSearchSources = [],
@@ -98,7 +109,11 @@ export const flattenMergedContextToSources = (mergedContext: {
   } = mergedContext || {};
 
   const sources = [
-    // Prioritize mentioned context
+    // Prioritize URL sources (highest priority)
+    ...flattenContextToSources({
+      urlSources,
+    }),
+    // Then mentioned context
     ...(mentionedContext ? flattenContextToSources(mentionedContext) : []),
     // Then relevant context
     ...(relevantContext ? flattenContextToSources(relevantContext) : []),
@@ -134,10 +149,21 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) =
     documents = [],
     webSearchSources = [],
     librarySearchSources = [],
+    urlSources = [],
   } = context || {};
 
   let contextStr = '';
   let index = startIndex; // Use passed in startIndex
+
+  // Process URL sources first (highest priority)
+  if (urlSources.length > 0) {
+    const concatUrlSource = (url: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='urlSource' url='${url}' title='${title}'>${content}</ContextItem>`;
+    };
+
+    contextStr += urlSources.map((s) => concatUrlSource(s.url, s.title, s.pageContent)).join('\n');
+    contextStr += '\n\n';
+  }
 
   if (contentList.length > 0) {
     // contextStr += 'Following are the user selected content: \n';
@@ -262,11 +288,27 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   const {
     webSearchSources = [],
     librarySearchSources = [],
+    urlSources = [],
     contentList = [],
     resources = [],
     documents = [],
   } = context || {};
   const sources: Source[] = [];
+
+  // URL sources (highest priority)
+  for (const source of urlSources) {
+    sources.push({
+      url: source.url,
+      title: source.title,
+      pageContent: source.pageContent,
+      metadata: {
+        ...source.metadata,
+        source: source.url,
+        title: source.title,
+        sourceType: 'urlSource', // Use 'webSearch' as source type for URL sources
+      },
+    });
+  }
 
   // Web search sources
   for (const source of webSearchSources) {

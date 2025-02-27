@@ -25,12 +25,14 @@ export async function prepareContext(
     maxTokens,
     enableMentionedContext,
     rewrittenQueries,
+    urlSources = [],
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
     enableMentionedContext: boolean;
     rewrittenQueries?: string[];
+    urlSources?: Source[];
   },
   ctx: {
     config: SkillRunnableConfig;
@@ -43,11 +45,17 @@ export async function prepareContext(
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
   ctx.ctxThis.engine.logger.log(`Enable Knowledge Base Search: ${enableKnowledgeBaseSearch}`);
+  ctx.ctxThis.engine.logger.log(`URL Sources Count: ${urlSources?.length || 0}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
   let remainingTokens = maxContextTokens;
   ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
+
+  // Calculate tokens used by URL sources
+  const urlSourcesTokens = countSourcesTokens(urlSources || []);
+  remainingTokens -= urlSourcesTokens;
+  ctx.ctxThis.engine.logger.log(`URL Sources Tokens: ${urlSourcesTokens}`);
 
   const { modelInfo } = ctx.config.configurable;
   const isSupportedModel = checkIsSupportedModel(modelInfo);
@@ -71,7 +79,7 @@ export async function prepareContext(
     processedWebSearchContext = preparedRes.processedWebSearchContext;
   }
   const webSearchContextTokens = countSourcesTokens(processedWebSearchContext.webSearchSources);
-  remainingTokens = maxContextTokens - webSearchContextTokens;
+  remainingTokens = maxContextTokens - webSearchContextTokens - urlSourcesTokens;
 
   // 2. library search context
   let processedLibrarySearchContext: IContext = {
@@ -159,6 +167,7 @@ export async function prepareContext(
   // Merge all contexts with proper deduplication
   const deduplicatedRelevantContext = deduplicateContexts(relevantContext);
   const mergedContext = {
+    urlSources: urlSources || [],
     mentionedContext: processedMentionedContext,
     relevantContext: deduplicatedRelevantContext,
     webSearchSources: processedWebSearchContext.webSearchSources,
