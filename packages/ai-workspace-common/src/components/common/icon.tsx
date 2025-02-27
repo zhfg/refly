@@ -34,6 +34,9 @@ import {
   LuLockOpen,
   LuLock,
   LuDownload,
+  LuX,
+  LuLink,
+  LuShare2,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -52,6 +55,8 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
 import { PiNotePencil } from 'react-icons/pi';
+import { VscNotebookTemplate } from 'react-icons/vsc';
+
 import { TfiBlackboard } from 'react-icons/tfi';
 
 import { IoLibraryOutline } from 'react-icons/io5';
@@ -78,6 +83,7 @@ import { memo } from 'react';
 
 export const IconReflyLogo = ReflyLogo;
 export const IconCanvas = TfiBlackboard;
+export const IconTemplate = VscNotebookTemplate;
 export const IconAskAI = LuSparkles;
 export const IconAskAIInput = TbInputSpark;
 export const IconImage = RiImageAiLine;
@@ -137,6 +143,10 @@ export const IconGuideLine = RiGuideLine;
 export const IconLanguage = IoLanguage;
 export const IconDeleteFile = TiDocumentDelete;
 export const IconDownloadFile = LuDownload;
+
+export const IconShare = LuShare2;
+export const IconClose = LuX;
+export const IconLink = LuLink;
 
 export const IconChrome = ChromeIcon;
 export const ModelProviderIcons = {

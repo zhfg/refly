@@ -11,6 +11,7 @@ import { Message } from '@arco-design/web-react';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const ContextItem = ({
   item,
@@ -28,6 +29,7 @@ export const ContextItem = ({
   onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
+  const { readonly } = useCanvasContext();
   const { title, entityId, selection, metadata } = item ?? {};
   const icon = getContextItemIcon(item.type, null, { withHistory: metadata?.withHistory });
   const { setSelectedNode } = useNodeSelection();
@@ -107,7 +109,7 @@ export const ContextItem = ({
           >
             {title}
           </span>
-          {!canNotRemove && (
+          {!canNotRemove && !readonly && (
             <IconClose
               className={cn('flex-shrink-0 text-xs cursor-pointer', {
                 'text-gray-300': disabled,

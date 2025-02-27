@@ -37,13 +37,15 @@ import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/com
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
-
+import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
+import { SiderLoggedOut } from './sider-logged-out';
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
 
-const SiderLogo = (props: {
+export const SiderLogo = (props: {
   source: 'sider' | 'popover';
   navigate: (path: string) => void;
   setCollapse: (collapse: boolean) => void;
@@ -154,11 +156,17 @@ const MenuItemContent = (props: {
     setShowCanvasListModal: state.setShowCanvasListModal,
   }));
 
+  const { setVisible } = useCanvasTemplateModal((state) => ({
+    setVisible: state.setVisible,
+  }));
+
   const handleNavClick = () => {
     if (type === 'Canvas') {
       setShowCanvasListModal(true);
     } else if (type === 'Library') {
       setShowLibraryModal(true);
+    } else if (type === 'Template') {
+      setVisible(true);
     }
   };
 
@@ -269,7 +277,7 @@ const getSelectedKey = (pathname: string) => {
   return '';
 };
 
-export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
+const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
   const { source = 'sider' } = props;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -310,7 +318,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
   const selectedKey = useMemo(() => getSelectedKey(location.pathname), [location.pathname]);
 
-  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library'], []);
+  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library', 'Template'], []);
 
   interface SiderCenterProps {
     key: string;
@@ -322,6 +330,12 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   }
 
   const siderSections: SiderCenterProps[] = [
+    // TODO: do not delete this, it's for future use
+    // {
+    //   key: 'Template',
+    //   name: 'template',
+    //   icon: <IconTemplate key="template" className="arco-icon" style={{ fontSize: 20 }} />,
+    // },
     {
       key: 'Canvas',
       name: 'canvas',
@@ -490,7 +504,17 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
         <SettingsGuideModal />
         <TourModal />
         <StorageExceededModal />
+        <CanvasTemplateModal />
       </div>
     </Sider>
   );
+};
+
+export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
+  const { source = 'sider' } = props;
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
+
+  return isLogin ? <SiderLoggedIn source={source} /> : <SiderLoggedOut source={source} />;
 };

@@ -11,7 +11,11 @@ import {
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { CanvasService } from './canvas.service';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
-import { canvasPO2DTO } from '@/canvas/canvas.dto';
+import {
+  canvasPO2DTO,
+  canvasTemplateCategoryPO2DTO,
+  canvasTemplatePO2DTO,
+} from '@/canvas/canvas.dto';
 import { buildSuccessResponse } from '@/utils';
 import {
   User,
@@ -19,7 +23,11 @@ import {
   DeleteCanvasRequest,
   AutoNameCanvasRequest,
   AutoNameCanvasResponse,
+  DuplicateCanvasRequest,
+  CreateCanvasTemplateRequest,
+  UpdateCanvasTemplateRequest,
 } from '@refly-packages/openapi-schema';
+import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/canvas')
 export class CanvasController {
@@ -34,6 +42,27 @@ export class CanvasController {
   ) {
     const canvases = await this.canvasService.listCanvases(user, { page, pageSize });
     return buildSuccessResponse(canvases.map(canvasPO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('detail')
+  async getCanvasDetail(@LoginedUser() user: User, @Query('canvasId') canvasId: string) {
+    const canvas = await this.canvasService.getCanvasDetail(user, canvasId);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('data')
+  async getCanvasData(@LoginedUser() user: User | null, @Query('canvasId') canvasId: string) {
+    const data = await this.canvasService.getCanvasRawData(user, canvasId);
+    return buildSuccessResponse(data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('duplicate')
+  async duplicateCanvas(@LoginedUser() user: User, @Body() body: DuplicateCanvasRequest) {
+    const canvas = await this.canvasService.duplicateCanvas(user, body);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -65,5 +94,44 @@ export class CanvasController {
   ): Promise<AutoNameCanvasResponse> {
     const data = await this.canvasService.autoNameCanvas(user, body);
     return buildSuccessResponse(data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('template/list')
+  async listCanvasTemplates(
+    @LoginedUser() user: User,
+    @Query('categoryId') categoryId: string,
+    @Query('scope', new DefaultValuePipe('public')) scope: 'public' | 'private',
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ) {
+    const templates = await this.canvasService.listCanvasTemplates(user, {
+      page,
+      pageSize,
+      scope,
+      categoryId,
+    });
+    return buildSuccessResponse(templates.map(canvasTemplatePO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('template/create')
+  async createCanvasTemplate(@LoginedUser() user: User, @Body() body: CreateCanvasTemplateRequest) {
+    const template = await this.canvasService.createCanvasTemplate(user, body);
+    return buildSuccessResponse(canvasTemplatePO2DTO(template));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('template/update')
+  async updateCanvasTemplate(@LoginedUser() user: User, @Body() body: UpdateCanvasTemplateRequest) {
+    const template = await this.canvasService.updateCanvasTemplate(user, body);
+    return buildSuccessResponse(canvasTemplatePO2DTO(template));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('template/category/list')
+  async listCanvasTemplateCategories() {
+    const categories = await this.canvasService.listCanvasTemplateCategories();
+    return buildSuccessResponse(categories.map(canvasTemplateCategoryPO2DTO));
   }
 }

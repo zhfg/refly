@@ -7,7 +7,7 @@ import { CanvasNodeData } from '../../components/canvas/nodes';
 export const usePatchNodeData = (selectedCanvasId?: string) => {
   const { canvasId: contextCanvasId, provider } = useCanvasContext();
   const { canvasId: routeCanvasId } = useParams();
-  const ydoc = provider.document;
+  const ydoc = provider?.document;
 
   const { setNodes } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,

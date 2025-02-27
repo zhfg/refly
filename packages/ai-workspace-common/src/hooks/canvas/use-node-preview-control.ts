@@ -47,7 +47,7 @@ export const useNodePreviewControl = ({
   // Cleanup non-existent node previews
   useEffect(() => {
     if (!nodePreviews?.length) return;
-    if (provider.status !== 'connected') return;
+    if (provider?.status !== 'connected') return;
 
     setTimeout(() => {
       const nodes = getNodes();

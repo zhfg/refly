@@ -26,6 +26,7 @@ import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParamsError } from '@refly-packages/errors';
+import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/misc')
 export class MiscController {
@@ -81,12 +82,12 @@ export class MiscController {
     return buildSuccessResponse({ content: result });
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('static/:objectKey')
   @Header('Access-Control-Allow-Origin', '*')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
   async serveStatic(
-    @LoginedUser() user: User,
+    @LoginedUser() user: User | null,
     @Param('objectKey') objectKey: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {

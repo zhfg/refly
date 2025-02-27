@@ -7,11 +7,13 @@ import { Edge } from '@xyflow/react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
+import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
 
 interface CanvasContextType {
   canvasId: string;
-  provider: HocuspocusProvider;
-  localProvider: IndexeddbPersistence;
+  provider: HocuspocusProvider | null;
+  localProvider: IndexeddbPersistence | null;
+  readonly: boolean;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -48,8 +50,13 @@ const getEdgesFromYDoc = (ydoc: Y.Doc) => {
 
 export const CanvasProvider = ({
   canvasId,
+  readonly = false,
   children,
-}: { canvasId: string; children: React.ReactNode }) => {
+}: {
+  canvasId: string;
+  readonly?: boolean;
+  children: React.ReactNode;
+}) => {
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000;
@@ -67,6 +74,29 @@ export const CanvasProvider = ({
     setEdges: state.setEdges,
   }));
 
+  // Fetch canvas data from API when in readonly mode
+  const { data: canvasData } = useGetCanvasData({ query: { canvasId } }, null, {
+    enabled: readonly,
+    refetchOnWindowFocus: false,
+  });
+
+  // Set canvas data from API response when in readonly mode
+  useEffect(() => {
+    if (readonly && canvasData?.data) {
+      const { title, nodes, edges } = canvasData.data;
+      setTitle(canvasId, title ?? '');
+
+      // Type casting to handle the type mismatch
+      if (nodes && Array.isArray(nodes)) {
+        setNodes(canvasId, nodes as unknown as CanvasNode[]);
+      }
+
+      if (edges && Array.isArray(edges)) {
+        setEdges(canvasId, edges as unknown as Edge[]);
+      }
+    }
+  }, [readonly, canvasData, canvasId, setTitle, setNodes, setEdges]);
+
   const setCanvasDataFromYDoc = useCallback(
     (ydoc: Y.Doc) => {
       setTitle(canvasId, getTitleFromYDoc(ydoc));
@@ -77,6 +107,11 @@ export const CanvasProvider = ({
   );
 
   const { remote: provider, local: localProvider } = useMemo(() => {
+    // Don't create providers when in readonly mode
+    if (readonly) {
+      return { remote: null, local: null };
+    }
+
     const existingProvider = providerCache.get(canvasId);
     if (existingProvider?.remote?.status === 'connected') {
       return existingProvider;
@@ -115,10 +150,19 @@ export const CanvasProvider = ({
     providerCache.set(canvasId, providers);
 
     return providers;
-  }, [canvasId, token, setCanvasRemoteSynced, setCanvasLocalSynced, setCanvasDataFromYDoc]);
+  }, [
+    canvasId,
+    token,
+    readonly,
+    setCanvasRemoteSynced,
+    setCanvasLocalSynced,
+    setCanvasDataFromYDoc,
+  ]);
 
   // Handle connection retries
   useEffect(() => {
+    if (readonly || !provider) return;
+
     let timeoutId: NodeJS.Timeout;
 
     const handleConnection = () => {
@@ -145,10 +189,12 @@ export const CanvasProvider = ({
       clearTimeout(timeoutId);
       provider.off('status', handleStatus);
     };
-  }, [provider, connectionAttempts]);
+  }, [provider, connectionAttempts, readonly]);
 
   // Subscribe to yjs document changes
   useEffect(() => {
+    if (readonly || !provider) return;
+
     const ydoc = provider.document;
     if (!ydoc) return;
 
@@ -206,10 +252,12 @@ export const CanvasProvider = ({
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle, setCanvasDataFromYDoc]);
+  }, [provider, canvasId, setNodes, setEdges, setTitle, setCanvasDataFromYDoc, readonly]);
 
   // Add cleanup on unmount
   useEffect(() => {
+    if (readonly) return;
+
     return () => {
       const providers = providerCache.get(canvasId);
       if (providers) {
@@ -221,15 +269,16 @@ export const CanvasProvider = ({
         providerCache.delete(canvasId);
       }
     };
-  }, [canvasId]);
+  }, [canvasId, readonly]);
 
   const value = useMemo(
     () => ({
       canvasId,
-      provider,
-      localProvider,
+      provider: provider ?? null,
+      localProvider: localProvider ?? null,
+      readonly,
     }),
-    [canvasId, provider, localProvider],
+    [canvasId, provider, localProvider, readonly],
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;

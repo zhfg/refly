@@ -8,7 +8,6 @@ import {
   SkillTemplateConfigDefinition,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { safeStringifyJSON } from '@refly-packages/utils';
 
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
@@ -18,6 +17,7 @@ import * as webSearch from '../scheduler/module/webSearch/index';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 export class WebSearch extends BaseSkill {
   name = 'webSearch';
@@ -175,7 +175,7 @@ export class WebSearch extends BaseSkill {
       },
     });
 
-    this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
+    // this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
 
     return { messages: [responseMessage] };
   };

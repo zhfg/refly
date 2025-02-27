@@ -47,9 +47,11 @@ const NodeHeader = memo(
   ({
     selectedSkillName,
     setSelectedSkill,
+    readonly,
   }: {
     selectedSkillName?: string;
     setSelectedSkill: (skill: Skill | null) => void;
+    readonly: boolean;
   }) => {
     const { t } = useTranslation();
     return (
@@ -64,7 +66,7 @@ const NodeHeader = memo(
               : t('canvas.skill.askAI')}
           </span>
         </div>
-        {selectedSkillName && (
+        {selectedSkillName && !readonly && (
           <Button
             type="text"
             size="small"
@@ -99,7 +101,7 @@ export const SkillNode = memo(
 
     // Add useEffect for auto focus
     useEffect(() => {
-      if (selected) {
+      if (selected && !readonly) {
         setTimeout(() => {
           if (chatInputRef.current) {
             const textArea = chatInputRef.current.querySelector('textarea');
@@ -149,7 +151,7 @@ export const SkillNode = memo(
     }));
 
     const { invokeAction, abortAction } = useInvokeAction();
-    const { canvasId } = useCanvasContext();
+    const { canvasId, readonly } = useCanvasContext();
 
     const { handleUploadImage } = useUploadImage();
 
@@ -209,7 +211,7 @@ export const SkillNode = memo(
     }, []);
 
     useEffect(() => {
-      if (!targetRef.current) return;
+      if (!targetRef.current || readonly) return;
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
@@ -347,25 +349,34 @@ export const SkillNode = memo(
           onMouseLeave={handleMouseLeave}
           style={containerStyle}
         >
-          {!isDragging && <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />}
+          {!isDragging && !readonly && (
+            <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
+          )}
           <div className={`w-full h-full  ${getNodeCommonStyles({ selected, isHovered })}`}>
-            <CustomHandle
-              type="target"
-              position={Position.Left}
-              isConnected={isTargetConnected}
-              isNodeHovered={isHovered}
-              nodeType="skill"
-            />
-            <CustomHandle
-              type="source"
-              position={Position.Right}
-              isConnected={isSourceConnected}
-              isNodeHovered={isHovered}
-              nodeType="skill"
-            />
+            {
+              <>
+                <CustomHandle
+                  id={`${id}-target`}
+                  type="target"
+                  position={Position.Left}
+                  isConnected={isTargetConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="skill"
+                />
+                <CustomHandle
+                  id={`${id}-source`}
+                  type="source"
+                  position={Position.Right}
+                  isConnected={isSourceConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="skill"
+                />
+              </>
+            }
 
             <div className="flex flex-col gap-3 h-full p-3 box-border">
               <NodeHeader
+                readonly={readonly}
                 selectedSkillName={selectedSkill?.name}
                 setSelectedSkill={setSelectedSkill}
               />
@@ -424,14 +435,16 @@ export const SkillNode = memo(
           </div>
         </div>
 
-        <NodeResizerComponent
-          moveableRef={moveableRef}
-          targetRef={targetRef}
-          isSelected={selected}
-          isHovered={isHovered}
-          isPreview={false}
-          onResize={handleResize}
-        />
+        {!readonly && (
+          <NodeResizerComponent
+            moveableRef={moveableRef}
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={false}
+            onResize={handleResize}
+          />
+        )}
       </div>
     );
   },

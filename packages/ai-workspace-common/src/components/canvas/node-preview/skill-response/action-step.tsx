@@ -16,6 +16,7 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { getParsedReasoningContent } from '@refly-packages/utils/content-parser';
 import { IconThinking } from '@refly-packages/ai-workspace-common/components/common/icon';
 
@@ -191,6 +192,7 @@ const ActualContent = memo(
     buildContextItem: (text: string) => IContextItem;
     step: ActionStep;
   }) => {
+    const { readonly } = useCanvasContext();
     const getSourceNode = useCallback(() => {
       return {
         type: 'skillResponse' as const,
@@ -204,11 +206,13 @@ const ActualContent = memo(
       <div className="my-3 text-gray-600 text-base">
         <div className={`skill-response-content-${resultId}-${step.name}`}>
           <Markdown content={content} sources={sources} />
-          <SelectionContext
-            containerClass={`skill-response-content-${resultId}-${step.name}`}
-            getContextItem={buildContextItem}
-            getSourceNode={getSourceNode}
-          />
+          {!readonly && (
+            <SelectionContext
+              containerClass={`skill-response-content-${resultId}-${step.name}`}
+              getContextItem={buildContextItem}
+              getSourceNode={getSourceNode}
+            />
+          )}
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import { Button, Modal, Divider, Input, Form } from 'antd';
-import { Link } from '@refly-packages/ai-workspace-common/utils/router';
+import { Link, useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { useState } from 'react';
 
 import Logo from '@/assets/logo.svg';
@@ -34,6 +34,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
     setEmail: state.setEmail,
     reset: state.reset,
   }));
+
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
   const { t } = useTranslation();
 
@@ -81,7 +83,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
         if (data.data?.skipVerification) {
           authStore.reset();
-          window.location.replace('/');
+          window.location.replace(isShareCanvas ? window.location.href : '/');
         } else {
           authStore.setEmail(values.email);
           authStore.setSessionId(data.data?.sessionId ?? null);
@@ -100,7 +102,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       if (data?.success) {
         authStore.setLoginModalOpen(false);
         authStore.reset();
-        window.location.replace('/');
+        window.location.replace(isShareCanvas ? window.location.href : '/');
       }
     }
   };

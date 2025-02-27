@@ -11,6 +11,7 @@ export enum IDPrefix {
   DOCUMENT = 'd-',
   RESOURCE = 'r-',
   CANVAS = 'c-',
+  CANVAS_TEMPLATE = 'ct-',
   REFERENCE = 'rf-',
   TOKEN_USAGE_METER = 'tum-',
   STORAGE_USAGE_METER = 'sum-',
@@ -53,6 +54,10 @@ export function genResourceID(): string {
 
 export function genCanvasID(): string {
   return IDPrefix.CANVAS + createId();
+}
+
+export function genCanvasTemplateID(): string {
+  return IDPrefix.CANVAS_TEMPLATE + createId();
 }
 
 export function genMemoID(): string {

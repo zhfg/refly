@@ -69,6 +69,7 @@
       "**/dist/**",
       "**/.wxt/**",
       "**/.output/**",
+      "**/.turbo/**",
       "**/build/**",
       "packages/wxt/**",
       "**/common/temp/**"

@@ -6,13 +6,15 @@ import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
+import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
 
 interface DocumentContextType {
   docId: string;
-  ydoc: Y.Doc;
-  provider: HocuspocusProvider;
-  localProvider: IndexeddbPersistence;
+  ydoc: Y.Doc | null;
+  provider: HocuspocusProvider | null;
+  localProvider: IndexeddbPersistence | null;
   isLoading: boolean;
+  readonly: boolean;
 }
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
@@ -29,8 +31,13 @@ const getTitleFromYDoc = (ydoc: Y.Doc) => {
 
 export const DocumentProvider = ({
   docId,
+  readonly = false,
   children,
-}: { docId: string; children: React.ReactNode }) => {
+}: {
+  docId: string;
+  readonly?: boolean;
+  children: React.ReactNode;
+}) => {
   const { token, refreshToken } = useCollabToken();
   const [isLoading, setIsLoading] = useState(true);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
@@ -43,6 +50,21 @@ export const DocumentProvider = ({
       setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
       updateDocument: state.updateDocument,
     }));
+
+  // Fetch document data from API when in readonly mode
+  const { data: documentData } = useGetDocumentDetail({ query: { docId } }, null, {
+    enabled: readonly,
+    refetchOnWindowFocus: false,
+  });
+
+  // Set document data from API response when in readonly mode
+  useEffect(() => {
+    if (readonly && documentData?.data) {
+      const { title, content } = documentData.data;
+      updateDocument(docId, { docId, title, content });
+      setIsLoading(false);
+    }
+  }, [readonly, documentData, docId, updateDocument]);
 
   const updateDocumentData = useCallback(
     (ydoc: Y.Doc) => {
@@ -57,6 +79,11 @@ export const DocumentProvider = ({
     local: localProvider,
     doc,
   } = useMemo(() => {
+    // Don't create providers when in readonly mode
+    if (readonly) {
+      return { remote: null, local: null, doc: null };
+    }
+
     const existingProvider = providerCache.get(docId);
     if (existingProvider?.remote?.status === 'connected') {
       return { ...existingProvider, doc: existingProvider.remote.document };
@@ -98,10 +125,12 @@ export const DocumentProvider = ({
     providerCache.set(docId, providers);
 
     return { remote: remoteProvider, local: localProvider, doc };
-  }, [docId, token, updateDocumentData]);
+  }, [docId, token, readonly, updateDocumentData]);
 
   // Handle connection retries
   useEffect(() => {
+    if (readonly || !provider) return;
+
     let timeoutId: NodeJS.Timeout;
 
     const handleConnection = () => {
@@ -128,29 +157,28 @@ export const DocumentProvider = ({
       clearTimeout(timeoutId);
       provider.off('status', handleStatus);
     };
-  }, [provider, connectionAttempts]);
+  }, [provider, connectionAttempts, readonly]);
 
   // Subscribe to yjs document changes
   useEffect(() => {
-    const ydoc = provider.document;
-    if (!ydoc) return;
+    if (readonly || !provider || !doc) return;
 
     let isDestroyed = false;
 
     // Get reference to the shared types
-    const title = ydoc.getText('title');
+    const title = doc.getText('title');
 
     // Connect handler
     const handleConnect = () => {
       if (isDestroyed) return;
 
       if (provider.status === 'connected') {
-        updateDocumentData(ydoc);
+        updateDocumentData(doc);
       }
 
       const titleObserverCallback = () => {
         if (provider.status === 'connected') {
-          updateDocumentData(ydoc);
+          updateDocumentData(doc);
         }
       };
 
@@ -171,10 +199,12 @@ export const DocumentProvider = ({
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
     };
-  }, [provider, docId, updateDocumentData]);
+  }, [provider, doc, docId, updateDocumentData, readonly]);
 
   // Add cleanup on unmount
   useEffect(() => {
+    if (readonly) return;
+
     return () => {
       const providers = providerCache.get(docId);
       if (providers) {
@@ -186,18 +216,21 @@ export const DocumentProvider = ({
         providerCache.delete(docId);
       }
     };
-  }, [docId]);
+  }, [docId, readonly]);
 
-  // Add loading state check
-  if (!provider || isLoading) {
-    return null;
-  }
-
-  return (
-    <DocumentContext.Provider value={{ docId, provider, localProvider, ydoc: doc, isLoading }}>
-      {children}
-    </DocumentContext.Provider>
+  const value = useMemo(
+    () => ({
+      docId,
+      provider,
+      localProvider,
+      ydoc: doc,
+      isLoading,
+      readonly,
+    }),
+    [docId, provider, localProvider, doc, isLoading, readonly],
   );
+
+  return <DocumentContext.Provider value={value}>{children}</DocumentContext.Provider>;
 };
 
 export const useDocumentContext = () => {

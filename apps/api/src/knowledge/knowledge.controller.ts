@@ -40,6 +40,7 @@ import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError } from '@refly-packages/errors';
 import { safeParseJSON } from '@refly-packages/utils';
+import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/knowledge')
 export class KnowledgeController {
@@ -65,10 +66,10 @@ export class KnowledgeController {
     return buildSuccessResponse(resources?.map(resourcePO2DTO));
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('resource/detail')
   async showResourceDetail(
-    @LoginedUser() user: User,
+    @LoginedUser() user: User | null,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
@@ -189,10 +190,10 @@ export class KnowledgeController {
     return buildSuccessResponse((documents ?? []).map(documentPO2DTO));
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('document/detail')
   async getDocumentDetail(
-    @LoginedUser() user: User,
+    @LoginedUser() user: User | null,
     @Query('docId') docId: string,
   ): Promise<GetDocumentDetailResponse> {
     const document = await this.knowledgeService.getDocumentDetail(user, { docId });
@@ -205,7 +206,9 @@ export class KnowledgeController {
     @LoginedUser() user: User,
     @Body() body: UpsertDocumentRequest,
   ): Promise<UpsertDocumentResponse> {
-    const document = await this.knowledgeService.createDocument(user, body);
+    const document = await this.knowledgeService.createDocument(user, body, {
+      checkStorageQuota: true,
+    });
     return buildSuccessResponse(documentPO2DTO(document));
   }
 

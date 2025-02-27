@@ -77,6 +77,7 @@ const translations = {
     uploadFailed: '上传失败',
     dropImageHere: '拖放图片到这里',
     presetColors: '预设颜色',
+    duplicate: '复制',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
@@ -132,6 +133,8 @@ const translations = {
     },
     messageText: '支持文件上传和多模态图片处理⚡️ ',
     tryForFree: '开始使用',
+    tryItNow: '立即体验',
+    creationEngine: '创作引擎',
     addToChrome: '添加到 Chrome',
     contactUs: '联系我们',
     watchVideo: '观看视频',
@@ -505,6 +508,17 @@ const translations = {
   shareContent: {
     title: '分享',
     login: '开始用 Refly 写作',
+    copyLink: '复制链接',
+    publishTemplate: '发布模板',
+    linkShare: '链接分享',
+    updateCanvasPermissionSuccess: '更新画布权限成功',
+    copyLinkSuccess: '分享链接已复制到剪切板！',
+    accessOptions: {
+      anyone: '互联网获得链接的人',
+      anyoneDescription: '互联网获得链接的人可以查看',
+      off: '未开启',
+      offDescription: '未开启访问权限',
+    },
   },
   workspace: {
     addToCanvas: '添加到画布',
@@ -722,6 +736,11 @@ const translations = {
       skill: '技能',
       image: '图片',
     },
+    export: {
+      success: '导出图片成功',
+      error: '导出图片失败',
+      noNodes: '画布为空，无法导出图片',
+    },
     contextMenu: {
       createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
@@ -814,6 +833,10 @@ const translations = {
       exitFullscreen: '退出全屏',
       completeTutorial: '完成教程',
       deleteCanvasFile: '同时删除画布中的资源和文档',
+      hideTemplates: '隐藏模板',
+      showTemplates: '显示模板',
+      exportImage: '导出图片',
+      copyLink: '复制链接',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -1153,6 +1176,7 @@ const translations = {
       viewMore: '查看更多',
       viewTutorial: '查看文档',
       tour: '查看教程',
+      template: '案例',
     },
   },
   knowledgeLibrary: {
@@ -1898,6 +1922,25 @@ const translations = {
         7: 'Refly 提供丰富的帮助文档，帮助您快速上手 Refly, 点击画布左下角「帮助」按钮，查看更多帮助文档。',
       },
     },
+  },
+  template: {
+    templateLibrary: '模板库',
+    myTemplates: '我的模板',
+    createTemplate: '发布模板',
+    templateTitle: '模板名称',
+    templateTitlePlaceholder: '请输入模板名称',
+    templateDescription: '模板描述',
+    templateDescriptionPlaceholder: '请输入模板描述',
+    createSuccess: '模板创建成功, 请在模板库中查看',
+    preview: '预览',
+    use: '使用',
+    duplicateCanvas: '复制画布',
+    canvasTitle: '画布名称',
+    duplicateCanvasTitlePlaceholder: '请输入新画布名称',
+    moreTemplates: '更多模版',
+    searchPlaceholder: '请输入关键词搜索模板',
+    noRelatedTemplates: '暂无相关模板',
+    hideTemplates: '隐藏模板',
   },
 };
 

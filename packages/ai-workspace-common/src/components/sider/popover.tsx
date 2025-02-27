@@ -1,10 +1,11 @@
 import { Popover } from 'antd';
-import { SiderLayout } from '@/components/layout/sider';
+import { SiderLayout } from './layout';
 
 interface SiderPopoverProps {
   children: React.ReactNode;
 }
-const SiderPopover = (props: SiderPopoverProps) => {
+
+export const SiderPopover = (props: SiderPopoverProps) => {
   const { children } = props;
 
   return (
@@ -21,5 +22,3 @@ const SiderPopover = (props: SiderPopoverProps) => {
     </Popover>
   );
 };
-
-export default SiderPopover;

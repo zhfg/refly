@@ -8,5 +8,6 @@ import { SubscriptionModule } from '@/subscription/subscription.module';
   imports: [CommonModule, SubscriptionModule],
   controllers: [ActionController],
   providers: [ActionService],
+  exports: [ActionService],
 })
 export class ActionModule {}

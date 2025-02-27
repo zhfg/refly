@@ -143,7 +143,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
     });
   }, [node, addToContext]);
 
-  const { canvasId } = useCanvasContext();
+  const { canvasId, readonly } = useCanvasContext();
   const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
   const isPinned = isNodePinned(node.id);
 
@@ -174,79 +174,99 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
     }
   }, [node, downloadFile]);
 
+  const centerNodeConfig = {
+    key: 'centerNode',
+    label: (
+      <div className="flex items-center gap-2 whitespace-nowrap">
+        <Target className="w-4 h-4 flex-shrink-0" />
+        {t('canvas.nodeActions.centerNode')}
+      </div>
+    ),
+    onClick: () => setNodeCenter(node.id, true),
+  };
+
   // Define dropdown menu items
-  const menuItems: MenuProps['items'] = [
-    {
-      key: 'centerNode',
-      label: (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <Target className="w-4 h-4 flex-shrink-0" />
-          {t('canvas.nodeActions.centerNode')}
-        </div>
-      ),
-      onClick: () => setNodeCenter(node.id, true),
-    },
-    {
-      key: 'addToContext',
-      label: (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <FilePlus className="w-4 h-4 flex-shrink-0" />
-          {t('canvas.nodeActions.addToContext')}
-        </div>
-      ),
-      onClick: handleAddToContext,
-    },
-    canDownload && {
-      key: 'downloadFile',
-      label: (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <IconDownloadFile className="w-4 h-4 flex-shrink-0" />
-          {t('canvas.nodeActions.downloadFile')}
-        </div>
-      ),
-      onClick: handleDownload,
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'delete',
-      label: (
-        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
-          <Trash2 className="w-4 h-4 flex-shrink-0" />
-          {t('canvas.nodeActions.delete')}
-        </div>
-      ),
-      onClick: () => deleteNode(node),
-      className: 'hover:bg-red-50',
-    },
-    node.type === 'document' && {
-      key: 'deleteFile',
-      label: (
-        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
-          <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
-          <span>{t('canvas.nodeActions.deleteDocument')}</span>
-        </div>
-      ),
-      onClick: () => {
-        handleDeleteFile();
+  const menuItems: MenuProps['items'] = useMemo(() => {
+    // If readonly is true, only show centerNode option
+    if (readonly) {
+      return [centerNodeConfig];
+    }
+
+    // Otherwise show all options
+    return [
+      centerNodeConfig,
+      {
+        key: 'addToContext',
+        label: (
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <FilePlus className="w-4 h-4 flex-shrink-0" />
+            {t('canvas.nodeActions.addToContext')}
+          </div>
+        ),
+        onClick: handleAddToContext,
       },
-      className: 'hover:bg-red-50',
-    },
-    node.type === 'resource' && {
-      key: 'deleteFile',
-      label: (
-        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
-          <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
-          <span>{t('canvas.nodeActions.deleteResource')}</span>
-        </div>
-      ),
-      onClick: () => {
-        handleDeleteFile();
+      canDownload && {
+        key: 'downloadFile',
+        label: (
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <IconDownloadFile className="w-4 h-4 flex-shrink-0" />
+            {t('canvas.nodeActions.downloadFile')}
+          </div>
+        ),
+        onClick: handleDownload,
       },
-      className: 'hover:bg-red-50',
-    },
-  ];
+      {
+        type: 'divider',
+      },
+      {
+        key: 'delete',
+        label: (
+          <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            {t('canvas.nodeActions.delete')}
+          </div>
+        ),
+        onClick: () => deleteNode(node),
+        className: 'hover:bg-red-50',
+      },
+      node.type === 'document' && {
+        key: 'deleteFile',
+        label: (
+          <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+            <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
+            <span>{t('canvas.nodeActions.deleteDocument')}</span>
+          </div>
+        ),
+        onClick: () => {
+          handleDeleteFile();
+        },
+        className: 'hover:bg-red-50',
+      },
+      node.type === 'resource' && {
+        key: 'deleteFile',
+        label: (
+          <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+            <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
+            <span>{t('canvas.nodeActions.deleteResource')}</span>
+          </div>
+        ),
+        onClick: () => {
+          handleDeleteFile();
+        },
+        className: 'hover:bg-red-50',
+      },
+    ];
+  }, [
+    readonly,
+    t,
+    setNodeCenter,
+    node,
+    handleAddToContext,
+    canDownload,
+    handleDownload,
+    deleteNode,
+    handleDeleteFile,
+  ]);
 
   return (
     <div className="flex justify-between items-center py-2 px-4 border-b border-[#EAECF0]">

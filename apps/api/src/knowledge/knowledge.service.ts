@@ -36,6 +36,8 @@ import {
   UpsertDocumentRequest,
   DeleteDocumentRequest,
   IndexError,
+  DuplicateDocumentRequest,
+  DuplicateResourceRequest,
 } from '@refly-packages/openapi-schema';
 import {
   QUEUE_SIMPLE_EVENT,
@@ -130,8 +132,7 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
-    const { uid } = user;
+  async getResourceDetail(user: User | null, param: GetResourceDetailData['query']) {
     const { resourceId } = param;
 
     if (!resourceId) {
@@ -139,11 +140,31 @@ export class KnowledgeService {
     }
 
     const resource = await this.prisma.resource.findFirst({
-      where: { resourceId, uid, deletedAt: null },
+      where: {
+        resourceId,
+        deletedAt: null,
+      },
     });
 
     if (!resource) {
       throw new ResourceNotFoundError(`resource ${resourceId} not found`);
+    }
+
+    // If the resource is accessed by anonymous user or another user,
+    // check if the resource is publicly share via some canvases
+    if (!user || user.uid !== resource.uid) {
+      const shareRels = await this.prisma.canvasEntityRelation.count({
+        where: {
+          entityId: resource.resourceId,
+          entityType: 'resource',
+          isPublic: true,
+          deletedAt: null,
+        },
+      });
+
+      if (shareRels === 0) {
+        throw new ResourceNotFoundError(`resource ${resourceId} not found`);
+      }
     }
 
     let content: string;
@@ -790,10 +811,9 @@ export class KnowledgeService {
   }
 
   async getDocumentDetail(
-    user: User,
+    user: User | null,
     params: GetDocumentDetailData['query'],
   ): Promise<DocumentModel & { content?: string }> {
-    const { uid } = user;
     const { docId } = params;
 
     if (!docId) {
@@ -801,11 +821,31 @@ export class KnowledgeService {
     }
 
     const doc = await this.prisma.document.findFirst({
-      where: { docId, uid, deletedAt: null },
+      where: {
+        docId,
+        deletedAt: null,
+      },
     });
 
     if (!doc) {
       throw new DocumentNotFoundError('Document not found');
+    }
+
+    // If the document is accessed by anonymous user or another user,
+    // check if the document is publicly share via some canvases
+    if (!user || user.uid !== doc.uid) {
+      const shareRels = await this.prisma.canvasEntityRelation.count({
+        where: {
+          entityId: doc.docId,
+          entityType: 'document',
+          isPublic: true,
+          deletedAt: null,
+        },
+      });
+
+      if (shareRels === 0) {
+        throw new DocumentNotFoundError('Document not found');
+      }
     }
 
     let content: string;
@@ -817,10 +857,16 @@ export class KnowledgeService {
     return { ...doc, content };
   }
 
-  async createDocument(user: User, param: UpsertDocumentRequest) {
-    const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (usageResult.available < 1) {
-      throw new StorageQuotaExceeded();
+  async createDocument(
+    user: User,
+    param: UpsertDocumentRequest,
+    options?: { checkStorageQuota?: boolean },
+  ) {
+    if (options?.checkStorageQuota) {
+      const usageResult = await this.subscriptionService.checkStorageUsage(user);
+      if (usageResult.available < 1) {
+        throw new StorageQuotaExceeded();
+      }
     }
 
     param.docId = genDocumentID();
@@ -957,6 +1003,148 @@ export class KnowledgeService {
 
     // Sync storage usage after all the cleanups
     await this.syncStorageUsage(user);
+  }
+
+  /**
+   * Duplicate an existing document
+   * @param user The user duplicating the document
+   * @param param The duplicate document request param
+   * @returns The newly created document
+   */
+  async duplicateDocument(user: User, param: DuplicateDocumentRequest) {
+    const { docId: sourceDocId, title: newTitle } = param;
+
+    // Check storage quota
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (usageResult.available < 1) {
+      throw new StorageQuotaExceeded();
+    }
+
+    // Find the source document
+    const sourceDoc = await this.prisma.document.findFirst({
+      where: { docId: sourceDocId, deletedAt: null },
+    });
+    if (!sourceDoc) {
+      throw new DocumentNotFoundError(`Document ${sourceDocId} not found`);
+    }
+
+    // Generate a new document ID
+    const newDocId = genDocumentID();
+
+    const newStorageKey = `doc/${newDocId}.txt`;
+    const newStateStorageKey = `state/${newDocId}`;
+
+    // Duplicate the files and index
+    await Promise.all([
+      this.minio.duplicateFile(sourceDoc.storageKey, newStorageKey),
+      this.minio.duplicateFile(sourceDoc.stateStorageKey, newStateStorageKey),
+      this.ragService.duplicateDocument({
+        sourceUid: sourceDoc.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceDoc.docId,
+        targetDocId: newDocId,
+      }),
+      this.elasticsearch.duplicateDocument(sourceDoc.docId, newDocId, user),
+    ]);
+
+    // Create the new document using the existing createDocument method
+    const newDoc = await this.prisma.document.create({
+      data: {
+        ...pick(sourceDoc, [
+          'wordCount',
+          'contentPreview',
+          'storageSize',
+          'vectorSize',
+          'readOnly',
+        ]),
+        docId: newDocId,
+        title: newTitle ?? sourceDoc.title,
+        uid: user.uid,
+        storageKey: newStorageKey,
+        stateStorageKey: newStateStorageKey,
+      },
+    });
+
+    await this.syncStorageUsage(user);
+
+    return newDoc;
+  }
+
+  /**
+   * Duplicate an existing resource
+   * @param user The user duplicating the resource
+   * @param param The duplicate resource request param
+   * @returns The newly created resource
+   */
+  async duplicateResource(user: User, param: DuplicateResourceRequest) {
+    const { resourceId: sourceResourceId, title: newTitle } = param;
+
+    // Check storage quota
+    const usageResult = await this.subscriptionService.checkStorageUsage(user);
+    if (usageResult.available < 1) {
+      throw new StorageQuotaExceeded();
+    }
+
+    // Find the source resource
+    const sourceResource = await this.prisma.resource.findFirst({
+      where: { resourceId: sourceResourceId, deletedAt: null },
+    });
+    if (!sourceResource) {
+      throw new ResourceNotFoundError(`Resource ${sourceResourceId} not found`);
+    }
+
+    // Create a new resource ID
+    const newResourceId = genResourceID();
+
+    const migrations: Promise<any>[] = [
+      this.ragService.duplicateDocument({
+        sourceUid: sourceResource.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceResource.resourceId,
+        targetDocId: newResourceId,
+      }),
+      this.elasticsearch.duplicateResource(sourceResource.resourceId, newResourceId, user),
+    ];
+
+    let newStorageKey: string;
+    if (sourceResource.storageKey) {
+      newStorageKey = `resources/${newResourceId}.txt`;
+      migrations.push(this.minio.duplicateFile(sourceResource.storageKey, newStorageKey));
+    }
+
+    await Promise.all(migrations);
+
+    let newRawFileKey: string;
+    if (sourceResource.rawFileKey) {
+      const { storageKey } = await this.miscService.duplicateFile(user, sourceResource.rawFileKey);
+      newRawFileKey = storageKey;
+    }
+
+    // Create the new resource
+    const newResource = await this.prisma.resource.create({
+      data: {
+        ...pick(sourceResource, [
+          'resourceType',
+          'wordCount',
+          'contentPreview',
+          'storageSize',
+          'vectorSize',
+          'indexStatus',
+          'indexError',
+          'identifier',
+          'meta',
+        ]),
+        resourceId: newResourceId,
+        title: newTitle,
+        uid: user.uid,
+        storageKey: newStorageKey,
+        rawFileKey: newRawFileKey,
+      },
+    });
+
+    await this.syncStorageUsage(user);
+
+    return newResource;
   }
 
   async queryReferences(

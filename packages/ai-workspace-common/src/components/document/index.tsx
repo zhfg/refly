@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 import { CollaborativeEditor } from './collab-editor';
+import { ReadonlyEditor } from './readonly-editor';
 import {
   DocumentProvider,
   useDocumentContext,
@@ -23,6 +24,7 @@ import { ydoc2Markdown } from '@refly-packages/utils/editor';
 import { time } from '@refly-packages/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-document-sync';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const StatusBar = memo(
   ({ docId }: { docId: string }) => {
@@ -39,9 +41,9 @@ const StatusBar = memo(
     }, []);
 
     useEffect(() => {
-      provider.on('unsyncedChanges', handleUnsyncedChanges);
+      provider?.on('unsyncedChanges', handleUnsyncedChanges);
       return () => {
-        provider.off('unsyncedChanges', handleUnsyncedChanges);
+        provider?.off('unsyncedChanges', handleUnsyncedChanges);
       };
     }, [provider, handleUnsyncedChanges]);
 
@@ -57,7 +59,7 @@ const StatusBar = memo(
         setDocumentReadOnly(docId, yReadOnly?.toJSON() === 'true');
 
         const observer = () => {
-          if (provider.status === 'connected') {
+          if (provider?.status === 'connected') {
             setDocumentReadOnly(docId, yReadOnly?.toJSON() === 'true');
           }
         };
@@ -67,7 +69,7 @@ const StatusBar = memo(
           yReadOnly?.unobserve(observer);
         };
       }
-    }, [ydoc, docId, setDocumentReadOnly, provider.status]);
+    }, [ydoc, docId, setDocumentReadOnly, provider?.status]);
 
     const toggleReadOnly = () => {
       ydoc?.transact(() => {
@@ -142,7 +144,7 @@ const StatusBar = memo(
 );
 
 const DocumentEditorHeader = memo(
-  ({ docId }: { docId: string }) => {
+  ({ docId, readonly }: { docId: string; readonly?: boolean }) => {
     const { t } = useTranslation();
     const { document } = useDocumentStoreShallow((state) => ({
       document: state.data[docId]?.document,
@@ -168,6 +170,7 @@ const DocumentEditorHeader = memo(
       <div className="w-full">
         <div className="mx-0 mt-4 max-w-screen-lg">
           <Input
+            readOnly={readonly}
             className="document-title !text-3xl font-bold focus:!border-transparent focus:!bg-transparent"
             placeholder={t('editor.placeholder.title')}
             value={document?.title}
@@ -184,7 +187,7 @@ const DocumentEditorHeader = memo(
 const DocumentBody = memo(
   ({ docId }: { docId: string }) => {
     const { t } = useTranslation();
-    const { provider } = useDocumentContext();
+    const { readonly, isLoading } = useDocumentContext();
 
     const { config } = useDocumentStoreShallow((state) => ({
       config: state.config[docId],
@@ -196,13 +199,13 @@ const DocumentBody = memo(
         <Spin
           className="document-editor-spin"
           tip={t('knowledgeBase.note.connecting')}
-          loading={!hasDocumentSynced && provider.status !== 'connected'}
+          loading={isLoading && !hasDocumentSynced}
           style={{ height: '100%', width: '100%' }}
         >
           <div className="ai-note-editor">
             <div className="ai-note-editor-container">
-              <DocumentEditorHeader docId={docId} />
-              <CollaborativeEditor docId={docId} />
+              <DocumentEditorHeader docId={docId} readonly={readonly} />
+              {readonly ? <ReadonlyEditor docId={docId} /> : <CollaborativeEditor docId={docId} />}
             </div>
           </div>
         </Spin>
@@ -213,10 +216,11 @@ const DocumentBody = memo(
 );
 
 export const DocumentEditor = memo(
-  ({ docId }: { docId: string }) => {
+  ({ docId, readonly }: { docId: string; readonly?: boolean }) => {
     const { resetState } = useDocumentStoreShallow((state) => ({
       resetState: state.resetState,
     }));
+    const { readonly: canvasReadOnly } = useCanvasContext();
 
     useEffect(() => {
       return () => {
@@ -225,9 +229,9 @@ export const DocumentEditor = memo(
     }, []);
 
     return (
-      <DocumentProvider docId={docId}>
+      <DocumentProvider docId={docId} readonly={readonly}>
         <div className="flex flex-col ai-note-container">
-          <StatusBar docId={docId} />
+          {!canvasReadOnly && <StatusBar docId={docId} />}
           <DocumentBody docId={docId} />
         </div>
       </DocumentProvider>

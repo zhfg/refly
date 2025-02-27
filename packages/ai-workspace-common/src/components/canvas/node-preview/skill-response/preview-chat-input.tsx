@@ -3,6 +3,7 @@ import { PreviewContextManager } from './preview-context-manager';
 import { useMemo, memo } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface PreviewChatInputProps {
   enabled: boolean;
@@ -17,7 +18,8 @@ interface PreviewChatInputProps {
 }
 
 const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
-  const { enabled, contextItems, query, actionMeta, setEditMode, readonly } = props;
+  const { enabled, contextItems, query, actionMeta, setEditMode } = props;
+  const { readonly } = useCanvasContext();
 
   const hideSelectedSkillHeader = useMemo(
     () => !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name,
@@ -31,7 +33,11 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
   return (
     <div
       className={cn('border border-solid border-gray-200 rounded-lg')}
-      onClick={() => setEditMode(true)}
+      onClick={() => {
+        if (!readonly) {
+          setEditMode(true);
+        }
+      }}
     >
       {!hideSelectedSkillHeader && (
         <SelectedSkillHeader
@@ -45,21 +51,6 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
       )}
       {contextItems?.length > 0 && <PreviewContextManager contextItems={contextItems} />}
       <div className="text-sm m-2 break-all">{query}</div>
-
-      {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
-      <ConfigManager
-        form={form}
-        formErrors={formErrors}
-        setFormErrors={setFormErrors}
-        schema={skillStore.selectedSkill?.configSchema}
-        tplConfig={skillStore.selectedSkill?.config}
-        fieldPrefix="tplConfig"
-        configScope="runtime"
-        resetConfig={() => {
-          form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
-        }}
-      />
-    )} */}
     </div>
   );
 };

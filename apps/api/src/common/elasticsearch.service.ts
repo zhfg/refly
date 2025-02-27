@@ -223,6 +223,62 @@ export class ElasticsearchService implements OnModuleInit {
     );
   }
 
+  async duplicateResource(resourceId: string, newId: string, user: User): Promise<void> {
+    try {
+      const { body } = await this.client.get<{ _source: ResourceDocument }>({
+        index: indexConfig.resource.index,
+        id: resourceId,
+      });
+
+      if (!body?._source) {
+        this.logger.warn(`Resource ${resourceId} not found`);
+        return;
+      }
+
+      const sourceDoc = body._source;
+      const duplicatedDoc: ResourceDocument = {
+        ...sourceDoc,
+        id: newId,
+        uid: user.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.upsertResource(duplicatedDoc);
+    } catch (error) {
+      this.logger.error(`Error duplicating resource ${resourceId}: ${error}`);
+      throw error;
+    }
+  }
+
+  async duplicateDocument(documentId: string, newId: string, user: User): Promise<void> {
+    try {
+      const { body } = await this.client.get<{ _source: DocumentDocument }>({
+        index: indexConfig.document.index,
+        id: documentId,
+      });
+
+      if (!body?._source) {
+        this.logger.warn(`Document ${documentId} not found`);
+        return;
+      }
+
+      const sourceDoc = body._source;
+      const duplicatedDoc: DocumentDocument = {
+        ...sourceDoc,
+        id: newId,
+        uid: user.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.upsertDocument(duplicatedDoc);
+    } catch (error) {
+      this.logger.error(`Error duplicating document ${documentId}: ${error}`);
+      throw error;
+    }
+  }
+
   async searchResources(user: User, req: SearchRequest) {
     const { query, limit, entities } = req;
     const { body } = await this.client.search<SearchResponse<ResourceDocument>>({

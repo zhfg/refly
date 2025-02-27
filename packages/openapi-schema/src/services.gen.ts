@@ -33,9 +33,24 @@ import type {
   ListCanvasesData,
   ListCanvasesError,
   ListCanvasesResponse,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
+  GetCanvasDetailResponse2,
+  GetCanvasDataData,
+  GetCanvasDataError,
+  GetCanvasDataResponse,
+  ExportCanvasData,
+  ExportCanvasError,
+  ExportCanvasResponse2,
+  ImportCanvasData,
+  ImportCanvasError,
+  ImportCanvasResponse,
   CreateCanvasData,
   CreateCanvasError,
   CreateCanvasResponse,
+  DuplicateCanvasData,
+  DuplicateCanvasError,
+  DuplicateCanvasResponse,
   UpdateCanvasData,
   UpdateCanvasError,
   UpdateCanvasResponse,
@@ -45,6 +60,17 @@ import type {
   AutoNameCanvasData,
   AutoNameCanvasError,
   AutoNameCanvasResponse2,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
+  ListCanvasTemplatesResponse,
+  CreateCanvasTemplateData,
+  CreateCanvasTemplateError,
+  CreateCanvasTemplateResponse,
+  UpdateCanvasTemplateData,
+  UpdateCanvasTemplateError,
+  UpdateCanvasTemplateResponse,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplateCategoriesResponse,
   ListResourcesData,
   ListResourcesError,
   ListResourcesResponse,
@@ -96,15 +122,6 @@ import type {
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
-  CreateShareData,
-  CreateShareError,
-  CreateShareResponse2,
-  DeleteShareData,
-  DeleteShareError,
-  DeleteShareResponse,
-  GetShareContentData,
-  GetShareContentError,
-  GetShareContentResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -359,6 +376,62 @@ export const listCanvases = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get canvas detail
+ * Get canvas detail
+ */
+export const getCanvasDetail = <ThrowOnError extends boolean = false>(
+  options: Options<GetCanvasDetailData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetCanvasDetailResponse2,
+    GetCanvasDetailError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/detail',
+  });
+};
+
+/**
+ * Get canvas data
+ * Get public canvas data without checking user identity
+ */
+export const getCanvasData = <ThrowOnError extends boolean = false>(
+  options: Options<GetCanvasDataData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<GetCanvasDataResponse, GetCanvasDataError, ThrowOnError>({
+    ...options,
+    url: '/canvas/data',
+  });
+};
+
+/**
+ * Export canvas
+ * Export canvas
+ */
+export const exportCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<ExportCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<ExportCanvasResponse2, ExportCanvasError, ThrowOnError>({
+    ...options,
+    url: '/canvas/export',
+  });
+};
+
+/**
+ * Import canvas
+ * Import canvas
+ */
+export const importCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<ImportCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<ImportCanvasResponse, ImportCanvasError, ThrowOnError>({
+    ...options,
+    url: '/canvas/import',
+  });
+};
+
+/**
  * Create canvas
  * Create a new canvas
  */
@@ -368,6 +441,23 @@ export const createCanvas = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError, ThrowOnError>({
     ...options,
     url: '/canvas/create',
+  });
+};
+
+/**
+ * Duplicate canvas
+ * Duplicate an existing canvas
+ */
+export const duplicateCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<DuplicateCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    DuplicateCanvasResponse,
+    DuplicateCanvasError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/duplicate',
   });
 };
 
@@ -411,6 +501,74 @@ export const autoNameCanvas = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/canvas/autoName',
+  });
+};
+
+/**
+ * List canvas templates
+ * List all canvas templates
+ */
+export const listCanvasTemplates = <ThrowOnError extends boolean = false>(
+  options?: Options<ListCanvasTemplatesData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    ListCanvasTemplatesResponse,
+    ListCanvasTemplatesError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/list',
+  });
+};
+
+/**
+ * Create canvas template
+ * Create a new canvas template
+ */
+export const createCanvasTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<CreateCanvasTemplateData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    CreateCanvasTemplateResponse,
+    CreateCanvasTemplateError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/create',
+  });
+};
+
+/**
+ * Update canvas template
+ * Update an existing canvas template
+ */
+export const updateCanvasTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateCanvasTemplateData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    UpdateCanvasTemplateResponse,
+    UpdateCanvasTemplateError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/update',
+  });
+};
+
+/**
+ * List canvas template categories
+ * List all canvas template categories
+ */
+export const listCanvasTemplateCategories = <ThrowOnError extends boolean = false>(
+  options?: Options<unknown, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    ListCanvasTemplateCategoriesResponse,
+    ListCanvasTemplateCategoriesError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/category/list',
   });
 };
 
@@ -695,49 +853,6 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/knowledge/reference/delete',
-  });
-};
-
-/**
- * Create share
- * Create new share for canvas
- */
-export const createShare = <ThrowOnError extends boolean = false>(
-  options: Options<CreateShareData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError, ThrowOnError>({
-    ...options,
-    url: '/share/new',
-  });
-};
-
-/**
- * Delete share
- * Delete an existing share
- */
-export const deleteShare = <ThrowOnError extends boolean = false>(
-  options: Options<DeleteShareData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError, ThrowOnError>({
-    ...options,
-    url: '/share/delete',
-  });
-};
-
-/**
- * Get share content
- * Get share content by share code
- */
-export const getShareContent = <ThrowOnError extends boolean = false>(
-  options: Options<GetShareContentData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<
-    GetShareContentResponse2,
-    GetShareContentError,
-    ThrowOnError
-  >({
-    ...options,
-    url: '/share/content',
   });
 };
 

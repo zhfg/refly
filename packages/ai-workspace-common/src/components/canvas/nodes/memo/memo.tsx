@@ -42,6 +42,8 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+
 export const MemoNode = ({
   data,
   selected,
@@ -79,6 +81,8 @@ export const MemoNode = ({
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  const { readonly } = useCanvasContext();
 
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
@@ -301,10 +305,10 @@ export const MemoNode = ({
           cursor: isOperating ? 'default' : 'grab',
         }}
       >
-        {!isPreview && selected && (
+        {!isPreview && selected && !readonly && (
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={onUpdateBgColor} />
         )}
-        {!isPreview && !hideActions && !isDragging && (
+        {!isPreview && !hideActions && !isDragging && !readonly && (
           <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />
         )}
 
@@ -318,6 +322,7 @@ export const MemoNode = ({
           {!isPreview && !hideHandles && (
             <>
               <CustomHandle
+                id={`${id}-target`}
                 type="target"
                 position={Position.Left}
                 isConnected={isTargetConnected}
@@ -325,6 +330,7 @@ export const MemoNode = ({
                 nodeType="memo"
               />
               <CustomHandle
+                id={`${id}-source`}
                 type="source"
                 position={Position.Right}
                 isConnected={isSourceConnected}
@@ -335,7 +341,7 @@ export const MemoNode = ({
           )}
           <div className="flex flex-col h-full p-3 box-border">
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
-              {!isPreview ? (
+              {!isPreview && !readonly ? (
                 <div className="editor-wrapper" style={{ userSelect: 'text', cursor: 'text' }}>
                   <EditorContent
                     editor={editor}
@@ -356,7 +362,7 @@ export const MemoNode = ({
         </div>
       </div>
 
-      {!isPreview && selected && (
+      {!isPreview && selected && !readonly && (
         <Moveable
           target={targetRef}
           resizable={true}

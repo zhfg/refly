@@ -86,4 +86,15 @@ export class MinioService implements OnModuleInit {
   get client(): ProxiedMinioClient {
     return this.proxiedClient;
   }
+
+  /**
+   * Duplicate a file from one storage key to another
+   * @param sourceStorageKey The source storage key
+   * @param targetStorageKey The target storage key
+   * @returns the target object info
+   */
+  async duplicateFile(sourceStorageKey: string, targetStorageKey: string) {
+    const sourceStream = await this.client.getObject(sourceStorageKey);
+    return await this.client.putObject(targetStorageKey, sourceStream);
+  }
 }

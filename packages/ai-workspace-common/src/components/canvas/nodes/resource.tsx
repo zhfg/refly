@@ -34,6 +34,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { message, Result } from 'antd';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const NodeContent = memo(
@@ -97,6 +98,7 @@ export const ResourceNode = memo(
     const isDragging = draggingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
 
+    const { readonly } = useCanvasContext();
     const { refetchUsage } = useSubscriptionUsage();
 
     const { containerStyle, handleResize } = useNodeSize({
@@ -302,7 +304,7 @@ export const ResourceNode = memo(
             'nodrag nopan select-text': isOperating,
           })}
         >
-          {!isPreview && !hideActions && !isDragging && (
+          {!isPreview && !hideActions && !isDragging && !readonly && (
             <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />
           )}
 
@@ -340,6 +342,7 @@ export const ResourceNode = memo(
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={isTargetConnected}
@@ -347,6 +350,7 @@ export const ResourceNode = memo(
                   nodeType="resource"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={isSourceConnected}
@@ -358,7 +362,7 @@ export const ResourceNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && sizeMode === 'adaptive' && (
+        {!isPreview && selected && sizeMode === 'adaptive' && !readonly && (
           <NodeResizerComponent
             targetRef={targetRef}
             isSelected={selected}

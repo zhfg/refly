@@ -11,6 +11,7 @@ import {
   checkVerification,
   convert,
   createCanvas,
+  createCanvasTemplate,
   createCheckoutSession,
   createDocument,
   createLabelClass,
@@ -18,7 +19,6 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
-  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,23 +28,28 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
-  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
+  duplicateCanvas,
   emailLogin,
   emailSignup,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
+  importCanvas,
   invokeSkill,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -66,6 +71,7 @@ import {
   streamInvokeSkill,
   unpinSkillInstance,
   updateCanvas,
+  updateCanvasTemplate,
   updateDocument,
   updateLabelClass,
   updateLabelInstance,
@@ -92,6 +98,8 @@ import {
   ConvertError,
   CreateCanvasData,
   CreateCanvasError,
+  CreateCanvasTemplateData,
+  CreateCanvasTemplateError,
   CreateCheckoutSessionData,
   CreateCheckoutSessionError,
   CreateDocumentData,
@@ -105,8 +113,6 @@ import {
   CreateResourceError,
   CreateResourceWithFileData,
   CreateResourceWithFileError,
-  CreateShareData,
-  CreateShareError,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
   CreateSkillTriggerData,
@@ -125,34 +131,43 @@ import {
   DeleteReferencesError,
   DeleteResourceData,
   DeleteResourceError,
-  DeleteShareData,
-  DeleteShareError,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
+  DuplicateCanvasData,
+  DuplicateCanvasError,
   EmailLoginData,
   EmailLoginError,
   EmailSignupData,
   EmailSignupError,
+  ExportCanvasData,
+  ExportCanvasError,
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDataData,
+  GetCanvasDataError,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
   GetCollabTokenError,
   GetDocumentDetailData,
   GetDocumentDetailError,
   GetResourceDetailData,
   GetResourceDetailError,
   GetSettingsError,
-  GetShareContentData,
-  GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
+  ImportCanvasData,
+  ImportCanvasError,
   InvokeSkillData,
   InvokeSkillError,
   ListActionsError,
   ListCanvasesData,
   ListCanvasesError,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
   ListDocumentsData,
   ListDocumentsError,
   ListLabelClassesData,
@@ -190,6 +205,8 @@ import {
   UnpinSkillInstanceError,
   UpdateCanvasData,
   UpdateCanvasError,
+  UpdateCanvasTemplateData,
+  UpdateCanvasTemplateError,
   UpdateDocumentData,
   UpdateDocumentError,
   UpdateLabelClassData,
@@ -253,6 +270,83 @@ export const useListCanvases = <
       listCanvases({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
+export const useGetCanvasDetail = <
+  TData = Common.GetCanvasDetailDefaultResponse,
+  TError = GetCanvasDetailError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDetailData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useGetCanvasData = <
+  TData = Common.GetCanvasDataDefaultResponse,
+  TError = GetCanvasDataError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDataData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasData({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useExportCanvas = <
+  TData = Common.ExportCanvasDefaultResponse,
+  TError = ExportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ExportCanvasData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplates = <
+  TData = Common.ListCanvasTemplatesDefaultResponse,
+  TError = ListCanvasTemplatesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplates({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplateCategories = <
+  TData = Common.ListCanvasTemplateCategoriesDefaultResponse,
+  TError = ListCanvasTemplateCategoriesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then(
+        (response) => response.data as TData,
+      ) as TData,
+    ...options,
+  });
 export const useListResources = <
   TData = Common.ListResourcesDefaultResponse,
   TError = ListResourcesError,
@@ -311,21 +405,6 @@ export const useGetDocumentDetail = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
-    ...options,
-  });
-export const useGetShareContent = <
-  TData = Common.GetShareContentDefaultResponse,
-  TError = GetShareContentError,
-  TQueryKey extends Array<unknown> = unknown[],
->(
-  clientOptions: Options<GetShareContentData, true>,
-  queryKey?: TQueryKey,
-  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
-) =>
-  useQuery<TData, TError>({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions, queryKey),
-    queryFn: () =>
-      getShareContent({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClasses = <
@@ -646,6 +725,23 @@ export const useLogout = <
     mutationFn: (clientOptions) => logout(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
+export const useImportCanvas = <
+  TData = Common.ImportCanvasMutationResult,
+  TError = ImportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<ImportCanvasData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<ImportCanvasData, true>, TContext>({
+    mutationKey: Common.UseImportCanvasKeyFn(mutationKey),
+    mutationFn: (clientOptions) => importCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
 export const useCreateCanvas = <
   TData = Common.CreateCanvasMutationResult,
   TError = CreateCanvasError,
@@ -661,6 +757,23 @@ export const useCreateCanvas = <
   useMutation<TData, TError, Options<CreateCanvasData, true>, TContext>({
     mutationKey: Common.UseCreateCanvasKeyFn(mutationKey),
     mutationFn: (clientOptions) => createCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDuplicateCanvas = <
+  TData = Common.DuplicateCanvasMutationResult,
+  TError = DuplicateCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DuplicateCanvasData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DuplicateCanvasData, true>, TContext>({
+    mutationKey: Common.UseDuplicateCanvasKeyFn(mutationKey),
+    mutationFn: (clientOptions) => duplicateCanvas(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateCanvas = <
@@ -712,6 +825,40 @@ export const useAutoNameCanvas = <
   useMutation<TData, TError, Options<AutoNameCanvasData, true>, TContext>({
     mutationKey: Common.UseAutoNameCanvasKeyFn(mutationKey),
     mutationFn: (clientOptions) => autoNameCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useCreateCanvasTemplate = <
+  TData = Common.CreateCanvasTemplateMutationResult,
+  TError = CreateCanvasTemplateError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<CreateCanvasTemplateData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<CreateCanvasTemplateData, true>, TContext>({
+    mutationKey: Common.UseCreateCanvasTemplateKeyFn(mutationKey),
+    mutationFn: (clientOptions) => createCanvasTemplate(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useUpdateCanvasTemplate = <
+  TData = Common.UpdateCanvasTemplateMutationResult,
+  TError = UpdateCanvasTemplateError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<UpdateCanvasTemplateData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<UpdateCanvasTemplateData, true>, TContext>({
+    mutationKey: Common.UseUpdateCanvasTemplateKeyFn(mutationKey),
+    mutationFn: (clientOptions) => updateCanvasTemplate(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateResource = <
@@ -934,40 +1081,6 @@ export const useDeleteReferences = <
   useMutation<TData, TError, Options<DeleteReferencesData, true>, TContext>({
     mutationKey: Common.UseDeleteReferencesKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteReferences(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useCreateShare = <
-  TData = Common.CreateShareMutationResult,
-  TError = CreateShareError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<CreateShareData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<CreateShareData, true>, TContext>({
-    mutationKey: Common.UseCreateShareKeyFn(mutationKey),
-    mutationFn: (clientOptions) => createShare(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useDeleteShare = <
-  TData = Common.DeleteShareMutationResult,
-  TError = DeleteShareError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<DeleteShareData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<DeleteShareData, true>, TContext>({
-    mutationKey: Common.UseDeleteShareKeyFn(mutationKey),
-    mutationFn: (clientOptions) => deleteShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateLabelClass = <
