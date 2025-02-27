@@ -27,12 +27,7 @@ export const useExportCanvasAsImage = () => {
         }
 
         // ensure all nodes are in the view
-        reactFlowInstance.fitView({
-          padding: 0.1,
-          duration: 200,
-          minZoom: 0.1,
-          maxZoom: 1,
-        });
+        reactFlowInstance.fitView();
 
         // wait for the view to adjust
         await new Promise((resolve) => setTimeout(resolve, 300));
