@@ -84,6 +84,20 @@ export class CanvasService {
     return canvas;
   }
 
+  async getCanvasYDoc(stateStorageKey: string) {
+    const readable = await this.minio.client.getObject(stateStorageKey);
+    const state = await streamToBuffer(readable);
+
+    const doc = new Y.Doc();
+    Y.applyUpdate(doc, state);
+
+    return doc;
+  }
+
+  async saveCanvasYDoc(stateStorageKey: string, doc: Y.Doc) {
+    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(doc)));
+  }
+
   async getCanvasRawData(user: User | null, canvasId: string): Promise<RawCanvasData> {
     const canvas = await this.prisma.canvas.findFirst({
       select: {
@@ -106,11 +120,7 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    const readable = await this.minio.client.getObject(canvas.stateStorageKey);
-    const state = await streamToBuffer(readable);
-
-    const doc = new Y.Doc();
-    Y.applyUpdate(doc, state);
+    const doc = await this.getCanvasYDoc(canvas.stateStorageKey);
 
     return {
       title: canvas.title,
@@ -132,17 +142,21 @@ export class CanvasService {
     }
 
     const newCanvasId = genCanvasID();
+    const newTitle = title || canvas.title;
+    this.logger.log(`Duplicating canvas ${canvasId} to ${newCanvasId} with ${newTitle}`);
+
+    const doc = new Y.Doc();
+    doc.getText('title').insert(0, newTitle);
     const stateStorageKey = `state/${newCanvasId}`;
-    const state = await this.minio.client.getObject(canvas.stateStorageKey);
-    await this.minio.client.putObject(stateStorageKey, state);
+    await this.saveCanvasYDoc(stateStorageKey, doc);
 
     const newCanvas = await this.prisma.canvas.create({
       data: {
         uid: user.uid,
         canvasId: newCanvasId,
-        stateStorageKey,
-        title: title || canvas.title,
+        title: newTitle,
         status: 'duplicating',
+        stateStorageKey,
       },
     });
 
@@ -153,7 +167,7 @@ export class CanvasService {
         uid: user.uid,
         sourceCanvasId: canvasId,
         targetCanvasId: newCanvasId,
-        title: title || canvas.title,
+        title: newCanvas.title,
         duplicateEntities: canvas.uid !== user.uid || duplicateEntities,
       },
       {
@@ -230,7 +244,11 @@ export class CanvasService {
                 break;
               }
               case 'skillResponse': {
-                const result = await this.actionService.duplicateActionResult(user, entityId);
+                const result = await this.actionService.duplicateActionResult(user, {
+                  sourceResultId: entityId,
+                  targetId: targetCanvasId,
+                  targetType: 'canvas',
+                });
                 if (result) {
                   node.data.entityId = result.resultId;
                 }
@@ -306,7 +324,7 @@ export class CanvasService {
     const ydoc = new Y.Doc();
     ydoc.getText('title').insert(0, param.title);
 
-    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(ydoc)));
+    await this.saveCanvasYDoc(stateStorageKey, ydoc);
 
     this.logger.log(`created canvas data: ${JSON.stringify(ydoc.toJSON())}`);
 

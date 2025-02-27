@@ -2,7 +2,7 @@ import { PrismaService } from '@/common/prisma.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { Injectable } from '@nestjs/common';
 import { ActionResultNotFoundError } from '@refly-packages/errors';
-import { GetActionResultData, User } from '@refly-packages/openapi-schema';
+import { EntityType, GetActionResultData, User } from '@refly-packages/openapi-schema';
 import { genActionResultID, pick } from '@refly-packages/utils';
 
 @Injectable()
@@ -74,13 +74,18 @@ export class ActionService {
 
   async duplicateActionResult(
     user: User,
-    resultId: string,
+    param: {
+      sourceResultId: string;
+      targetId: string;
+      targetType: EntityType;
+    },
     options?: { checkOwnership?: boolean },
   ) {
+    const { sourceResultId, targetId, targetType } = param;
     // Get the latest version of the action result
     const originalResult = await this.prisma.actionResult.findFirst({
       where: {
-        resultId,
+        resultId: sourceResultId,
       },
       orderBy: { version: 'desc' },
     });
@@ -108,7 +113,7 @@ export class ActionService {
     // Get the original steps
     const originalSteps = await this.prisma.actionStep.findMany({
       where: {
-        resultId,
+        resultId: originalResult.resultId,
         version: originalResult.version,
         deletedAt: null,
       },
@@ -123,8 +128,6 @@ export class ActionService {
           'title',
           'tier',
           'modelName',
-          'targetType',
-          'targetId',
           'actionMeta',
           'input',
           'context',
@@ -133,6 +136,8 @@ export class ActionService {
         ]),
         resultId: genActionResultID(),
         uid: user.uid,
+        targetId,
+        targetType,
       },
     });
 

@@ -1028,26 +1028,44 @@ export class KnowledgeService {
       throw new DocumentNotFoundError(`Document ${sourceDocId} not found`);
     }
 
-    // Get the content of the source document
-    let content = '';
-    if (sourceDoc.storageKey) {
-      const contentStream = await this.minio.client.getObject(sourceDoc.storageKey);
-      content = await streamToString(contentStream);
-    }
-
     // Generate a new document ID
     const newDocId = genDocumentID();
 
-    // Set the title for the new document
-    const title = newTitle || `${sourceDoc.title} (Copy)`;
+    const newStorageKey = `doc/${newDocId}.txt`;
+    const newStateStorageKey = `state/${newDocId}`;
+
+    // Duplicate the files and index
+    await Promise.all([
+      this.minio.duplicateFile(sourceDoc.storageKey, newStorageKey),
+      this.minio.duplicateFile(sourceDoc.stateStorageKey, newStateStorageKey),
+      this.ragService.duplicateDocument({
+        sourceUid: sourceDoc.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceDoc.docId,
+        targetDocId: newDocId,
+      }),
+      this.elasticsearch.duplicateDocument(sourceDoc.docId, newDocId, user),
+    ]);
 
     // Create the new document using the existing createDocument method
-    const newDoc = await this.createDocument(user, {
-      docId: newDocId,
-      title,
-      initialContent: content,
-      readOnly: sourceDoc.readOnly,
+    const newDoc = await this.prisma.document.create({
+      data: {
+        ...pick(sourceDoc, [
+          'wordCount',
+          'contentPreview',
+          'storageSize',
+          'vectorSize',
+          'readOnly',
+        ]),
+        docId: newDocId,
+        title: newTitle ?? sourceDoc.title,
+        uid: user.uid,
+        storageKey: newStorageKey,
+        stateStorageKey: newStateStorageKey,
+      },
     });
+
+    await this.syncStorageUsage(user);
 
     return newDoc;
   }
@@ -1075,30 +1093,56 @@ export class KnowledgeService {
       throw new ResourceNotFoundError(`Resource ${sourceResourceId} not found`);
     }
 
-    // Get the content of the source resource
-    let content = '';
-    if (sourceResource.storageKey) {
-      const contentStream = await this.minio.client.getObject(sourceResource.storageKey);
-      content = await streamToString(contentStream);
-    }
-
-    // Parse the metadata
-    const meta = JSON.parse(sourceResource.meta || '{}') as ResourceMeta;
-
-    // Set the title for the new resource
-    const title = newTitle || `${sourceResource.title} (Copy)`;
-
     // Create a new resource ID
     const newResourceId = genResourceID();
 
+    const migrations: Promise<any>[] = [
+      this.ragService.duplicateDocument({
+        sourceUid: sourceResource.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceResource.resourceId,
+        targetDocId: newResourceId,
+      }),
+      this.elasticsearch.duplicateResource(sourceResource.resourceId, newResourceId, user),
+    ];
+
+    let newStorageKey: string;
+    if (sourceResource.storageKey) {
+      newStorageKey = `resources/${newResourceId}.txt`;
+      migrations.push(this.minio.duplicateFile(sourceResource.storageKey, newStorageKey));
+    }
+
+    await Promise.all(migrations);
+
+    let newRawFileKey: string;
+    if (sourceResource.rawFileKey) {
+      const { storageKey } = await this.miscService.duplicateFile(user, sourceResource.rawFileKey);
+      newRawFileKey = storageKey;
+    }
+
     // Create the new resource
-    const newResource = await this.createResource(user, {
-      resourceId: newResourceId,
-      resourceType: sourceResource.resourceType as ResourceType,
-      title,
-      content,
-      data: meta,
+    const newResource = await this.prisma.resource.create({
+      data: {
+        ...pick(sourceResource, [
+          'resourceType',
+          'wordCount',
+          'contentPreview',
+          'storageSize',
+          'vectorSize',
+          'indexStatus',
+          'indexError',
+          'identifier',
+          'meta',
+        ]),
+        resourceId: newResourceId,
+        title: newTitle,
+        uid: user.uid,
+        storageKey: newStorageKey,
+        rawFileKey: newRawFileKey,
+      },
     });
+
+    await this.syncStorageUsage(user);
 
     return newResource;
   }

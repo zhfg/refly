@@ -647,18 +647,12 @@ export class MiscService implements OnModuleInit {
     const originalFile = await this.prisma.staticFile.findFirst({
       where: {
         storageKey,
-        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!originalFile) {
       throw new NotFoundException('Original file not found');
-    }
-
-    // Check entity if provided
-    if (param?.entityId && param?.entityType) {
-      await this.checkEntity(user, param.entityId, param.entityType);
     }
 
     // Generate new storage key
