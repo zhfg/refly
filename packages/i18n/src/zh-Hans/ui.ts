@@ -836,6 +836,7 @@ const translations = {
       hideTemplates: '隐藏模板',
       showTemplates: '显示模板',
       exportImage: '导出图片',
+      copyLink: '复制链接',
     },
     connectionTimeout: {
       title: '连接超时',

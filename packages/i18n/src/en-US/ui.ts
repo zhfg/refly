@@ -844,6 +844,7 @@ const translations = {
       hideTemplates: 'Hide Templates',
       showTemplates: 'Show Templates',
       exportImage: 'Export Image',
+      copyLink: 'Copy Link',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

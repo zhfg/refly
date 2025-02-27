@@ -1,6 +1,6 @@
 import { useEffect, FC, useState, useCallback, memo } from 'react';
-
-import { Button, Divider } from 'antd';
+import { useMatch } from 'react-router-dom';
+import { Button, Divider, message } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -17,6 +17,7 @@ import ShareSettings from './share-settings';
 import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import './index.scss';
+import { IconLink } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -32,6 +33,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
   }));
+  const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
   const { provider, readonly } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
@@ -139,11 +141,24 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          {!readonly && (
+          {!readonly && !isShareCanvas && (
             <>
               <ShareSettings canvasId={canvasId} />
               <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
             </>
+          )}
+
+          {isShareCanvas && (
+            <Button
+              type="primary"
+              icon={<IconLink className="flex items-center" />}
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                message.success(t('shareContent.copyLinkSuccess'));
+              }}
+            >
+              {t('canvas.toolbar.copyLink')}
+            </Button>
           )}
 
           {readonly && isLogin && (
