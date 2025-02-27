@@ -1,7 +1,7 @@
 import { useEffect, useRef, memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import mermaid from 'mermaid';
 import { useTranslation } from 'react-i18next';
-import { debounce } from 'lodash.debounce';
+import debounce from 'lodash.debounce';
 import { cn } from '@refly/utils';
 
 // Initialize mermaid config
