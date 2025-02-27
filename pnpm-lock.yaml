@@ -1321,6 +1321,12 @@ importers:
       is-url:
         specifier: ~1.2.4
         version: 1.2.4
+      json-parse-even-better-errors:
+        specifier: ^4.0.0
+        version: 4.0.0
+      jsonrepair:
+        specifier: ^3.12.0
+        version: 3.12.0
       langchain:
         specifier: 0.3.15
         version: 0.3.15(@langchain/core@0.3.29)(@langchain/deepseek@0.0.1)(axios@1.7.4)(openai@4.83.0)
@@ -1345,6 +1351,9 @@ importers:
       zod:
         specifier: 3.23.8
         version: 3.23.8
+      zod-to-json-schema:
+        specifier: ^3.24.3
+        version: 3.24.3(zod@3.23.8)
 
   packages/tsconfig: {}
 
@@ -4809,7 +4818,7 @@ packages:
       openai: 4.83.0(ws@8.17.1)(zod@3.23.8)
       uuid: 10.0.0
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - '@langchain/anthropic'
       - '@langchain/aws'
@@ -4843,7 +4852,7 @@ packages:
       p-retry: 4.6.2
       uuid: 10.0.0
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - openai
     dev: false
@@ -4904,7 +4913,7 @@ packages:
       js-tiktoken: 1.0.14
       openai: 4.83.0(ws@8.17.1)(zod@3.23.8)
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
       - ws
@@ -14961,6 +14970,11 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dev: false
 
+  /json-parse-even-better-errors@4.0.0:
+    resolution: {integrity: sha512-lR4MXjGNgkJc7tkQ97kb2nuEMnNCyU//XYVH0MKTGcXEiSudQ5MKGKen3C5QubYy0vmq+JGitUg92uuywGEwIA==}
+    engines: {node: ^18.17.0 || >=20.5.0}
+    dev: false
+
   /json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
     requiresBuild: true
@@ -15003,6 +15017,11 @@ packages:
   /jsonpointer@5.0.1:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /jsonrepair@3.12.0:
+    resolution: {integrity: sha512-SWfjz8SuQ0wZjwsxtSJ3Zy8vvLg6aO/kxcp9TWNPGwJKgTZVfhNEQBMk/vPOpYCDFWRxD6QWuI6IHR1t615f0w==}
+    hasBin: true
     dev: false
 
   /jsonwebtoken@9.0.2:
@@ -15170,7 +15189,7 @@ packages:
       uuid: 10.0.0
       yaml: 2.5.1
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
       - openai
@@ -15246,7 +15265,7 @@ packages:
       uuid: 10.0.0
       yaml: 2.5.1
       zod: 3.23.8
-      zod-to-json-schema: 3.23.3(zod@3.23.8)
+      zod-to-json-schema: 3.24.3(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
       - openai
@@ -22437,6 +22456,14 @@ packages:
     resolution: {integrity: sha512-TYWChTxKQbRJp5ST22o/Irt9KC5nj7CdBKYB/AosCRdj/wxEMvv4NNaj9XVUHDOIp53ZxArGhnw5HMZziPFjog==}
     peerDependencies:
       zod: ^3.23.3
+    dependencies:
+      zod: 3.23.8
+    dev: false
+
+  /zod-to-json-schema@3.24.3(zod@3.23.8):
+    resolution: {integrity: sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==}
+    peerDependencies:
+      zod: ^3.24.1
     dependencies:
       zod: 3.23.8
     dev: false
