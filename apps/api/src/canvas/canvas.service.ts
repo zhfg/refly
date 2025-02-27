@@ -354,7 +354,7 @@ export class CanvasService {
         });
         const parsedInput = JSON.parse(input ?? '{}');
         const question = parsedInput?.query ?? title;
-        const answer = steps.map((s) => s.content.slice(0, 100)).join('\n');
+        const answer = steps.map((s) => s.content.slice(0, 500)).join('\n');
 
         return {
           question,
