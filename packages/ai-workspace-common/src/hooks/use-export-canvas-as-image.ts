@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
+import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 
 export const useExportCanvasAsImage = () => {
   const { t } = useTranslation();
@@ -55,8 +56,10 @@ export const useExportCanvasAsImage = () => {
             // handle the cloned document, ensure all styles are applied correctly
             const clonedContainer = clonedDoc.querySelector('.react-flow');
             if (clonedContainer) {
-              if (clonedContainer instanceof HTMLElement) {
-                clonedContainer.style.left = '-220px';
+              if (!useSiderStore.getState().collapse) {
+                if (clonedContainer instanceof HTMLElement) {
+                  clonedContainer.style.left = '-220px';
+                }
               }
 
               // 隐藏 miniMap，防止其被导出到图片中
