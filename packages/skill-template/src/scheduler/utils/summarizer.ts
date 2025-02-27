@@ -305,7 +305,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         ...source.metadata,
         source: source.url,
         title: source.title,
-        sourceType: 'urlSource', // Use 'webSearch' as source type for URL sources
+        sourceType: 'webSearch', // Use 'webSearch' as source type for URL sources
       },
     });
   }
