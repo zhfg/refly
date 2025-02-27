@@ -334,9 +334,10 @@ export const ResourceNode = memo(
             </div>
 
             {/* Handles */}
-            {!isPreview && !hideHandles && !readonly && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={isTargetConnected}
@@ -344,6 +345,7 @@ export const ResourceNode = memo(
                   nodeType="resource"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={isSourceConnected}

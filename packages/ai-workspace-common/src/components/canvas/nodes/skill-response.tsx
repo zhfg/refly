@@ -537,9 +537,10 @@ export const SkillResponseNode = memo(
           )}
 
           <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
-            {!isPreview && !hideHandles && !readonly && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={isTargetConnected}
@@ -547,6 +548,7 @@ export const SkillResponseNode = memo(
                   nodeType="response"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={isSourceConnected}

@@ -478,18 +478,29 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
 
   // Create readonly versions of the node and edge operation handlers
-  const readonlyNodesChange = useCallback(() => {
-    // No-op function for readonly mode
-    return nodes;
-  }, [nodes]);
+  const readonlyNodesChange = useCallback(
+    (changes: any) => {
+      // Allow position changes for nodes in readonly mode
+      const allowedChanges = changes.filter(
+        (change: any) => change.type === 'position' || change.type === 'dimensions',
+      );
+      return onNodesChange(allowedChanges);
+    },
+    [onNodesChange],
+  );
 
-  const readonlyEdgesChange = useCallback(() => {
-    // No-op function for readonly mode
-    return edges;
-  }, [edges]);
+  const readonlyEdgesChange = useCallback(
+    (changes: any) => {
+      // Allow selection changes for edges in readonly mode
+      const allowedChanges = changes.filter((change: any) => change.type === 'select');
+      return onEdgesChange(allowedChanges);
+    },
+    [onEdgesChange],
+  );
 
   const readonlyConnect = useCallback(() => {
     // No-op function for readonly mode
+    return;
   }, []);
 
   // Optimize node dragging performance
@@ -686,7 +697,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onDragOver={readonly ? undefined : handleDragOver}
             onDrop={readonly ? undefined : handleDrop}
             connectOnClick={false}
-            edgesFocusable={!readonly}
+            edgesFocusable={false}
             nodesFocusable={!readonly}
             onEdgeClick={readonly ? undefined : handleEdgeClick}
           >

@@ -219,9 +219,10 @@ export const ImageNode = memo(
                 ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
               `}
           >
-            {!isPreview && !hideHandles && !readonly && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={false}
@@ -229,6 +230,7 @@ export const ImageNode = memo(
                   nodeType="image"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={false}

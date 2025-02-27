@@ -353,9 +353,10 @@ export const SkillNode = memo(
             <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
           )}
           <div className={`w-full h-full  ${getNodeCommonStyles({ selected, isHovered })}`}>
-            {!readonly && (
+            {
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={isTargetConnected}
@@ -363,6 +364,7 @@ export const SkillNode = memo(
                   nodeType="skill"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={isSourceConnected}
@@ -370,7 +372,7 @@ export const SkillNode = memo(
                   nodeType="skill"
                 />
               </>
-            )}
+            }
 
             <div className="flex flex-col gap-3 h-full p-3 box-border">
               <NodeHeader

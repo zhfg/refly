@@ -214,9 +214,10 @@ export const DocumentNode = memo(
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
-            {!isPreview && !hideHandles && !readonly && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={isTargetConnected}
@@ -224,6 +225,7 @@ export const DocumentNode = memo(
                   nodeType="document"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={isSourceConnected}

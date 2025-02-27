@@ -301,9 +301,10 @@ export const GroupNode = memo(
               transition: 'all 0.2s ease',
             }}
           >
-            {!isPreview && !hideHandles && !readonly && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
                   isConnected={false}
@@ -311,6 +312,7 @@ export const GroupNode = memo(
                   nodeType="group"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
                   isConnected={false}
