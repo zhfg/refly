@@ -185,7 +185,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   );
 
   return (
-    <div>
+    <div className="hidden">
       <CreateTemplateModal
         canvasId={canvasId}
         title={title}
