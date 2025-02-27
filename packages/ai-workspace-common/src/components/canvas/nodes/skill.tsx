@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { ModelInfo, Skill } from '@refly/openapi-schema';
+import { ModelInfo, Skill, SkillTemplateConfig } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
@@ -39,6 +39,8 @@ import classNames from 'classnames';
 import Moveable from 'react-moveable';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -133,7 +135,9 @@ export const SkillNode = memo(
       defaultHeight: 'auto',
     });
 
-    const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
+    const { entityId, metadata = {} } = data;
+    const { query, selectedSkill, modelInfo, contextItems = [], tplConfig } = metadata;
+    const skill = useFindSkill(selectedSkill?.name);
 
     const [localQuery, setLocalQuery] = useState(query);
 
@@ -292,6 +296,7 @@ export const SkillNode = memo(
               metadata: {
                 status: 'executing',
                 contextItems,
+                tplConfig,
               },
             },
             position: node.position,
@@ -338,6 +343,15 @@ export const SkillNode = memo(
       }
     };
 
+    const setNodeDataByEntity = useSetNodeDataByEntity();
+
+    const handleTplConfigChange = useCallback(
+      (config: SkillTemplateConfig) => {
+        setNodeDataByEntity({ entityId, type: 'skill' }, { metadata: { tplConfig: config } });
+      },
+      [entityId, setNodeDataByEntity],
+    );
+
     return (
       <div className={classNames({ nowheel: isOperating })}>
         <div
@@ -377,7 +391,7 @@ export const SkillNode = memo(
             <div className="flex flex-col gap-3 h-full p-3 box-border">
               <NodeHeader
                 readonly={readonly}
-                selectedSkillName={selectedSkill?.name}
+                selectedSkillName={skill?.name}
                 setSelectedSkill={setSelectedSkill}
               />
 
@@ -394,7 +408,7 @@ export const SkillNode = memo(
                   setQuery(value);
                   updateSize({ height: 'auto' });
                 }}
-                selectedSkillName={selectedSkill?.name}
+                selectedSkillName={skill?.name}
                 inputClassName="px-1 py-0"
                 maxRows={100}
                 handleSendMessage={handleSendMessage}
@@ -405,19 +419,24 @@ export const SkillNode = memo(
                 onUploadImage={handleImageUpload}
               />
 
-              {selectedSkill?.configSchema?.items?.length > 0 && (
+              {skill?.configSchema?.items?.length > 0 && (
                 <ConfigManager
-                  key={selectedSkill?.name}
+                  key={skill?.name}
                   form={form}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  schema={selectedSkill?.configSchema}
-                  tplConfig={selectedSkill?.tplConfig}
+                  schema={skill?.configSchema}
+                  tplConfig={tplConfig}
                   fieldPrefix="tplConfig"
                   configScope="runtime"
                   resetConfig={() => {
-                    const defaultConfig = selectedSkill?.tplConfig ?? {};
+                    const defaultConfig = skill?.tplConfig ?? {};
                     form.setFieldValue('tplConfig', defaultConfig);
+                  }}
+                  onFormValuesChange={(changedValues, allValues) => {
+                    console.log('changedValues', changedValues);
+                    console.log('allValues', allValues);
+                    handleTplConfigChange(allValues.tplConfig);
                   }}
                 />
               )}
