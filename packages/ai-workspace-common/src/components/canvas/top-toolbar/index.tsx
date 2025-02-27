@@ -132,6 +132,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
 
         <div className="flex items-center gap-2 relative z-10">
           <ToolbarButtons
+            canvasTitle={canvasTitle}
             showPreview={showPreview}
             showMaxRatio={showMaxRatio}
             setShowPreview={setShowPreview}

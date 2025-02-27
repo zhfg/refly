@@ -736,6 +736,11 @@ const translations = {
       skill: '技能',
       image: '图片',
     },
+    export: {
+      success: '导出图片成功',
+      error: '导出图片失败',
+      noNodes: '画布为空，无法导出图片',
+    },
     contextMenu: {
       createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
@@ -830,6 +835,7 @@ const translations = {
       deleteCanvasFile: '同时删除画布中的资源和文档',
       hideTemplates: '隐藏模板',
       showTemplates: '显示模板',
+      exportImage: '导出图片',
     },
     connectionTimeout: {
       title: '连接超时',

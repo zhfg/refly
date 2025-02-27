@@ -54,6 +54,8 @@
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.12",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "lodash-es": "^4.17.21"
   }
 }

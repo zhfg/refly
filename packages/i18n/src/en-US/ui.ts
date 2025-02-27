@@ -739,6 +739,11 @@ const translations = {
       skill: 'Skill',
       image: 'Image',
     },
+    export: {
+      success: 'Image exported successfully',
+      error: 'Failed to export image',
+      noNodes: 'Canvas is empty, cannot export image',
+    },
     contextMenu: {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
@@ -838,6 +843,7 @@ const translations = {
       deleteCanvasFile: 'Delete resources and documents in the canvas',
       hideTemplates: 'Hide Templates',
       showTemplates: 'Show Templates',
+      exportImage: 'Export Image',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

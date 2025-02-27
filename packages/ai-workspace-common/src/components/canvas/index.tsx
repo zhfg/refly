@@ -50,7 +50,7 @@ import { CustomEdge } from './edges/custom-edge';
 import '@xyflow/react/dist/style.css';
 import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
@@ -133,18 +133,24 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const interactionMode = useUserStore.getState().localSettings.canvasMode;
   const { localSettings, setLocalSettings } = useUserStore.getState();
   const { mutate: updateSettings } = useUpdateSettings();
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
+
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setLocalSettings({
       ...localSettings,
       canvasMode: mode,
     });
-    updateSettings({
-      body: {
-        preferences: {
-          operationMode: mode,
+    if (isLogin) {
+      updateSettings({
+        body: {
+          preferences: {
+            operationMode: mode,
+          },
         },
-      },
-    });
+      });
+    }
   };
 
   useEffect(() => {
