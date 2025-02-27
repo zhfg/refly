@@ -137,7 +137,7 @@ const ReasoningContent = memo(
         >
           {collapsed ? (
             <div
-              className="flex items-center justify-between text-gray-500 text-sm"
+              className="flex items-center justify-between text-sm"
               onClick={() => setCollapsed(false)}
             >
               <div className="flex items-center gap-1">
@@ -149,13 +149,13 @@ const ReasoningContent = memo(
           ) : (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1 text-gray-500 text-sm font-medium">
+                <div className="flex items-center gap-1 text-sm font-medium">
                   <IconThinking className="w-4 h-4" />
                   {t('canvas.skillResponse.reasoningContent')}
                 </div>
                 <Button
                   type="text"
-                  icon={<ChevronUp className="w-4 h-4 text-gray-500" />}
+                  icon={<ChevronUp className="w-4 h-4" />}
                   onClick={() => setCollapsed(true)}
                   size="small"
                   className="flex items-center justify-center h-6 w-6 min-w-0 p-0"
