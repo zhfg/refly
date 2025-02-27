@@ -9,7 +9,6 @@ import { cn } from '@refly-packages/utils/cn';
 import { useListSkills } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 const TextArea = Input.TextArea;
 
@@ -43,9 +42,6 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const { t } = useTranslation();
     const { readonly } = useCanvasContext();
     const [isDragging, setIsDragging] = useState(false);
-    const { isLogin } = useUserStoreShallow((state) => ({
-      isLogin: state.isLogin,
-    }));
 
     const inputRef = useRef<RefTextAreaType>(null);
     const searchStore = useSearchStoreShallow((state) => ({
