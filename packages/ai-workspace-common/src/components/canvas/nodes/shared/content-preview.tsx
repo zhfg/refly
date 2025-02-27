@@ -7,35 +7,26 @@ interface ContentPreviewProps {
   sources?: Source[];
   sizeMode: 'compact' | 'adaptive';
   isOperating: boolean;
-  maxCompactLength?: number;
   className?: string;
 }
 
 export const ContentPreview = memo(
-  ({
-    content,
-    sources,
-    sizeMode,
-    isOperating,
-    maxCompactLength = 10,
-    className = '',
-  }: ContentPreviewProps) => {
-    const previewContent = useMemo(() => {
-      if (sizeMode === 'compact') {
-        return `${content?.slice(0, maxCompactLength)}...` || '';
-      }
-      return content || '';
-    }, [content, sizeMode, maxCompactLength]);
+  ({ content, sources, sizeMode, isOperating, className = '' }: ContentPreviewProps) => {
+    const previewContent = content ?? '';
 
     // Memoize className to prevent re-renders when only isOperating changes
     const markdownClassName = useMemo(
       () =>
-        `text-xs overflow-hidden ${isOperating ? 'pointer-events-auto cursor-text select-text' : 'pointer-events-none select-none'} ${className}`,
-      [isOperating, className],
+        `text-xs overflow-hidden ${sizeMode === 'compact' ? 'max-h-[1.5rem] line-clamp-1' : ''} ${
+          isOperating
+            ? 'pointer-events-auto cursor-text select-text'
+            : 'pointer-events-none select-none'
+        } ${className}`,
+      [isOperating, sizeMode, className],
     );
 
     return (
-      <Markdown className={markdownClassName} content={previewContent} sources={sources || []} />
+      <Markdown className={markdownClassName} content={previewContent} sources={sources ?? []} />
     );
   },
   (prevProps, nextProps) => {
@@ -43,7 +34,6 @@ export const ContentPreview = memo(
       prevProps.content === nextProps.content &&
       prevProps.sizeMode === nextProps.sizeMode &&
       prevProps.isOperating === nextProps.isOperating &&
-      prevProps.maxCompactLength === nextProps.maxCompactLength &&
       prevProps.className === nextProps.className &&
       JSON.stringify(prevProps.sources) === JSON.stringify(nextProps.sources)
     );

@@ -240,7 +240,7 @@ export const SkillResponseNode = memo(
       : '';
 
     const skill = {
-      name: actionMeta?.name || '',
+      name: actionMeta?.name || 'CommonQnA',
       icon: actionMeta?.icon,
     };
     const skillName = actionMeta?.name;
@@ -288,6 +288,7 @@ export const SkillResponseNode = memo(
         {
           resultId: entityId,
           query: title,
+          selectedSkill: skill,
           contextItems: data?.metadata?.contextItems,
         },
         {
@@ -607,7 +608,6 @@ export const SkillResponseNode = memo(
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}
                       isOperating={isOperating}
-                      maxCompactLength={10}
                       sources={sources}
                     />
                   )}
