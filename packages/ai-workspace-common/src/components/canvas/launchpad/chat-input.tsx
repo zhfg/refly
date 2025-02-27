@@ -42,6 +42,8 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const [isDragging, setIsDragging] = useState(false);
 
     const inputRef = useRef<RefTextAreaType>(null);
+    const hasMatchedOptions = useRef(false);
+
     const searchStore = useSearchStoreShallow((state) => ({
       setIsSearchOpen: state.setIsSearchOpen,
     }));
@@ -116,7 +118,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       }
 
       if (e.keyCode === 13) {
-        if (showSkillSelector && options?.length > 0) {
+        if (showSkillSelector && hasMatchedOptions.current) {
           e.preventDefault();
           return;
         }
@@ -189,6 +191,8 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       [skills, setSelectedSkill, handleSelectSkill, query, setQuery],
     );
 
+    console.log('showSkillSelector', showSkillSelector, options);
+
     return (
       <div
         ref={ref}
@@ -244,14 +248,21 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             const searchText =
               lastSlashIndex !== -1 ? inputValue.slice(lastSlashIndex + 1) : inputValue;
             const searchVal = searchText.toLowerCase();
-            return (
+            const isMatch =
               !searchVal ||
               option.value.toString().toLowerCase().includes(searchVal) ||
-              option.textLabel.toLowerCase().includes(searchVal)
-            );
+              option.textLabel.toLowerCase().includes(searchVal);
+
+            if (isMatch) {
+              hasMatchedOptions.current = true;
+            }
+            return isMatch;
+          }}
+          onSearch={(value) => {
+            hasMatchedOptions.current = false;
+            handleSearch(value);
           }}
           onSelect={(value) => handleSearchListConfirm(value)}
-          onSearch={(value) => handleSearch(value)}
         >
           <TextArea
             style={{ paddingLeft: 0, paddingRight: 0, height: '100%' }}
