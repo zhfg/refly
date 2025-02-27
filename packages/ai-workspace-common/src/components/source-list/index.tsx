@@ -169,14 +169,12 @@ export const SourceList = (props: SourceListProps) => {
         {sources.slice(0, 3).map((item, index) => (
           <SourceItem key={index} index={index} source={item} />
         ))}
-        {sources.length > 3 && (
-          <ViewMoreItem
-            onClick={handleViewMore}
-            key="view-more"
-            sources={sources}
-            extraCnt={sources.slice(3).length}
-          />
-        )}
+        <ViewMoreItem
+          onClick={handleViewMore}
+          key="view-more"
+          sources={sources}
+          extraCnt={sources.slice(3).length}
+        />
       </div>
     </div>
   ) : null;

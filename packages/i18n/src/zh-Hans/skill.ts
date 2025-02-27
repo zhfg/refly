@@ -4,6 +4,9 @@ const translations = {
     description: '基于上下文回答问题',
     placeholder: '向 AI 提问，输入 / 选择技能...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       analyzeContext: {
         name: '上下文分析',
       },
@@ -17,6 +20,9 @@ const translations = {
     description: '基于自定义系统提示和上下文回答问题',
     placeholder: '让 AI 基于自定义系统提示回答问题...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       analyzeContext: {
         name: '上下文分析',
       },
@@ -30,6 +36,9 @@ const translations = {
     description: '根据需求和上下文进行写作',
     placeholder: '让 AI 帮您生成一篇文档...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       analyzeContext: {
         name: '上下文分析',
       },
@@ -44,7 +53,14 @@ const translations = {
   editDoc: {
     name: '编辑文档',
     placeholder: '让 AI 帮您编辑文档...',
-    steps: {},
+    steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
+      analyzeContext: {
+        name: '上下文分析',
+      },
+    },
   },
   rewriteDoc: {
     name: '重写文档',
@@ -55,6 +71,9 @@ const translations = {
     description: '搜索网络并获取答案',
     placeholder: '搜索网络并获取答案...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       analyzeContext: {
         name: '上下文分析',
       },
@@ -71,6 +90,9 @@ const translations = {
     description: '搜索知识库并获取答案',
     placeholder: '搜索知识库并获取答案...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       analyzeContext: {
         name: '上下文分析',
       },
@@ -87,6 +109,9 @@ const translations = {
     description: '基于上下文脑暴问题',
     placeholder: '让 AI 为您生成推荐问题...',
     steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
       recommendQuestions: {
         name: '生成推荐问题',
       },

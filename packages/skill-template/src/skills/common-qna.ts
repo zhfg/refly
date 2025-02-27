@@ -18,6 +18,7 @@ import { prepareContext } from '../scheduler/utils/context';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 import { processQuery } from '../scheduler/utils/queryProcessor';
+import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';
@@ -60,6 +61,8 @@ export class CommonQnA extends BaseSkill {
     const { messages = [], images = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
 
+    config.metadata.step = { name: 'analyzeQuery' };
+
     // Use shared query processor with shouldSkipAnalysis option
     const {
       optimizedQuery,
@@ -76,14 +79,26 @@ export class CommonQnA extends BaseSkill {
       shouldSkipAnalysis: true, // For common QnA, we can skip analysis when there's no context and chat history
     });
 
+    // Extract URLs from the query and crawl them with optimized concurrent processing
+    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5, // 增加并发爬取的URL数量限制
+      batchSize: 8, // 增加每批处理的URL数量
+    });
+
+    this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
+    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+
     let context = '';
     let sources: Source[] = [];
 
-    const needPrepareContext = hasContext && remainingTokens > 0;
+    // Consider URL sources for context preparation
+    const hasUrlSources = urlSources.length > 0;
+    const needPrepareContext = (hasContext || hasUrlSources) && remainingTokens > 0;
     const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
 
     this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+    this.engine.logger.log(`hasUrlSources: ${hasUrlSources}`);
 
     if (needPrepareContext) {
       config.metadata.step = { name: 'analyzeContext' };
@@ -94,6 +109,7 @@ export class CommonQnA extends BaseSkill {
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
           rewrittenQueries,
+          urlSources, // Pass URL sources to the prepareContext function
         },
         {
           config,

@@ -114,7 +114,7 @@ const NodeHeader = memo(
         </div>
         {skillName && skillName !== 'commonQnA' && (
           <div className="flex-shrink-0 mb-2">
-            <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
+            <SelectedSkillHeader readonly skill={skill} className="rounded-md" />
           </div>
         )}
       </>
@@ -574,7 +574,7 @@ export const SkillResponseNode = memo(
                   {status === 'failed' && (
                     <div
                       className={cn(
-                        'flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2',
+                        'flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-md p-2',
                         readonly ? 'cursor-not-allowed' : 'cursor-pointer',
                       )}
                       onClick={() => handleRerun()}
@@ -587,7 +587,7 @@ export const SkillResponseNode = memo(
                   )}
 
                   {(status === 'waiting' || status === 'executing') && (
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-md p-2">
                       <IconLoading className="h-3 w-3 animate-spin text-green-500" />
                       <span className="text-xs text-gray-500 max-w-48 truncate">
                         {log ? (
@@ -604,7 +604,7 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && sources.length > 0 && (
                     <div
-                      className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center rounded-md justify-between gap-2 border-gray-100 border-solid p-2 hover:bg-gray-50 cursor-pointer "
                       onClick={handleClickSources}
                     >
                       <span className="flex items-center gap-1 text-xs text-gray-500">

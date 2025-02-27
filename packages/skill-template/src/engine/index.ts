@@ -112,6 +112,12 @@ export interface ReflyService {
       additionalMetadata?: Record<string, any>;
     },
   ) => Promise<InMemorySearchResponse>;
+
+  // New method to crawl URLs and get their content
+  crawlUrl: (
+    user: User,
+    url: string,
+  ) => Promise<{ title?: string; content?: string; metadata?: Record<string, any> }>;
 }
 
 export interface SkillEngineOptions {
