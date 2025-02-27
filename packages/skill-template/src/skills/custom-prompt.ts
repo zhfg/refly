@@ -15,6 +15,7 @@ import { processQuery } from '../scheduler/utils/queryProcessor';
 import { prepareContext } from '../scheduler/utils/context';
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 import { truncateSource } from '../scheduler/utils/truncator';
+import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 // prompts
 import * as customPrompt from '../scheduler/module/customPrompt/index';
 
@@ -118,7 +119,7 @@ export class CustomPrompt extends BaseSkill {
     const { currentSkill, tplConfig, locale = 'en' } = config.configurable;
 
     // Set current step
-    config.metadata.step = { name: 'customPrompt' };
+    config.metadata.step = { name: 'analyzeQuery' };
 
     // Get custom system prompt from config
     let customSystemPrompt = (tplConfig?.customSystemPrompt?.value as string) || '';
@@ -157,6 +158,18 @@ export class CustomPrompt extends BaseSkill {
       shouldSkipAnalysis: true,
     });
 
+    // Extract URLs from the query and crawl them with optimized concurrent processing
+    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5, // Increase concurrent URL crawling limit
+      batchSize: 8, // Increase batch size for URL processing
+    });
+
+    this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
+    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+
+    // Set current step
+    config.metadata.step = { name: 'analyzeContext' };
+
     // Prepare context
     const { contextStr, sources } = await prepareContext(
       {
@@ -165,6 +178,7 @@ export class CustomPrompt extends BaseSkill {
         maxTokens: remainingTokens,
         enableMentionedContext: true,
         rewrittenQueries,
+        urlSources, // Pass URL sources to the prepareContext function
       },
       {
         config,
@@ -195,6 +209,8 @@ export class CustomPrompt extends BaseSkill {
         config,
       );
     }
+
+    config.metadata.step = { name: 'answerQuestion' };
 
     // Build messages for the model using the customPrompt module
     const module = {
