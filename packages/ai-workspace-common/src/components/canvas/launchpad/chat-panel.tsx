@@ -262,8 +262,8 @@ export const ChatPanel = () => {
           setSelectedSkill={setSelectedSkill}
           onClose={() => setSelectedSkill(null)}
         />
+        {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
         <div className="px-3">
-          {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
           <ContextManager
             className="py-2"
             contextItems={contextItems}
