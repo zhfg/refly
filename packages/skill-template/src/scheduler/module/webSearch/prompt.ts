@@ -146,7 +146,7 @@ export const buildWebSearchContextUserPrompt = (context: string, needPrepareCont
   }
 
   return `
-## Web Search Results
+## Context
 ${context}
 
 ${buildCitationReminder()}

@@ -13,7 +13,7 @@ import {
   Switch,
   Space,
 } from '@arco-design/web-react';
-import { IconRefresh } from '@arco-design/web-react/icon';
+import { IconRefresh, IconUp, IconDown } from '@arco-design/web-react/icon';
 import { GrDocumentConfig } from 'react-icons/gr';
 
 import {
@@ -231,6 +231,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   const { schema, fieldPrefix, form, tplConfig, configScope, formErrors, setFormErrors } = props;
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [formValues, setFormValues] = useState<Record<string, DynamicConfigValue>>({});
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const isConfigItemRequired = useCallback(
     (schemaItem: DynamicConfigItem) => {
@@ -364,71 +365,84 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   return (
     <div className="config-manager">
       <div className="config-manager__header">
-        <GrDocumentConfig className="config-manager__header-icon" />
-        <span className="config-manager__header-title">{t('copilot.configManager.title')}</span>
+        <div className="config-manager__header-left">
+          <GrDocumentConfig className="config-manager__header-icon" />
+          <span className="config-manager__header-title">{t('copilot.configManager.title')}</span>
+        </div>
+        <Button
+          type="text"
+          size="mini"
+          className="config-manager__toggle-button"
+          icon={isExpanded ? <IconUp /> : <IconDown />}
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-label={isExpanded ? t('common.collapse') : t('common.expand')}
+        />
       </div>
 
-      <Form
-        form={form}
-        className="config-manager__form"
-        onValuesChange={(changedValues, _allValues) => {
-          for (const field of Object.keys(changedValues)) {
-            validateField(field, changedValues[field]);
-          }
-        }}
-      >
-        <Space direction="vertical" style={{ width: '100%' }}>
-          {(schema.items || []).map((item) => {
-            const field = getFormField(fieldPrefix, item.key);
-            // 使用本地状态或表单值
-            const configValue = formValues[item.key] || form.getFieldValue(field);
+      {isExpanded && (
+        <Form
+          form={form}
+          className="config-manager__form"
+          onValuesChange={(changedValues, _allValues) => {
+            for (const field of Object.keys(changedValues)) {
+              validateField(field, changedValues[field]);
+            }
+          }}
+        >
+          <Space direction="vertical" style={{ width: '100%' }}>
+            {(schema.items || []).map((item) => {
+              const field = getFormField(fieldPrefix, item.key);
+              // 使用本地状态或表单值
+              const configValue = formValues[item.key] || form.getFieldValue(field);
 
-            return (
-              <div
-                key={item.key}
-                className={`config-manager__item-row ${getItemError(item.key) ? 'error' : ''}`}
-              >
-                <Form.Item
-                  layout="vertical"
-                  field={field}
-                  label={
-                    <div className="config-manager__item-label">
-                      {item.required?.value && item.required?.configScope.includes(configScope) && (
-                        <span style={{ color: 'red' }}>* </span>
-                      )}
-                      {getDictValue(item.labelDict, locale)}
-                      <Button
-                        type="text"
-                        size="mini"
-                        className="config-manager__reset-button"
-                        icon={<IconRefresh />}
-                        onClick={() => handleReset(item.key)}
-                      >
-                        {t('common.reset')}
-                      </Button>
-                    </div>
-                  }
-                  required={
-                    item.required?.value && item.required?.configScope.includes(configScope)
-                  }
-                  validateStatus={formErrors[field] ? 'error' : undefined}
-                  help={formErrors[field]}
+              return (
+                <div
+                  key={item.key}
+                  className={`config-manager__item-row ${getItemError(item.key) ? 'error' : ''}`}
                 >
-                  <ConfigItem
-                    key={`${item.key}-${resetCounter}`}
-                    item={item}
-                    form={form}
+                  <Form.Item
+                    layout="vertical"
                     field={field}
-                    locale={locale}
-                    configValue={configValue}
-                    onValueChange={handleValueChange}
-                  />
-                </Form.Item>
-              </div>
-            );
-          })}
-        </Space>
-      </Form>
+                    label={
+                      <div className="config-manager__item-label">
+                        {item.required?.value &&
+                          item.required?.configScope.includes(configScope) && (
+                            <span style={{ color: 'red' }}>* </span>
+                          )}
+                        {getDictValue(item.labelDict, locale)}
+                        <Button
+                          type="text"
+                          size="mini"
+                          className="config-manager__reset-button"
+                          icon={<IconRefresh />}
+                          onClick={() => handleReset(item.key)}
+                        >
+                          {t('common.reset')}
+                        </Button>
+                      </div>
+                    }
+                    required={
+                      item.required?.value && item.required?.configScope.includes(configScope)
+                    }
+                    validateStatus={formErrors[field] ? 'error' : undefined}
+                    help={formErrors[field]}
+                  >
+                    <ConfigItem
+                      key={`${item.key}-${resetCounter}`}
+                      item={item}
+                      form={form}
+                      field={field}
+                      locale={locale}
+                      configValue={configValue}
+                      onValueChange={handleValueChange}
+                    />
+                  </Form.Item>
+                </div>
+              );
+            })}
+          </Space>
+        </Form>
+      )}
     </div>
   );
 };

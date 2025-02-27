@@ -9,11 +9,14 @@ import {
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 
 // utils
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { prepareContext } from '../scheduler/utils/context';
+import { buildFinalRequestMessages } from '../scheduler/utils/message';
+import { truncateSource } from '../scheduler/utils/truncator';
+// prompts
+import * as customPrompt from '../scheduler/module/customPrompt/index';
 
 export class CustomPrompt extends BaseSkill {
   name = 'customPrompt';
@@ -25,7 +28,7 @@ export class CustomPrompt extends BaseSkill {
       {
         key: 'customSystemPrompt',
         inputMode: 'inputTextArea',
-        defaultValue: 'You are a helpful AI assistant.',
+        defaultValue: '',
         labelDict: {
           en: 'Custom System Prompt',
           'zh-CN': '自定义系统提示词',
@@ -112,14 +115,32 @@ export class CustomPrompt extends BaseSkill {
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
     const { messages = [], images = [] } = state;
-    const { currentSkill, tplConfig } = config.configurable;
+    const { currentSkill, tplConfig, locale = 'en' } = config.configurable;
 
     // Set current step
     config.metadata.step = { name: 'customPrompt' };
 
     // Get custom system prompt from config
-    const customSystemPrompt =
-      (tplConfig?.customSystemPrompt?.value as string) || 'You are a helpful AI assistant.';
+    let customSystemPrompt = (tplConfig?.customSystemPrompt?.value as string) || '';
+
+    // If customSystemPrompt is empty, look for it in chat history
+    if (!customSystemPrompt && config.configurable.chatHistory?.length > 0) {
+      // Iterate through chat history in reverse order (most recent first)
+      for (let i = config.configurable.chatHistory.length - 1; i >= 0; i--) {
+        const message = config.configurable.chatHistory[i];
+        // Check if message has skillMeta and tplConfig with customSystemPrompt
+        const skillMeta = message.additional_kwargs?.skillMeta as { name?: string } | undefined;
+        const messageTplConfig = message.additional_kwargs?.tplConfig as
+          | Record<string, any>
+          | undefined;
+
+        if (skillMeta?.name === 'customPrompt' && messageTplConfig?.customSystemPrompt?.value) {
+          customSystemPrompt = messageTplConfig.customSystemPrompt.value as string;
+          this.engine.logger.log('Found customSystemPrompt in chat history');
+          break;
+        }
+      }
+    }
 
     // Use shared query processor
     const {
@@ -133,10 +154,11 @@ export class CustomPrompt extends BaseSkill {
       config,
       ctxThis: this,
       state,
+      shouldSkipAnalysis: true,
     });
 
     // Prepare context
-    const { contextStr } = await prepareContext(
+    const { contextStr, sources } = await prepareContext(
       {
         query: optimizedQuery,
         mentionedContext,
@@ -154,32 +176,47 @@ export class CustomPrompt extends BaseSkill {
 
     this.engine.logger.log('Prepared context successfully!');
 
-    // Create messages with custom system prompt
-    const requestMessages = [
-      new SystemMessage(customSystemPrompt),
-      ...usedChatHistory,
-      ...messages,
-    ];
-
-    // Add context as a human message if available
-    if (contextStr) {
-      requestMessages.push(new HumanMessage(`Context information: ${contextStr}`));
+    // Handle sources if available
+    if (sources?.length > 0) {
+      // Split sources into smaller chunks based on size and emit them separately
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
     }
 
-    // Add the user query
-    requestMessages.push(
-      new HumanMessage(
-        images?.length
-          ? {
-              content: [
-                { type: 'text', text: query },
-                ...(images.map((image) => ({ type: 'image_url', image_url: { url: image } })) ||
-                  []),
-              ],
-            }
-          : query,
-      ),
-    );
+    // Build messages for the model using the customPrompt module
+    const module = {
+      buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
+        customPrompt.buildCustomPromptSystemPrompt(customSystemPrompt, locale, needPrepareContext),
+      buildContextUserPrompt: customPrompt.buildCustomPromptContextUserPrompt,
+      buildUserPrompt: customPrompt.buildCustomPromptUserPrompt,
+    };
+
+    // Build messages using the utility function
+    const requestMessages = buildFinalRequestMessages({
+      module,
+      locale,
+      chatHistory: usedChatHistory,
+      messages,
+      needPrepareContext: true,
+      context: contextStr,
+      images,
+      originalQuery: query,
+      optimizedQuery,
+      rewrittenQueries,
+    });
 
     // Generate answer using the model
     const model = this.engine.chatModel({

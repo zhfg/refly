@@ -10,10 +10,12 @@ interface QueryProcessorOptions {
   config: SkillRunnableConfig;
   ctxThis: BaseSkill;
   state: GraphState;
+  // Whether to skip query analysis, defaults to false for backward compatibility
+  shouldSkipAnalysis?: boolean;
 }
 
 export async function processQuery(options: QueryProcessorOptions): Promise<QueryProcessorResult> {
-  const { config, ctxThis, state } = options;
+  const { config, ctxThis, state, shouldSkipAnalysis = false } = options;
   const { query: originalQuery } = state;
   const {
     modelInfo,
@@ -59,19 +61,26 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
     `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
   );
 
-  const analyzedRes = await analyzeQueryAndContext(query, {
-    config,
-    ctxThis,
-    state,
-    tplConfig,
-  });
-  optimizedQuery = analyzedRes.analysis.summary;
-  const mentionedContext = analyzedRes.mentionedContext;
-  rewrittenQueries = analyzedRes.rewrittenQueries;
+  // Only skip analysis if explicitly set to true and there's no context and chat history
+  const canSkipAnalysis =
+    shouldSkipAnalysis && !hasContext && (!usedChatHistory || usedChatHistory.length === 0);
 
-  ctxThis.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
-  ctxThis.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
-  ctxThis.engine.logger.log(`rewrittenQueries: ${safeStringifyJSON(rewrittenQueries)}`);
+  let mentionedContext = {};
+  if (!canSkipAnalysis) {
+    const analyzedRes = await analyzeQueryAndContext(query, {
+      config,
+      ctxThis,
+      state,
+      tplConfig,
+    });
+    optimizedQuery = analyzedRes.analysis.summary;
+    mentionedContext = analyzedRes.mentionedContext;
+    rewrittenQueries = analyzedRes.rewrittenQueries;
+
+    ctxThis.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
+    ctxThis.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+    ctxThis.engine.logger.log(`rewrittenQueries: ${safeStringifyJSON(rewrittenQueries)}`);
+  }
 
   return {
     optimizedQuery,

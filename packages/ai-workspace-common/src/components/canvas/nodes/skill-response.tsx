@@ -42,13 +42,13 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { ReasoningContentPreview } from './shared/reasoning-content-preview';
 const POLLING_WAIT_TIME = 15000;
 
 const NodeHeader = memo(
@@ -592,6 +592,15 @@ export const SkillResponseNode = memo(
                         </div>
                       ))}
                     </div>
+                  )}
+
+                  {status !== 'failed' && metadata?.reasoningContent && (
+                    <ReasoningContentPreview
+                      content={metadata.reasoningContent}
+                      sources={sources}
+                      isOperating={isOperating}
+                      stepStatus={status === 'executing' ? 'executing' : 'finish'}
+                    />
                   )}
 
                   {status !== 'failed' && content && (

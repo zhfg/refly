@@ -620,28 +620,31 @@ export class SkillService {
   ): Promise<BaseMessage[]> {
     const query = result.input?.query || result.title;
 
-    let imageUrls: string[] = [];
+    // Only create content array if images exist
+    let messageContent: string | MessageContentComplex[] = query;
     if (result.input?.images?.length > 0) {
-      imageUrls = await this.misc.generateImageUrls(user, result.input.images);
+      const imageUrls = await this.misc.generateImageUrls(user, result.input.images);
+      messageContent = [
+        { type: 'text', text: query },
+        ...imageUrls.map((url) => ({ type: 'image_url', image_url: { url } })),
+      ];
     }
-    const imageContent: MessageContentComplex[] = imageUrls.map((url) => ({
-      type: 'image_url',
-      image_url: { url },
-    }));
 
     return [
-      new HumanMessage({
-        content: [{ type: 'text', text: query }, ...imageContent],
-      }),
+      new HumanMessage({ content: messageContent }),
       ...(steps?.length > 0
         ? steps.map(
             (step) =>
               new AIMessage({
-                content: getWholeParsedContent(step.reasoningContent, step.content), //  // TODO: dump artifact content to message
+                content: getWholeParsedContent(step.reasoningContent, step.content),
                 additional_kwargs: {
                   skillMeta: result.actionMeta,
                   structuredData: step.structuredData,
                   type: result.type,
+                  tplConfig:
+                    typeof result.tplConfig === 'string'
+                      ? safeParseJSON(result.tplConfig)
+                      : result.tplConfig,
                 },
               }),
           )

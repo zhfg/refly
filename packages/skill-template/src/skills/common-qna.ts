@@ -60,7 +60,7 @@ export class CommonQnA extends BaseSkill {
     const { messages = [], images = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
 
-    // Use shared query processor
+    // Use shared query processor with shouldSkipAnalysis option
     const {
       optimizedQuery,
       query,
@@ -73,6 +73,7 @@ export class CommonQnA extends BaseSkill {
       config,
       ctxThis: this,
       state,
+      shouldSkipAnalysis: true, // For common QnA, we can skip analysis when there's no context and chat history
     });
 
     let context = '';
@@ -136,6 +137,7 @@ export class CommonQnA extends BaseSkill {
       buildContextUserPrompt: commonQnA.buildCommonQnAContextUserPrompt,
       buildUserPrompt: commonQnA.buildCommonQnAUserPrompt,
     };
+
     const { requestMessages, sources } = await this.commonPreprocess(state, config, module);
 
     // set current step
