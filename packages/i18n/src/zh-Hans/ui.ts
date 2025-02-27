@@ -860,6 +860,7 @@ const translations = {
       startRunning: '技能开始执行...',
       startRerun: '技能开始重新执行...',
       resultNotFound: '抱歉，执行结果似乎丢失了。',
+      reasoningContent: 'AI 思考过程',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',

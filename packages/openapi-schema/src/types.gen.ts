@@ -491,6 +491,27 @@ export type DynamicConfigItem = {
    * Config options
    */
   options?: Array<SelectOption>;
+  /**
+   * Additional input properties
+   */
+  inputProps?: {
+    /**
+     * Minimum value for number input
+     */
+    min?: number;
+    /**
+     * Maximum value for number input
+     */
+    max?: number;
+    /**
+     * Step value for number input
+     */
+    step?: number;
+    /**
+     * Decimal precision for number input
+     */
+    precision?: number;
+  };
 };
 
 /**

@@ -3,6 +3,7 @@ import { Source, ResourceType } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { getClientOrigin } from '@refly-packages/utils';
+import { MAX_NEED_RECALL_TOKEN } from './constants';
 
 export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
   let chatHistoryStr = '';
@@ -28,36 +29,56 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
 
 export const concatMergedContextToStr = (mergedContext: {
   mentionedContext: IContext | null;
-  lowerPriorityContext: IContext | null;
+  relevantContext: IContext | null;
   webSearchSources: Source[];
+  librarySearchSources?: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
+  const {
+    mentionedContext,
+    relevantContext,
+    webSearchSources,
+    librarySearchSources = [],
+  } = mergedContext || {};
   let contextStr = '';
   const currentIndex = 1; // Start index
 
-  // Handle web search sources
-  const webSearchContexConcatRes = concatContextToStr({ webSearchSources }, currentIndex);
-
-  // Only process mentioned and lower priority contexts if they exist
+  // Process mentioned context first
   const mentionedContextConcatRes = mentionedContext
-    ? concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex)
-    : { contextStr: '', nextIndex: webSearchContexConcatRes.nextIndex };
+    ? concatContextToStr(mentionedContext, currentIndex)
+    : { contextStr: '', nextIndex: currentIndex };
 
-  const lowerPriorityContextConcatRes = lowerPriorityContext
-    ? concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex)
+  // Then process relevant context
+  const relevantContextConcatRes = relevantContext
+    ? concatContextToStr(relevantContext, mentionedContextConcatRes.nextIndex)
     : { contextStr: '', nextIndex: mentionedContextConcatRes.nextIndex };
 
-  // Only add sections that have content
-  if (webSearchContexConcatRes.contextStr?.length > 0) {
-    contextStr += `<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
-  }
+  // Process web search sources
+  const webSearchContexConcatRes = concatContextToStr(
+    { webSearchSources },
+    relevantContextConcatRes.nextIndex,
+  );
 
+  // Process library search sources
+  const librarySearchContextConcatRes = concatContextToStr(
+    { librarySearchSources },
+    webSearchContexConcatRes.nextIndex,
+  );
+
+  // Add sections in priority order
   if (mentionedContextConcatRes.contextStr?.length > 0) {
     contextStr += `<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
   }
 
-  if (lowerPriorityContextConcatRes.contextStr?.length > 0) {
-    contextStr += `<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
+  if (relevantContextConcatRes.contextStr?.length > 0) {
+    contextStr += `<RelevantContext>\n${relevantContextConcatRes.contextStr}\n</RelevantContext>\n\n`;
+  }
+
+  if (webSearchContexConcatRes.contextStr?.length > 0) {
+    contextStr += `<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
+  }
+
+  if (librarySearchContextConcatRes.contextStr?.length > 0) {
+    contextStr += `<LibrarySearchContext>\n${librarySearchContextConcatRes.contextStr}\n</LibrarySearchContext>\n\n`;
   }
 
   return contextStr.trim();
@@ -65,19 +86,30 @@ export const concatMergedContextToStr = (mergedContext: {
 
 export const flattenMergedContextToSources = (mergedContext: {
   mentionedContext: IContext | null;
-  lowerPriorityContext: IContext | null;
+  relevantContext: IContext | null;
   webSearchSources: Source[];
+  librarySearchSources?: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources = [] } = mergedContext || {};
+  const {
+    mentionedContext,
+    relevantContext,
+    webSearchSources = [],
+    librarySearchSources = [],
+  } = mergedContext || {};
 
   const sources = [
-    // Always include web search sources
+    // Prioritize mentioned context
+    ...(mentionedContext ? flattenContextToSources(mentionedContext) : []),
+    // Then relevant context
+    ...(relevantContext ? flattenContextToSources(relevantContext) : []),
+    // Then web search sources
     ...flattenContextToSources({
       webSearchSources,
     }),
-    // Only include other contexts if they exist
-    ...(mentionedContext ? flattenContextToSources(mentionedContext) : []),
-    ...(lowerPriorityContext ? flattenContextToSources(lowerPriorityContext) : []),
+    // Finally library search sources
+    ...flattenContextToSources({
+      librarySearchSources,
+    }),
   ];
 
   // Remove duplicates while preserving order
@@ -96,25 +128,16 @@ export const flattenMergedContextToSources = (mergedContext: {
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) => {
-  const { contentList = [], resources = [], documents = [], webSearchSources = [] } = context || {};
+  const {
+    contentList = [],
+    resources = [],
+    documents = [],
+    webSearchSources = [],
+    librarySearchSources = [],
+  } = context || {};
 
   let contextStr = '';
   let index = startIndex; // Use passed in startIndex
-
-  if (webSearchSources.length > 0) {
-    // contextStr += 'Following are the web search results: \n';
-    const concatWebSearchSource = (url: string, title: string, content: string) => {
-      return `<ContextItem citationIndex='[[citation:${index++}]]' type='webSearchSource' url='${url}' title='${title}'>${content}</WebSearchSource>`;
-    };
-
-    contextStr += webSearchSources
-      .map((s) => concatWebSearchSource(s.url, s.title, s.pageContent))
-      .join('\n');
-    contextStr += '\n\n';
-  }
-
-  // TODO: prior handle mentioned context, includes mentioned contentList, documents, and resources
-  // TODO: otherwise, the context more front will be more priority, should be most focused in the prompt
 
   if (contentList.length > 0) {
     // contextStr += 'Following are the user selected content: \n';
@@ -174,25 +197,57 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) =
     contextStr += `\n\n<KnowledgeBaseResources>\n${resourceStr}\n</KnowledgeBaseResources>\n\n`;
   }
 
+  if (webSearchSources.length > 0) {
+    // contextStr += 'Following are the web search results: \n';
+    const concatWebSearchSource = (url: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='webSearchSource' url='${url}' title='${title}'>${content}</ContextItem>`;
+    };
+
+    contextStr += webSearchSources
+      .map((s) => concatWebSearchSource(s.url, s.title, s.pageContent))
+      .join('\n');
+    contextStr += '\n\n';
+  }
+
+  if (librarySearchSources.length > 0) {
+    // contextStr += 'Following are the library search results: \n';
+    const concatLibrarySearchSource = (source: Source) => {
+      const metadata = source.metadata || {};
+      const entityId = metadata.entityId;
+      const entityType = metadata.entityType;
+
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='librarySearchSource' url='${source.url || ''}' title='${source.title || ''}' ${entityId ? `entityId='${entityId}'` : ''} ${entityType ? `entityType='${entityType}'` : ''}>${source.pageContent || ''}</ContextItem>`;
+    };
+
+    contextStr += librarySearchSources.map((s) => concatLibrarySearchSource(s)).join('\n');
+    contextStr += '\n\n';
+  }
+
   return { contextStr, nextIndex: index };
 };
 
-export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
+export const summarizeContext = (
+  context: IContext,
+  maxContextTokens: number,
+  maxContentLength: number = MAX_NEED_RECALL_TOKEN,
+): string => {
   const { contentList = [], resources = [], documents = [] } = context || {};
   const previewedContext: IContext = {
     resources: resources.map((r) => ({
       ...r,
-      content: r?.resource?.contentPreview || `${r.resource?.content?.slice(0, 50)}...`,
+      content: `${r.resource?.content?.slice(0, maxContentLength)}...`,
     })),
     documents: documents.map((n) => ({
       ...n,
-      content: n?.document?.contentPreview || `${n.document?.content?.slice(0, 50)}...`,
+      content: `${n.document?.content?.slice(0, maxContentLength)}...`,
     })),
-    contentList: contentList.map((c) => ({ ...c, content: `${c.content?.slice(0, 50)}...` })),
+    contentList: contentList.map((c) => ({
+      ...c,
+      content: `${c.content?.slice(0, maxContentLength)}...`,
+    })),
   };
   const truncatedContext = truncateContext(previewedContext, maxContextTokens);
 
-  // contentPreview just about 100~150 tokens, cannot overflow
   const contextConcatRes = concatContextToStr(truncatedContext, 1);
 
   return contextConcatRes.contextStr || 'no available context';
@@ -204,7 +259,13 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
 };
 
 export function flattenContextToSources(context: Partial<IContext>): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], documents = [] } = context || {};
+  const {
+    webSearchSources = [],
+    librarySearchSources = [],
+    contentList = [],
+    resources = [],
+    documents = [],
+  } = context || {};
   const sources: Source[] = [];
 
   // Web search sources
@@ -218,6 +279,21 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         source: source.url,
         title: source.title,
         sourceType: 'webSearch', // Add source type for web search results
+      },
+    });
+  }
+
+  // Library search sources
+  for (const source of librarySearchSources) {
+    sources.push({
+      url: source.url,
+      title: source.title,
+      pageContent: source.pageContent,
+      metadata: {
+        ...source.metadata,
+        source: source.url,
+        title: source.title,
+        sourceType: 'library', // Use 'library' as source type for library search results
       },
     });
   }

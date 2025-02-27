@@ -43,7 +43,6 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
@@ -51,6 +50,8 @@ import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canv
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import cn from 'classnames';
+import { ReasoningContentPreview } from './shared/reasoning-content-preview';
+
 const POLLING_WAIT_TIME = 15000;
 
 const NodeHeader = memo(
@@ -268,7 +269,7 @@ export const SkillResponseNode = memo(
       : '';
 
     const skill = {
-      name: actionMeta?.name || '',
+      name: actionMeta?.name || 'CommonQnA',
       icon: actionMeta?.icon,
     };
     const skillName = actionMeta?.name;
@@ -320,6 +321,7 @@ export const SkillResponseNode = memo(
         {
           resultId: entityId,
           query: title,
+          selectedSkill: skill,
           contextItems: data?.metadata?.contextItems,
         },
         {
@@ -631,12 +633,20 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
+                  {status !== 'failed' && metadata?.reasoningContent && (
+                    <ReasoningContentPreview
+                      content={metadata.reasoningContent}
+                      sources={sources}
+                      isOperating={isOperating}
+                      stepStatus={status === 'executing' ? 'executing' : 'finish'}
+                    />
+                  )}
+
                   {status !== 'failed' && content && (
                     <ContentPreview
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}
                       isOperating={isOperating}
-                      maxCompactLength={10}
                       sources={sources}
                     />
                   )}

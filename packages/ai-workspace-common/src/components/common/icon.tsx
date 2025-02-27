@@ -49,6 +49,7 @@ import {
   RiExpandDiagonalLine,
   RiGuideLine,
 } from 'react-icons/ri';
+import { PiAtom } from 'react-icons/pi';
 import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
@@ -132,6 +133,7 @@ export const IconShrink = AiOutlineShrink;
 export const IconDocumentation = LuBookOpen;
 export const IconMouse = MdOutlineMouse;
 export const IconTouchpad = LuTouchpad;
+export const IconThinking = PiAtom;
 
 export const IconX = BsTwitterX;
 export const IconGithub = BsGithub;

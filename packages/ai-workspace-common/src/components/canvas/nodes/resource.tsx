@@ -35,6 +35,7 @@ import { message, Result } from 'antd';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const NodeContent = memo(
   ({ data, isOperating }: { data: CanvasNodeData<ResourceNodeMeta>; isOperating: boolean }) => {
@@ -66,7 +67,6 @@ const NodeContent = memo(
         content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
         sizeMode={sizeMode}
         isOperating={isOperating}
-        maxCompactLength={10}
       />
     );
   },
@@ -99,6 +99,7 @@ export const ResourceNode = memo(
     const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { readonly } = useCanvasContext();
+    const { refetchUsage } = useSubscriptionUsage();
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
@@ -255,6 +256,10 @@ export const ResourceNode = memo(
             },
           },
         );
+
+        if (indexStatus === 'finish' && resourceType === 'file') {
+          refetchUsage();
+        }
       }
     }, [data.entityId, remoteResult, setNodeDataByEntity]);
 

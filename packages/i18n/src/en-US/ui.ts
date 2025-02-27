@@ -186,7 +186,7 @@ const translations = {
     },
     features: {
       tag: 'Core Features',
-      title: "Refly's Key Features",
+      title: "Refly's",
       fileFormats: {
         pdf: {
           name: 'document.pdf',
@@ -868,6 +868,7 @@ const translations = {
       startRunning: 'Skill is running...',
       startRerun: 'Skill is rerunning...',
       resultNotFound: 'Sorry, the execution result seems to be lost.',
+      reasoningContent: 'AI Thinking Process',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',

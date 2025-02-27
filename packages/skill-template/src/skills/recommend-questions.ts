@@ -37,8 +37,8 @@ export class RecommendQuestions extends BaseSkill {
         inputMode: 'switch',
         defaultValue: false,
         labelDict: {
-          en: 'Refresh',
-          'zh-CN': '刷新',
+          en: 'Refresh recommended questions',
+          'zh-CN': '刷新推荐的提问',
         },
         descriptionDict: {
           en: 'Refresh the recommended questions',

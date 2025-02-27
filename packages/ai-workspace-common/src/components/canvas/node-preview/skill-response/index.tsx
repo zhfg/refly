@@ -26,7 +26,6 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
-import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -97,11 +96,15 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       patchNodeData(node.id, {
         title: remoteResult.title,
         contentPreview: remoteResult.steps
-          ?.map((s) => getWholeParsedContent(s?.reasoningContent, s?.content))
+          ?.map((s) => s?.content || '')
           .filter(Boolean)
           .join('\n'),
         metadata: {
           status: remoteResult.status,
+          reasoningContent: remoteResult.steps
+            ?.map((s) => s?.reasoningContent || '')
+            ?.filter(Boolean)
+            ?.join('\n'),
         },
       });
     }
@@ -146,6 +149,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const actionMeta = result?.actionMeta ?? data?.metadata?.actionMeta;
   const version = result?.version ?? data?.metadata?.version ?? 0;
   const modelInfo = result?.modelInfo ?? data?.metadata?.modelInfo;
+  const tplConfig = result?.tplConfig ?? {};
 
   const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {
@@ -172,6 +176,10 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       {
         resultId,
         query: title,
+        selectedSkill: {
+          name: actionMeta?.name || 'CommonQnA',
+        },
+        contextItems,
       },
       {
         entityId: canvasId,
@@ -221,6 +229,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
             actionMeta={actionMeta}
             modelInfo={modelInfo}
             setEditMode={setEditMode}
+            tplConfig={tplConfig}
           />
           <PreviewChatInput
             enabled={!editMode}

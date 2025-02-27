@@ -1,122 +1,157 @@
 .config-manager {
-  padding: 12px 0 4px 0;
-  margin: 8px 12px 0;
+  padding: 12px 0px 4px 0px;
+  margin: 8px 0px 0;
   border-top: 1px dashed rgba(0, 0, 0, 0.15);
 
-  &__items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  &__item {
+  &__header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    border-radius: 4px;
-    font-size: 10px;
-    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 12px;
+    justify-content: space-between;
 
-    &.config-item {
-      padding: 0 4px;
-      background: #f1f1f0;
-      border: 1px solid #f1f1f0;
-      cursor: pointer;
-
-      &.active {
-        border-color: #00968f;
-      }
-
-      &.error {
-        border-color: rgba(245, 63, 63, 0.3);
-        background-color: rgb(255, 236, 232);
-        color: #f00;
-      }
-
-      .content {
-        max-width: 180px;
-        margin-right: 4px;
-        color: rgba(0, 0, 0, 0.6);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+    &-left {
+      display: flex;
+      align-items: center;
     }
 
     &-icon {
       margin-right: 4px;
     }
+
+    &-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.85);
+    }
   }
 
-  &__input {
-    margin-top: 8px;
-    border: 1px solid #00968f;
-    border-radius: 8px;
+  &__toggle-button {
+    padding: 0 4px;
+    box-sizing: border-box;
     font-size: 10px;
+    height: 18px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+
+  &__form {
+    font-size: 10px;
+  }
+
+  &__item-row {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background-color: #f6f6f6;
+
     &.error {
-      border-color: rgb(245, 63, 63);
+      border: 1px solid rgba(245, 63, 63, 0.3);
+      background-color: rgb(255, 236, 232);
     }
 
-    &-top {
-      padding: 5px 8px 7px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #f1f1f0;
-
-      .arco-btn {
-        margin-left: 4px;
-        padding: 0 4px;
-        box-sizing: border-box;
-        font-size: 10px;
-        height: 18px;
-        border-radius: 4px;
-      }
+    &:last-child {
+      margin-bottom: 0;
     }
-    &-content {
-      padding: 8px;
+  }
 
-      .arco-checkbox {
-        font-size: 10px;
-      }
+  &__item-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
 
-      .arco-checkbox-mask {
-        border-radius: 0 !important;
-        width: 12px;
-        height: 12px;
-      }
+  &__reset-button {
+    margin-left: 4px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    font-size: 10px;
+    height: 18px;
+    border-radius: 4px;
+  }
 
-      .arco-radio {
-        font-size: 10px;
-      }
+  .arco-input-inner-wrapper {
+    border: none !important;
+  }
 
-      .arco-radio-mask {
-        width: 12px;
-        height: 12px;
-        &::after {
-          width: 8px;
-          height: 8px;
-        }
-      }
+  .arco-input-number-step-button,
+  .arco-input-group-addbefore,
+  .arco-input-group-addafter {
+    border-radius: 4px !important;
+    border: none !important;
+  }
 
-      input {
-        font-size: 10px;
-      }
+  // 确保 input 和 textarea 背景透明
+  .arco-input,
+  .arco-textarea {
+    background-color: transparent !important;
+    outline: none !important;
+    border: none !important;
 
-      textarea {
-        padding: 4px;
-        margin: 0 !important;
-        font-size: 10px;
-      }
-
-      .arco-form-message {
-        font-size: 10px;
-      }
-
-      .arco-form-item {
-        margin-bottom: 0;
-      }
+    &:hover,
+    &:focus,
+    &:active,
+    &:disabled,
+    &[disabled],
+    &.arco-input-disabled {
+      background-color: transparent !important;
     }
+  }
+
+  // 确保 input 和 textarea 容器也是透明的
+  .arco-input-inner-wrapper,
+  .arco-textarea-wrapper {
+    background-color: transparent !important;
+
+    &:hover,
+    &:focus-within,
+    &.arco-input-inner-wrapper-focus,
+    &.arco-input-inner-wrapper-disabled,
+    &.arco-textarea-wrapper-disabled {
+      background-color: transparent !important;
+      border-color: #e5e6eb;
+    }
+  }
+
+  .arco-checkbox {
+    font-size: 10px;
+  }
+
+  .arco-checkbox-mask {
+    border-radius: 0 !important;
+    width: 12px;
+    height: 12px;
+  }
+
+  .arco-radio {
+    font-size: 10px;
+  }
+
+  .arco-radio-mask {
+    width: 12px;
+    height: 12px;
+    &::after {
+      width: 8px;
+      height: 8px;
+    }
+  }
+
+  input {
+    font-size: 10px;
+  }
+
+  textarea {
+    padding: 4px;
+    margin: 0 !important;
+    font-size: 10px;
+  }
+
+  .arco-form-message {
+    font-size: 10px;
+  }
+
+  .arco-form-item {
+    margin-bottom: 0;
   }
 }

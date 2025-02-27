@@ -16,8 +16,9 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { getParsedReasoningContent } from '@refly-packages/utils/content-parser';
+import { IconThinking } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'
@@ -91,7 +92,93 @@ const LogBox = memo(
   },
 );
 
-const StepContent = memo(
+const ReasoningContent = memo(
+  ({
+    resultId,
+    reasoningContent,
+    sources,
+    buildContextItem,
+    step,
+    stepStatus,
+  }: {
+    resultId: string;
+    reasoningContent: string;
+    sources: Source[];
+    buildContextItem: (text: string) => IContextItem;
+    step: ActionStep;
+    stepStatus: 'executing' | 'finish';
+  }) => {
+    const { t } = useTranslation();
+    const [collapsed, setCollapsed] = useState(stepStatus !== 'executing');
+
+    // Auto-collapse when step status changes from executing to finish
+    useEffect(() => {
+      if (stepStatus === 'executing') {
+        setCollapsed(false);
+      } else {
+        setCollapsed(true);
+      }
+    }, [stepStatus]);
+
+    const getSourceNode = useCallback(() => {
+      return {
+        type: 'skillResponse' as const,
+        entityId: resultId,
+      };
+    }, [resultId]);
+
+    if (!reasoningContent) return null;
+
+    return (
+      <div>
+        <div
+          className={cn('p-3 bg-gray-50 rounded-lg border border-gray-200 transition-all', {
+            'cursor-pointer hover:bg-gray-100': collapsed,
+          })}
+        >
+          {collapsed ? (
+            <div
+              className="flex items-center justify-between text-sm"
+              onClick={() => setCollapsed(false)}
+            >
+              <div className="flex items-center gap-1">
+                <IconThinking className="w-4 h-4" />
+                {t('canvas.skillResponse.reasoningContent')}
+              </div>
+              <ChevronDown className="w-4 h-4" />
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1 text-sm font-medium">
+                  <IconThinking className="w-4 h-4" />
+                  {t('canvas.skillResponse.reasoningContent')}
+                </div>
+                <Button
+                  type="text"
+                  icon={<ChevronUp className="w-4 h-4" />}
+                  onClick={() => setCollapsed(true)}
+                  size="small"
+                  className="flex items-center justify-center h-6 w-6 min-w-0 p-0"
+                />
+              </div>
+              <div className={`skill-response-reasoning-${resultId}-${step.name}`}>
+                <Markdown content={getParsedReasoningContent(reasoningContent)} sources={sources} />
+                <SelectionContext
+                  containerClass={`skill-response-reasoning-${resultId}-${step.name}`}
+                  getContextItem={buildContextItem}
+                  getSourceNode={getSourceNode}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  },
+);
+
+const ActualContent = memo(
   ({
     resultId,
     content,
@@ -112,6 +199,8 @@ const StepContent = memo(
         entityId: resultId,
       };
     }, [resultId]);
+
+    if (!content) return null;
 
     return (
       <div className="my-3 text-gray-600 text-base">
@@ -222,8 +311,6 @@ export const ActionStepCard = memo(
     const logs = step?.logs?.filter((log) => log?.key);
     const skillName = result.actionMeta?.name || 'commonQnA';
 
-    const content = getWholeParsedContent(step.reasoningContent, step.content);
-
     const handleArtifactSelect = useCallback(
       (artifact) => {
         setSelectedNodeByEntity({
@@ -258,10 +345,21 @@ export const ActionStepCard = memo(
 
         {parsedData.sources && <SourceViewer sources={parsedData.sources} query={query} />}
 
-        {content && (
-          <StepContent
+        {step.reasoningContent && (
+          <ReasoningContent
             resultId={result.resultId}
-            content={content}
+            reasoningContent={step.reasoningContent}
+            sources={parsedData.sources}
+            buildContextItem={buildContextItem}
+            step={step}
+            stepStatus={stepStatus}
+          />
+        )}
+
+        {step.content && (
+          <ActualContent
+            resultId={result.resultId}
+            content={step.content}
             sources={parsedData.sources}
             buildContextItem={buildContextItem}
             step={step}
