@@ -28,7 +28,7 @@ export class CustomPrompt extends BaseSkill {
       {
         key: 'customSystemPrompt',
         inputMode: 'inputTextArea',
-        defaultValue: 'You are a helpful AI assistant.',
+        defaultValue: '',
         labelDict: {
           en: 'Custom System Prompt',
           'zh-CN': '自定义系统提示词',
@@ -121,8 +121,26 @@ export class CustomPrompt extends BaseSkill {
     config.metadata.step = { name: 'customPrompt' };
 
     // Get custom system prompt from config
-    const customSystemPrompt =
-      (tplConfig?.customSystemPrompt?.value as string) || 'You are a helpful AI assistant.';
+    let customSystemPrompt = (tplConfig?.customSystemPrompt?.value as string) || '';
+
+    // If customSystemPrompt is empty, look for it in chat history
+    if (!customSystemPrompt && config.configurable.chatHistory?.length > 0) {
+      // Iterate through chat history in reverse order (most recent first)
+      for (let i = config.configurable.chatHistory.length - 1; i >= 0; i--) {
+        const message = config.configurable.chatHistory[i];
+        // Check if message has skillMeta and tplConfig with customSystemPrompt
+        const skillMeta = message.additional_kwargs?.skillMeta as { name?: string } | undefined;
+        const messageTplConfig = message.additional_kwargs?.tplConfig as
+          | Record<string, any>
+          | undefined;
+
+        if (skillMeta?.name === 'customPrompt' && messageTplConfig?.customSystemPrompt?.value) {
+          customSystemPrompt = messageTplConfig.customSystemPrompt.value as string;
+          this.engine.logger.log('Found customSystemPrompt in chat history');
+          break;
+        }
+      }
+    }
 
     // Use shared query processor
     const {
@@ -136,6 +154,7 @@ export class CustomPrompt extends BaseSkill {
       config,
       ctxThis: this,
       state,
+      shouldSkipAnalysis: true,
     });
 
     // Prepare context

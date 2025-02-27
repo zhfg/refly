@@ -641,6 +641,10 @@ export class SkillService {
                   skillMeta: result.actionMeta,
                   structuredData: step.structuredData,
                   type: result.type,
+                  tplConfig:
+                    typeof result.tplConfig === 'string'
+                      ? safeParseJSON(result.tplConfig)
+                      : result.tplConfig,
                 },
               }),
           )
