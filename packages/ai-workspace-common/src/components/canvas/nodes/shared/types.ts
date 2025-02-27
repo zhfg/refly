@@ -74,6 +74,7 @@ export type ResponseNodeMeta = {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
+  reasoningContent?: string;
 };
 
 export type ImageNodeMeta = {

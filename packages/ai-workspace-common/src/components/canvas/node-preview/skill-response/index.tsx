@@ -26,7 +26,6 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
-import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -97,11 +96,15 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       patchNodeData(node.id, {
         title: remoteResult.title,
         contentPreview: remoteResult.steps
-          ?.map((s) => getWholeParsedContent(s?.reasoningContent, s?.content))
+          ?.map((s) => s?.content || '')
           .filter(Boolean)
           .join('\n'),
         metadata: {
           status: remoteResult.status,
+          reasoningContent: remoteResult.steps
+            ?.map((s) => s?.reasoningContent || '')
+            ?.filter(Boolean)
+            ?.join('\n'),
         },
       });
     }
