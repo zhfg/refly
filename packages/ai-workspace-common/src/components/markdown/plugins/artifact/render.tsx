@@ -20,16 +20,38 @@ const isReflyCanvasClosed = (content: string) => {
   return ARTIFACT_TAG_CLOSED_REGEX.test(content || '');
 };
 
-const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => {
+const Render = memo<CanvasProps>((props: CanvasProps) => {
+  const { identifier, title, type, children, id } = props;
   const { t } = useTranslation();
   const hasChildren = !!children;
   const str = ((children as string) || '').toString?.();
 
   const [open, setOpen] = useState(false);
 
+  console.log('Render component props:', {
+    identifier,
+    title,
+    type,
+    id,
+    hasChildren,
+    propsKeys: Object.keys(props),
+  });
+
   // Use action result store to get status
   const [isGenerating, isCanvasTagClosed, canvasContent] = useActionResultStoreShallow((s) => {
-    const result = s.resultMap[identifier];
+    // Prioritize using id from props if available, otherwise fallback to identifier
+    const lookupId = id;
+    const result = s.resultMap[lookupId];
+
+    console.log('Action result lookup:', {
+      storeKeys: Object.keys(s.resultMap),
+      lookupId,
+      originalIdentifier: identifier,
+      propsId: id,
+      foundResult: !!result,
+      resultStatus: result?.status,
+      result: result,
+    });
 
     // Get content from result if possible
     let artifactContent = '';

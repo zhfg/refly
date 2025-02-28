@@ -646,6 +646,7 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && content && (
                     <ContentPreview
+                      resultId={entityId}
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}
                       isOperating={isOperating}

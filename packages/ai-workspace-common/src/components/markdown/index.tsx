@@ -35,6 +35,15 @@ export const Markdown = memo(
     const { content: rawContent } = props;
     const content = processWithArtifact(rawContent);
 
+    // Log all props for debugging
+    console.log('Markdown component received props:', {
+      resultId: props.resultId,
+      hasContent: !!rawContent,
+      contentLength: rawContent?.length,
+      hasSource: !!props.sources?.length,
+      allProps: Object.keys(props),
+    });
+
     const mdRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isKatexLoaded, setIsKatexLoaded] = useState(false);
@@ -55,17 +64,24 @@ export const Markdown = memo(
     // Memoize the parsed content
     const parsedContent = useMemo(() => markdownCitationParse(content), [content]);
 
-    const artifactComponents = useMemo(
-      () =>
-        Object.fromEntries(
-          markdownElements.map((element) => {
-            const Component = element.Component;
+    console.log('Markdown', props);
 
-            return [element.tag, (props: any) => <Component {...props} id={props.resultId} />];
-          }),
-        ),
-      [props.resultId],
-    );
+    const artifactComponents = useMemo(() => {
+      // Capture resultId from outer props scope
+      const outerResultId = props.resultId;
+
+      return Object.fromEntries(
+        markdownElements.map((element) => {
+          const Component = element.Component;
+          console.log('element', element, props);
+
+          return [
+            element.tag,
+            (innerProps: any) => <Component {...innerProps} id={outerResultId} />,
+          ];
+        }),
+      );
+    }, [props.resultId]);
 
     // Dynamically import KaTeX CSS
     useEffect(() => {
@@ -128,6 +144,7 @@ export const Markdown = memo(
       prevProps.content === nextProps.content &&
       prevProps.loading === nextProps.loading &&
       prevProps.className === nextProps.className &&
+      prevProps.resultId === nextProps.resultId &&
       JSON.stringify(prevProps.sources) === JSON.stringify(nextProps.sources)
     );
   },

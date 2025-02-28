@@ -51,6 +51,10 @@ const translations = {
     title: 'Generate Artifact',
     description: 'Artifact generated, completed in {{duration}}ms',
   },
+  artifactGenerated: {
+    title: 'Artifact Generated',
+    description: 'Artifact generated, completed in {{duration}}ms',
+  },
 };
 
 export default translations;
