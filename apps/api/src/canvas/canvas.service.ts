@@ -83,13 +83,29 @@ export class CanvasService {
   }
 
   async getCanvasYDoc(stateStorageKey: string) {
-    const readable = await this.minio.client.getObject(stateStorageKey);
-    const state = await streamToBuffer(readable);
+    if (!stateStorageKey) {
+      return null;
+    }
 
-    const doc = new Y.Doc();
-    Y.applyUpdate(doc, state);
+    try {
+      const readable = await this.minio.client.getObject(stateStorageKey);
+      if (!readable) {
+        throw new Error('Canvas state not found');
+      }
 
-    return doc;
+      const state = await streamToBuffer(readable);
+      if (!state?.length) {
+        throw new Error('Canvas state is empty');
+      }
+
+      const doc = new Y.Doc();
+      Y.applyUpdate(doc, state);
+
+      return doc;
+    } catch (error) {
+      this.logger.warn(`Error getting canvas YDoc for key ${stateStorageKey}: ${error?.message}`);
+      return null;
+    }
   }
 
   async saveCanvasYDoc(stateStorageKey: string, doc: Y.Doc) {
@@ -122,8 +138,8 @@ export class CanvasService {
 
     return {
       title: canvas.title,
-      nodes: doc.getArray('nodes').toJSON(),
-      edges: doc.getArray('edges').toJSON(),
+      nodes: doc?.getArray('nodes').toJSON() ?? [],
+      edges: doc?.getArray('edges').toJSON() ?? [],
       isPublic: canvas.isPublic,
     };
   }

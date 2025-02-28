@@ -72,17 +72,33 @@ const StatusBar = memo(
     }, [ydoc, docId, setDocumentReadOnly, provider?.status]);
 
     const toggleReadOnly = () => {
-      ydoc?.transact(() => {
-        const yReadOnly = ydoc.getText('readOnly');
-        yReadOnly.delete(0, yReadOnly?.length ?? 0);
-        yReadOnly.insert(0, (!readOnly).toString());
-      });
+      if (!ydoc || provider?.status !== 'connected') {
+        message.error(t('knowledgeBase.note.connectionError') || 'Connection error');
+        return;
+      }
 
-      setDocumentReadOnly(docId, !readOnly);
+      try {
+        ydoc.transact(() => {
+          const yReadOnly = ydoc.getText('readOnly');
+          if (!yReadOnly) return;
 
-      readOnly
-        ? message.success(t('knowledgeBase.note.edit'))
-        : message.warning(t('knowledgeBase.note.readOnly'));
+          yReadOnly.delete(0, yReadOnly.length ?? 0);
+          yReadOnly.insert(0, (!readOnly).toString());
+        });
+
+        setDocumentReadOnly(docId, !readOnly);
+
+        readOnly
+          ? message.success(t('knowledgeBase.note.edit'))
+          : message.warning(t('knowledgeBase.note.readOnly'));
+      } catch (error) {
+        console.error('Transaction error when toggling read-only:', error);
+
+        if (error instanceof DOMException && error.name === 'InvalidStateError') {
+          console.warn('Database connection is closing. Transaction aborted.');
+          message.error(t('knowledgeBase.note.databaseError') || 'Database connection error');
+        }
+      }
     };
 
     const handleCopy = () => {
