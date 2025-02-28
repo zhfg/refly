@@ -62,9 +62,10 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
         .join('\n');
     }
 
-    // Otherwise try to extract from content string if available
+    artifactContent = getArtifactContent(artifactContent);
+
     if (!artifactContent && hasChildren) {
-      artifactContent = getArtifactContent(str);
+      artifactContent = str;
     }
 
     return [
