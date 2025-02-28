@@ -3,6 +3,7 @@ import { Check, Trash } from 'lucide-react';
 import { useEditor, EditorInstance } from '../../core/components';
 import { useEffect, useRef } from 'react';
 import { Link as LucideLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function isValidUrl(url: string) {
   try {
@@ -29,6 +30,7 @@ interface LinkSelectorProps {
 }
 
 export const LinkSelector = ({ open, onOpenChange, triggerEditor }: LinkSelectorProps) => {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const { editor: currentEditor } = useEditor();
   const editor = triggerEditor || currentEditor;
@@ -53,7 +55,7 @@ export const LinkSelector = ({ open, onOpenChange, triggerEditor }: LinkSelector
       <input
         ref={inputRef}
         type="text"
-        placeholder="Paste a link"
+        placeholder={t('editor.linkSelector.placeholder')}
         className="flex-1 bg-background p-1 text-sm outline-none border-none"
         defaultValue={editor?.getAttributes('link').href ?? ''}
       />

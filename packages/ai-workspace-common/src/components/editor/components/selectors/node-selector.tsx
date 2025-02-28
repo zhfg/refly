@@ -3,7 +3,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { EditorBubbleItem, EditorInstance, useEditor } from '../../core/components';
 import { LuCode, LuList, LuListOrdered, LuListTodo } from 'react-icons/lu';
 import { RiH1, RiH2, RiH3, RiQuoteText, RiText } from 'react-icons/ri';
-
+import { useTranslation } from 'react-i18next';
 import { Button, Popover } from 'antd';
 
 export type SelectorItem = {
@@ -15,7 +15,7 @@ export type SelectorItem = {
 
 const items: SelectorItem[] = [
   {
-    name: 'Text',
+    name: 'text',
     icon: RiText,
     command: (editor) => editor.chain().focus().clearNodes().run(),
     // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
@@ -25,49 +25,49 @@ const items: SelectorItem[] = [
       !editor.isActive('orderedList'),
   },
   {
-    name: 'Heading 1',
+    name: 'heading1',
     icon: RiH1,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 1 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 1 }),
   },
   {
-    name: 'Heading 2',
+    name: 'heading2',
     icon: RiH2,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 2 }),
   },
   {
-    name: 'Heading 3',
+    name: 'heading3',
     icon: RiH3,
     command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor.isActive('heading', { level: 3 }),
   },
   {
-    name: 'To-do List',
+    name: 'toDoList',
     icon: LuListTodo,
     command: (editor) => editor.chain().focus().clearNodes().toggleTaskList().run(),
     isActive: (editor) => editor.isActive('taskItem'),
   },
   {
-    name: 'Bullet List',
+    name: 'bulletList',
     icon: LuList,
     command: (editor) => editor.chain().focus().clearNodes().toggleBulletList().run(),
     isActive: (editor) => editor.isActive('bulletList'),
   },
   {
-    name: 'Numbered List',
+    name: 'numberedList',
     icon: LuListOrdered,
     command: (editor) => editor.chain().focus().clearNodes().toggleOrderedList().run(),
     isActive: (editor) => editor.isActive('orderedList'),
   },
   {
-    name: 'Quote',
+    name: 'quote',
     icon: RiQuoteText,
     command: (editor) => editor.chain().focus().clearNodes().toggleBlockquote().run(),
     isActive: (editor) => editor.isActive('blockquote'),
   },
   {
-    name: 'Code',
+    name: 'code',
     icon: LuCode,
     command: (editor) => editor.chain().focus().clearNodes().toggleCodeBlock().run(),
     isActive: (editor) => editor.isActive('codeBlock'),
@@ -81,6 +81,7 @@ interface NodeSelectorProps {
 }
 
 export const NodeSelector = ({ triggerEditor, open, onOpenChange }: NodeSelectorProps) => {
+  const { t } = useTranslation();
   const { editor: currentEditor } = useEditor();
   const editor = triggerEditor || currentEditor;
   if (!editor) return null;
@@ -102,7 +103,7 @@ export const NodeSelector = ({ triggerEditor, open, onOpenChange }: NodeSelector
             <div className="rounded-sm border p-1 flex items-center justify-center">
               <item.icon className="h-3 w-3" />
             </div>
-            <span className="text-xs">{item.name}</span>
+            <span className="text-xs">{t(`editor.nodeSelector.${item.name}`)}</span>
           </div>
           {activeItem.name === item.name && <Check className="h-3.5 w-3.5" />}
         </EditorBubbleItem>
