@@ -25,11 +25,11 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { checkModelContextLenSupport } from '../scheduler/utils/model';
 
-// Import prompt building functions
+// Import prompt building functions - only import what we need
 import {
-  buildArtifactsSystemPrompt,
   buildArtifactsUserPrompt,
   buildArtifactsContextUserPrompt,
+  buildArtifactsFullSystemPrompt,
 } from '../scheduler/module/artifacts';
 
 /**
@@ -55,6 +55,32 @@ export class Artifacts extends BaseSkill {
         descriptionDict: {
           en: 'Enable performance optimizations (React.memo, useMemo, useCallback)',
           'zh-CN': '启用性能优化 (React.memo, useMemo, useCallback)',
+        },
+      },
+      {
+        key: 'useTailwind',
+        inputMode: 'switch',
+        defaultValue: true,
+        labelDict: {
+          en: 'Use Tailwind CSS',
+          'zh-CN': '使用 Tailwind CSS',
+        },
+        descriptionDict: {
+          en: 'Style components using Tailwind CSS utility classes',
+          'zh-CN': '使用 Tailwind CSS 实用类设计组件',
+        },
+      },
+      {
+        key: 'strictErrorHandling',
+        inputMode: 'switch',
+        defaultValue: true,
+        labelDict: {
+          en: 'Strict Error Handling',
+          'zh-CN': '严格错误处理',
+        },
+        descriptionDict: {
+          en: 'Add comprehensive error handling and edge case management',
+          'zh-CN': '添加全面的错误处理和边缘情况管理',
         },
       },
     ],
@@ -147,9 +173,12 @@ ${reactiveArtifactExamples}`;
       sources = preparedRes.sources;
     }
 
-    // Custom module for building messages using our prompt module functions
+    // Custom module for building messages
     const module = {
-      buildSystemPrompt: buildArtifactsSystemPrompt,
+      // Custom system prompt that includes examples
+      buildSystemPrompt: () => {
+        return buildArtifactsFullSystemPrompt(reactiveArtifactExamples);
+      },
       buildContextUserPrompt: buildArtifactsContextUserPrompt,
       buildUserPrompt: buildArtifactsUserPrompt,
     };
@@ -170,14 +199,119 @@ ${reactiveArtifactExamples}`;
     return { requestMessages, sources, context, query };
   };
 
+  /**
+   * Extract and validate React code from model response
+   * @param response The model's response
+   * @returns Validated React code or null if validation fails
+   */
+  validateReactCode = (response: string): { valid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+
+    // Check if response contains reflyArtifact
+    if (!response.includes('<reflyArtifact')) {
+      issues.push('Missing reflyArtifact tag');
+      return { valid: false, issues };
+    }
+
+    // Extract the actual code content from reflyArtifact tag
+    const startTag = '<reflyArtifact';
+    const endTag = '</reflyArtifact>';
+    const startIndex = response.indexOf(startTag);
+    const endIndex = response.indexOf(endTag);
+
+    if (startIndex === -1 || endIndex === -1) {
+      issues.push('Invalid reflyArtifact tags structure');
+      return { valid: false, issues };
+    }
+
+    const content = response.substring(startIndex, endIndex + endTag.length);
+
+    // Basic checks for required elements
+    const requiredImports = [
+      { name: 'React', pattern: /import\s+React/i },
+      { name: 'useState', pattern: /import.*useState/i },
+      { name: 'useCallback', pattern: /import.*useCallback/i },
+      { name: 'useMemo', pattern: /import.*useMemo/i },
+    ];
+
+    for (const { name, pattern } of requiredImports) {
+      if (!pattern.test(content)) {
+        issues.push(`Missing required import: ${name}`);
+      }
+    }
+
+    // Check for duplicate variable definitions
+    const variableDefinitionPattern = /const\s+(\w+)\s*=/g;
+    const definedVariables = new Set<string>();
+    let match: RegExpExecArray | null = variableDefinitionPattern.exec(content);
+    while (match !== null) {
+      const varName = match[1];
+      if (definedVariables.has(varName)) {
+        issues.push(`Duplicate variable definition: ${varName}`);
+      }
+      definedVariables.add(varName);
+      match = variableDefinitionPattern.exec(content);
+    }
+
+    // Check for proper export
+    if (!content.includes('export default')) {
+      issues.push('Missing default export');
+    }
+
+    // Check for proper React.memo usage
+    if (content.includes('React.FC') && !content.includes('React.memo')) {
+      issues.push('Missing React.memo optimization');
+    }
+
+    // Check for proper TypeScript typing
+    if (!content.includes('type') && !content.includes('interface')) {
+      issues.push('Missing TypeScript type definitions');
+    }
+
+    // Check for proper dependency arrays in useEffect
+    const useEffectPattern = /useEffect\(\s*\(\)\s*=>\s*{[^}]*}\s*,\s*\[(.*?)]/g;
+    let effectMatch: RegExpExecArray | null = useEffectPattern.exec(content);
+    while (effectMatch !== null) {
+      // Empty dependency array is valid, but no dependency array is a problem
+      effectMatch = useEffectPattern.exec(content);
+    }
+
+    // Check for empty dependency array in useEffect
+    if (content.includes('useEffect') && !useEffectPattern.test(content)) {
+      issues.push('Missing or invalid dependency array in useEffect');
+    }
+
+    // Check for Tailwind CSS usage
+    if (!content.includes('className=')) {
+      issues.push('Missing Tailwind CSS classes (className prop)');
+    }
+
+    // Check for proper key props in array mapping
+    if (content.includes('.map(') && !content.includes('key={')) {
+      issues.push('Missing key prop in array mapping');
+    }
+
+    // Check for null checks or optional chaining
+    if (content.includes('.map(') && !content.includes('?.') && !content.includes('&& ')) {
+      issues.push('Missing null checks before array operations');
+    }
+
+    return {
+      valid: issues.length === 0,
+      issues,
+    };
+  };
+
   callGenerateArtifact = async (
     state: GraphState,
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
     const { currentSkill } = config.configurable;
 
-    // Get the "optimizeComponents" config value or default to true
+    // Get configuration values
     const optimizeComponents = config?.configurable?.tplConfig?.optimizeComponents?.value ?? true;
+    const useTailwind = config?.configurable?.tplConfig?.useTailwind?.value ?? true;
+    const strictErrorHandling = config?.configurable?.tplConfig?.strictErrorHandling?.value ?? true;
 
     // Preprocess the query
     const { requestMessages, sources, query } = await this.commonPreprocess(state, config);
@@ -218,17 +352,69 @@ ${reactiveArtifactExamples}`;
       config,
     );
 
-    // Generate the response
-    const responseMessage = await model.invoke(requestMessages, {
+    // Add specific configuration to metadata for the model
+    const enhancedConfig = {
       ...config,
       metadata: {
         ...config.metadata,
         ...currentSkill,
         artifactConfig: {
           optimizeComponents,
+          useTailwind,
+          strictErrorHandling,
+          codeStandards: {
+            useSingleQuotes: true,
+            useEnglishComments: true,
+            useOptionalChaining: true,
+            useNullishCoalescing: true,
+            validateArraysBeforeUse: true,
+            validatePropsBeforeDestructuring: true,
+            useProperKeyProps: true,
+            avoidInlineObjectCreation: true,
+          },
         },
       },
-    });
+    };
+
+    // Generate the response
+    let responseMessage = await model.invoke(requestMessages, enhancedConfig);
+
+    // Validate the generated code - assuming the content is a string
+    const responseContent =
+      typeof responseMessage.content === 'string'
+        ? responseMessage.content
+        : JSON.stringify(responseMessage.content);
+
+    const validation = this.validateReactCode(responseContent);
+
+    // If there are issues, try to regenerate with more specific instructions
+    if (!validation.valid) {
+      this.engine.logger.log(`Validation issues: ${validation.issues.join(', ')}`);
+
+      // Add a system message about the validation issues
+      const issuesPrompt = `The previous response had the following code issues: ${validation.issues.join(', ')}. 
+Please regenerate the React component, ensuring you address these specific issues. 
+Remember to:
+- Avoid duplicate variable definitions
+- Include proper React imports
+- Use React.memo for functional components
+- Export the component as default
+- Use proper TypeScript typing
+- Ensure all variables are properly initialized
+- Use consistent syntax for event handlers`;
+
+      // Add the issues prompt to the request messages
+      const enhancedMessages = [
+        ...requestMessages,
+        {
+          role: 'system',
+          content: issuesPrompt,
+        },
+      ];
+
+      // Try again with enhanced instructions but without temperature parameter
+      responseMessage = await model.invoke(enhancedMessages, enhancedConfig);
+    }
 
     // Signal completion of artifact generation
     this.emitEvent(

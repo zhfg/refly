@@ -1,3 +1,6 @@
+// Import process polyfill first
+import './process-polyfill';
+
 import './utils/dom-patch';
 
 import React, { Suspense, useEffect, lazy } from 'react';

@@ -4,7 +4,13 @@ import {
   buildArtifactsSystemPrompt,
   buildArtifactsUserPrompt,
   buildArtifactsContextUserPrompt,
+  buildArtifactsFullSystemPrompt,
 } from './prompt';
 
 // Export the prompt building functions for artifacts module
-export { buildArtifactsSystemPrompt, buildArtifactsUserPrompt, buildArtifactsContextUserPrompt };
+export {
+  buildArtifactsSystemPrompt,
+  buildArtifactsUserPrompt,
+  buildArtifactsContextUserPrompt,
+  buildArtifactsFullSystemPrompt,
+};

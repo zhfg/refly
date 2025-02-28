@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from 'react';
-import { Spin, Drawer } from 'antd';
+import { Spin, Drawer, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FiCode } from 'react-icons/fi';
 
@@ -9,11 +9,14 @@ import { ARTIFACT_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/m
 import { getArtifactContent } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 import { IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { cn } from '@refly-packages/utils/cn';
+import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
+import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
 
 interface CanvasProps extends MarkdownElementProps {
   identifier: string;
   title: string;
   type: string;
+  language: string;
 }
 
 const isReflyCanvasClosed = (content: string) => {
@@ -21,21 +24,16 @@ const isReflyCanvasClosed = (content: string) => {
 };
 
 const Render = memo<CanvasProps>((props: CanvasProps) => {
-  const { identifier, title, type, children, id } = props;
+  const { identifier, title, language, children, id } = props;
   const { t } = useTranslation();
   const hasChildren = !!children;
   const str = ((children as string) || '').toString?.();
 
   const [open, setOpen] = useState(false);
+  const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(false);
+  const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
 
-  console.log('Render component props:', {
-    identifier,
-    title,
-    type,
-    id,
-    hasChildren,
-    propsKeys: Object.keys(props),
-  });
+  console.log('Render component props:', props);
 
   // Use action result store to get status
   const [isGenerating, isCanvasTagClosed, canvasContent] = useActionResultStoreShallow((s) => {
@@ -79,13 +77,20 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
 
   const openCanvas = () => {
     setOpen(true);
+    setIsShowingCodeViewer(true);
   };
 
   useEffect(() => {
     if (!hasChildren || !isGenerating) return;
 
     openCanvas();
-  }, [isGenerating, hasChildren, str, identifier, title, type, id]);
+  }, [isGenerating, hasChildren, str, identifier, title, language, id]);
+
+  const handleRequestFix = (error: string) => {
+    // We'll simplify this to just show an alert since we don't have
+    // the original implementation context
+    message.error(`Render component error: ${error}`);
+  };
 
   return (
     <div className="my-3 rounded-lg overflow-hidden border border-solid border-gray-300 bg-white hover:shadow-sm hover:bg-gray-50 transition-all duration-200">
@@ -139,19 +144,39 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
         title={title || t('artifact.contentTitle', 'Canvas Content')}
         onClose={() => setOpen(false)}
         open={open}
-        width={600}
+        width="50%"
         className="artifact-drawer"
+        styles={{
+          body: { padding: 0 },
+          content: { display: 'flex', flexDirection: 'column', height: '100%' },
+        }}
       >
         <div
           className={cn(
-            'p-4 rounded-lg',
+            'p-4 rounded-lg flex-1 overflow-auto',
             canvasContent
               ? 'bg-white'
               : 'bg-gray-50 flex items-center justify-center min-h-[100px]',
           )}
         >
           {canvasContent ? (
-            <div className="prose max-w-none">{canvasContent}</div>
+            <CodeViewerLayout isShowing={isShowingCodeViewer}>
+              {isShowingCodeViewer && (
+                <CodeViewer
+                  code={canvasContent}
+                  language={language}
+                  title={title}
+                  isGenerating={isGenerating}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  onClose={() => {
+                    setIsShowingCodeViewer(false);
+                    setOpen(false);
+                  }}
+                  onRequestFix={handleRequestFix}
+                />
+              )}
+            </CodeViewerLayout>
           ) : (
             <div className="text-gray-500 flex items-center">
               <Spin size="small" className="mr-2" />{' '}
