@@ -4381,6 +4381,10 @@ export const ModelInfoSchema = {
       description: 'Model capabilities',
       $ref: '#/components/schemas/ModelCapabilities',
     },
+    isDefault: {
+      type: 'boolean',
+      description: 'Whether this model is the default model',
+    },
   },
 } as const;
 
