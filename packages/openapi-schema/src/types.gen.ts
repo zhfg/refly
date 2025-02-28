@@ -3075,6 +3075,10 @@ export type ModelInfo = {
    * Model capabilities
    */
   capabilities?: ModelCapabilities;
+  /**
+   * Whether this model is the default model
+   */
+  isDefault?: boolean;
 };
 
 export type ListModelsResponse = BaseResponse & {

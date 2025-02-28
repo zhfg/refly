@@ -14,7 +14,7 @@ export interface FileObject {
 
 export function modelInfoPO2DTO(modelInfo: ModelInfoPO): ModelInfo {
   return {
-    ...pick(modelInfo, ['name', 'label', 'provider', 'contextLimit', 'maxOutput']),
+    ...pick(modelInfo, ['name', 'label', 'provider', 'contextLimit', 'maxOutput', 'isDefault']),
     tier: modelInfo.tier as ModelTier,
     capabilities: JSON.parse(modelInfo.capabilities),
   };
