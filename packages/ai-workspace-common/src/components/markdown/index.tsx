@@ -17,6 +17,11 @@ import './styles/highlight.scss';
 import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
+import { markdownElements } from './plugins';
+import { processWithArtifact } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
+
+const rehypePlugins = markdownElements.map((element) => element.rehypePlugin);
+
 export const Markdown = memo(
   (
     props: {
@@ -24,8 +29,12 @@ export const Markdown = memo(
       loading?: boolean;
       sources?: Source[];
       className?: string;
+      resultId?: string;
     } & React.DOMAttributes<HTMLDivElement>,
   ) => {
+    const { content: rawContent } = props;
+    const content = processWithArtifact(rawContent);
+
     const mdRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isKatexLoaded, setIsKatexLoaded] = useState(false);
@@ -44,9 +53,18 @@ export const Markdown = memo(
     );
 
     // Memoize the parsed content
-    const parsedContent = useMemo(
-      () => markdownCitationParse(props?.content || ''),
-      [props.content],
+    const parsedContent = useMemo(() => markdownCitationParse(content), [content]);
+
+    const artifactComponents = useMemo(
+      () =>
+        Object.fromEntries(
+          markdownElements.map((element) => {
+            const Component = element.Component;
+
+            return [element.tag, (props: any) => <Component {...props} id={props.resultId} />];
+          }),
+        ),
+      [props.resultId],
     );
 
     // Dynamically import KaTeX CSS
@@ -80,6 +98,7 @@ export const Markdown = memo(
                 <ReactMarkdown
                   remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
                   rehypePlugins={[
+                    ...rehypePlugins,
                     plugins.RehypeKatex,
                     [
                       plugins.RehypeHighlight,
@@ -90,6 +109,7 @@ export const Markdown = memo(
                     ],
                   ]}
                   components={{
+                    ...artifactComponents,
                     pre: CodeElement.Component,
                     a: (args) => LinkElement.Component(args, props?.sources || []),
                   }}

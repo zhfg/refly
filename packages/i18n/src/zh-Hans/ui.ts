@@ -720,6 +720,10 @@ const translations = {
   artifact: {
     generating: '生成中',
     completed: '已完成',
+    openComponent: '点击打开组件',
+    contentTitle: '画布内容',
+    loadingContent: '加载内容中...',
+    thinking: '思考中...',
   },
   resourceType: {
     weblink: '网页链接',

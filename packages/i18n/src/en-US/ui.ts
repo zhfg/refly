@@ -723,6 +723,10 @@ const translations = {
   artifact: {
     generating: 'Generating',
     completed: 'Completed',
+    openComponent: 'Click to open component',
+    contentTitle: 'Canvas Content',
+    loadingContent: 'Loading content...',
+    thinking: 'Thinking...',
   },
   resourceType: {
     weblink: 'Web Link',

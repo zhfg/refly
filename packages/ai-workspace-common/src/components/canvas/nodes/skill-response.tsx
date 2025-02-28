@@ -636,6 +636,7 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && metadata?.reasoningContent && (
                     <ReasoningContentPreview
+                      resultId={entityId}
                       content={metadata.reasoningContent}
                       sources={sources}
                       isOperating={isOperating}

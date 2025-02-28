@@ -31,6 +31,22 @@ const translations = {
       },
     },
   },
+  artifacts: {
+    name: 'Artifacts',
+    description: 'Generate React/TypeScript components based on the question and context',
+    placeholder: 'Let AI help you generate a React/TypeScript component...',
+    steps: {
+      analyzeQuery: {
+        name: 'Query Analysis',
+      },
+      analyzeContext: {
+        name: 'Context Analysis',
+      },
+      generateArtifact: {
+        name: 'Generate Artifact',
+      },
+    },
+  },
   generateDoc: {
     name: 'Document Writing',
     description: 'Generate documents based on the question and context',

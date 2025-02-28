@@ -47,6 +47,10 @@ const translations = {
     title: 'Analyze Query',
     description: 'Analyze query completed, completed in {{duration}}ms',
   },
+  generateArtifact: {
+    title: 'Generate Artifact',
+    description: 'Artifact generated, completed in {{duration}}ms',
+  },
 };
 
 export default translations;
