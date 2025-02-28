@@ -23,27 +23,57 @@ export const useCanvasSync = () => {
   }, [ydoc]);
 
   const syncFunctions = useMemo(() => {
+    const isProviderActive = () => {
+      return ydoc && provider?.status === 'connected';
+    };
+
+    const safeTransaction = (transactionFn: () => void) => {
+      if (!isProviderActive()) return;
+
+      try {
+        ydoc?.transact(transactionFn);
+      } catch (error) {
+        // Log the error but don't crash the application
+        console.error('Transaction error:', error);
+
+        // If we get an InvalidStateError, we could implement reconnection logic here
+        if (error instanceof DOMException && error.name === 'InvalidStateError') {
+          console.warn('Database connection is closing. Transaction aborted.');
+        }
+      }
+    };
+
     const syncTitleToYDoc = (title: string) => {
-      ydoc?.transact(() => {
+      safeTransaction(() => {
         const yTitle = ydoc?.getText('title');
-        yTitle?.delete(0, yTitle?.length ?? 0);
-        yTitle?.insert(0, title);
+        if (!yTitle) return;
+
+        yTitle.delete(0, yTitle.length ?? 0);
+        yTitle.insert(0, title);
       });
     };
 
     const syncNodesToYDoc = (nodes: CanvasNode<any>[]) => {
-      ydoc?.transact(() => {
+      if (!nodes?.length) return;
+
+      safeTransaction(() => {
         const yNodes = ydoc?.getArray('nodes');
-        yNodes?.delete(0, yNodes?.length ?? 0);
-        yNodes?.push(nodes);
+        if (!yNodes) return;
+
+        yNodes.delete(0, yNodes.length ?? 0);
+        yNodes.push(nodes);
       });
     };
 
     const syncEdgesToYDoc = (edges: Edge[]) => {
-      ydoc?.transact(() => {
+      if (!edges?.length) return;
+
+      safeTransaction(() => {
         const yEdges = ydoc?.getArray('edges');
-        yEdges?.delete(0, yEdges?.length ?? 0);
-        yEdges?.push(edges.map((edge) => omit(edge, ['style'])));
+        if (!yEdges) return;
+
+        yEdges.delete(0, yEdges.length ?? 0);
+        yEdges.push(edges.map((edge) => omit(edge, ['style'])));
       });
     };
 
@@ -52,7 +82,7 @@ export const useCanvasSync = () => {
       syncNodesToYDoc,
       syncEdgesToYDoc,
     };
-  }, [ydoc]);
+  }, [ydoc, provider]);
 
   const throttledSyncNodesToYDoc = useThrottledCallback(syncFunctions.syncNodesToYDoc, 500, {
     leading: true,
