@@ -17,6 +17,8 @@ tags:
     description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
+  - name: share
+    description: Share management endpoints
   - name: label
     description: Label management endpoints
   - name: action
@@ -928,6 +930,66 @@ paths:
       responses:
         '200':
           description: Successful operation
+  /share/new:
+    post:
+      tags:
+        - share
+      summary: Create share
+      description: Create new share for canvas
+      operationId: createShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShareResponse'
+  /share/query:
+    post:
+      tags:
+        - share
+      summary: Query share
+      description: Query share
+      operationId: queryShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryShareResponse'
+  /share/delete:
+    post:
+      tags:
+        - share
+      summary: Delete share
+      description: Delete an existing share
+      operationId: deleteShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /label/class/list:
     get:
       tags:
@@ -3323,6 +3385,7 @@ components:
           description: Canvas nodes
           items:
             type: object
+            $ref: '#/components/schemas/CanvasNode'
         edges:
           type: array
           description: Canvas edges
@@ -3768,6 +3831,91 @@ components:
         error:
           description: Error data. Only present when `event` is `error`.
           $ref: '#/components/schemas/BaseResponse'
+    ShareRecord:
+      type: object
+      required:
+        - shareId
+        - entityType
+        - entityId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+          description: Entity type
+        entityId:
+          type: string
+          description: Entity ID
+        createdAt:
+          type: string
+          description: Create timestamp
+        updatedAt:
+          type: string
+          description: Update timestamp
+    CreateShareRequest:
+      type: object
+      required:
+        - entityType
+        - entityId
+      properties:
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+        entityId:
+          type: string
+          description: Entity ID
+        allowDuplication:
+          type: boolean
+          description: Whether to allow duplication of the shared entity
+          default: false
+        parentShareId:
+          type: string
+          description: Parent share ID
+    CreateShareResult:
+      type: object
+      required:
+        - shareId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+    CreateShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CreateShareResult'
+              description: Share created
+    QueryShareRequest:
+      type: object
+      required:
+        - entityId
+        - entityType
+      properties:
+        entityId:
+          type: string
+          description: Entity ID
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+    QueryShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Share record list
+              items:
+                $ref: '#/components/schemas/ShareRecord'
+    DeleteShareRequest:
+      type: object
+      required:
+        - shareId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

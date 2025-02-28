@@ -19,6 +19,7 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
+  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,6 +29,7 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
+  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
@@ -62,6 +64,7 @@ import {
   multiLingualWebSearch,
   pinSkillInstance,
   queryReferences,
+  queryShare,
   refreshToken,
   reindexResource,
   resendVerification,
@@ -519,6 +522,24 @@ export type DeleteReferencesMutationResult = Awaited<ReturnType<typeof deleteRef
 export const useDeleteReferencesKey = 'DeleteReferences';
 export const UseDeleteReferencesKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteReferencesKey,
+  ...(mutationKey ?? []),
+];
+export type CreateShareMutationResult = Awaited<ReturnType<typeof createShare>>;
+export const useCreateShareKey = 'CreateShare';
+export const UseCreateShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useCreateShareKey,
+  ...(mutationKey ?? []),
+];
+export type QueryShareMutationResult = Awaited<ReturnType<typeof queryShare>>;
+export const useQueryShareKey = 'QueryShare';
+export const UseQueryShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useQueryShareKey,
+  ...(mutationKey ?? []),
+];
+export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;
+export const useDeleteShareKey = 'DeleteShare';
+export const UseDeleteShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useDeleteShareKey,
   ...(mutationKey ?? []),
 ];
 export type CreateLabelClassMutationResult = Awaited<ReturnType<typeof createLabelClass>>;

@@ -2050,6 +2050,7 @@ export const RawCanvasDataSchema = {
       description: 'Canvas nodes',
       items: {
         type: 'object',
+        $ref: '#/components/schemas/CanvasNode',
       },
     },
     edges: {
@@ -2757,6 +2758,129 @@ export const SkillEventSchema = {
     error: {
       description: 'Error data. Only present when `event` is `error`.',
       $ref: '#/components/schemas/BaseResponse',
+    },
+  },
+} as const;
+
+export const ShareRecordSchema = {
+  type: 'object',
+  required: ['shareId', 'entityType', 'entityId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+      description: 'Entity type',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    createdAt: {
+      type: 'string',
+      description: 'Create timestamp',
+    },
+    updatedAt: {
+      type: 'string',
+      description: 'Update timestamp',
+    },
+  },
+} as const;
+
+export const CreateShareRequestSchema = {
+  type: 'object',
+  required: ['entityType', 'entityId'],
+  properties: {
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    allowDuplication: {
+      type: 'boolean',
+      description: 'Whether to allow duplication of the shared entity',
+      default: false,
+    },
+    parentShareId: {
+      type: 'string',
+      description: 'Parent share ID',
+    },
+  },
+} as const;
+
+export const CreateShareResultSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+  },
+} as const;
+
+export const CreateShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CreateShareResult',
+          description: 'Share created',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const QueryShareRequestSchema = {
+  type: 'object',
+  required: ['entityId', 'entityType'],
+  properties: {
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+    },
+  },
+} as const;
+
+export const QueryShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Share record list',
+          items: {
+            $ref: '#/components/schemas/ShareRecord',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const DeleteShareRequestSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
     },
   },
 } as const;

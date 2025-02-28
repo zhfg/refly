@@ -1612,9 +1612,7 @@ export type RawCanvasData = {
   /**
    * Canvas nodes
    */
-  nodes?: Array<{
-    [key: string]: unknown;
-  }>;
+  nodes?: Array<CanvasNode>;
   /**
    * Canvas edges
    */
@@ -2028,6 +2026,81 @@ export type SkillEvent = {
    * Error data. Only present when `event` is `error`.
    */
   error?: BaseResponse;
+};
+
+export type ShareRecord = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+  /**
+   * Entity type
+   */
+  entityType: EntityType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Create timestamp
+   */
+  createdAt?: string;
+  /**
+   * Update timestamp
+   */
+  updatedAt?: string;
+};
+
+export type CreateShareRequest = {
+  entityType: EntityType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Whether to allow duplication of the shared entity
+   */
+  allowDuplication?: boolean;
+  /**
+   * Parent share ID
+   */
+  parentShareId?: string;
+};
+
+export type CreateShareResult = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+};
+
+export type CreateShareResponse = BaseResponse & {
+  /**
+   * Share created
+   */
+  data?: CreateShareResult;
+};
+
+export type QueryShareRequest = {
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  entityType: EntityType;
+};
+
+export type QueryShareResponse = BaseResponse & {
+  /**
+   * Share record list
+   */
+  data?: Array<ShareRecord>;
+};
+
+export type DeleteShareRequest = {
+  /**
+   * Share ID
+   */
+  shareId: string;
 };
 
 export type ListLabelClassesResponse = BaseResponse & {
@@ -3595,6 +3668,30 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
+
+export type CreateShareData = {
+  body: CreateShareRequest;
+};
+
+export type CreateShareResponse2 = CreateShareResponse;
+
+export type CreateShareError = unknown;
+
+export type QueryShareData = {
+  body: QueryShareRequest;
+};
+
+export type QueryShareResponse2 = QueryShareResponse;
+
+export type QueryShareError = unknown;
+
+export type DeleteShareData = {
+  body: DeleteShareRequest;
+};
+
+export type DeleteShareResponse = BaseResponse;
+
+export type DeleteShareError = unknown;
 
 export type ListLabelClassesData = {
   query?: {

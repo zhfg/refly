@@ -19,6 +19,7 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
+  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,6 +29,7 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
+  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
@@ -62,6 +64,7 @@ import {
   multiLingualWebSearch,
   pinSkillInstance,
   queryReferences,
+  queryShare,
   refreshToken,
   reindexResource,
   resendVerification,
@@ -113,6 +116,8 @@ import {
   CreateResourceError,
   CreateResourceWithFileData,
   CreateResourceWithFileError,
+  CreateShareData,
+  CreateShareError,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
   CreateSkillTriggerData,
@@ -131,6 +136,8 @@ import {
   DeleteReferencesError,
   DeleteResourceData,
   DeleteResourceError,
+  DeleteShareData,
+  DeleteShareError,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillTriggerData,
@@ -189,6 +196,8 @@ import {
   PinSkillInstanceError,
   QueryReferencesData,
   QueryReferencesError,
+  QueryShareData,
+  QueryShareError,
   RefreshTokenError,
   ReindexResourceData,
   ReindexResourceError,
@@ -1081,6 +1090,57 @@ export const useDeleteReferences = <
   useMutation<TData, TError, Options<DeleteReferencesData, true>, TContext>({
     mutationKey: Common.UseDeleteReferencesKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteReferences(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useCreateShare = <
+  TData = Common.CreateShareMutationResult,
+  TError = CreateShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<CreateShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<CreateShareData, true>, TContext>({
+    mutationKey: Common.UseCreateShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => createShare(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useQueryShare = <
+  TData = Common.QueryShareMutationResult,
+  TError = QueryShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<QueryShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<QueryShareData, true>, TContext>({
+    mutationKey: Common.UseQueryShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => queryShare(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDeleteShare = <
+  TData = Common.DeleteShareMutationResult,
+  TError = DeleteShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DeleteShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DeleteShareData, true>, TContext>({
+    mutationKey: Common.UseDeleteShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => deleteShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateLabelClass = <

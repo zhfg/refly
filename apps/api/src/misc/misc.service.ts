@@ -185,6 +185,16 @@ export class MiscService implements OnModuleInit {
     return `${endpoint}/${storageKey}`;
   }
 
+  /**
+   * Publish a private file to the public bucket
+   * @param storageKey - The storage key of the file to publish
+   */
+  async publishFile(storageKey: string) {
+    const stream = await this.minioClient('private').getObject(storageKey);
+    await this.minioClient('public').putObject(storageKey, stream);
+    return this.generateFileURL({ visibility: 'public', storageKey });
+  }
+
   async uploadBuffer(
     user: User,
     param: {
@@ -193,12 +203,13 @@ export class MiscService implements OnModuleInit {
       entityId?: string;
       entityType?: EntityType;
       visibility?: FileVisibility;
+      storageKey?: string;
     },
   ): Promise<UploadResponse['data']> {
     const { fpath, buf, entityId, entityType, visibility = 'private' } = param;
     const objectKey = randomUUID();
     const fileExtension = path.extname(fpath);
-    const storageKey = `static/${objectKey}${fileExtension}`;
+    const storageKey = param.storageKey ?? `static/${objectKey}${fileExtension}`;
     const contentType = mime.getType(fpath) ?? 'application/octet-stream';
 
     await this.prisma.staticFile.create({

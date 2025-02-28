@@ -122,6 +122,15 @@ import type {
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
+  CreateShareData,
+  CreateShareError,
+  CreateShareResponse2,
+  QueryShareData,
+  QueryShareError,
+  QueryShareResponse2,
+  DeleteShareData,
+  DeleteShareError,
+  DeleteShareResponse,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -853,6 +862,45 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/knowledge/reference/delete',
+  });
+};
+
+/**
+ * Create share
+ * Create new share for canvas
+ */
+export const createShare = <ThrowOnError extends boolean = false>(
+  options: Options<CreateShareData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError, ThrowOnError>({
+    ...options,
+    url: '/share/new',
+  });
+};
+
+/**
+ * Query share
+ * Query share
+ */
+export const queryShare = <ThrowOnError extends boolean = false>(
+  options: Options<QueryShareData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<QueryShareResponse2, QueryShareError, ThrowOnError>({
+    ...options,
+    url: '/share/query',
+  });
+};
+
+/**
+ * Delete share
+ * Delete an existing share
+ */
+export const deleteShare = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteShareData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError, ThrowOnError>({
+    ...options,
+    url: '/share/delete',
   });
 };
 

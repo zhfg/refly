@@ -456,6 +456,34 @@ model Document {
   @@map("documents")
 }
 
+model ShareRecord {
+  /// Primary key
+  pk               BigInt    @id @default(autoincrement())
+  /// Share record id
+  shareId          String    @unique @map("share_id")
+  /// Storage key
+  storageKey       String    @map("storage_key")
+  /// UID
+  uid              String    @map("uid")
+  /// Whether to allow duplication of the shared entity
+  allowDuplication Boolean   @default(false) @map("allow_duplication")
+  /// Parent share id
+  parentShareId    String?   @map("parent_share_id")
+  /// Entity id
+  entityId         String    @map("entity_id")
+  /// Entity type
+  entityType       String    @map("entity_type")
+  /// Create timestamp
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([entityType, entityId, deletedAt])
+  @@map("share_records")
+}
+
 model Reference {
   /// Primary key
   pk          BigInt    @id @default(autoincrement())
