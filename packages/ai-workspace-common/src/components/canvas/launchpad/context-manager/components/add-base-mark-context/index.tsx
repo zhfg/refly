@@ -35,6 +35,10 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
     }
   };
 
+  const handleClear = () => {
+    setContextItems([]);
+  };
+
   return (
     <Badge
       count={(contextItems || []).length}
@@ -53,6 +57,7 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
             onClose={handleClose}
             onSelect={handleSelect}
             selectedItems={contextItems}
+            onClear={handleClear}
           />
         }
       >
