@@ -6,9 +6,9 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 export const useUpdateSkillResponseTitle = () => {
   const { canvasId } = useCanvasContext();
 
-  const { updateNodePreview, nodePreviews } = useCanvasStoreShallow((state) => ({
-    updateNodePreview: state.updateNodePreview,
+  const { nodePreviews, updateNodePreview } = useCanvasStoreShallow((state) => ({
     nodePreviews: state.config[canvasId]?.nodePreviews || [],
+    updateNodePreview: state.updateNodePreview,
   }));
 
   const setNodeDataByEntity = useSetNodeDataByEntity();
@@ -24,7 +24,7 @@ export const useUpdateSkillResponseTitle = () => {
           title: newTitle,
         },
       );
-      const preview = nodePreviews.find((p) => p.id === nodeId);
+      const preview = nodePreviews.find((p) => p?.id === nodeId);
       if (preview) {
         updateNodePreview(canvasId, {
           ...preview,
@@ -35,7 +35,7 @@ export const useUpdateSkillResponseTitle = () => {
         });
       }
     },
-    [setNodeDataByEntity, updateNodePreview, canvasId],
+    [setNodeDataByEntity, updateNodePreview, canvasId, nodePreviews],
   );
 
   return handleTitleUpdateSkillResponse;

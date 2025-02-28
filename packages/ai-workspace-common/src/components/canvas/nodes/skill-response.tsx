@@ -112,7 +112,9 @@ export const NodeHeader = memo(
             {isEditing ? (
               <Input
                 ref={inputRef}
-                className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0 !bg-transparent !text-gray-700"
+                className={`${
+                  source === 'skillResponsePreview' ? 'text-lg' : ''
+                } !border-transparent font-bold focus:!bg-transparent px-0.5 py-0 !bg-transparent !text-gray-700`}
                 value={editTitle}
                 data-cy="skill-response-node-header-input"
                 onBlur={handleBlur}
