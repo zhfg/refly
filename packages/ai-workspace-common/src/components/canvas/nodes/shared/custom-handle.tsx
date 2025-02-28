@@ -13,12 +13,12 @@ interface CustomHandleProps {
 export const CustomHandle = React.memo(
   ({ id, type, position, isConnected, isNodeHovered }: CustomHandleProps) => {
     const baseHandleStyle: CSSProperties = {
-      width: '12px',
-      height: '12px',
+      width: '14px',
+      height: '14px',
       background: '#fff',
       border: `2px solid ${isNodeHovered ? '#00968F' : '#D0D5DD'}`,
-      minWidth: '12px',
-      minHeight: '12px',
+      minWidth: '14px',
+      minHeight: '14px',
       borderRadius: '50%',
       opacity: isNodeHovered ? 1 : isConnected ? 0.8 : 0.4,
       cursor: 'crosshair',

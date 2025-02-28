@@ -364,7 +364,7 @@ export const SkillNode = memo(
           style={containerStyle}
         >
           {!isDragging && !readonly && (
-            <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="skill" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
           <div className={`w-full h-full  ${getNodeCommonStyles({ selected, isHovered })}`}>
             {

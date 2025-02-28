@@ -536,7 +536,7 @@ export const SkillResponseNode = memo(
           onClick={onNodeClick}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
