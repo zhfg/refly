@@ -125,9 +125,7 @@ export class KnowledgeService {
     return resources.map((resource) => ({
       ...resource,
       downloadURL: resource.rawFileKey
-        ? this.miscService.generateFileURL({
-            storageKey: resource.rawFileKey,
-          })
+        ? this.miscService.generateFileURL({ storageKey: resource.rawFileKey }, { download: true })
         : undefined,
     }));
   }

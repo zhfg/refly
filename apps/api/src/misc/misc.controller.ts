@@ -6,10 +6,11 @@ import {
   Get,
   Param,
   StreamableFile,
-  Header,
   Res,
   UseInterceptors,
   UploadedFile,
+  Req,
+  Query,
 } from '@nestjs/common';
 import path from 'node:path';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -23,10 +24,9 @@ import {
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParamsError } from '@refly-packages/errors';
-import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/misc')
 export class MiscController {
@@ -82,23 +82,31 @@ export class MiscController {
     return buildSuccessResponse({ content: result });
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('static/:objectKey')
-  @Header('Access-Control-Allow-Origin', '*')
-  @Header('Cross-Origin-Resource-Policy', 'cross-origin')
   async serveStatic(
-    @LoginedUser() user: User | null,
+    @LoginedUser() user: User,
     @Param('objectKey') objectKey: string,
+    @Query('download') download: string,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
   ): Promise<StreamableFile> {
-    const fileStream = await this.miscService.getInternalFileStream(user, `static/${objectKey}`);
+    const { data, contentType } = await this.miscService.getInternalFileStream(
+      user,
+      `static/${objectKey}`,
+    );
     const filename = path.basename(objectKey);
 
+    const origin = req.headers.origin;
+
     res.set({
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${filename}"`,
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      ...(download ? { 'Content-Disposition': `attachment; filename="${filename}"` } : {}),
     });
 
-    return fileStream;
+    return new StreamableFile(data);
   }
 }

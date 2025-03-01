@@ -10,6 +10,26 @@ export const useExportCanvasAsImage = () => {
   const reactFlowInstance = useReactFlow();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper function to convert image to base64
+  const imageToBase64 = useCallback(async (imgUrl: string): Promise<string> => {
+    try {
+      const response = await fetch(imgUrl, {
+        mode: 'cors',
+        credentials: 'include', // Include cookies with the request
+      });
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Failed to convert image to base64:', error);
+      return imgUrl; // Return original URL if conversion fails
+    }
+  }, []);
+
   const exportCanvasAsImage = useCallback(
     async (canvasName = 'canvas') => {
       if (isLoading) return;
@@ -47,7 +67,7 @@ export const useExportCanvasAsImage = () => {
           logging: false, // disable logging
           imageTimeout: 0, // do not timeout
           foreignObjectRendering: true,
-          onclone: (clonedDoc) => {
+          onclone: async (clonedDoc) => {
             // handle the cloned document, ensure all styles are applied correctly
             const clonedContainer = clonedDoc.querySelector('.react-flow');
             if (clonedContainer) {
@@ -71,11 +91,22 @@ export const useExportCanvasAsImage = () => {
                 }
               }
 
-              // handle potentially problematic images
+              // handle images: download and convert to base64
               const images = clonedContainer.querySelectorAll('img');
-              for (const img of images) {
-                img.crossOrigin = 'anonymous';
-              }
+              const imagePromises = Array.from(images).map(async (img) => {
+                try {
+                  if (img.src && !img.src.startsWith('data:')) {
+                    const base64Data = await imageToBase64(img.src);
+                    img.src = base64Data;
+                  }
+                  img.crossOrigin = 'anonymous';
+                } catch (error) {
+                  console.error('Error processing image:', error);
+                }
+              });
+
+              // Wait for all image conversions to complete
+              await Promise.all(imagePromises);
             }
           },
         });
@@ -99,7 +130,7 @@ export const useExportCanvasAsImage = () => {
         setIsLoading(false);
       }
     },
-    [reactFlowInstance, t],
+    [reactFlowInstance, t, imageToBase64],
   );
 
   return { exportCanvasAsImage, isLoading };
