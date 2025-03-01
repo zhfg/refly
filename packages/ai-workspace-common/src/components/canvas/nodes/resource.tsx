@@ -305,7 +305,7 @@ export const ResourceNode = memo(
           })}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="resource" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div

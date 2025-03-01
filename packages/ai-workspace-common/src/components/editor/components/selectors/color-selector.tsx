@@ -1,7 +1,8 @@
 import { Check, ChevronDown } from 'lucide-react';
 import { EditorBubbleItem, EditorInstance, useEditor } from '../../core/components';
-
+import { useTranslation } from 'react-i18next';
 import { Button, Popover } from 'antd';
+import './color-selector.scss';
 
 export interface BubbleColorMenuItem {
   name: string;
@@ -10,78 +11,78 @@ export interface BubbleColorMenuItem {
 
 const TEXT_COLORS: BubbleColorMenuItem[] = [
   {
-    name: 'Default',
+    name: 'default',
     color: 'var(--novel-black)',
   },
   {
-    name: 'Purple',
+    name: 'purple',
     color: '#9333EA',
   },
   {
-    name: 'Red',
+    name: 'red',
     color: '#E00000',
   },
   {
-    name: 'Yellow',
+    name: 'yellow',
     color: '#EAB308',
   },
   {
-    name: 'Blue',
+    name: 'blue',
     color: '#2563EB',
   },
   {
-    name: 'Green',
+    name: 'green',
     color: '#008A00',
   },
   {
-    name: 'Orange',
+    name: 'orange',
     color: '#FFA500',
   },
   {
-    name: 'Pink',
+    name: 'pink',
     color: '#BA4081',
   },
   {
-    name: 'Gray',
+    name: 'gray',
     color: '#A8A29E',
   },
 ];
 
 const HIGHLIGHT_COLORS: BubbleColorMenuItem[] = [
   {
-    name: 'Default',
+    name: 'default',
     color: 'var(--novel-highlight-default)',
   },
   {
-    name: 'Purple',
+    name: 'purple',
     color: 'var(--novel-highlight-purple)',
   },
   {
-    name: 'Red',
+    name: 'red',
     color: 'var(--novel-highlight-red)',
   },
   {
-    name: 'Yellow',
+    name: 'yellow',
     color: 'var(--novel-highlight-yellow)',
   },
   {
-    name: 'Blue',
+    name: 'blue',
     color: 'var(--novel-highlight-blue)',
   },
   {
-    name: 'Green',
+    name: 'green',
     color: 'var(--novel-highlight-green)',
   },
   {
-    name: 'Orange',
+    name: 'orange',
     color: 'var(--novel-highlight-orange)',
   },
   {
-    name: 'Pink',
+    name: 'pink',
     color: 'var(--novel-highlight-pink)',
   },
   {
-    name: 'Gray',
+    name: 'gray',
     color: 'var(--novel-highlight-gray)',
   },
 ];
@@ -93,6 +94,8 @@ interface ColorSelectorProps {
 }
 
 export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelectorProps) => {
+  const { t } = useTranslation();
+
   const { editor: currentEditor } = useEditor();
   const editor = triggerEditor || currentEditor;
 
@@ -103,16 +106,18 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
   );
 
   const content = (
-    <div className="flex max-h-80 w-38 flex-col overflow-hidden overflow-y-auto">
+    <div className="flex max-h-80 w-38 flex-col overflow-hidden overflow-y-auto p-3">
       <div className="flex flex-col">
-        <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">Color</div>
+        <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">
+          {t('editor.colorSelector.color')}
+        </div>
         {TEXT_COLORS?.map(({ name, color }) => (
           <EditorBubbleItem
             key={name}
             triggerEditor={triggerEditor}
             onSelect={() => {
               editor?.commands.unsetColor();
-              name !== 'Default' &&
+              name !== 'default' &&
                 editor
                   ?.chain()
                   .focus()
@@ -125,20 +130,22 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
               <div className="rounded-sm border px-2 py-px font-medium" style={{ color }}>
                 A
               </div>
-              <span>{name}</span>
+              <span>{t(`editor.colorSelector.${name}`)}</span>
             </div>
           </EditorBubbleItem>
         ))}
       </div>
       <div>
-        <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">Background</div>
+        <div className="my-1 px-2 text-xs font-semibold text-muted-foreground">
+          {t('editor.colorSelector.background')}
+        </div>
         {HIGHLIGHT_COLORS?.map(({ name, color }) => (
           <EditorBubbleItem
             key={name}
             triggerEditor={triggerEditor}
             onSelect={() => {
               editor?.commands.unsetHighlight();
-              name !== 'Default' && editor?.commands.setHighlight({ color });
+              name !== 'default' && editor?.commands.setHighlight({ color });
             }}
             className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
           >
@@ -149,7 +156,7 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
               >
                 A
               </div>
-              <span>{name}</span>
+              <span>{t(`editor.colorSelector.${name}`)}</span>
             </div>
             {editor?.isActive('highlight', { color }) && <Check className="h-4 w-4" />}
           </EditorBubbleItem>

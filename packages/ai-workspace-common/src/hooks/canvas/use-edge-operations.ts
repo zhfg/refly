@@ -33,6 +33,19 @@ export const useEdgeOperations = (_selectedCanvasId?: string) => {
         return;
       }
 
+      const { data } = useCanvasStore.getState();
+      const edges = data[canvasId]?.edges ?? [];
+
+      // check if the edge already exists
+      const connectionExists = edges?.some(
+        (edge) => edge.source === params.source && edge.target === params.target,
+      );
+
+      // if the edge already exists, do not create a new edge
+      if (connectionExists) {
+        return;
+      }
+
       const newEdge = {
         ...params,
         id: `edge-${genUniqueId()}`,
@@ -40,8 +53,6 @@ export const useEdgeOperations = (_selectedCanvasId?: string) => {
         style: edgeStyles.default,
       };
 
-      const { data } = useCanvasStore.getState();
-      const edges = data[canvasId]?.edges ?? [];
       const updatedEdges = [...edges, newEdge];
       setEdges(canvasId, updatedEdges);
       throttledSyncEdgesToYDoc(updatedEdges);
