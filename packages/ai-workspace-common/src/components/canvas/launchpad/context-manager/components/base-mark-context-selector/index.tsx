@@ -24,6 +24,7 @@ interface CustomProps {
   onSelect?: (item: IContextItem) => void;
   selectedItems: IContextItem[];
   onClose?: () => void;
+  onClear?: () => void;
 }
 
 export interface BaseMarkContextSelectorProps
@@ -36,6 +37,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
     onSearchValueChange,
     onClose,
     onSelect,
+    onClear,
     selectedItems = [],
     ...divProps
   } = props;
@@ -74,6 +76,14 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
 
   const { nodes } = useCanvasData();
   const targetNodes = nodes.filter((node) => !['skill', 'group'].includes(node?.type));
+
+  const handleClear = () => {
+    if (onClear) {
+      onClear();
+    } else {
+      contextPanelStore.clearContextItems();
+    }
+  };
 
   // Memoize the filtered and sorted nodes to prevent unnecessary recalculations
   const processedNodes = useMemo(() => {
@@ -173,13 +183,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
               </div>
             </div>
             <div className="cmdk-footer-action">
-              <Button
-                size="small"
-                icon={<IconRefresh />}
-                onClick={() => {
-                  contextPanelStore.clearContextItems();
-                }}
-              >
+              <Button size="small" icon={<IconRefresh />} onClick={handleClear}>
                 {t('knowledgeBase.context.clearContext')}
               </Button>
             </div>

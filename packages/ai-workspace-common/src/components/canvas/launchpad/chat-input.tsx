@@ -192,8 +192,6 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       [skills, setSelectedSkill, handleSelectSkill, query, setQuery],
     );
 
-    console.log('showSkillSelector', showSkillSelector, options);
-
     return (
       <div
         ref={ref}

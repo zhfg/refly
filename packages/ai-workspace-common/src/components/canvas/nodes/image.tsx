@@ -209,7 +209,7 @@ export const ImageNode = memo(
           })}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="image" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="image" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div

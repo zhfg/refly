@@ -47,30 +47,40 @@ import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
-import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import cn from 'classnames';
 import { ReasoningContentPreview } from './shared/reasoning-content-preview';
+import { useUpdateSkillResponseTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-skill-response-title';
 
 const POLLING_WAIT_TIME = 15000;
 
-const NodeHeader = memo(
+export const NodeHeader = memo(
   ({
     query,
     skillName,
     skill,
     disabled,
+    showIcon,
     updateTitle,
+    source,
   }: {
     query: string;
-    skillName: string;
-    skill: any;
+    skillName?: string;
+    skill?: any;
     disabled: boolean;
+    showIcon?: boolean;
     updateTitle: (title: string) => void;
+    className?: string;
+    source?: string;
   }) => {
+    const { t } = useTranslation();
     const [editTitle, setEditTitle] = useState(query);
     const inputRef = useRef<InputRef>(null);
     const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+      setEditTitle(query);
+    }, [query]);
 
     useEffect(() => {
       if (isEditing && inputRef.current) {
@@ -78,36 +88,49 @@ const NodeHeader = memo(
       }
     }, [isEditing]);
 
+    const handleBlur = () => {
+      setIsEditing(false);
+    };
+
+    const handleChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditTitle(e.target.value);
+        updateTitle(e.target.value);
+      },
+      [setEditTitle, updateTitle],
+    );
+
     return (
       <>
-        <div className="flex-shrink-0 mb-3" data-cy="skill-response-node-header">
+        <div className={`flex-shrink-0 ${source === 'skillResponsePreview' ? 'mb-0' : 'mb-3'}`}>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
-              <IconResponse className="w-4 h-4 text-white" />
-            </div>
+            {showIcon && (
+              <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
+                <IconResponse className="w-4 h-4 text-white" />
+              </div>
+            )}
             {isEditing ? (
               <Input
                 ref={inputRef}
-                className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0 !bg-transparent !text-gray-700"
+                className={`${
+                  source === 'skillResponsePreview' ? 'text-lg' : ''
+                } !border-transparent font-bold focus:!bg-transparent px-0.5 py-0 !bg-transparent !text-gray-700`}
                 value={editTitle}
                 data-cy="skill-response-node-header-input"
-                onBlur={() => {
-                  setIsEditing(false);
-                }}
-                onChange={(e) => {
-                  setEditTitle(e.target.value);
-                  updateTitle?.(e.target.value);
-                }}
+                onBlur={handleBlur}
+                onChange={handleChange}
               />
             ) : (
               <Typography.Text
-                className="text-sm font-bold leading-normal truncate block"
+                className={`font-bold leading-normal truncate block ${
+                  source === 'skillResponsePreview' ? 'text-lg' : 'text-sm'
+                }`}
                 title={editTitle}
                 onClick={() => {
                   !disabled && setIsEditing(true);
                 }}
               >
-                {editTitle}
+                {editTitle || t('common.untitled')}
               </Typography.Text>
             )}
           </div>
@@ -198,7 +221,7 @@ export const SkillResponseNode = memo(
       edges: state.data[state.currentCanvasId]?.edges ?? [],
       operatingNodeId: state.operatingNodeId,
     }));
-    const setNodeDataByEntity = useSetNodeDataByEntity();
+    const updateSkillResponseTitle = useUpdateSkillResponseTitle();
     const patchNodeData = usePatchNodeData();
     const { getNode } = useReactFlow();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
@@ -456,15 +479,10 @@ export const SkillResponseNode = memo(
     }, [id, data?.entityId, addNode, t]);
 
     const onTitleChange = (newTitle: string) => {
-      setNodeDataByEntity(
-        {
-          entityId: data.entityId,
-          type: 'skillResponse',
-        },
-        {
-          title: newTitle,
-        },
-      );
+      if (newTitle === query) {
+        return;
+      }
+      updateSkillResponseTitle(newTitle, data.entityId, id);
     };
 
     // Update size when content changes
@@ -536,7 +554,7 @@ export const SkillResponseNode = memo(
           onClick={onNodeClick}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
@@ -563,6 +581,7 @@ export const SkillResponseNode = memo(
 
             <div className="flex flex-col h-full p-3 box-border">
               <NodeHeader
+                showIcon
                 disabled={readonly}
                 query={query}
                 skillName={skillName}

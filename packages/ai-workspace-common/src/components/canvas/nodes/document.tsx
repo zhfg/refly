@@ -205,7 +205,7 @@ export const DocumentNode = memo(
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="document" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="document" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div
