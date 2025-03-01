@@ -110,27 +110,24 @@ export const ChatActions = memo(
             contextItems={contextItems}
           />
 
-          <div
-            className={cn(
-              'flex items-center gap-1 ml-2 transition-all duration-300',
-              detectedUrls?.length > 0 ? 'opacity-100' : 'opacity-0',
-            )}
-          >
-            <Switch
-              size="small"
-              checked={!runtimeConfig?.disableLinkParsing}
-              onChange={handleAutoParseLinksChange}
-            />
-            <span className="text-xs text-gray-500">{t('skill.runtimeConfig.parseLinks')}</span>
-            <Tooltip
-              className="flex flex-row items-center gap-1 cursor-pointer"
-              title={t('skill.runtimeConfig.parseLinksHint', {
-                count: detectedUrls?.length,
-              })}
-            >
-              <HiOutlineQuestionMarkCircle className="text-sm text-gray-500 flex items-center justify-center cursor-pointer" />
-            </Tooltip>
-          </div>
+          {detectedUrls?.length > 0 && (
+            <div className="flex items-center gap-1 ml-2">
+              <Switch
+                size="small"
+                checked={!runtimeConfig?.disableLinkParsing}
+                onChange={handleAutoParseLinksChange}
+              />
+              <span className="text-xs text-gray-500">{t('skill.runtimeConfig.parseLinks')}</span>
+              <Tooltip
+                className="flex flex-row items-center gap-1 cursor-pointer"
+                title={t('skill.runtimeConfig.parseLinksHint', {
+                  count: detectedUrls?.length,
+                })}
+              >
+                <HiOutlineQuestionMarkCircle className="text-sm text-gray-500 flex items-center justify-center cursor-pointer" />
+              </Tooltip>
+            </div>
+          )}
         </div>
         <div className="flex flex-row items-center gap-2">
           {customActions?.map((action, index) => (
