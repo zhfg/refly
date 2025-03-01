@@ -91,13 +91,14 @@ export const ChatPanel = () => {
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
   }));
-  const { contextItems, setContextItems, filterErrorInfo } = useContextPanelStoreShallow(
-    (state) => ({
+  const { contextItems, setContextItems, filterErrorInfo, runtimeConfig, setRuntimeConfig } =
+    useContextPanelStoreShallow((state) => ({
       contextItems: state.contextItems,
       setContextItems: state.setContextItems,
       filterErrorInfo: state.filterErrorInfo,
-    }),
-  );
+      runtimeConfig: state.runtimeConfig,
+      setRuntimeConfig: state.setRuntimeConfig,
+    }));
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
@@ -190,6 +191,7 @@ export const ChatPanel = () => {
         modelInfo: selectedModel,
         contextItems,
         tplConfig,
+        runtimeConfig,
       },
       {
         entityType: 'canvas',
@@ -315,6 +317,8 @@ export const ChatPanel = () => {
             query={chatStore.newQAText}
             model={chatStore.selectedModel}
             setModel={chatStore.setSelectedModel}
+            runtimeConfig={runtimeConfig}
+            setRuntimeConfig={setRuntimeConfig}
             form={form}
             handleSendMessage={handleSendMessage}
             handleAbort={handleAbort}

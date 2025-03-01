@@ -331,6 +331,7 @@ export const useInvokeAction = () => {
       resultId,
       version = 0,
       tplConfig = {},
+      runtimeConfig = {},
     } = payload;
     const { context, resultHistory, images } = convertContextItemsToInvokeParams(
       contextItems,
@@ -358,6 +359,7 @@ export const useInvokeAction = () => {
       resultHistory,
       skillName: selectedSkill?.name,
       tplConfig,
+      runtimeConfig,
     };
 
     onUpdateResult(resultId, {
@@ -372,6 +374,7 @@ export const useInvokeAction = () => {
       context,
       history: resultHistory,
       tplConfig,
+      runtimeConfig,
       status: 'waiting',
       steps: [],
       errors: [],

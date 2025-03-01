@@ -10,6 +10,7 @@ import {
   ModelInfo,
   ResourceType,
   Skill,
+  SkillRuntimeConfig,
   SkillTemplateConfig,
   TokenUsageItem,
 } from '@refly/openapi-schema';
@@ -56,6 +57,7 @@ export type SkillNodeMeta = {
   modelInfo?: ModelInfo;
   contextItems?: IContextItem[];
   tplConfig?: SkillTemplateConfig;
+  runtimeConfig?: SkillRuntimeConfig;
 };
 
 export type ToolNodeMeta = {
@@ -73,6 +75,7 @@ export type ResponseNodeMeta = {
   structuredData?: Record<string, unknown>;
   contextItems?: IContextItem[];
   tplConfig?: SkillTemplateConfig;
+  runtimeConfig?: SkillRuntimeConfig;
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;

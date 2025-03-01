@@ -14,6 +14,7 @@ import {
   SkillMeta,
   User,
   SkillEvent,
+  SkillRuntimeConfig,
   SkillTemplateConfig,
   Icon,
   Artifact,
@@ -245,6 +246,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     currentStep?: ActionStepMeta;
     chatHistory?: BaseMessage[];
     tplConfig?: SkillTemplateConfig;
+    runtimeConfig?: SkillRuntimeConfig;
     emitter?: EventEmitter<SkillEventMap>;
   };
   metadata?: SkillRunnableMeta;

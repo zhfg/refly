@@ -1244,6 +1244,11 @@ const translations = {
       skillInstances: 'Installed Skills',
       skillTemplate: 'Marketplace',
     },
+    runtimeConfig: {
+      parseLinks: 'Parse links',
+      parseLinksHint:
+        'This skill will automatically read {{count}} link(s) from the query and add them to the context',
+    },
     createFromTemplate: 'Create from template',
     skillManagement: {
       searchPlaceholder: 'Search for skill',
