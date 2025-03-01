@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  Query,
 } from '@nestjs/common';
 import path from 'node:path';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -86,22 +87,26 @@ export class MiscController {
   async serveStatic(
     @LoginedUser() user: User,
     @Param('objectKey') objectKey: string,
+    @Query('download') download: string,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
   ): Promise<StreamableFile> {
-    const fileStream = await this.miscService.getInternalFileStream(user, `static/${objectKey}`);
+    const { data, contentType } = await this.miscService.getInternalFileStream(
+      user,
+      `static/${objectKey}`,
+    );
     const filename = path.basename(objectKey);
 
     const origin = req.headers.origin;
 
     res.set({
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${filename}"`,
+      'Content-Type': contentType,
       'Access-Control-Allow-Origin': origin || '*',
       'Access-Control-Allow-Credentials': 'true',
       'Cross-Origin-Resource-Policy': 'cross-origin',
+      ...(download ? { 'Content-Disposition': `attachment; filename="${filename}"` } : {}),
     });
 
-    return fileStream;
+    return new StreamableFile(data);
   }
 }

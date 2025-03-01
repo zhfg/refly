@@ -1,11 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  StreamableFile,
-  Logger,
-  OnModuleInit,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import sharp from 'sharp';
 import mime from 'mime';
@@ -175,7 +168,7 @@ export class MiscService implements OnModuleInit {
     );
   }
 
-  generateFileURL(object: FileObject) {
+  generateFileURL(object: FileObject, options?: { download?: boolean }) {
     const { visibility, storageKey } = object;
 
     let endpoint = '';
@@ -183,6 +176,10 @@ export class MiscService implements OnModuleInit {
       endpoint = this.config.get<string>('static.public.endpoint')?.replace(/\/$/, '');
     } else {
       endpoint = this.config.get<string>('static.private.endpoint')?.replace(/\/$/, '');
+    }
+
+    if (options?.download) {
+      return `${endpoint}/${storageKey}?download=1`;
     }
 
     return `${endpoint}/${storageKey}`;
@@ -419,9 +416,12 @@ export class MiscService implements OnModuleInit {
     }
   }
 
-  async getInternalFileStream(user: User, storageKey: string): Promise<StreamableFile> {
+  async getInternalFileStream(
+    user: User,
+    storageKey: string,
+  ): Promise<{ data: Buffer; contentType: string }> {
     const file = await this.prisma.staticFile.findFirst({
-      select: { uid: true, visibility: true, entityId: true, entityType: true },
+      select: { uid: true, visibility: true, entityId: true, entityType: true, contentType: true },
       where: { storageKey, deletedAt: null },
     });
     if (!file) {
@@ -453,8 +453,12 @@ export class MiscService implements OnModuleInit {
       }
     }
 
-    const data = await this.minioClient(file.visibility as FileVisibility).getObject(storageKey);
-    return new StreamableFile(data);
+    const readable = await this.minioClient(file.visibility as FileVisibility).getObject(
+      storageKey,
+    );
+    const data = await streamToBuffer(readable);
+
+    return { data, contentType: file.contentType };
   }
 
   /**

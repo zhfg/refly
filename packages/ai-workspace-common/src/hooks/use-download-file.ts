@@ -10,7 +10,7 @@ export const useDownloadFile = () => {
     }
 
     if (resource.rawFileKey) {
-      const fileUrl = `${serverOrigin}/v1/misc/${resource.rawFileKey}`;
+      const fileUrl = `${serverOrigin}/v1/misc/${resource.rawFileKey}?download=1`;
       window.open(fileUrl, '_blank');
     }
   }, []);
