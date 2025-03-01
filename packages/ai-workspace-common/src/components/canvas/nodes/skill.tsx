@@ -9,7 +9,13 @@ import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { CanvasNodeType, ModelInfo, Skill, SkillTemplateConfig } from '@refly/openapi-schema';
+import {
+  CanvasNodeType,
+  ModelInfo,
+  Skill,
+  SkillRuntimeConfig,
+  SkillTemplateConfig,
+} from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
@@ -136,7 +142,14 @@ export const SkillNode = memo(
     });
 
     const { entityId, metadata = {} } = data;
-    const { query, selectedSkill, modelInfo, contextItems = [], tplConfig } = metadata;
+    const {
+      query,
+      selectedSkill,
+      modelInfo,
+      contextItems = [],
+      tplConfig,
+      runtimeConfig,
+    } = metadata;
     const skill = useFindSkill(selectedSkill?.name);
 
     const [localQuery, setLocalQuery] = useState(query);
@@ -210,6 +223,13 @@ export const SkillNode = memo(
       [id, patchNodeData, addEdges, getNodes, getEdges, deleteElements, edgeStyles.hover],
     );
 
+    const setRuntimeConfig = useCallback(
+      (runtimeConfig: SkillRuntimeConfig) => {
+        patchNodeData(id, { metadata: { runtimeConfig } });
+      },
+      [id, patchNodeData],
+    );
+
     const resizeMoveable = useCallback((width: number, height: number) => {
       moveableRef.current?.request('resizable', { width, height });
     }, []);
@@ -281,6 +301,7 @@ export const SkillNode = memo(
             resultId,
             ...data?.metadata,
             tplConfig,
+            runtimeConfig,
           },
           {
             entityId: canvasId,
@@ -489,6 +510,8 @@ export const SkillNode = memo(
                 handleAbort={abortAction}
                 onUploadImage={handleImageUpload}
                 contextItems={contextItems}
+                runtimeConfig={runtimeConfig}
+                setRuntimeConfig={setRuntimeConfig}
               />
             </div>
           </div>

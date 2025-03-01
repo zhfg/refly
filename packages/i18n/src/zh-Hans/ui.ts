@@ -1278,6 +1278,10 @@ const translations = {
       skillInstances: '已添加技能',
       skillTemplate: '技能市场',
     },
+    runtimeConfig: {
+      parseLinks: '解析链接',
+      parseLinksHint: '此技能会自动从提问中读取 {{count}} 个链接，并将其添加到上下文中',
+    },
     skillManagement: {
       searchPlaceholder: '搜索技能',
       removedFromTop: '已从置顶列表中移除',

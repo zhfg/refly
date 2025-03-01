@@ -893,6 +893,17 @@ export const ActionMetaSchema = {
   },
 } as const;
 
+export const SkillRuntimeConfigSchema = {
+  type: 'object',
+  description: 'Skill runtime config',
+  properties: {
+    disableLinkParsing: {
+      type: 'boolean',
+      description: 'Whether to disable link parsing for input query',
+    },
+  },
+} as const;
+
 export const SkillTemplateConfigSchema = {
   type: 'object',
   description: 'Skill template config (key is config item key, value is config value)',
@@ -1320,6 +1331,11 @@ export const ActionResultSchema = {
       type: 'object',
       description: 'Action template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
+    },
+    runtimeConfig: {
+      type: 'object',
+      description: 'Action runtime config',
+      $ref: '#/components/schemas/SkillRuntimeConfig',
     },
     history: {
       type: 'array',
@@ -3449,6 +3465,10 @@ export const InvokeSkillRequestSchema = {
       items: {
         $ref: '#/components/schemas/ActionResult',
       },
+    },
+    runtimeConfig: {
+      description: 'Skill runtime config',
+      $ref: '#/components/schemas/SkillRuntimeConfig',
     },
     tplConfig: {
       description: 'Skill template config',

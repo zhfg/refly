@@ -2,76 +2,11 @@ import { SkillRunnableConfig } from '../../base';
 import { Source } from '@refly-packages/openapi-schema';
 import { BaseSkill } from '../../base';
 import pLimit from 'p-limit';
-// Import linkify-it and tlds
-import LinkifyIt from 'linkify-it';
-import tlds from 'tlds';
+import { isValidUrl, extractUrlsWithLinkify } from '@refly-packages/utils';
 
-// 默认的并发限制和批处理大小
+// Default concurrency limit and batch size
 const DEFAULT_CONCURRENCY_LIMIT = 5;
 const DEFAULT_BATCH_SIZE = 8;
-
-// Initialize linkify-it with all TLDs
-const linkify = new LinkifyIt();
-// Add all top-level domains and enable fuzzy IP detection
-linkify.tlds(tlds).set({ fuzzyIP: true, fuzzyLink: true });
-
-/**
- * Validates URL using built-in Node.js URL class
- * @param url The URL string to validate
- * @returns Boolean indicating if the URL is valid
- */
-export function isValidUrl(url: string): boolean {
-  try {
-    // Check if URL can be constructed (validates format)
-    new URL(url);
-    return true;
-  } catch {
-    // Invalid URL format
-    return false;
-  }
-}
-
-/**
- * Extract URLs from text using linkify-it
- * Much faster and more reliable than regex or AI-based extraction
- * @param query The text to extract URLs from
- * @returns Object with detected URLs and whether URLs were found
- */
-export function extractUrlsWithLinkify(query: string): {
-  hasUrls: boolean;
-  detectedUrls: string[];
-} {
-  if (!query) {
-    return { hasUrls: false, detectedUrls: [] };
-  }
-
-  // Find all links in text
-  const matches = linkify.match(query);
-
-  if (!matches || matches.length === 0) {
-    return { hasUrls: false, detectedUrls: [] };
-  }
-
-  // Extract URLs and normalize them
-  const detectedUrls = matches
-    .map((match) => {
-      // Get the raw URL
-      let url = match.url;
-
-      // If schema is missing, add https://
-      if (!match.schema) {
-        url = `https://${url}`;
-      }
-
-      return url;
-    })
-    .filter(isValidUrl); // Filter out any URLs that aren't valid
-
-  return {
-    hasUrls: detectedUrls.length > 0,
-    detectedUrls,
-  };
-}
 
 // Helper to chunk array into batches
 const chunk = <T>(arr: T[], size: number): T[][] => {
@@ -150,7 +85,12 @@ export async function crawlExtractedUrls(
     return [];
   }
 
-  const { user } = config.configurable;
+  const { user, runtimeConfig } = config.configurable;
+
+  if (runtimeConfig?.disableLinkParsing) {
+    return [];
+  }
+
   const engine = skill.engine;
   const logger = engine.logger;
 
