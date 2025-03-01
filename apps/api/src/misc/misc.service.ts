@@ -419,7 +419,7 @@ export class MiscService implements OnModuleInit {
     }
   }
 
-  async getInternalFileStream(user: User | null, storageKey: string): Promise<StreamableFile> {
+  async getInternalFileStream(user: User, storageKey: string): Promise<StreamableFile> {
     const file = await this.prisma.staticFile.findFirst({
       select: { uid: true, visibility: true, entityId: true, entityType: true },
       where: { storageKey, deletedAt: null },
@@ -428,7 +428,7 @@ export class MiscService implements OnModuleInit {
       throw new NotFoundException();
     }
 
-    if (!user || user.uid !== file.uid) {
+    if (user.uid !== file.uid) {
       if (file.entityType === 'canvas') {
         const canvas = await this.prisma.canvas.findFirst({
           where: { canvasId: file.entityId, isPublic: true, deletedAt: null },
