@@ -19,6 +19,7 @@ const translations = {
     finish: 'Finish',
     add: 'Add',
     remove: 'Remove',
+    goBack: 'Go Back',
     library: 'Library',
     untitled: 'Untitled',
     loading: 'Loading...',
@@ -561,9 +562,9 @@ const translations = {
     copyLinkSuccess: 'Share link copied to clipboard!',
     accessOptions: {
       anyone: 'Anyone with the link',
-      anyoneDescription: 'Anyone with the link can view',
-      off: 'Not enabled',
-      offDescription: 'Not enabled access permission',
+      anyoneDescription: 'Anyone with the link can access',
+      off: 'Disabled',
+      offDescription: 'Only you can access',
     },
   },
   workspace: {
@@ -776,6 +777,9 @@ const translations = {
   },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
+    shareNotFound: 'Canvas Not Found',
+    shareNotFoundHint:
+      "The shared canvas you're trying to access could not be found. It might have been deleted or the link may be incorrect.",
     nodeTypes: {
       document: 'Document',
       resource: 'Resource',

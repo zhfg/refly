@@ -249,15 +249,30 @@ export class ShareService {
 
   async deleteShare(user: User, body: DeleteShareRequest) {
     const { shareId } = body;
-    const result = await this.prisma.shareRecord.updateMany({
+
+    const mainRecord = await this.prisma.shareRecord.findFirst({
       where: { shareId, uid: user.uid, deletedAt: null },
-      data: { deletedAt: new Date() },
     });
 
-    // TODO: delete all public files
-
-    if (result.count === 0) {
+    if (!mainRecord) {
       throw new ShareNotFoundError();
     }
+
+    const childRecords = await this.prisma.shareRecord.findMany({
+      where: { parentShareId: shareId, uid: user.uid, deletedAt: null },
+    });
+    const allRecords = [mainRecord, ...childRecords];
+
+    await this.prisma.shareRecord.updateMany({
+      data: { deletedAt: new Date() },
+      where: { pk: { in: allRecords.map((r) => r.pk) } },
+    });
+
+    await this.miscService.batchRemoveObjects(
+      allRecords.map((r) => ({
+        storageKey: r.storageKey,
+        visibility: 'public',
+      })),
+    );
   }
 }

@@ -27,6 +27,7 @@ const translations = {
     finish: '完成',
     add: '添加',
     remove: '移除',
+    goBack: '返回',
     library: '知识库',
     untitled: '未命名',
     loading: '加载中...',
@@ -560,9 +561,9 @@ const translations = {
     copyLinkSuccess: '分享链接已复制到剪切板！',
     accessOptions: {
       anyone: '互联网获得链接的人',
-      anyoneDescription: '互联网获得链接的人可以查看',
+      anyoneDescription: '获得此链接的人均可查看',
       off: '未开启',
-      offDescription: '未开启访问权限',
+      offDescription: '仅你可访问',
     },
   },
   workspace: {
@@ -773,6 +774,8 @@ const translations = {
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
+    shareNotFound: '画布不存在',
+    shareNotFoundHint: '你尝试访问的共享画布无法找到。它可能已被删除，或者链接可能有误。',
     nodeTypes: {
       document: '文档',
       resource: '资源',

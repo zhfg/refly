@@ -46,6 +46,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
 import { CustomEdge } from './edges/custom-edge';
+import NotFoundOverlay from './NotFoundOverlay';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -117,7 +118,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
-  const { provider, readonly } = useCanvasContext();
+  const { provider, readonly, shareNotFound } = useCanvasContext();
 
   const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } =
     useCanvasStoreShallow((state) => ({
@@ -704,6 +705,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
           {memoizedLaunchPad}
         </div>
+
+        {/* Display the not found overlay when shareNotFound is true */}
+        {readonly && shareNotFound && <NotFoundOverlay />}
 
         {showPreview && (
           <div

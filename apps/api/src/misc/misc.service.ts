@@ -448,15 +448,27 @@ export class MiscService implements OnModuleInit {
   }
 
   async getExternalFileStream(storageKey: string): Promise<{ data: Buffer; contentType: string }> {
-    const [readable, stat] = await Promise.all([
-      this.minioClient('public').getObject(storageKey),
-      this.prisma.staticFile.findFirst({
-        select: { contentType: true },
-        where: { storageKey, deletedAt: null },
-      }),
-    ]);
-    const data = await streamToBuffer(readable);
-    return { data, contentType: stat?.contentType ?? 'application/octet-stream' };
+    try {
+      const [readable, stat] = await Promise.all([
+        this.minioClient('public').getObject(storageKey),
+        this.prisma.staticFile.findFirst({
+          select: { contentType: true },
+          where: { storageKey, deletedAt: null },
+        }),
+      ]);
+      const data = await streamToBuffer(readable);
+      return { data, contentType: stat?.contentType ?? 'application/octet-stream' };
+    } catch (error) {
+      // Check if it's the Minio S3Error for key not found
+      if (
+        error?.code === 'NoSuchKey' ||
+        error?.message?.includes('The specified key does not exist')
+      ) {
+        throw new NotFoundException(`File with key ${storageKey} not found`);
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   /**

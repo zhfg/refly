@@ -24,19 +24,19 @@ const labelRender = (props: any) => {
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`text-white rounded-lg h-[30px] w-[30px] flex items-center justify-center ${
+        className={`text-white rounded-lg h-[30px] w-[30px] flex items-center justify-center translate-y-1 ${
           value === 'off' ? 'bg-gray-500' : 'bg-green-600'
         }`}
       >
         {value === 'off' ? (
-          <RiUserForbidLine className="w-5 h-5" />
+          <RiUserForbidLine className="w-6 h-6" />
         ) : (
-          <GrLanguage className="w-5 h-5" />
+          <GrLanguage className="w-6 h-6" />
         )}
       </div>
-      <div className="text-sm">
-        <div>{label}</div>
-        <div className="text-xs text-gray-500 leading-none">{title}</div>
+      <div className="text-sm py-1 flex flex-col">
+        <div className="font-medium">{label}</div>
+        <div className="text-xs leading-none">{title}</div>
       </div>
     </div>
   );
@@ -79,7 +79,13 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     ],
     [t],
   );
-  const { data } = useListShares({ query: { entityId: canvasId, entityType: 'canvas' } });
+  const {
+    data,
+    refetch: refetchShares,
+    isLoading: isLoadingShares,
+  } = useListShares({
+    query: { entityId: canvasId, entityType: 'canvas' },
+  });
   const shareRecord = useMemo(() => data?.data?.[0], [data]);
   const shareLink = useMemo(
     () => `${getClientOrigin()}/share/canvas/${shareRecord?.shareId}`,
@@ -116,22 +122,33 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     setTitle(''); // TODO: set title from shareRecord
   }, [shareRecord]);
 
+  const [updateLoading, setUpdateLoading] = useState(false);
+
   const updateCanvasPermission = useCallback(
     async (value: ShareAccess) => {
+      setUpdateLoading(true);
+      let success: boolean;
       if (value === 'off') {
-        await getClient().deleteShare({ body: { shareId: shareRecord?.shareId } });
+        const { data, error } = await getClient().deleteShare({
+          body: { shareId: shareRecord?.shareId },
+        });
+        success = data.success && !error;
       } else {
-        await getClient().createShare({
+        const { data, error } = await getClient().createShare({
           body: {
             entityId: canvasId,
             entityType: 'canvas',
             allowDuplication: true,
           },
         });
+        success = data.success && !error;
       }
-      if (data.success) {
+      setUpdateLoading(false);
+
+      if (success) {
         message.success(t('shareContent.updateCanvasPermissionSuccess'));
         setAccess(value);
+        refetchShares();
       }
     },
     [canvasId, access],
@@ -169,6 +186,8 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
               variant="borderless"
               options={accessOptions}
               value={access}
+              loading={updateLoading || isLoadingShares}
+              disabled={updateLoading || isLoadingShares}
               onChange={handleAccessChange}
               labelRender={labelRender}
               optionRender={optionRender}
@@ -191,7 +210,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         </div>
       </div>
     ),
-    [accessOptions, access, setAccess, t, shareLink, buttons],
+    [accessOptions, access, setAccess, t, shareLink, buttons, updateLoading, isLoadingShares],
   );
 
   return (
