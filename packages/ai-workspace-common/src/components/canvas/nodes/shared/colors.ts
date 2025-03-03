@@ -13,3 +13,9 @@ export const NODE_COLORS: Record<CanvasNodeType | 'threadHistory', string> = {
   threadHistory: '#64748b',
   image: '#02b0c7',
 };
+export const NODE_MINI_MAP_COLORS = {
+  ...NODE_COLORS,
+  resource: '#40df2b',
+  group: '#bfc5bf',
+  memo: 'transparent',
+};
