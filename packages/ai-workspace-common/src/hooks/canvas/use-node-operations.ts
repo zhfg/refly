@@ -4,6 +4,7 @@ import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
 import { useContextPanelStoreShallow } from '../../stores/context-panel';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
+import { useUploadMinimap } from '@refly-packages/ai-workspace-common/hooks/use-upload-minimap';
 
 export const useNodeOperations = () => {
   const canvasId = useCanvasId();
@@ -14,7 +15,7 @@ export const useNodeOperations = () => {
   const { removeContextItem } = useContextPanelStoreShallow((state) => ({
     removeContextItem: state.removeContextItem,
   }));
-
+  const { handleUpdateCanvasMiniMap } = useUploadMinimap();
   const { throttledSyncNodesToYDoc } = useCanvasSync();
 
   const updateNodesWithSync = useCallback(
@@ -49,6 +50,7 @@ export const useNodeOperations = () => {
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);
       updateNodesWithSync(updatedNodes);
+      handleUpdateCanvasMiniMap(canvasId);
 
       return updatedNodes;
     },

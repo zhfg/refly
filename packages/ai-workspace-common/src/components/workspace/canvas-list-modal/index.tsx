@@ -13,6 +13,7 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
 import { CanvasActionDropdown } from './canvasActionDropdown';
+import { AiFillPicture } from 'react-icons/ai';
 
 interface CanvasListProps {
   visible: boolean;
@@ -50,16 +51,32 @@ export const CanvasListModal = (props: CanvasListProps) => {
 
     return (
       <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="font-medium">{canvas.title || t('common.untitled')}</div>
-          </div>
+        <div className="flex items-center gap-2">
+          {canvas.minimapUrl ? (
+            <img
+              src={canvas.minimapUrl}
+              alt="minimap"
+              className="w-10 h-10"
+              onError={() => {
+                console.log('error');
+              }}
+            />
+          ) : (
+            <div className="flex items-center justify-center w-10 h-10 border border-solid border-gray-200 rounded-md">
+              <AiFillPicture className="text-gray-500" size={22} />
+            </div>
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="font-medium">{canvas.title || t('common.untitled')}</div>
+            </div>
 
-          <div className="mt-1">
-            <div className="text-xs text-black/40">
-              {time(canvas.updatedAt, language as LOCALE)
-                .utc()
-                .fromNow()}
+            <div className="mt-1">
+              <div className="text-xs text-black/40">
+                {time(canvas.updatedAt, language as LOCALE)
+                  .utc()
+                  .fromNow()}
+              </div>
             </div>
           </div>
         </div>
