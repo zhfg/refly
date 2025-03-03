@@ -200,7 +200,6 @@ export const CodeArtifactNode = memo(
                     height: '100%',
                     overflowY: 'auto',
                     maxHeight: sizeMode === 'compact' ? '40px' : '',
-                    paddingBottom: '40px',
                   }}
                 >
                   <NodeContent data={data} />

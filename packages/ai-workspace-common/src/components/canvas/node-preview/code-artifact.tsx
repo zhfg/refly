@@ -80,7 +80,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const isGenerating = node.data?.metadata?.status === 'generating';
 
   return (
-    <div className="h-full bg-white rounded">
+    <div className="h-full bg-white rounded px-4">
       <CodeViewerLayout isShowing={isShowingCodeViewer}>
         {isShowingCodeViewer && (
           <CodeViewer

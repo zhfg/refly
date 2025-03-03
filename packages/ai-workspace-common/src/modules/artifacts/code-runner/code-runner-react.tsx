@@ -11,10 +11,12 @@ export default function ReactCodeRunner({
   code,
   language,
   onRequestFix,
+  showErrorMessage = true,
 }: {
   code: string;
   language?: string;
   onRequestFix?: (e: string) => void;
+  showErrorMessage?: boolean;
 }) {
   console.log('code', code, 'language', language);
   return (
@@ -59,7 +61,7 @@ export default function ReactCodeRunner({
         showOpenNewtab={false}
         className="h-full w-full"
       />
-      {onRequestFix && <ErrorMessage onRequestFix={onRequestFix} />}
+      {onRequestFix && showErrorMessage && <ErrorMessage onRequestFix={onRequestFix} />}
     </SandpackProvider>
   );
 }
@@ -67,12 +69,37 @@ export default function ReactCodeRunner({
 function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
   const { sandpack } = useSandpack();
   const [didCopy, setDidCopy] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!sandpack.error) return null;
+  if (!sandpack.error || !isVisible) return null;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white/5 text-base backdrop-blur-sm">
-      <div className="max-w-[400px] rounded-md bg-red-500 p-4 text-white shadow-xl shadow-black/20">
+      <div className="relative max-w-[400px] rounded-md bg-red-500 p-4 text-white shadow-xl shadow-black/20">
+        <div className="absolute right-2 top-2">
+          <button
+            type="button"
+            onClick={() => setIsVisible(false)}
+            className="rounded-full p-1 text-red-100 hover:bg-red-600 hover:text-white"
+            aria-label="Close error message"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
         <p className="text-lg font-medium">Error</p>
 
         <p className="mt-4 line-clamp-[10] overflow-x-auto whitespace-pre font-mono text-xs">
