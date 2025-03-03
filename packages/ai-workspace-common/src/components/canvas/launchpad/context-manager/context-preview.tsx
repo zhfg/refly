@@ -12,6 +12,8 @@ import {
   ResourceNode,
   MemoNode,
   ImageNode,
+  CodeArtifactNode,
+  CodeArtifactNodeProps,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -48,6 +50,8 @@ export const ContextPreview = memo(
         return <SkillResponseNode {...(commonProps as SkillResponseNodeProps)} />;
       case 'memo':
         return <MemoNode {...(commonProps as MemoNodeProps)} />;
+      case 'codeArtifact':
+        return <CodeArtifactNode {...(commonProps as CodeArtifactNodeProps)} />;
       case 'resourceSelection':
       case 'documentSelection':
       case 'skillResponseSelection':

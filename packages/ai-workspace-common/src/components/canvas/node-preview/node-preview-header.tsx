@@ -29,6 +29,7 @@ import {
   IconUnpin,
   IconDeleteFile,
   IconDownloadFile,
+  IconCodeArtifact,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
@@ -50,6 +51,8 @@ const getNodeIcon = (node: CanvasNode<any>) => {
       return IconResponse;
     case 'toolResponse':
       return IconResponse;
+    case 'codeArtifact':
+      return IconCodeArtifact;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
         case 'prompt':

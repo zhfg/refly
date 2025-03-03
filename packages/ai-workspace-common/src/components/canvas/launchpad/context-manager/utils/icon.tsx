@@ -6,6 +6,7 @@ import {
   IconThreadHistoryFilled,
   IconQuote,
   IconImageFilled,
+  IconCodeArtifact,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { CanvasNodeType, SelectionKey } from '@refly/openapi-schema';
@@ -30,6 +31,8 @@ export const getContextItemIcon = (
       ) : (
         <IconResponseFilled style={{ color, ...style }} />
       );
+    case 'codeArtifact':
+      return <IconCodeArtifact style={{ color, ...style }} />;
     case 'resourceSelection':
     case 'documentSelection':
     case 'skillResponseSelection':

@@ -12,7 +12,6 @@ import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { FiCode } from 'react-icons/fi';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -36,6 +35,7 @@ import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/c
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const NodeContent = memo(
   ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
@@ -105,7 +105,6 @@ export const CodeArtifactNode = memo(
     const { getNode } = useReactFlow();
 
     const { sizeMode = 'adaptive' } = data?.metadata ?? {};
-    const CodeIcon = FiCode;
 
     const { i18n } = useTranslation();
     const language = i18n.languages?.[0];
@@ -261,7 +260,7 @@ export const CodeArtifactNode = memo(
         `}
           >
             <div className="flex flex-col h-full relative p-3 box-border">
-              <NodeHeader title={data.title} Icon={CodeIcon} iconBgColor="#3E63DD" />
+              <NodeHeader title={data.title} Icon={IconCodeArtifact} iconBgColor="#3E63DD" />
 
               <div className="relative flex-grow min-h-0">
                 <div
