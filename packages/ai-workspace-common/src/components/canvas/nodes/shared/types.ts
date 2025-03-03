@@ -101,7 +101,7 @@ export type NodeMetadataMap = {
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
   image: ImageNodeMeta;
-  code: CodeArtifactNodeMeta;
+  codeArtifact: CodeArtifactNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -124,5 +124,7 @@ export type SkillResponseNodeProps = NodeProps<
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
 export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'image'>> &
   CommonNodeProps;
-export type CodeArtifactNodeProps = NodeProps<Node<CanvasNodeData<CodeArtifactNodeMeta>, 'code'>> &
+export type CodeArtifactNodeProps = NodeProps<
+  Node<CanvasNodeData<CodeArtifactNodeMeta>, 'codeArtifact'>
+> &
   CommonNodeProps;

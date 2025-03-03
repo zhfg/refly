@@ -32,6 +32,10 @@ import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifa
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const NodeContent = memo(
   ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
@@ -50,7 +54,7 @@ const NodeContent = memo(
         if (data.entityId) {
           setNodeDataByEntity(
             {
-              type: 'code',
+              type: 'codeArtifact',
               entityId: data.entityId,
             },
             {
@@ -155,7 +159,7 @@ export const CodeArtifactNode = memo(
 
     const handleAddToContext = useCallback(() => {
       addToContext({
-        type: 'code',
+        type: 'codeArtifact',
         title: data.title,
         entityId: data.entityId,
         metadata: data.metadata,
@@ -167,31 +171,71 @@ export const CodeArtifactNode = memo(
     const handleDelete = useCallback(() => {
       deleteNode({
         id,
-        type: 'code',
+        type: 'codeArtifact',
         data,
         position: { x: 0, y: 0 },
       } as CanvasNode);
     }, [id, data, deleteNode]);
+
+    const insertToDoc = useInsertToDocument(data.entityId);
+    const handleInsertToDoc = useCallback(async () => {
+      if (!data?.contentPreview) return;
+      await insertToDoc('insertBelow', data?.contentPreview);
+    }, [insertToDoc, data]);
+
+    const { addNode } = useAddNode();
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'codeArtifact',
+                  title: data?.contentPreview
+                    ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+                    : data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ] as IContextItem[],
+            },
+          },
+        },
+        [{ type: 'codeArtifact', entityId: data.entityId }],
+        false,
+        true,
+      );
+    }, [data, addNode]);
 
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeInsertToDoc = () => handleInsertToDoc();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete]);
+    }, [id, handleAddToContext, handleDelete, handleInsertToDoc, handleAskAI]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>
@@ -206,7 +250,7 @@ export const CodeArtifactNode = memo(
           })}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="code" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="codeArtifact" nodeId={id} isNodeHovered={isHovered} />
           )}
 
           <div
@@ -247,7 +291,7 @@ export const CodeArtifactNode = memo(
                   position={Position.Left}
                   isConnected={isTargetConnected}
                   isNodeHovered={isHovered}
-                  nodeType="code"
+                  nodeType="codeArtifact"
                 />
                 <CustomHandle
                   id={`${id}-source`}
@@ -255,7 +299,7 @@ export const CodeArtifactNode = memo(
                   position={Position.Right}
                   isConnected={isSourceConnected}
                   isNodeHovered={isHovered}
-                  nodeType="code"
+                  nodeType="codeArtifact"
                 />
               </>
             )}

@@ -117,6 +117,16 @@ export const convertContextItemsToInvokeParams = (
             },
           })),
         ) ?? []),
+      ...(items
+        ?.filter((item) => item.type === 'codeArtifact')
+        ?.map((item) => ({
+          content: item.metadata?.contentPreview ?? '',
+          metadata: {
+            domain: 'code',
+            entityId: item.entityId,
+            title: item.title,
+          },
+        })) ?? []),
     ],
     resources: items
       ?.filter((item) => item?.type === 'resource')

@@ -47,11 +47,11 @@ const translations = {
     title: '分析需求',
     description: '分析需求完成，耗时 {{duration}} 毫秒',
   },
-  generatingArtifact: {
+  generatingCodeArtifact: {
     title: '生成小组件',
     description: '小组件生成中，耗时 {{duration}} 毫秒',
   },
-  artifactGenerated: {
+  codeArtifactGenerated: {
     title: '组件生成完成',
     description: '组件生成完成，耗时 {{duration}} 毫秒',
   },

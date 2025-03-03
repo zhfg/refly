@@ -107,7 +107,7 @@ export const useInvokeAction = () => {
 
   const onSkillStreamArtifact = (resultId: string, artifact: Artifact, content: string) => {
     // Handle code artifact content if this is a code artifact stream
-    if (artifact && artifact.type === 'code') {
+    if (artifact && artifact.type === 'codeArtifact') {
       // Get the code content as string
       const codeContent = getArtifactContent(content);
 

@@ -998,7 +998,7 @@ export class SkillService {
                 if (artifact.type === 'document' && artifact.connection) {
                   // For document artifacts, update the yjs document
                   throttledMarkdownUpdate(artifact);
-                } else if (artifact.type === 'code') {
+                } else if (artifact.type === 'codeArtifact') {
                   // For code artifacts, send stream and stream_artifact event
                   // Update result content and forward stream events to client
                   resultAggregator.handleStreamContent(runMeta, content, reasoningContent);

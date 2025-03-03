@@ -47,13 +47,13 @@ const translations = {
     title: 'Analyze Query',
     description: 'Analyze query completed, completed in {{duration}}ms',
   },
-  generatingArtifact: {
-    title: 'Generating Artifact',
-    description: 'Artifact generating, completed in {{duration}}ms',
+  generatingCodeArtifact: {
+    title: 'Generating Code Artifact',
+    description: 'Code artifact generating, completed in {{duration}}ms',
   },
-  artifactGenerated: {
-    title: 'Artifact Generated',
-    description: 'Artifact generated, completed in {{duration}}ms',
+  codeArtifactGenerated: {
+    title: 'Code Artifact Generated',
+    description: 'Code artifact generated, completed in {{duration}}ms',
   },
 };
 

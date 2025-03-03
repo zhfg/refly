@@ -84,8 +84,8 @@ const getNodeTitle = (node: CanvasNode<any>, t: TFunction) => {
       return t('canvas.nodeTypes.skill');
     case 'memo':
       return t('canvas.nodeTypes.memo');
-    case 'code':
-      return t('canvas.nodeTypes.code');
+    case 'codeArtifact':
+      return t('canvas.nodeTypes.codeArtifact');
     default:
       return 'Unknown Node';
   }

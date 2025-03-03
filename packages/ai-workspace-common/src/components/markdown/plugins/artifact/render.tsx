@@ -32,7 +32,7 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
     // Find the artifact in the steps
     const foundArtifact = result?.steps?.reduce<Artifact | null>((found, step) => {
       if (found) return found;
-      return step.artifacts?.find((a) => a.type === 'code') ?? null;
+      return step.artifacts?.find((a) => a.type === 'codeArtifact') ?? null;
     }, null);
 
     return [
@@ -56,7 +56,7 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
 
     // Find existing node with this entityId
     const existingNode = nodes.find(
-      (node) => node.type === 'code' && node.data?.entityId === artifact.entityId,
+      (node) => node.type === 'codeArtifact' && node.data?.entityId === artifact.entityId,
     );
 
     let nodeIdForEvent: string | undefined; // Track the node ID to use in the locate event
@@ -66,7 +66,7 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
       nodeIdForEvent = existingNode.id;
       addNodePreview(canvasId, {
         id: existingNode.id, // Use the existing node's ID
-        type: 'code',
+        type: 'codeArtifact',
         data: {
           ...existingNode.data, // Include all existing data
           title: existingNode.data?.title || artifact.title,

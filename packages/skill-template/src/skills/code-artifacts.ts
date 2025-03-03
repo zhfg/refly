@@ -319,7 +319,7 @@ ${reactiveArtifactExamples}`;
     const { requestMessages, sources, query } = await this.commonPreprocess(state, config);
 
     // Set current step
-    config.metadata.step = { name: 'generateArtifact' };
+    config.metadata.step = { name: 'generateCodeArtifact' };
 
     // Create a code artifact entity
     const title = `Code: ${query?.substring(0, 50) || 'React Component'}`;
@@ -327,7 +327,7 @@ ${reactiveArtifactExamples}`;
 
     // Create and emit the code artifact
     const artifact: Artifact = {
-      type: 'code',
+      type: 'codeArtifact',
       entityId: codeEntityId,
       title: title,
     };
@@ -366,7 +366,7 @@ ${reactiveArtifactExamples}`;
     this.emitEvent(
       {
         log: {
-          key: 'generatingArtifact',
+          key: 'generatingCodeArtifact',
           descriptionArgs: { query },
         },
       },
@@ -442,7 +442,7 @@ Remember to:
     this.emitEvent(
       {
         log: {
-          key: 'artifactGenerated',
+          key: 'codeArtifactGenerated',
           descriptionArgs: { query },
         },
       },

@@ -742,7 +742,7 @@ const translations = {
       memo: 'Memo',
       skill: 'Skill',
       image: 'Image',
-      code: 'Code',
+      codeArtifact: 'Code Artifact',
     },
     export: {
       success: 'Image exported successfully',

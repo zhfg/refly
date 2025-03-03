@@ -42,7 +42,7 @@ const translations = {
       analyzeContext: {
         name: '上下文分析',
       },
-      generateArtifact: {
+      generateCodeArtifact: {
         name: '生成小组件',
       },
     },

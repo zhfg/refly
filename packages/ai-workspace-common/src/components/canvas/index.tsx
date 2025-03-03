@@ -395,6 +395,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         case 'group':
           menuNodeType = 'group';
           break;
+        case 'codeArtifact':
+          menuNodeType = 'codeArtifact';
+          break;
         default:
           return; // Don't show context menu for unknown node types
       }

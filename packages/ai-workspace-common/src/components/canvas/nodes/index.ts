@@ -33,6 +33,7 @@ export * from './memo/memo';
 export * from './group';
 export * from './image';
 export * from './code-artifact';
+
 // Node types mapping
 export const nodeTypes: NodeTypes = {
   document: DocumentNode,
@@ -43,7 +44,7 @@ export const nodeTypes: NodeTypes = {
   memo: MemoNode,
   group: GroupNode,
   image: ImageNode,
-  code: CodeArtifactNode,
+  codeArtifact: CodeArtifactNode,
 };
 
 // Helper function to prepare node data
@@ -140,7 +141,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         style: {},
       };
 
-    case 'code':
+    case 'codeArtifact':
       return {
         status: 'generating',
         language: 'typescript',

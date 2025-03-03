@@ -32,7 +32,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
       if (node?.data?.entityId) {
         setNodeDataByEntity(
           {
-            type: 'code',
+            type: 'codeArtifact',
             entityId: node.data.entityId,
           },
           {

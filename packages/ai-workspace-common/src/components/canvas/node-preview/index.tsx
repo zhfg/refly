@@ -32,7 +32,7 @@ const PreviewComponent = memo(
         return <ToolNodePreview />;
       case 'skillResponse':
         return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
-      case 'code':
+      case 'codeArtifact':
         return <CodeArtifactNodePreview node={node} artifactId={node.data.entityId} />;
       default:
         return null;
