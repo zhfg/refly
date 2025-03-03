@@ -119,7 +119,7 @@ const MiniMapNode = (props: any) => {
           stroke: getMiniMapNodeStrokeColor(node),
           strokeWidth: 10,
           opacity: 0.5,
-          strokeDasharray: node?.type === 'group' ? '5,5' : 'none',
+          strokeDasharray: node?.type === 'group' ? '10,10' : 'none',
         }}
       />
     );
@@ -394,7 +394,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       if (!readonly) {
         handleUpdateCanvasMiniMap(canvasId);
       }
-    }, 1000);
+    }, 3000);
 
     return unsubscribe;
   }, [canvasId]);

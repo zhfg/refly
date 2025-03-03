@@ -15,7 +15,7 @@ export const useNodeOperations = () => {
   const { removeContextItem } = useContextPanelStoreShallow((state) => ({
     removeContextItem: state.removeContextItem,
   }));
-  const { handleUpdateCanvasMiniMap } = useUploadMinimap();
+  const { debouncedHandleUpdateCanvasMiniMap } = useUploadMinimap();
   const { throttledSyncNodesToYDoc } = useCanvasSync();
 
   const updateNodesWithSync = useCallback(
@@ -50,7 +50,7 @@ export const useNodeOperations = () => {
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);
       updateNodesWithSync(updatedNodes);
-      handleUpdateCanvasMiniMap(canvasId);
+      debouncedHandleUpdateCanvasMiniMap(canvasId);
 
       return updatedNodes;
     },

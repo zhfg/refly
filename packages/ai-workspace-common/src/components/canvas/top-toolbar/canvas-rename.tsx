@@ -70,6 +70,7 @@ export const CanvasRename: React.FC<CanvasRenameProps> = ({
     >
       <div className="relative">
         <Input
+          className="pr-8"
           autoFocus
           ref={inputRef}
           value={editedTitle}

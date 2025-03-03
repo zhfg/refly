@@ -13,7 +13,7 @@ export const useUploadMinimap = () => {
     return data;
   };
 
-  const handleUpdateCanvasMiniMap = useDebouncedCallback(async (canvasId: string) => {
+  const handleUpdateCanvasMiniMap = async (canvasId: string) => {
     const minimap = await getMinimap();
     if (minimap) {
       const { data, success } = await uploadMinimap(minimap);
@@ -23,9 +23,12 @@ export const useUploadMinimap = () => {
         });
       }
     }
-  }, 5000);
+  };
+
+  const debouncedHandleUpdateCanvasMiniMap = useDebouncedCallback(handleUpdateCanvasMiniMap, 5000);
 
   return {
     handleUpdateCanvasMiniMap,
+    debouncedHandleUpdateCanvasMiniMap,
   };
 };
