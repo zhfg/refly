@@ -7,6 +7,9 @@ import {
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -18,10 +21,48 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
   const setNodeDataByEntity = useSetNodeDataByEntity();
+  const { addNode } = useAddNode();
 
-  const handleRequestFix = useCallback((error: string) => {
-    console.error('Code artifact error:', error);
-  }, []);
+  const handleRequestFix = useCallback(
+    (errorMessage: string) => {
+      console.error('Code artifact error:', errorMessage);
+
+      // Create a skill node with the code artifact as context and error message in the query
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: t('codeArtifact.fixError', 'Fix Code Error'),
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'codeArtifact',
+                  title: node?.data?.contentPreview
+                    ? `${node.data.title} - ${node.data.contentPreview?.slice(0, 10)}`
+                    : (node.data?.title ?? ''),
+                  entityId: node.data?.entityId ?? '',
+                  metadata: node.data?.metadata,
+                },
+              ] as IContextItem[],
+              query: t(
+                'codeArtifact.fixErrorQuery',
+                'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
+                {
+                  errorMessage,
+                },
+              ),
+            },
+          },
+        },
+        // Connect the skill node to the code artifact node
+        [{ type: 'codeArtifact', entityId: node.data?.entityId ?? '' }],
+        false,
+        true,
+      );
+    },
+    [node, addNode, t],
+  );
 
   const handleClose = useCallback(() => {
     setIsShowingCodeViewer(false);

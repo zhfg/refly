@@ -44,10 +44,46 @@ const NodeContent = memo(
     const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
     const { t } = useTranslation();
     const setNodeDataByEntity = useSetNodeDataByEntity();
+    const { addNode } = useAddNode();
 
-    const handleRequestFix = useCallback((error: string) => {
-      console.error('Code artifact error:', error);
-    }, []);
+    const handleRequestFix = useCallback(
+      (error: string) => {
+        if (!data.entityId) return;
+
+        addNode(
+          {
+            type: 'skill',
+            data: {
+              title: t('codeArtifact.fix.title', 'Fix Code Error'),
+              entityId: genSkillID(),
+              metadata: {
+                contextItems: [
+                  {
+                    type: 'codeArtifact',
+                    title: data?.contentPreview
+                      ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+                      : data.title,
+                    entityId: data.entityId,
+                    metadata: data.metadata,
+                  },
+                ] as IContextItem[],
+                query: t(
+                  'codeArtifact.fix.query',
+                  'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
+                  {
+                    errorMessage: error,
+                  },
+                ),
+              },
+            },
+          },
+          [{ type: 'codeArtifact', entityId: data.entityId }],
+          false,
+          true,
+        );
+      },
+      [addNode, data, t],
+    );
 
     const handleCodeChange = useCallback(
       (updatedCode: string) => {
@@ -103,6 +139,7 @@ export const CodeArtifactNode = memo(
     const [isHovered, setIsHovered] = useState(false);
     const { edges } = useCanvasData();
     const { getNode } = useReactFlow();
+    const { addNode } = useAddNode();
 
     const { sizeMode = 'adaptive' } = data?.metadata ?? {};
 
@@ -182,7 +219,6 @@ export const CodeArtifactNode = memo(
       await insertToDoc('insertBelow', data?.contentPreview);
     }, [insertToDoc, data]);
 
-    const { addNode } = useAddNode();
     const handleAskAI = useCallback(() => {
       addNode(
         {

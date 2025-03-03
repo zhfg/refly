@@ -8,6 +8,7 @@ import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
+import { useTranslation } from 'react-i18next';
 
 export default function ReactCodeRunner({
   code,
@@ -72,6 +73,7 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
   const { sandpack } = useSandpack();
   const [didCopy, setDidCopy] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const { t } = useTranslation();
 
   if (!sandpack.error || !isVisible) return null;
 
@@ -89,7 +91,7 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
           </Button>
         </div>
 
-        <p className="text-lg font-medium">Error</p>
+        <p className="text-lg font-medium">{t('codeArtifact.fix.error', 'Error')}</p>
 
         <p className="mt-4 line-clamp-[10] overflow-x-auto whitespace-pre font-mono text-xs">
           {sandpack.error.message}
@@ -118,7 +120,7 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
             }}
             className="rounded bg-white px-2.5 py-1.5 text-sm font-medium text-black"
           >
-            Try to fix
+            {t('codeArtifact.fix.tryToFix', 'Try to fix')}
           </Button>
         </div>
       </div>

@@ -1092,6 +1092,14 @@ const translations = {
       text: '文本',
     },
   },
+  codeArtifact: {
+    fix: {
+      title: '修复代码错误',
+      query: '帮我优化这段代码。我遇到了以下错误：\n\n{{errorMessage}}',
+      tryToFix: '尝试修复',
+      error: '错误',
+    },
+  },
   loggedHomePage: {
     searchEverything: '搜索任何内容',
     quickSearch: {

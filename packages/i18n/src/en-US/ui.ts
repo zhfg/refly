@@ -1110,6 +1110,14 @@ const translations = {
       text: 'Text',
     },
   },
+  codeArtifact: {
+    fix: {
+      title: 'Fix Code Error',
+      query: 'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
+      tryToFix: 'Try to Fix',
+      error: 'Error',
+    },
+  },
   loggedHomePage: {
     searchEverything: 'Search',
     quickSearch: {
