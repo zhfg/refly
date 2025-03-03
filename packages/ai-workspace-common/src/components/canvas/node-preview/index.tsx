@@ -39,10 +39,25 @@ const PreviewComponent = memo(
     }
   },
   (prevProps, nextProps) => {
-    return (
+    // Check type and entity ID
+    const basicPropsEqual =
       prevProps.node?.type === nextProps.node?.type &&
-      prevProps.node?.data?.entityId === nextProps.node?.data?.entityId
-    );
+      prevProps.node?.data?.entityId === nextProps.node?.data?.entityId;
+
+    if (!basicPropsEqual) return false;
+
+    // Check content preview
+    const contentEqual =
+      prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview;
+
+    // Check title
+    const titleEqual = prevProps.node?.data?.title === nextProps.node?.data?.title;
+
+    // Check metadata status (for generating state)
+    const statusEqual =
+      prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual;
   },
 );
 
@@ -110,6 +125,19 @@ export const NodePreview = memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.node?.id === nextProps.node?.id && prevProps.canvasId === nextProps.canvasId;
+    const basicPropsEqual =
+      prevProps.node?.id === nextProps.node?.id && prevProps.canvasId === nextProps.canvasId;
+
+    if (!basicPropsEqual) return false;
+
+    const contentEqual =
+      prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview;
+
+    const titleEqual = prevProps.node?.data?.title === nextProps.node?.data?.title;
+
+    const statusEqual =
+      prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual;
   },
 );

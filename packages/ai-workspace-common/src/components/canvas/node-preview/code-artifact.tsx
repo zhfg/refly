@@ -85,5 +85,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
 
 export const CodeArtifactNodePreview = memo(
   CodeArtifactNodePreviewComponent,
-  (prevProps, nextProps) => prevProps.artifactId === nextProps.artifactId,
+  (prevProps, nextProps) =>
+    prevProps.artifactId === nextProps.artifactId &&
+    prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview,
 );
