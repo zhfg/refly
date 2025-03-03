@@ -59,8 +59,6 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const { language = 'typescript' } = node.data?.metadata || {};
   const isGenerating = node.data?.metadata?.status === 'generating';
 
-  console.log('content', content);
-
   return (
     <div className="h-full bg-white rounded px-4">
       <CodeViewerLayout isShowing={isShowingCodeViewer}>

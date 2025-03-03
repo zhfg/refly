@@ -2,7 +2,7 @@ import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { Button, Tooltip, Divider } from 'antd';
 import CodeRunner from './code-runner-react';
-import Editor from '@monaco-editor/react';
+import Editor, { Monaco } from '@monaco-editor/react';
 
 export default function CodeViewer({
   code,
@@ -36,6 +36,17 @@ export default function CodeViewer({
     setEditorContent(code);
   }, [code]);
 
+  // Set up Monaco editor with proper language support
+  useEffect(() => {
+    // No need to configure loader without direct monaco import
+    // loader.config({ monaco });
+
+    // Setup will happen in beforeMount callback instead
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
+
   const handleCopyCode = () => {
     navigator.clipboard.writeText(editorContent);
   };
@@ -64,7 +75,7 @@ export default function CodeViewer({
   const getFileExtensionForLanguage = (lang: string): string => {
     const extensionMap: Record<string, string> = {
       javascript: 'js',
-      typescript: 'tsx',
+      typescript: 'ts',
       python: 'py',
       html: 'html',
       css: 'css',
@@ -141,7 +152,7 @@ export default function CodeViewer({
             />
           </Tooltip>
 
-          <Tooltip title={`Download as .${getFileExtensionForLanguage(language)}`}>
+          <Tooltip title={`Download as ${title}.${getFileExtensionForLanguage(language)}`}>
             <Button
               type="text"
               icon={<FiDownload className="size-4" />}
@@ -159,9 +170,53 @@ export default function CodeViewer({
           <div className="h-full" style={{ minHeight: '500px' }}>
             <Editor
               height="100%"
-              defaultLanguage={getFileExtensionForLanguage(language)}
               value={editorContent}
               onChange={handleEditorChange}
+              language="markdown"
+              beforeMount={(monaco: Monaco) => {
+                // Configure Monaco instance before mounting
+                monaco.editor.defineTheme('github-custom', {
+                  base: 'vs',
+                  inherit: true,
+                  rules: [
+                    { token: 'comment', foreground: '008000' },
+                    { token: 'keyword', foreground: '0000FF' },
+                    { token: 'string', foreground: 'A31515' },
+                    { token: 'number', foreground: '098658' },
+                    { token: 'regexp', foreground: '800000' },
+                  ],
+                  colors: {
+                    'editor.foreground': '#000000',
+                    'editor.background': '#ffffff',
+                    'editor.selectionBackground': '#b3d4fc',
+                    'editor.lineHighlightBackground': '#f5f5f5',
+                    'editorCursor.foreground': '#000000',
+                    'editorWhitespace.foreground': '#d3d3d3',
+                  },
+                });
+              }}
+              onMount={(editor, monaco) => {
+                // Configure TypeScript and other languages
+                if (monaco.languages.typescript) {
+                  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+                    target: monaco.languages.typescript.ScriptTarget.Latest,
+                    allowNonTsExtensions: true,
+                    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+                    module: monaco.languages.typescript.ModuleKind.CommonJS,
+                    noEmit: true,
+                    esModuleInterop: true,
+                    jsx: monaco.languages.typescript.JsxEmit.React,
+                    reactNamespace: 'React',
+                    allowJs: true,
+                  });
+                }
+
+                // Set editor options if needed
+                editor.updateOptions({
+                  tabSize: 2,
+                  fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                });
+              }}
               options={{
                 automaticLayout: true,
                 minimap: { enabled: true },
@@ -174,8 +229,12 @@ export default function CodeViewer({
                   vertical: 'visible',
                   horizontal: 'visible',
                 },
+                formatOnPaste: true,
+                formatOnType: true,
+                autoIndent: 'full',
+                colorDecorators: true,
               }}
-              theme="github-light"
+              theme="github-custom"
             />
           </div>
         ) : (

@@ -4,7 +4,10 @@ import { FiCode } from 'react-icons/fi';
 import { IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { MarkdownElementProps } from '../../types/index';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import {
+  useCanvasStoreShallow,
+  useCanvasStore,
+} from '@refly-packages/ai-workspace-common/stores/canvas';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { Artifact } from '@refly/openapi-schema';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -45,20 +48,36 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
   }));
 
   const handleClick = () => {
-    if (artifact) {
-      // Open the code artifact preview
-      if (canvasId) {
-        addNodePreview(canvasId, {
-          id: artifact.entityId,
-          type: 'code',
-          data: {
-            entityId: artifact.entityId,
-            title: artifact.title,
-          },
-          position: { x: 0, y: 0 }, // Default position, will be adjusted by the canvas
-        });
-        locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: artifact.entityId });
-      }
+    if (!artifact || !canvasId) return;
+
+    // Get canvas nodes to find if a node with this entity ID already exists
+    const canvasData = useCanvasStore.getState().data[canvasId];
+    const nodes = canvasData?.nodes || [];
+
+    // Find existing node with this entityId
+    const existingNode = nodes.find(
+      (node) => node.type === 'code' && node.data?.entityId === artifact.entityId,
+    );
+
+    let nodeIdForEvent: string | undefined; // Track the node ID to use in the locate event
+
+    if (existingNode) {
+      // Use the existing node's information for the preview
+      nodeIdForEvent = existingNode.id;
+      addNodePreview(canvasId, {
+        id: existingNode.id, // Use the existing node's ID
+        type: 'code',
+        data: {
+          ...existingNode.data, // Include all existing data
+          title: existingNode.data?.title || artifact.title,
+        },
+        position: existingNode.position || { x: 0, y: 0 },
+      });
+    }
+
+    if (nodeIdForEvent) {
+      // Emit the locate event with the correct node ID
+      locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: nodeIdForEvent });
     }
   };
 
