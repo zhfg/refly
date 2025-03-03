@@ -447,6 +447,18 @@ export class MiscService implements OnModuleInit {
     return { data, contentType: file.contentType };
   }
 
+  async getExternalFileStream(storageKey: string): Promise<{ data: Buffer; contentType: string }> {
+    const [readable, stat] = await Promise.all([
+      this.minioClient('public').getObject(storageKey),
+      this.prisma.staticFile.findFirst({
+        select: { contentType: true },
+        where: { storageKey, deletedAt: null },
+      }),
+    ]);
+    const data = await streamToBuffer(readable);
+    return { data, contentType: stat?.contentType ?? 'application/octet-stream' };
+  }
+
   /**
    * Generates image URLs based on storage keys and configured payload mode
    * @param storageKeys - Array of storage keys for the images

@@ -2030,6 +2030,14 @@ export type ShareRecord = {
    */
   entityId: string;
   /**
+   * Whether to allow duplication of the shared entity
+   */
+  allowDuplication?: boolean;
+  /**
+   * Parent share ID
+   */
+  parentShareId?: string;
+  /**
    * Create timestamp
    */
   createdAt?: string;
@@ -2069,15 +2077,7 @@ export type CreateShareResponse = BaseResponse & {
   data?: CreateShareResult;
 };
 
-export type QueryShareRequest = {
-  /**
-   * Entity ID
-   */
-  entityId: string;
-  entityType: EntityType;
-};
-
-export type QueryShareResponse = BaseResponse & {
+export type ListShareResponse = BaseResponse & {
   /**
    * Share record list
    */
@@ -3665,13 +3665,26 @@ export type CreateShareResponse2 = CreateShareResponse;
 
 export type CreateShareError = unknown;
 
-export type QueryShareData = {
-  body: QueryShareRequest;
+export type ListSharesData = {
+  query?: {
+    /**
+     * Entity ID
+     */
+    entityId?: string;
+    /**
+     * Entity type
+     */
+    entityType?: EntityType;
+    /**
+     * Share ID
+     */
+    shareId?: string;
+  };
 };
 
-export type QueryShareResponse2 = QueryShareResponse;
+export type ListSharesResponse = ListShareResponse;
 
-export type QueryShareError = unknown;
+export type ListSharesError = unknown;
 
 export type DeleteShareData = {
   body: DeleteShareRequest;

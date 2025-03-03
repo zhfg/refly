@@ -2766,6 +2766,14 @@ export const ShareRecordSchema = {
       type: 'string',
       description: 'Entity ID',
     },
+    allowDuplication: {
+      type: 'boolean',
+      description: 'Whether to allow duplication of the shared entity',
+    },
+    parentShareId: {
+      type: 'string',
+      description: 'Parent share ID',
+    },
     createdAt: {
       type: 'string',
       description: 'Create timestamp',
@@ -2828,21 +2836,7 @@ export const CreateShareResponseSchema = {
   ],
 } as const;
 
-export const QueryShareRequestSchema = {
-  type: 'object',
-  required: ['entityId', 'entityType'],
-  properties: {
-    entityId: {
-      type: 'string',
-      description: 'Entity ID',
-    },
-    entityType: {
-      $ref: '#/components/schemas/EntityType',
-    },
-  },
-} as const;
-
-export const QueryShareResponseSchema = {
+export const ListShareResponseSchema = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',

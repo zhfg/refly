@@ -125,9 +125,9 @@ import type {
   CreateShareData,
   CreateShareError,
   CreateShareResponse2,
-  QueryShareData,
-  QueryShareError,
-  QueryShareResponse2,
+  ListSharesData,
+  ListSharesError,
+  ListSharesResponse,
   DeleteShareData,
   DeleteShareError,
   DeleteShareResponse,
@@ -879,15 +879,15 @@ export const createShare = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Query share
- * Query share
+ * List shares
+ * List all shares
  */
-export const queryShare = <ThrowOnError extends boolean = false>(
-  options: Options<QueryShareData, ThrowOnError>,
+export const listShares = <ThrowOnError extends boolean = false>(
+  options?: Options<ListSharesData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<QueryShareResponse2, QueryShareError, ThrowOnError>({
+  return (options?.client ?? client).get<ListSharesResponse, ListSharesError, ThrowOnError>({
     ...options,
-    url: '/share/query',
+    url: '/share/list',
   });
 };
 

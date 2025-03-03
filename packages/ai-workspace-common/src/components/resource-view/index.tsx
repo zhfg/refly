@@ -1,5 +1,5 @@
 import { Button, Skeleton, Empty, Alert, Result } from 'antd';
-import { useEffect, useState, memo, useCallback } from 'react';
+import { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
@@ -20,9 +20,11 @@ import { LOCALE } from '@refly/common-types';
 import { TFunction } from 'i18next';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
 interface ResourceViewProps {
   resourceId: string;
+  shareId?: string;
   nodeId: string;
   deckSize: number;
   setDeckSize: (size: number) => void;
@@ -192,7 +194,7 @@ const ResourceContent = memo(
 
 export const ResourceView = memo(
   (props: ResourceViewProps) => {
-    const { resourceId } = props;
+    const { resourceId, shareId } = props;
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
     const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
@@ -209,8 +211,10 @@ export const ResourceView = memo(
       refetchOnReconnect: false,
       staleTime: 60 * 1000,
       gcTime: 5 * 60 * 1000,
+      enabled: !shareId,
     });
-    const { data: resourceDetail } = data || {};
+    const { data: shareData } = useFetchShareData<Resource>(shareId);
+    const resourceDetail = useMemo(() => shareData || data?.data || null, [shareData, data]);
 
     const handleReindexResource = useCallback(
       async (resourceId: string) => {

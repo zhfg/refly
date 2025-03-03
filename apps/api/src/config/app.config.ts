@@ -13,7 +13,7 @@ export default () => ({
   origin: process.env.ORIGIN || 'http://localhost:5700',
   static: {
     public: {
-      endpoint: process.env.STATIC_PUBLIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+      endpoint: process.env.STATIC_PUBLIC_ENDPOINT || 'http://localhost:5800/v1/misc/public',
     },
     private: {
       endpoint: process.env.STATIC_PRIVATE_ENDPOINT || 'http://localhost:5800/v1/misc',

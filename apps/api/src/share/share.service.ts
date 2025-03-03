@@ -6,12 +6,15 @@ import {
   CreateShareRequest,
   CreateShareResult,
   DeleteShareRequest,
+  ListSharesData,
   User,
 } from '@refly-packages/openapi-schema';
 import { ParamsError, ShareNotFoundError } from '@refly-packages/errors';
 import { CanvasService } from '@/canvas/canvas.service';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import { ActionService } from '@/action/action.service';
+import { actionResultPO2DTO } from '@/action/action.dto';
+import { documentPO2DTO, resourcePO2DTO } from '@/knowledge/knowledge.dto';
 
 const SHARE_CODE_PREFIX = {
   document: 'doc-',
@@ -35,6 +38,16 @@ export class ShareService {
     private readonly knowledgeService: KnowledgeService,
     private readonly actionService: ActionService,
   ) {}
+
+  async listShares(user: User, param: ListSharesData['query']) {
+    const { shareId, entityId, entityType } = param;
+
+    const shares = await this.prisma.shareRecord.findMany({
+      where: { shareId, entityId, entityType, uid: user.uid, deletedAt: null },
+    });
+
+    return shares;
+  }
 
   async createShareForCanvas(user: User, param: CreateShareRequest) {
     const { entityId: canvasId, parentShareId, allowDuplication } = param;
@@ -123,12 +136,13 @@ export class ShareService {
     const documentDetail = await this.knowledgeService.getDocumentDetail(user, {
       docId: documentId,
     });
+    const document = documentPO2DTO(documentDetail);
 
     // TODO: process document images
 
     const { storageKey } = await this.miscService.uploadBuffer(user, {
       fpath: 'document.json',
-      buf: Buffer.from(JSON.stringify(documentDetail)),
+      buf: Buffer.from(JSON.stringify(document)),
       entityId: documentId,
       entityType: 'document',
       visibility: 'public',
@@ -157,12 +171,13 @@ export class ShareService {
     const resourceDetail = await this.knowledgeService.getResourceDetail(user, {
       resourceId,
     });
+    const resource = resourcePO2DTO(resourceDetail);
 
     // TODO: process resource images
 
     const { storageKey } = await this.miscService.uploadBuffer(user, {
       fpath: 'resource.json',
-      buf: Buffer.from(JSON.stringify(resourceDetail)),
+      buf: Buffer.from(JSON.stringify(resource)),
       entityId: resourceId,
       entityType: 'resource',
       visibility: 'public',
@@ -191,10 +206,11 @@ export class ShareService {
     const actionResultDetail = await this.actionService.getActionResult(user, {
       resultId,
     });
+    const actionResult = actionResultPO2DTO(actionResultDetail);
 
     const { storageKey } = await this.miscService.uploadBuffer(user, {
       fpath: 'skillResponse.json',
-      buf: Buffer.from(JSON.stringify(actionResultDetail)),
+      buf: Buffer.from(JSON.stringify(actionResult)),
       entityId: resultId,
       entityType: 'skillResponse',
       visibility: 'public',

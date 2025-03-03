@@ -109,4 +109,27 @@ export class MiscController {
 
     return new StreamableFile(data);
   }
+
+  @Get('public/:storageKey(*)')
+  async servePublicStatic(
+    @Param('storageKey') storageKey: string,
+    @Query('download') download: string,
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ): Promise<StreamableFile> {
+    const { data, contentType } = await this.miscService.getExternalFileStream(storageKey);
+    const filename = path.basename(storageKey);
+
+    const origin = req.headers.origin;
+
+    res.set({
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      ...(download ? { 'Content-Disposition': `attachment; filename="${filename}"` } : {}),
+    });
+
+    return new StreamableFile(data);
+  }
 }

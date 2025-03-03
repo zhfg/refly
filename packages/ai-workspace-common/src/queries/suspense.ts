@@ -24,6 +24,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -64,6 +65,8 @@ import {
   ListModelsError,
   ListResourcesData,
   ListResourcesError,
+  ListSharesData,
+  ListSharesError,
   ListSkillInstancesData,
   ListSkillInstancesError,
   ListSkillsError,
@@ -252,6 +255,21 @@ export const useGetDocumentDetailSuspense = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListSharesSuspense = <
+  TData = Common.ListSharesDefaultResponse,
+  TError = ListSharesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListSharesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseListSharesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listShares({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClassesSuspense = <

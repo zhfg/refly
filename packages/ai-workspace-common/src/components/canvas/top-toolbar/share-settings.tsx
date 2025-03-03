@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
-import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
+import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -62,7 +62,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const [open, setOpen] = useState(false);
   const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [access, setAccess] = useState<ShareAccess>('off');
-  const shareLink = useMemo(() => `${getClientOrigin()}/share/canvas/${canvasId}`, [canvasId]);
+
   const [title, setTitle] = useState('');
   const accessOptions = useMemo(
     () => [
@@ -78,6 +78,12 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
       },
     ],
     [t],
+  );
+  const { data } = useListShares({ query: { entityId: canvasId, entityType: 'canvas' } });
+  const shareRecord = useMemo(() => data?.data?.[0], [data]);
+  const shareLink = useMemo(
+    () => `${getClientOrigin()}/share/canvas/${shareRecord?.shareId}`,
+    [shareRecord],
   );
 
   const buttons = useMemo(
@@ -105,20 +111,24 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     [access, t],
   );
 
-  const { data: canvasData } = useGetCanvasData({ query: { canvasId } });
-
   useEffect(() => {
-    if (canvasData?.data) {
-      setAccess(canvasData.data.isPublic ? 'anyone' : 'off');
-      setTitle(canvasData.data.title || '');
-    }
-  }, [canvasData?.data]);
+    setAccess(shareRecord ? 'anyone' : 'off');
+    setTitle(''); // TODO: set title from shareRecord
+  }, [shareRecord]);
 
   const updateCanvasPermission = useCallback(
     async (value: ShareAccess) => {
-      const { data } = await getClient().updateCanvas({
-        body: { canvasId, isPublic: value === 'anyone' },
-      });
+      if (value === 'off') {
+        await getClient().deleteShare({ body: { shareId: shareRecord?.shareId } });
+      } else {
+        await getClient().createShare({
+          body: {
+            entityId: canvasId,
+            entityType: 'canvas',
+            allowDuplication: true,
+          },
+        });
+      }
       if (data.success) {
         message.success(t('shareContent.updateCanvasPermissionSuccess'));
         setAccess(value);
@@ -185,7 +195,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   );
 
   return (
-    <div className="hidden">
+    <div>
       <CreateTemplateModal
         canvasId={canvasId}
         title={title}

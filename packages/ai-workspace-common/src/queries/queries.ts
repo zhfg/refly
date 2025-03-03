@@ -57,6 +57,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -64,7 +65,6 @@ import {
   multiLingualWebSearch,
   pinSkillInstance,
   queryReferences,
-  queryShare,
   refreshToken,
   reindexResource,
   resendVerification,
@@ -184,6 +184,8 @@ import {
   ListModelsError,
   ListResourcesData,
   ListResourcesError,
+  ListSharesData,
+  ListSharesError,
   ListSkillInstancesData,
   ListSkillInstancesError,
   ListSkillsError,
@@ -196,8 +198,6 @@ import {
   PinSkillInstanceError,
   QueryReferencesData,
   QueryReferencesError,
-  QueryShareData,
-  QueryShareError,
   RefreshTokenError,
   ReindexResourceData,
   ReindexResourceError,
@@ -414,6 +414,21 @@ export const useGetDocumentDetail = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListShares = <
+  TData = Common.ListSharesDefaultResponse,
+  TError = ListSharesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListSharesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListSharesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listShares({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClasses = <
@@ -1107,23 +1122,6 @@ export const useCreateShare = <
   useMutation<TData, TError, Options<CreateShareData, true>, TContext>({
     mutationKey: Common.UseCreateShareKeyFn(mutationKey),
     mutationFn: (clientOptions) => createShare(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useQueryShare = <
-  TData = Common.QueryShareMutationResult,
-  TError = QueryShareError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<QueryShareData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<QueryShareData, true>, TContext>({
-    mutationKey: Common.UseQueryShareKeyFn(mutationKey),
-    mutationFn: (clientOptions) => queryShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useDeleteShare = <

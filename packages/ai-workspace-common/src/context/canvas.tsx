@@ -7,7 +7,8 @@ import { Edge } from '@xyflow/react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
+import { RawCanvasData } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
 interface CanvasContextType {
   canvasId: string;
@@ -74,16 +75,13 @@ export const CanvasProvider = ({
     setEdges: state.setEdges,
   }));
 
-  // Fetch canvas data from API when in readonly mode
-  const { data: canvasData } = useGetCanvasData({ query: { canvasId } }, null, {
-    enabled: readonly,
-    refetchOnWindowFocus: false,
-  });
+  // Use the hook to fetch canvas data when in readonly mode
+  const { data: canvasData } = useFetchShareData<RawCanvasData>(readonly ? canvasId : undefined);
 
   // Set canvas data from API response when in readonly mode
   useEffect(() => {
-    if (readonly && canvasData?.data) {
-      const { title, nodes, edges } = canvasData.data;
+    if (readonly && canvasData) {
+      const { title, nodes, edges } = canvasData;
       setTitle(canvasId, title ?? '');
 
       // Type casting to handle the type mismatch

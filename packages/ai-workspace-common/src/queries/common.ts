@@ -57,6 +57,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -64,7 +65,6 @@ import {
   multiLingualWebSearch,
   pinSkillInstance,
   queryReferences,
-  queryShare,
   refreshToken,
   reindexResource,
   resendVerification,
@@ -212,6 +212,16 @@ export const UseGetDocumentDetailKeyFn = (
   clientOptions: Options<unknown, true>,
   queryKey?: Array<unknown>,
 ) => [useGetDocumentDetailKey, ...(queryKey ?? [clientOptions])];
+export type ListSharesDefaultResponse = Awaited<ReturnType<typeof listShares>>['data'];
+export type ListSharesQueryResult<
+  TData = ListSharesDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useListSharesKey = 'ListShares';
+export const UseListSharesKeyFn = (
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: Array<unknown>,
+) => [useListSharesKey, ...(queryKey ?? [clientOptions])];
 export type ListLabelClassesDefaultResponse = Awaited<ReturnType<typeof listLabelClasses>>['data'];
 export type ListLabelClassesQueryResult<
   TData = ListLabelClassesDefaultResponse,
@@ -528,12 +538,6 @@ export type CreateShareMutationResult = Awaited<ReturnType<typeof createShare>>;
 export const useCreateShareKey = 'CreateShare';
 export const UseCreateShareKeyFn = (mutationKey?: Array<unknown>) => [
   useCreateShareKey,
-  ...(mutationKey ?? []),
-];
-export type QueryShareMutationResult = Awaited<ReturnType<typeof queryShare>>;
-export const useQueryShareKey = 'QueryShare';
-export const UseQueryShareKeyFn = (mutationKey?: Array<unknown>) => [
-  useQueryShareKey,
   ...(mutationKey ?? []),
 ];
 export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;

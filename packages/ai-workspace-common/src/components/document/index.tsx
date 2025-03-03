@@ -232,7 +232,7 @@ const DocumentBody = memo(
 );
 
 export const DocumentEditor = memo(
-  ({ docId, readonly }: { docId: string; readonly?: boolean }) => {
+  ({ docId, shareId, readonly }: { docId: string; shareId?: string; readonly?: boolean }) => {
     const { resetState } = useDocumentStoreShallow((state) => ({
       resetState: state.resetState,
     }));
@@ -245,7 +245,7 @@ export const DocumentEditor = memo(
     }, []);
 
     return (
-      <DocumentProvider docId={docId} readonly={readonly}>
+      <DocumentProvider docId={docId} shareId={shareId} readonly={readonly}>
         <div className="flex flex-col ai-note-container">
           {!canvasReadOnly && <StatusBar docId={docId} />}
           <DocumentBody docId={docId} />

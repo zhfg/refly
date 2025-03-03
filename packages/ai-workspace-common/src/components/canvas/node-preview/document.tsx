@@ -1,22 +1,22 @@
 import { memo } from 'react';
 import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  DocumentNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface DocumentNodePreviewProps {
-  nodeData?: {
-    entityId?: string;
-    entityType?: 'document' | 'resource';
-    node: CanvasNode<any>;
-  };
+  node: CanvasNode<DocumentNodeMeta>;
 }
 
 export const DocumentNodePreview = memo(
-  ({ nodeData }: DocumentNodePreviewProps) => {
+  ({ node }: DocumentNodePreviewProps) => {
     const { readonly } = useCanvasContext();
+    const { entityId, metadata } = node.data;
 
     // Early return if no node data
-    if (!nodeData?.entityId || !nodeData?.entityType) {
+    if (!entityId) {
       return (
         <div className="h-full flex items-center justify-center text-gray-500">
           No document data available
@@ -24,15 +24,13 @@ export const DocumentNodePreview = memo(
       );
     }
 
-    const { entityId } = nodeData;
-
     return (
       <div className="h-full overflow-hidden">
-        <DocumentEditor docId={entityId} readonly={readonly} />
+        <DocumentEditor docId={entityId} readonly={readonly} shareId={metadata?.shareId} />
       </div>
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.nodeData?.entityId === nextProps.nodeData?.entityId;
+    return prevProps.node.data.entityId === nextProps.node.data.entityId;
   },
 );
