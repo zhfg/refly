@@ -259,6 +259,8 @@ model Canvas {
   storageSize     BigInt    @default(0) @map("storage_size")
   /// Canvas yjs doc storage key
   stateStorageKey String?   @map("state_storage_key")
+  /// Minimap storage key
+  minimap         String?   @map("minimap_storage_key")
   /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Whether this canvas is public

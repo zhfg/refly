@@ -32,9 +32,9 @@ export interface DuplicateCanvasJobData {
   duplicateEntities?: boolean;
 }
 
-export function canvasPO2DTO(canvas: CanvasModel): Canvas {
+export function canvasPO2DTO(canvas: CanvasModel & { minimapUrl?: string }): Canvas {
   return {
-    ...pick(canvas, ['canvasId', 'title', 'isPublic']),
+    ...pick(canvas, ['canvasId', 'title', 'isPublic', 'minimapUrl']),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };
