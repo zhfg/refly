@@ -100,7 +100,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         },
         connectTo,
         false,
-        false,
+        true,
       );
     }
 

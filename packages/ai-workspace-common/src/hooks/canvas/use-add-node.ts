@@ -54,7 +54,7 @@ export const useAddNode = () => {
 
   const setNodeCenter = useCallback(
     (nodeId: string) => {
-      const currentZoom = reactFlowInstance.getZoom();
+      // const currentZoom = reactFlowInstance.getZoom();
       const zoomAdjustedPadding = padding;
 
       requestAnimationFrame(() => {
@@ -65,7 +65,7 @@ export const useAddNode = () => {
             renderedNode.position.y + zoomAdjustedPadding,
             {
               duration: 300,
-              zoom: currentZoom,
+              zoom: 1,
             },
           );
         }
