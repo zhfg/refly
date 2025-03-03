@@ -238,7 +238,7 @@ export default function CodeViewer({
             />
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center" style={{ minHeight: '500px' }}>
+          <div className="h-full flex items-center justify-center">
             {language && (
               <div className="w-full h-full p-4">
                 <CodeRunner
