@@ -22,13 +22,27 @@ const Render = memo((props: { id: string }) => {
     // Look for the result with this ID
     const result = state.resultMap[id];
 
-    // If we have a result and it's still executing/waiting, show thinking state
-    if (result) {
-      return ['executing', 'waiting'].includes(result.status);
+    // If no result found, return false
+    if (!result) {
+      return false;
     }
 
-    // Default to false if no result found
-    return false;
+    // Combine all step contents into one string
+    const combinedContent =
+      result.steps?.reduce((acc, step) => {
+        return acc + (step.content ?? '');
+      }, '') ?? '';
+
+    // Check if the combined content has closed thinking tags
+    const hasClosedThinking = isReflyThinkingClosed(combinedContent);
+
+    // Return false if thinking is closed or if not in executing/waiting state
+    if (hasClosedThinking || !['executing', 'waiting'].includes(result.status ?? '')) {
+      return false;
+    }
+
+    // Otherwise, we are thinking
+    return true;
   });
 
   if (!isThinking) return null;
@@ -37,7 +51,7 @@ const Render = memo((props: { id: string }) => {
     <div className="my-3 p-3 bg-gray-50 rounded-lg border border-gray-200 transition-all">
       <div className="flex items-center gap-1">
         <div className="flex items-center gap-2">
-          <IconThinking className="w-4 h-4 text-blue-500" />
+          <IconThinking className="w-4 h-4" />
           <span className="text-sm text-gray-700 font-medium">
             {t('artifact.thinking', 'Thinking...')}
           </span>
