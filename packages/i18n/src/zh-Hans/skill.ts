@@ -31,10 +31,10 @@ const translations = {
       },
     },
   },
-  artifacts: {
-    name: '组件生成',
-    description: '根据需求和上下文生成组件',
-    placeholder: '让 AI 帮您生成一个组件...',
+  codeArtifacts: {
+    name: '工件生成',
+    description: '根据需求和上下文生成工件',
+    placeholder: '让 AI 帮您生成一个工件...',
     steps: {
       analyzeQuery: {
         name: '分析需求',
@@ -43,7 +43,7 @@ const translations = {
         name: '上下文分析',
       },
       generateArtifact: {
-        name: '生成组件',
+        name: '生成工件',
       },
     },
   },

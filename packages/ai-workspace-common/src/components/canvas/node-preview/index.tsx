@@ -7,6 +7,7 @@ import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState, useMemo, useCallback, useRef, memo } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { CodeArtifactNodePreview } from './code-artifact';
 
 const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
@@ -31,6 +32,8 @@ const PreviewComponent = memo(
         return <ToolNodePreview />;
       case 'skillResponse':
         return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
+      case 'code':
+        return <CodeArtifactNodePreview node={node} artifactId={node.data.entityId} />;
       default:
         return null;
     }

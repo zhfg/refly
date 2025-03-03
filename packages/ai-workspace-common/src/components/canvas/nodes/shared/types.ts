@@ -48,6 +48,14 @@ export interface ResourceNodeMeta {
   originalWidth?: number;
 }
 
+export interface CodeArtifactNodeMeta {
+  status?: 'generating' | 'finish' | 'failed';
+  language?: string;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
+
 export type SkillNodeMeta = {
   query?: string;
   resultId?: string;
@@ -93,6 +101,7 @@ export type NodeMetadataMap = {
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
   image: ImageNodeMeta;
+  code: CodeArtifactNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -114,4 +123,6 @@ export type SkillResponseNodeProps = NodeProps<
   CommonNodeProps;
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
 export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'image'>> &
+  CommonNodeProps;
+export type CodeArtifactNodeProps = NodeProps<Node<CanvasNodeData<CodeArtifactNodeMeta>, 'code'>> &
   CommonNodeProps;

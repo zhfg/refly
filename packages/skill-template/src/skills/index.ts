@@ -6,4 +6,4 @@ export * from './web-search';
 export * from './library-search';
 export * from './recommend-questions';
 export * from './custom-prompt';
-export * from './artifacts';
+export * from './code-artifacts';

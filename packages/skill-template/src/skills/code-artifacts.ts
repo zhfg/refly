@@ -6,8 +6,10 @@ import {
   Icon,
   SkillInvocationConfig,
   SkillTemplateConfigDefinition,
+  Artifact,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
+import { randomUUID } from 'node:crypto';
 
 // Import prompt sections
 import {
@@ -33,12 +35,12 @@ import {
 } from '../scheduler/module/artifacts';
 
 /**
- * Artifacts Skill
+ * Code Artifacts Skill
  *
  * Generates React/TypeScript components for data visualization and interactive UIs
  */
-export class Artifacts extends BaseSkill {
-  name = 'artifacts';
+export class CodeArtifacts extends BaseSkill {
+  name = 'codeArtifacts';
 
   icon: Icon = { type: 'emoji', value: '🧩' };
 
@@ -318,6 +320,25 @@ ${reactiveArtifactExamples}`;
 
     // Set current step
     config.metadata.step = { name: 'generateArtifact' };
+
+    // Create a code artifact entity
+    const title = `Code: ${query?.substring(0, 50) || 'React Component'}`;
+    const codeEntityId = randomUUID();
+
+    // Create and emit the code artifact
+    const artifact: Artifact = {
+      type: 'code',
+      entityId: codeEntityId,
+      title: title,
+    };
+
+    this.emitEvent(
+      {
+        event: 'artifact',
+        artifact: { ...artifact, status: 'generating' },
+      },
+      config,
+    );
 
     // Emit sources if available
     if (sources?.length > 0) {

@@ -954,7 +954,7 @@ export type ActionStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 /**
  * Artifact type
  */
-export type ArtifactType = 'document';
+export type ArtifactType = 'document' | 'code';
 
 /**
  * Artifact status
@@ -3107,6 +3107,7 @@ export type InMemorySearchResponse = BaseResponse & {
 
 export type CanvasNodeType =
   | 'document'
+  | 'code'
   | 'resource'
   | 'skill'
   | 'tool'

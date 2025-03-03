@@ -985,16 +985,35 @@ export class SkillService {
                     event: 'create_node',
                     resultId,
                     node: {
-                      type: 'document',
+                      type: artifact.type,
                       data: { entityId, title: artifact.title },
                     },
                   });
                   artifact.nodeCreated = true;
                 }
 
-                // Update artifact content and yjs doc
+                // Update artifact content based on type
                 artifact.content += content;
-                throttledMarkdownUpdate(artifact);
+
+                if (artifact.type === 'document' && artifact.connection) {
+                  // For document artifacts, update the yjs document
+                  throttledMarkdownUpdate(artifact);
+                } else if (artifact.type === 'code') {
+                  // For code artifacts, send stream and stream_artifact event
+                  // Update result content and forward stream events to client
+                  resultAggregator.handleStreamContent(runMeta, content, reasoningContent);
+                  writeSSEResponse(res, {
+                    event: 'stream',
+                    resultId,
+                    content,
+                    reasoningContent,
+                    step: runMeta?.step,
+                    artifact: {
+                      ...artifact,
+                      status: 'generating',
+                    },
+                  });
+                }
               } else {
                 // Update result content and forward stream events to client
                 resultAggregator.handleStreamContent(runMeta, content, reasoningContent);

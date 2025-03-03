@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
   ActionStep,
   ActionStepMeta,
+  Artifact,
   Entity,
   InvokeSkillRequest,
   SkillEvent,
@@ -25,6 +26,8 @@ import { useActionPolling } from './use-action-polling';
 import { useFindMemo } from './use-find-memo';
 import { useUpdateActionResult } from './use-update-action-result';
 import { useSubscriptionUsage } from '../use-subscription-usage';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { getArtifactContent } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -102,8 +105,66 @@ export const useInvokeAction = () => {
     return steps.map((step) => (step.name === updatedStep.name ? updatedStep : step));
   };
 
+  const onSkillStreamArtifact = (resultId: string, artifact: Artifact, content: string) => {
+    // Handle code artifact content if this is a code artifact stream
+    if (artifact && artifact.type === 'code') {
+      // Get the code content as string
+      const codeContent = getArtifactContent(content);
+
+      // Check if the node exists and create it if not
+      const canvasState = useCanvasStore.getState();
+      const currentCanvasId = canvasState.currentCanvasId;
+
+      // Skip if no active canvas
+      if (!currentCanvasId) return;
+
+      const canvasData = canvasState.data[currentCanvasId];
+      const existingNode = canvasData?.nodes?.find(
+        (node) => node.data?.entityId === artifact.entityId && node.type === artifact.type,
+      );
+
+      // If node doesn't exist, create it
+      if (!existingNode) {
+        addNode(
+          {
+            type: artifact.type,
+            data: {
+              title: artifact.title,
+              entityId: artifact.entityId,
+              contentPreview: codeContent, // Set content preview for code artifact
+              metadata: {
+                status: 'generating',
+                language: 'typescript', // Default language
+              },
+            },
+          },
+          [
+            {
+              type: 'skillResponse',
+              entityId: resultId,
+            },
+          ],
+        );
+      } else {
+        // Update existing node with new content
+        setNodeDataByEntity(
+          {
+            type: artifact.type,
+            entityId: artifact.entityId,
+          },
+          {
+            contentPreview: codeContent, // Update content preview
+            metadata: {
+              status: 'generating',
+            },
+          },
+        );
+      }
+    }
+  };
+
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { resultId, content, reasoningContent = '', step } = skillEvent;
+    const { resultId, content, reasoningContent = '', step, artifact } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
@@ -111,6 +172,7 @@ export const useInvokeAction = () => {
       return;
     }
 
+    // Regular stream content handling (non-code artifact)
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.content += content;
 
@@ -119,6 +181,9 @@ export const useInvokeAction = () => {
     } else {
       updatedStep.reasoningContent += reasoningContent;
     }
+
+    // Handle code artifact content if this is a code artifact stream
+    onSkillStreamArtifact(resultId, artifact, content);
 
     onUpdateResult(
       resultId,

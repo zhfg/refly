@@ -2644,6 +2644,7 @@ components:
       description: Artifact type
       enum:
         - document
+        - code
     ArtifactStatus:
       type: string
       description: Artifact status
@@ -4903,6 +4904,7 @@ components:
       type: string
       enum:
         - document
+        - code
         - resource
         - skill
         - tool

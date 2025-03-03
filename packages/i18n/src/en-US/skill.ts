@@ -31,8 +31,8 @@ const translations = {
       },
     },
   },
-  artifacts: {
-    name: 'Artifacts',
+  codeArtifacts: {
+    name: 'Code Artifacts',
     description: 'Generate React/TypeScript components based on the question and context',
     placeholder: 'Let AI help you generate a React/TypeScript component...',
     steps: {
