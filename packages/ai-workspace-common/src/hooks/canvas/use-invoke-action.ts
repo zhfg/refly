@@ -183,7 +183,7 @@ export const useInvokeAction = () => {
     }
 
     // Handle code artifact content if this is a code artifact stream
-    onSkillStreamArtifact(resultId, artifact, content);
+    onSkillStreamArtifact(resultId, artifact, updatedStep.content);
 
     onUpdateResult(
       resultId,

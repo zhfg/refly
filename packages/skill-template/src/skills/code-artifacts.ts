@@ -49,7 +49,7 @@ export class CodeArtifacts extends BaseSkill {
       {
         key: 'optimizeComponents',
         inputMode: 'switch',
-        defaultValue: true,
+        defaultValue: false,
         labelDict: {
           en: 'Optimize Components',
           'zh-CN': '优化组件',
@@ -62,7 +62,7 @@ export class CodeArtifacts extends BaseSkill {
       {
         key: 'useTailwind',
         inputMode: 'switch',
-        defaultValue: true,
+        defaultValue: false,
         labelDict: {
           en: 'Use Tailwind CSS',
           'zh-CN': '使用 Tailwind CSS',
@@ -75,7 +75,7 @@ export class CodeArtifacts extends BaseSkill {
       {
         key: 'strictErrorHandling',
         inputMode: 'switch',
-        defaultValue: true,
+        defaultValue: false,
         labelDict: {
           en: 'Strict Error Handling',
           'zh-CN': '严格错误处理',
@@ -379,6 +379,7 @@ ${reactiveArtifactExamples}`;
       metadata: {
         ...config.metadata,
         ...currentSkill,
+        artifact,
         artifactConfig: {
           optimizeComponents,
           useTailwind,
@@ -444,6 +445,14 @@ Remember to:
           key: 'artifactGenerated',
           descriptionArgs: { query },
         },
+      },
+      config,
+    );
+
+    this.emitEvent(
+      {
+        event: 'artifact',
+        artifact: { ...artifact, status: 'finish' },
       },
       config,
     );
