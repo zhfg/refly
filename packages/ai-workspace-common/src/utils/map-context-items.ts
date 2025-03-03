@@ -89,6 +89,7 @@ export const convertContextItemsToInvokeParams = (
   items: IContextItem[],
   getHistory: (item: IContextItem) => ActionResult[],
   getMemo?: (item: IContextItem) => { content: string; title: string }[],
+  getCodeArtifact?: (item: IContextItem) => { content: string; title: string }[],
 ): { context: SkillContext; resultHistory: ActionResult[]; images: string[] } => {
   const context = {
     contentList: [
@@ -118,15 +119,17 @@ export const convertContextItemsToInvokeParams = (
           })),
         ) ?? []),
       ...(items
-        ?.filter((item) => item.type === 'codeArtifact')
-        ?.map((item) => ({
-          content: item.metadata?.contentPreview ?? '',
-          metadata: {
-            domain: 'code',
-            entityId: item.entityId,
-            title: item.title,
-          },
-        })) ?? []),
+        ?.filter((item) => item.type === 'codeArtifact' && getCodeArtifact)
+        ?.flatMap((item) =>
+          getCodeArtifact(item).map((code) => ({
+            content: code.content,
+            metadata: {
+              domain: 'codeArtifact',
+              entityId: item.entityId,
+              title: code.title,
+            },
+          })),
+        ) ?? []),
     ],
     resources: items
       ?.filter((item) => item?.type === 'resource')

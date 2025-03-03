@@ -451,7 +451,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             },
           },
         ],
-        code: [
+        codeArtifact: [
           {
             key: 'insertToDoc',
             icon: FileInput,

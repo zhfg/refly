@@ -23,11 +23,12 @@ import {
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
-import { useFindMemo } from './use-find-memo';
+import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-memo';
 import { useUpdateActionResult } from './use-update-action-result';
 import { useSubscriptionUsage } from '../use-subscription-usage';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getArtifactContent } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
+import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -383,6 +384,7 @@ export const useInvokeAction = () => {
   const onStart = () => {};
   const findThreadHistory = useFindThreadHistory();
   const findMemo = useFindMemo();
+  const findCodeArtifact = useFindCodeArtifact();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
@@ -404,11 +406,24 @@ export const useInvokeAction = () => {
           title: node.data?.title,
           resultId: node.data?.entityId,
         })),
-      (item) =>
-        findMemo({ resultId: item.entityId }).map((node) => ({
-          content: node.data?.contentPreview ?? '',
-          title: node.data?.title ?? 'Memo',
-        })),
+      (item) => {
+        if (item.type === 'memo') {
+          return findMemo({ resultId: item.entityId }).map((node) => ({
+            content: node.data?.contentPreview ?? '',
+            title: node.data?.title ?? 'Memo',
+          }));
+        }
+        return [];
+      },
+      (item) => {
+        if (item.type === 'codeArtifact') {
+          return findCodeArtifact({ resultId: item.entityId }).map((node) => ({
+            content: node.data?.contentPreview ?? '',
+            title: node.data?.title ?? 'Code',
+          }));
+        }
+        return [];
+      },
     );
 
     const param: InvokeSkillRequest = {
