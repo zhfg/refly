@@ -38,6 +38,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 const ICON_CLASS = 'text-xl flex items-center justify-center text-gray-200 hover:text-white';
 export const ImageNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ImageNodeProps) => {
+    console.log('data', data);
     const { metadata } = data ?? {};
     const imageUrl = metadata?.imageUrl;
     const [isHovered, setIsHovered] = useState(false);

@@ -18,6 +18,8 @@ import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/compon
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import './index.scss';
 import { IconLink } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { LuBookCopy } from 'react-icons/lu';
+import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -89,8 +91,9 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const showWarning = connectionTimeout && !hasCanvasSynced && provider?.status !== 'connected';
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
   const handleDuplicate = () => {
-    setShowDuplicateModal(true);
+    duplicateCanvas(canvasId, () => {});
   };
 
   return (
@@ -148,6 +151,16 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
 
+          {isShareCanvas && isLogin && (
+            <Button
+              loading={duplicating}
+              icon={<LuBookCopy className="flex items-center" />}
+              onClick={handleDuplicate}
+            >
+              {t('common.duplicate')}
+            </Button>
+          )}
+
           {isShareCanvas && (
             <Button
               type="primary"
@@ -158,12 +171,6 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
               }}
             >
               {t('canvas.toolbar.copyLink')}
-            </Button>
-          )}
-
-          {readonly && isLogin && (
-            <Button type="primary" onClick={handleDuplicate} className="hidden">
-              {t('common.duplicate')}
             </Button>
           )}
         </div>

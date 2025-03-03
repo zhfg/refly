@@ -131,6 +131,9 @@ import type {
   DeleteShareData,
   DeleteShareError,
   DeleteShareResponse,
+  DuplicateShareData,
+  DuplicateShareError,
+  DuplicateShareResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -901,6 +904,23 @@ export const deleteShare = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError, ThrowOnError>({
     ...options,
     url: '/share/delete',
+  });
+};
+
+/**
+ * Duplicate share
+ * Duplicate an existing share
+ */
+export const duplicateShare = <ThrowOnError extends boolean = false>(
+  options: Options<DuplicateShareData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    DuplicateShareResponse2,
+    DuplicateShareError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/share/duplicate',
   });
 };
 

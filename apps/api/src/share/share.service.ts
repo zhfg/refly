@@ -6,6 +6,8 @@ import {
   CreateShareRequest,
   CreateShareResult,
   DeleteShareRequest,
+  DuplicateShareRequest,
+  Entity,
   ListSharesData,
   User,
 } from '@refly-packages/openapi-schema';
@@ -274,5 +276,33 @@ export class ShareService {
         visibility: 'public',
       })),
     );
+  }
+
+  async duplicateShare(user: User, body: DuplicateShareRequest): Promise<Entity> {
+    const { shareId } = body;
+
+    if (!shareId) {
+      throw new ParamsError('Share ID is required');
+    }
+
+    const shareRecord = await this.prisma.shareRecord.findUnique({
+      where: { shareId, deletedAt: null },
+    });
+
+    if (!shareRecord) {
+      throw new ShareNotFoundError();
+    }
+
+    const { entityId, entityType } = shareRecord;
+    if (entityType !== 'canvas') {
+      throw new ParamsError(`Unsupported entity type ${entityType} for duplication`);
+    }
+
+    const newCanvas = await this.canvasService.duplicateCanvas(user, {
+      canvasId: entityId,
+      duplicateEntities: true,
+    });
+
+    return { entityId: newCanvas.canvasId, entityType: 'canvas' };
   }
 }

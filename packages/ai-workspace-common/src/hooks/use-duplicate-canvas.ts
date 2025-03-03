@@ -15,13 +15,12 @@ export const useDuplicateCanvas = () => {
     visible: state.visible,
   }));
   const [loading, setLoading] = useState(false);
-  const duplicateCanvas = async (canvasId: string, title?: string, onSuccess?: () => void) => {
+  const duplicateCanvas = async (shareId: string, onSuccess?: () => void) => {
     if (loading) return;
     setLoading(true);
-    const { data } = await getClient().duplicateCanvas({
+    const { data } = await getClient().duplicateShare({
       body: {
-        canvasId,
-        title,
+        shareId,
       },
     });
     setLoading(false);
@@ -29,8 +28,8 @@ export const useDuplicateCanvas = () => {
       message.success(t('common.putSuccess'));
       const canvasData = data.data;
       getCanvasList();
-      if (canvasData.canvasId) {
-        navigate(`/canvas/${canvasData.canvasId}`);
+      if (canvasData.entityId) {
+        navigate(`/canvas/${canvasData.entityId}`);
         if (visible) {
           setVisible(false);
         }

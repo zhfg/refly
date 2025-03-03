@@ -29,7 +29,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { genCanvasID, genCanvasTemplateID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
-import { QUEUE_DELETE_KNOWLEDGE_ENTITY, QUEUE_DUPLICATE_CANVAS } from '@/utils/const';
+import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
 import { AutoNameCanvasJobData, DuplicateCanvasJobData } from './canvas.dto';
 import { streamToBuffer } from '@/utils';
 import { SubscriptionService } from '@/subscription/subscription.service';
@@ -52,8 +52,6 @@ export class CanvasService {
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_DELETE_KNOWLEDGE_ENTITY)
     private deleteKnowledgeQueue: Queue<DeleteKnowledgeEntityJobData>,
-    @InjectQueue(QUEUE_DUPLICATE_CANVAS)
-    private duplicateCanvasQueue: Queue<DuplicateCanvasJobData>,
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
@@ -139,11 +137,15 @@ export class CanvasService {
     };
   }
 
-  async duplicateCanvas(user: User, param: DuplicateCanvasRequest) {
+  async duplicateCanvas(
+    user: User,
+    param: DuplicateCanvasRequest,
+    options?: { checkOwnership?: boolean },
+  ) {
     const { title, canvasId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, deletedAt: null, uid: user.uid },
+      where: { canvasId, deletedAt: null, uid: options?.checkOwnership ? user.uid : undefined },
     });
 
     if (!canvas) {
@@ -169,23 +171,12 @@ export class CanvasService {
       },
     });
 
-    // Queue the duplication job
-    await this.duplicateCanvasQueue.add(
-      'duplicateCanvas',
-      {
-        uid: user.uid,
-        sourceCanvasId: canvasId,
-        targetCanvasId: newCanvasId,
-        title: newCanvas.title,
-        duplicateEntities: canvas.uid !== user.uid || duplicateEntities,
-      },
-      {
-        jobId: `duplicate_${newCanvasId}`,
-        removeOnComplete: true,
-        removeOnFail: true,
-        attempts: 3,
-      },
-    );
+    await this._duplicateCanvas({
+      uid: user.uid,
+      sourceCanvasId: canvasId,
+      targetCanvasId: newCanvasId,
+      duplicateEntities,
+    });
 
     return newCanvas;
   }
@@ -270,6 +261,7 @@ export class CanvasService {
                     node.data.metadata.storageKey as string,
                   );
                   if (file) {
+                    node.data.metadata.imageUrl = file.url;
                     node.data.metadata.storageKey = file.storageKey;
                   }
                 }
@@ -296,25 +288,6 @@ export class CanvasService {
     });
 
     this.logger.log(`Successfully duplicated canvas ${sourceCanvasId} to ${targetCanvasId}`);
-  }
-
-  async duplicateCanvasFromQueue(jobData: DuplicateCanvasJobData) {
-    const { sourceCanvasId, targetCanvasId } = jobData;
-
-    try {
-      await this._duplicateCanvas(jobData);
-    } catch (error) {
-      this.logger.error(
-        `Error duplicating canvas ${sourceCanvasId} to ${targetCanvasId}: ${error?.stack}`,
-      );
-
-      // Update canvas status to failed
-      await this.prisma.canvas.update({
-        where: { canvasId: targetCanvasId },
-        data: { status: 'failed' },
-      });
-      throw error;
-    }
   }
 
   async createCanvas(user: User, param: UpsertCanvasRequest) {

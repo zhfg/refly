@@ -720,6 +720,7 @@ export class MiscService implements OnModuleInit {
           data: { processedImageKey: newProcessedKey },
         });
       }
+      this.logger.log(`Duplicated file ${storageKey} to ${newStorageKey}`);
 
       return {
         storageKey: newStorageKey,

@@ -60,7 +60,7 @@ export class CanvasController {
   @UseGuards(JwtAuthGuard)
   @Post('duplicate')
   async duplicateCanvas(@LoginedUser() user: User, @Body() body: DuplicateCanvasRequest) {
-    const canvas = await this.canvasService.duplicateCanvas(user, body);
+    const canvas = await this.canvasService.duplicateCanvas(user, body, { checkOwnership: true });
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 

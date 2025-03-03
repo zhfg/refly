@@ -2867,6 +2867,34 @@ export const DeleteShareRequestSchema = {
   },
 } as const;
 
+export const DuplicateShareRequestSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+  },
+} as const;
+
+export const DuplicateShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Duplicated entity',
+          $ref: '#/components/schemas/Entity',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const ListLabelClassesResponseSchema = {
   allOf: [
     {

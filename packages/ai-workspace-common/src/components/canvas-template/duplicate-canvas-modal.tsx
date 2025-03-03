@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { Form, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+
 interface DuplicateCanvasModalProps {
   canvasId: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
 }
+
 export const DuplicateCanvasModal = ({
   canvasId,
   visible,
@@ -19,7 +21,8 @@ export const DuplicateCanvasModal = ({
   const onSubmit = () => {
     form.validateFields().then((values) => {
       const { title } = values;
-      duplicateCanvas(canvasId, title, () => {
+      console.log('title', title);
+      duplicateCanvas(canvasId, () => {
         setVisible(false);
       });
     });

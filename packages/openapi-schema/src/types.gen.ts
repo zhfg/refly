@@ -2091,6 +2091,20 @@ export type DeleteShareRequest = {
   shareId: string;
 };
 
+export type DuplicateShareRequest = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+};
+
+export type DuplicateShareResponse = BaseResponse & {
+  /**
+   * Duplicated entity
+   */
+  data?: Entity;
+};
+
 export type ListLabelClassesResponse = BaseResponse & {
   /**
    * Label class list
@@ -3693,6 +3707,14 @@ export type DeleteShareData = {
 export type DeleteShareResponse = BaseResponse;
 
 export type DeleteShareError = unknown;
+
+export type DuplicateShareData = {
+  body: DuplicateShareRequest;
+};
+
+export type DuplicateShareResponse2 = DuplicateShareResponse;
+
+export type DuplicateShareError = unknown;
 
 export type ListLabelClassesData = {
   query?: {

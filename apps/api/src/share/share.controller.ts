@@ -7,6 +7,8 @@ import {
   CreateShareResponse,
   EntityType,
   ListShareResponse,
+  DuplicateShareRequest,
+  DuplicateShareResponse,
 } from '@refly-packages/openapi-schema';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
@@ -44,5 +46,15 @@ export class ShareController {
   async deleteShare(@LoginedUser() user: User, @Body() body: DeleteShareRequest) {
     await this.shareService.deleteShare(user, body);
     return buildSuccessResponse(null);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('duplicate')
+  async duplicateShare(
+    @LoginedUser() user: User,
+    @Body() body: DuplicateShareRequest,
+  ): Promise<DuplicateShareResponse> {
+    const result = await this.shareService.duplicateShare(user, body);
+    return buildSuccessResponse(result);
   }
 }

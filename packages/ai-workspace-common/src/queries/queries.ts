@@ -33,6 +33,7 @@ import {
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
+  duplicateShare,
   emailLogin,
   emailSignup,
   exportCanvas,
@@ -144,6 +145,8 @@ import {
   DeleteSkillTriggerError,
   DuplicateCanvasData,
   DuplicateCanvasError,
+  DuplicateShareData,
+  DuplicateShareError,
   EmailLoginData,
   EmailLoginError,
   EmailSignupData,
@@ -1139,6 +1142,23 @@ export const useDeleteShare = <
   useMutation<TData, TError, Options<DeleteShareData, true>, TContext>({
     mutationKey: Common.UseDeleteShareKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteShare(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDuplicateShare = <
+  TData = Common.DuplicateShareMutationResult,
+  TError = DuplicateShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DuplicateShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DuplicateShareData, true>, TContext>({
+    mutationKey: Common.UseDuplicateShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => duplicateShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateLabelClass = <

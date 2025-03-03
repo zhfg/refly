@@ -33,6 +33,7 @@ import {
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
+  duplicateShare,
   emailLogin,
   emailSignup,
   exportCanvas,
@@ -544,6 +545,12 @@ export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;
 export const useDeleteShareKey = 'DeleteShare';
 export const UseDeleteShareKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteShareKey,
+  ...(mutationKey ?? []),
+];
+export type DuplicateShareMutationResult = Awaited<ReturnType<typeof duplicateShare>>;
+export const useDuplicateShareKey = 'DuplicateShare';
+export const UseDuplicateShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useDuplicateShareKey,
   ...(mutationKey ?? []),
 ];
 export type CreateLabelClassMutationResult = Awaited<ReturnType<typeof createLabelClass>>;
