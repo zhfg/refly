@@ -6,6 +6,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -16,6 +17,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
+  const setNodeDataByEntity = useSetNodeDataByEntity();
 
   const handleRequestFix = useCallback((error: string) => {
     console.error('Code artifact error:', error);
@@ -24,6 +26,23 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const handleClose = useCallback(() => {
     setIsShowingCodeViewer(false);
   }, []);
+
+  const handleCodeChange = useCallback(
+    (updatedCode: string) => {
+      if (node?.data?.entityId) {
+        setNodeDataByEntity(
+          {
+            type: 'code',
+            entityId: node.data.entityId,
+          },
+          {
+            contentPreview: updatedCode,
+          },
+        );
+      }
+    },
+    [node?.data?.entityId, setNodeDataByEntity],
+  );
 
   if (!artifactId) {
     return (
@@ -40,6 +59,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const { language = 'typescript' } = node.data?.metadata || {};
   const isGenerating = node.data?.metadata?.status === 'generating';
 
+  console.log('content', content);
+
   return (
     <div className="h-full bg-white rounded px-4">
       <CodeViewerLayout isShowing={isShowingCodeViewer}>
@@ -53,6 +74,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             onTabChange={setActiveTab}
             onClose={handleClose}
             onRequestFix={handleRequestFix}
+            onChange={handleCodeChange}
             readOnly={false}
           />
         )}
