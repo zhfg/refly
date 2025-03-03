@@ -109,10 +109,6 @@ export const CanvasSchema = {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
     },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
-    },
     status: {
       type: 'string',
       description: 'Canvas status',
@@ -2060,10 +2056,6 @@ export const RawCanvasDataSchema = {
         type: 'object',
       },
     },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
-    },
   },
 } as const;
 
@@ -2146,10 +2138,6 @@ export const UpsertCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
     },
   },
 } as const;

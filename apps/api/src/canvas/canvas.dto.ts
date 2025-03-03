@@ -34,7 +34,7 @@ export interface DuplicateCanvasJobData {
 
 export function canvasPO2DTO(canvas: CanvasModel): Canvas {
   return {
-    ...pick(canvas, ['canvasId', 'title', 'isPublic']),
+    ...pick(canvas, ['canvasId', 'title']),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };

@@ -130,7 +130,7 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: User | null, param: GetResourceDetailData['query']) {
+  async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
     const { resourceId } = param;
 
     if (!resourceId) {
@@ -140,29 +140,13 @@ export class KnowledgeService {
     const resource = await this.prisma.resource.findFirst({
       where: {
         resourceId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!resource) {
       throw new ResourceNotFoundError(`resource ${resourceId} not found`);
-    }
-
-    // If the resource is accessed by anonymous user or another user,
-    // check if the resource is publicly share via some canvases
-    if (!user || user.uid !== resource.uid) {
-      const shareRels = await this.prisma.canvasEntityRelation.count({
-        where: {
-          entityId: resource.resourceId,
-          entityType: 'resource',
-          isPublic: true,
-          deletedAt: null,
-        },
-      });
-
-      if (shareRels === 0) {
-        throw new ResourceNotFoundError(`resource ${resourceId} not found`);
-      }
     }
 
     let content: string;
@@ -809,7 +793,7 @@ export class KnowledgeService {
   }
 
   async getDocumentDetail(
-    user: User | null,
+    user: User,
     params: GetDocumentDetailData['query'],
   ): Promise<DocumentModel & { content?: string }> {
     const { docId } = params;
@@ -821,29 +805,13 @@ export class KnowledgeService {
     const doc = await this.prisma.document.findFirst({
       where: {
         docId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!doc) {
       throw new DocumentNotFoundError('Document not found');
-    }
-
-    // If the document is accessed by anonymous user or another user,
-    // check if the document is publicly share via some canvases
-    if (!user || user.uid !== doc.uid) {
-      const shareRels = await this.prisma.canvasEntityRelation.count({
-        where: {
-          entityId: doc.docId,
-          entityType: 'document',
-          isPublic: true,
-          deletedAt: null,
-        },
-      });
-
-      if (shareRels === 0) {
-        throw new DocumentNotFoundError('Document not found');
-      }
     }
 
     let content: string;

@@ -96,10 +96,6 @@ export type Canvas = {
    */
   readOnly?: boolean;
   /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
-  /**
    * Canvas status
    */
   status?: CanvasStatus;
@@ -1619,10 +1615,6 @@ export type RawCanvasData = {
   edges?: Array<{
     [key: string]: unknown;
   }>;
-  /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
 };
 
 export type ExportCanvasResponse = BaseResponse & {
@@ -1678,10 +1670,6 @@ export type UpsertCanvasRequest = {
    * Canvas ID (only used for update)
    */
   canvasId?: string;
-  /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {

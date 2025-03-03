@@ -112,25 +112,21 @@ export class CanvasService {
     await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(doc)));
   }
 
-  async getCanvasRawData(user: User | null, canvasId: string): Promise<RawCanvasData> {
+  async getCanvasRawData(user: User, canvasId: string): Promise<RawCanvasData> {
     const canvas = await this.prisma.canvas.findFirst({
       select: {
         title: true,
         uid: true,
-        isPublic: true,
         stateStorageKey: true,
       },
       where: {
         canvasId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!canvas) {
-      throw new CanvasNotFoundError();
-    }
-
-    if ((!user || user.uid !== canvas.uid) && !canvas.isPublic) {
       throw new CanvasNotFoundError();
     }
 
@@ -140,7 +136,6 @@ export class CanvasService {
       title: canvas.title,
       nodes: doc?.getArray('nodes').toJSON() ?? [],
       edges: doc?.getArray('edges').toJSON() ?? [],
-      isPublic: canvas.isPublic,
     };
   }
 
@@ -148,7 +143,7 @@ export class CanvasService {
     const { title, canvasId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, deletedAt: null, OR: [{ uid: user.uid }, { isPublic: true }] },
+      where: { canvasId, deletedAt: null, uid: user.uid },
     });
 
     if (!canvas) {
@@ -331,7 +326,6 @@ export class CanvasService {
         canvasId,
         title: param.title,
         stateStorageKey,
-        isPublic: param.isPublic,
       },
     });
 
@@ -354,15 +348,12 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title, isPublic } = param;
+    const { canvasId, title } = param;
 
     const updates: Prisma.CanvasUpdateInput = {};
 
     if (title !== undefined) {
       updates.title = title;
-    }
-    if (isPublic !== undefined) {
-      updates.isPublic = isPublic;
     }
 
     const updatedCanvas = await this.prisma.$transaction(async (tx) => {
@@ -370,15 +361,6 @@ export class CanvasService {
         where: { canvasId, uid: user.uid, deletedAt: null },
         data: updates,
       });
-
-      if (updates.isPublic !== undefined) {
-        // Create share records for all entities in this canvas
-        await tx.canvasEntityRelation.updateMany({
-          where: { canvasId, deletedAt: null },
-          data: { isPublic: updates.isPublic },
-        });
-      }
-
       return canvas;
     });
 

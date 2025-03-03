@@ -433,35 +433,10 @@ export class MiscService implements OnModuleInit {
   ): Promise<{ data: Buffer; contentType: string }> {
     const file = await this.prisma.staticFile.findFirst({
       select: { uid: true, visibility: true, entityId: true, entityType: true, contentType: true },
-      where: { storageKey, deletedAt: null },
+      where: { storageKey, uid: user.uid, deletedAt: null },
     });
     if (!file) {
       throw new NotFoundException();
-    }
-
-    if (user.uid !== file.uid) {
-      if (file.entityType === 'canvas') {
-        const canvas = await this.prisma.canvas.findFirst({
-          where: { canvasId: file.entityId, isPublic: true, deletedAt: null },
-        });
-        if (!canvas) {
-          throw new NotFoundException();
-        }
-      } else if (file.entityType === 'resource' || file.entityType === 'document') {
-        const shareRels = await this.prisma.canvasEntityRelation.count({
-          where: {
-            entityId: file.entityId,
-            entityType: file.entityType,
-            isPublic: true,
-            deletedAt: null,
-          },
-        });
-        if (shareRels === 0) {
-          throw new NotFoundException();
-        }
-      } else {
-        throw new NotFoundException();
-      }
     }
 
     const readable = await this.minioClient(file.visibility as FileVisibility).getObject(
