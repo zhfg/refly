@@ -742,6 +742,7 @@ const translations = {
       memo: 'Memo',
       skill: 'Skill',
       image: 'Image',
+      code: 'Code',
     },
     export: {
       success: 'Image exported successfully',

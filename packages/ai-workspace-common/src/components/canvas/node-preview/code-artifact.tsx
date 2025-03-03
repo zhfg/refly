@@ -4,11 +4,8 @@ import {
   CanvasNode,
   CodeArtifactNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
-import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
-import { Spin } from 'antd';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -19,33 +16,6 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
-
-  // Try to get content from the action result store first
-  const [codeContent] = useActionResultStoreShallow((s) => {
-    // Look up content from result steps
-    const result = s.resultMap[artifactId];
-    let artifactContent = '';
-
-    if (result?.steps?.length) {
-      artifactContent = result.steps
-        .map((step) => step?.content || '')
-        .filter(Boolean)
-        .join('\n');
-    }
-
-    return [artifactContent];
-  });
-
-  // Fallback to document API if not found in action result store
-  const { data: documentData, isLoading } = useGetDocumentDetail(
-    { query: { docId: artifactId } },
-    null,
-    {
-      enabled: !codeContent && !!artifactId,
-      staleTime: 60 * 1000, // Data fresh for 1 minute
-      gcTime: 5 * 60 * 1000, // Cache for 5 minutes
-    },
-  );
 
   const handleRequestFix = useCallback((error: string) => {
     console.error('Code artifact error:', error);
@@ -65,17 +35,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center bg-white rounded p-3">
-        <Spin size="small" />
-        <span className="ml-2 text-gray-500">{t('codeArtifact.loading', 'Loading code...')}</span>
-      </div>
-    );
-  }
-
   // Determine which content to show - prefer action result store content, fallback to document content
-  const content = codeContent || documentData?.data?.content || '';
+  const content = node?.data?.contentPreview || '';
   const { language = 'typescript' } = node.data?.metadata || {};
   const isGenerating = node.data?.metadata?.status === 'generating';
 
@@ -92,6 +53,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             onTabChange={setActiveTab}
             onClose={handleClose}
             onRequestFix={handleRequestFix}
+            readOnly={false}
           />
         )}
       </CodeViewerLayout>

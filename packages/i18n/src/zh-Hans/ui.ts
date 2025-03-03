@@ -739,6 +739,7 @@ const translations = {
       memo: '备忘录',
       skill: '技能',
       image: '图片',
+      code: '小组件',
     },
     export: {
       success: '导出图片成功',

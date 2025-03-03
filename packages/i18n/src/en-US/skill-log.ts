@@ -47,9 +47,9 @@ const translations = {
     title: 'Analyze Query',
     description: 'Analyze query completed, completed in {{duration}}ms',
   },
-  generateArtifact: {
-    title: 'Generate Artifact',
-    description: 'Artifact generated, completed in {{duration}}ms',
+  generatingArtifact: {
+    title: 'Generating Artifact',
+    description: 'Artifact generating, completed in {{duration}}ms',
   },
   artifactGenerated: {
     title: 'Artifact Generated',

@@ -1,5 +1,5 @@
 import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Tooltip, Divider } from 'antd';
 import CodeRunner from './code-runner-react';
 import Editor from '@monaco-editor/react';
@@ -13,6 +13,8 @@ export default function CodeViewer({
   onTabChange,
   onClose: _onClose,
   onRequestFix,
+  onChange,
+  readOnly = false,
 }: {
   code: string;
   language: string;
@@ -22,16 +24,25 @@ export default function CodeViewer({
   onTabChange: (v: 'code' | 'preview') => void;
   onClose: () => void;
   onRequestFix: (e: string) => void;
+  onChange?: (code: string) => void;
+  readOnly?: boolean;
 }) {
   const [refresh, setRefresh] = useState(0);
+  // Track editor content for controlled updates
+  const [editorContent, setEditorContent] = useState(code);
+
+  // Update editor content when code prop changes
+  useEffect(() => {
+    setEditorContent(code);
+  }, [code]);
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(code);
+    navigator.clipboard.writeText(editorContent);
   };
 
   const handleDownload = () => {
     const fileExtension = getFileExtensionForLanguage(language);
-    const blob = new Blob([code], { type: 'text/plain' });
+    const blob = new Blob([editorContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -40,6 +51,14 @@ export default function CodeViewer({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  // Handle content changes from editor
+  const handleEditorChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setEditorContent(value);
+      onChange?.(value);
+    }
   };
 
   const getFileExtensionForLanguage = (lang: string): string => {
@@ -141,7 +160,8 @@ export default function CodeViewer({
             <Editor
               height="100%"
               defaultLanguage={getFileExtensionForLanguage(language)}
-              defaultValue={code}
+              value={editorContent}
+              onChange={handleEditorChange}
               options={{
                 automaticLayout: true,
                 minimap: { enabled: true },
@@ -149,6 +169,7 @@ export default function CodeViewer({
                 fontSize: 14,
                 lineNumbers: 'on',
                 renderLineHighlight: 'all',
+                readOnly: readOnly || isGenerating,
                 scrollbar: {
                   vertical: 'visible',
                   horizontal: 'visible',
@@ -158,15 +179,12 @@ export default function CodeViewer({
             />
           </div>
         ) : (
-          <div
-            className="h-full flex items-center justify-center bg-gray-100"
-            style={{ minHeight: '500px' }}
-          >
+          <div className="h-full flex items-center justify-center" style={{ minHeight: '500px' }}>
             {language && (
               <div className="w-full h-full p-4">
                 <CodeRunner
                   onRequestFix={onRequestFix}
-                  code={code}
+                  code={editorContent}
                   language={language}
                   key={refresh}
                 />

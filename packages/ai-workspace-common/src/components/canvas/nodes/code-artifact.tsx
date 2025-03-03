@@ -31,36 +31,60 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 
-const NodeContent = memo(({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta> }) => {
-  const { language = 'typescript' } = data?.metadata ?? {};
-  const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
-  const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
+const NodeContent = memo(
+  ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
+    const { language = 'typescript' } = data?.metadata ?? {};
+    const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
+    const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
+    const { t } = useTranslation();
+    const setNodeDataByEntity = useSetNodeDataByEntity();
 
-  const handleRequestFix = useCallback((error: string) => {
-    console.error('Code artifact error:', error);
-  }, []);
+    const handleRequestFix = useCallback((error: string) => {
+      console.error('Code artifact error:', error);
+    }, []);
 
-  // Always show the content, even when generating
-  return (
-    <CodeViewerLayout isShowing={isShowingCodeViewer}>
-      {isShowingCodeViewer && (
-        <CodeViewer
-          code={data.contentPreview || ''}
-          language={language}
-          title={data.title}
-          isGenerating={data?.metadata?.status === 'generating'}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onClose={() => {
-            setIsShowingCodeViewer(false);
-          }}
-          onRequestFix={handleRequestFix}
-        />
-      )}
-    </CodeViewerLayout>
-  );
-});
+    const handleCodeChange = useCallback(
+      (updatedCode: string) => {
+        if (data.entityId) {
+          setNodeDataByEntity(
+            {
+              type: 'code',
+              entityId: data.entityId,
+            },
+            {
+              contentPreview: updatedCode,
+            },
+          );
+        }
+      },
+      [data.entityId, setNodeDataByEntity],
+    );
+
+    // Always show the content, even when generating
+    return (
+      <CodeViewerLayout isShowing={isShowingCodeViewer}>
+        {isShowingCodeViewer && (
+          <CodeViewer
+            code={data.contentPreview || ''}
+            language={language}
+            title={data.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
+            isGenerating={data?.metadata?.status === 'generating'}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onClose={() => {
+              setIsShowingCodeViewer(false);
+            }}
+            onRequestFix={handleRequestFix}
+            onChange={handleCodeChange}
+            readOnly={true}
+          />
+        )}
+      </CodeViewerLayout>
+    );
+  },
+);
 
 export const CodeArtifactNode = memo(
   ({
@@ -187,10 +211,10 @@ export const CodeArtifactNode = memo(
 
           <div
             className={`
-            h-full
-            flex flex-col
-            ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-          `}
+          h-full
+          flex flex-col
+          ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+        `}
           >
             <div className="flex flex-col h-full relative p-3 box-border">
               <NodeHeader title={data.title} Icon={CodeIcon} iconBgColor="#3E63DD" />
@@ -203,7 +227,7 @@ export const CodeArtifactNode = memo(
                     maxHeight: sizeMode === 'compact' ? '40px' : '',
                   }}
                 >
-                  <NodeContent data={data} />
+                  <NodeContent data={data} isOperating={isOperating} />
                 </div>
               </div>
               {/* Timestamp container */}

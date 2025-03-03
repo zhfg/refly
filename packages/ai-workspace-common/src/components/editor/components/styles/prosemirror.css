@@ -179,7 +179,7 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
 
 /* Custom Youtube Video CSS */
 iframe {
-  border: 8px solid #ffd00027;
+  border: none;
   border-radius: 4px;
   min-width: 200px;
   min-height: 200px;
