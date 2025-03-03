@@ -30,6 +30,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
+import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 
 const NodeContent = memo(({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta> }) => {
   const { language = 'typescript' } = data?.metadata ?? {};
@@ -94,7 +95,7 @@ export const CodeArtifactNode = memo(
 
     const { readonly } = useCanvasContext();
 
-    const { containerStyle } = useNodeSize({
+    const { containerStyle, handleResize } = useNodeSize({
       id,
       node,
       sizeMode,
@@ -238,14 +239,13 @@ export const CodeArtifactNode = memo(
         </div>
 
         {!isPreview && selected && sizeMode === 'adaptive' && !readonly && (
-          <div
-            className="absolute -z-10 border-2 border-blue-500 rounded-lg"
-            style={{
-              width: targetRef.current?.offsetWidth ?? 0,
-              height: targetRef.current?.offsetHeight ?? 0,
-              left: 0,
-              top: 0,
-            }}
+          <NodeResizerComponent
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={isPreview}
+            sizeMode={sizeMode}
+            onResize={handleResize}
           />
         )}
       </div>

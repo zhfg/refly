@@ -6,6 +6,8 @@ import {
 // import dedent from 'dedent';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from 'antd';
+import { IconClose } from '@arco-design/web-react/icon';
 
 export default function ReactCodeRunner({
   code,
@@ -74,30 +76,17 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
   if (!sandpack.error || !isVisible) return null;
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white/5 text-base backdrop-blur-sm">
+    <div className="absolute inset-0 px-4 flex flex-col items-center justify-center gap-4 bg-white/5 text-base backdrop-blur-sm">
       <div className="relative max-w-[400px] rounded-md bg-red-500 p-4 text-white shadow-xl shadow-black/20">
         <div className="absolute right-2 top-2">
-          <button
-            type="button"
+          <Button
+            type="text"
             onClick={() => setIsVisible(false)}
             className="rounded-full p-1 text-red-100 hover:bg-red-600 hover:text-white"
             aria-label="Close error message"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+            <IconClose />
+          </Button>
         </div>
 
         <p className="text-lg font-medium">Error</p>
@@ -107,8 +96,8 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
         </p>
 
         <div className="mt-8 flex justify-between gap-4">
-          <button
-            type="button"
+          <Button
+            type="text"
             onClick={async () => {
               if (!sandpack.error) return;
 
@@ -120,9 +109,9 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
             className="rounded border-red-300 px-2.5 py-1.5 text-sm font-semibold text-red-50"
           >
             {didCopy ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            type="text"
             onClick={() => {
               if (!sandpack.error) return;
               onRequestFix(sandpack.error.message);
@@ -130,7 +119,7 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
             className="rounded bg-white px-2.5 py-1.5 text-sm font-medium text-black"
           >
             Try to fix
-          </button>
+          </Button>
         </div>
       </div>
     </div>
