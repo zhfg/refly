@@ -623,7 +623,7 @@ export const SkillResponseNode = memo(
                       {artifacts.map((artifact) => (
                         <div
                           key={artifact.entityId}
-                          className="border border-solid border-gray-200 rounded-sm px-2 py-2 w-full flex items-center gap-1"
+                          className="border border-solid border-gray-200 rounded-md px-2 py-2 w-full flex items-center gap-1"
                         >
                           {getArtifactIcon(artifact, 'text-gray-500')}
                           <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">

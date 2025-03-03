@@ -32,3 +32,34 @@ export const getArtifactContent = (content: string) => {
 
   return result?.groups?.content || '';
 };
+
+// Function to extract content and attributes from artifact tag
+export const getArtifactContentAndAttributes = (content: string) => {
+  const result = content.match(ARTIFACT_TAG_REGEX);
+  const contentValue = result?.groups?.content || '';
+
+  // Extract attributes like title, language, type
+  const attributeRegex = /<reflyArtifact\b([^>]*)>/;
+  const attributeMatch = attributeRegex.exec(content);
+  const attributes: Record<string, string> = {};
+
+  // Only process attributes if there's a match with a first capturing group
+  if (attributeMatch && attributeMatch.length > 1) {
+    const attrStr = attributeMatch[1];
+    const attrRegex = /(\w+)="([^"]*)"/g;
+    let match: RegExpExecArray | null;
+
+    match = attrRegex.exec(attrStr);
+    while (match !== null) {
+      attributes[match[1]] = match[2];
+      match = attrRegex.exec(attrStr);
+    }
+  }
+
+  return {
+    content: contentValue,
+    title: attributes.title || '',
+    language: attributes.language || 'typescript',
+    type: attributes.type || '',
+  };
+};

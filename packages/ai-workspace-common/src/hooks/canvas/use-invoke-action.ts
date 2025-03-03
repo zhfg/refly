@@ -27,7 +27,7 @@ import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { useUpdateActionResult } from './use-update-action-result';
 import { useSubscriptionUsage } from '../use-subscription-usage';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { getArtifactContent } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
+import { getArtifactContentAndAttributes } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
 
 export const useInvokeAction = () => {
@@ -109,8 +109,13 @@ export const useInvokeAction = () => {
   const onSkillStreamArtifact = (resultId: string, artifact: Artifact, content: string) => {
     // Handle code artifact content if this is a code artifact stream
     if (artifact && artifact.type === 'codeArtifact') {
-      // Get the code content as string
-      const codeContent = getArtifactContent(content);
+      // Get the code content and attributes as an object
+      const {
+        content: codeContent,
+        title,
+        language,
+        type,
+      } = getArtifactContentAndAttributes(content);
 
       // Check if the node exists and create it if not
       const canvasState = useCanvasStore.getState();
@@ -130,12 +135,14 @@ export const useInvokeAction = () => {
           {
             type: artifact.type,
             data: {
-              title: artifact.title,
+              // Use extracted title if available, fallback to artifact.title
+              title: title || artifact.title,
               entityId: artifact.entityId,
               contentPreview: codeContent, // Set content preview for code artifact
               metadata: {
                 status: 'generating',
-                language: 'typescript', // Default language
+                language: language || 'typescript', // Use extracted language or default
+                type: type || '', // Use extracted type if available
               },
             },
           },
@@ -147,16 +154,21 @@ export const useInvokeAction = () => {
           ],
         );
       } else {
-        // Update existing node with new content
+        // Update existing node with new content and attributes
         setNodeDataByEntity(
           {
             type: artifact.type,
             entityId: artifact.entityId,
           },
           {
+            // Update title if available from extracted attributes
+            ...(title && { title }),
             contentPreview: codeContent, // Update content preview
             metadata: {
               status: 'generating',
+              // Update language and type if available from extracted attributes
+              ...(language && { language }),
+              ...(type && { type }),
             },
           },
         );
