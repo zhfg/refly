@@ -3114,6 +3114,9 @@ components:
         pagesLimit:
           type: number
           description: File pages limit
+        fileUploadLimit:
+          type: number
+          description: File upload limit (in MB)
     OperationMode:
       type: string
       description: Operation mode

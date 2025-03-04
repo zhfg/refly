@@ -1609,6 +1609,10 @@ export const FileParsingMeterSchema = {
       type: 'number',
       description: 'File pages limit',
     },
+    fileUploadLimit: {
+      type: 'number',
+      description: 'File upload limit (in MB)',
+    },
   },
 } as const;
 

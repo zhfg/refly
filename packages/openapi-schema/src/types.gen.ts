@@ -1329,6 +1329,10 @@ export type FileParsingMeter = {
    * File pages limit
    */
   pagesLimit: number;
+  /**
+   * File upload limit (in MB)
+   */
+  fileUploadLimit?: number;
 };
 
 /**

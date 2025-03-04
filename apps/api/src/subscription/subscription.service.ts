@@ -571,7 +571,7 @@ export class SubscriptionService implements OnModuleInit {
 
     const planType = sub?.planType || 'free';
     const plan = await this.prisma.subscriptionPlan.findFirst({
-      select: { fileParsePageLimit: true },
+      select: { fileParsePageLimit: true, fileUploadLimit: true },
       where: { planType },
     });
     const pageLimit = plan?.fileParsePageLimit ?? this.config.get('quota.fileParse.page');
@@ -579,6 +579,7 @@ export class SubscriptionService implements OnModuleInit {
     return {
       pageUsed,
       pageLimit,
+      fileUploadLimit: plan?.fileUploadLimit ?? this.config.get('quota.fileUpload'),
       available: pageLimit < 0 ? Number.POSITIVE_INFINITY : pageLimit - pageUsed,
     };
   }
@@ -755,6 +756,7 @@ export class SubscriptionService implements OnModuleInit {
     return {
       pagesParsed: usage.pageUsed,
       pagesLimit: usage.pageLimit,
+      fileUploadLimit: usage.fileUploadLimit,
     };
   }
 

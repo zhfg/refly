@@ -1088,7 +1088,9 @@ const translations = {
       fromFile: 'Upload File',
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
-      supportedFiles: 'Supported Files: {{formats}}. Max {{size}} each.',
+      supportedFiles: 'Supported Files: {{formats}}.',
+      fileUploadLimit: 'Limit for each file: {{size}}',
+      unlockUploadLimit: 'Unlock upload limit',
       fileTooLarge: 'File size cannot exceed {{size}}',
       fileParsingUsage:
         'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
