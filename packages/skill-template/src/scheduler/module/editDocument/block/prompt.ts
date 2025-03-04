@@ -19,6 +19,7 @@ import {
   buildContextualBlockEditDocumentContext,
   buildNoContextBlockEditDocumentContext,
 } from './context';
+import { buildFormatDisplayInstruction } from '../../common/format';
 
 export const buildNoContextBlockEditDocumentPrompt = () => `
 # Refly AI Block Content Editor (No Context Mode)
@@ -153,6 +154,8 @@ ${highlightContextEmphasisPrompt}
 ${highlightOperationRulesPrompt}
 
 ${buildLocaleFollowInstruction(locale)}
+
+${buildFormatDisplayInstruction()}
 `;
 };
 
