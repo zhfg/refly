@@ -108,7 +108,7 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
                   ? t('artifact.openComponent', 'Click to view code component')
                   : t('artifact.codeArtifact', 'Code artifact')}
               </span>
-              {isGenerating && <IconLoading className="w-2.5 h-2.5 text-blue-500 animate-spin" />}
+              {isGenerating && <IconLoading className="w-2.5 h-2.5 text-gray-500 animate-spin" />}
             </div>
           </div>
 

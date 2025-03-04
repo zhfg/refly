@@ -56,7 +56,7 @@ const Render = memo((props: { id: string }) => {
             {t('artifact.thinking', 'Thinking...')}
           </span>
         </div>
-        <IconLoading className="w-3 h-3 ml-1 text-blue-500 animate-spin" />
+        <IconLoading className="w-3 h-3 ml-1 text-gray-500 animate-spin" />
       </div>
     </div>
   );
