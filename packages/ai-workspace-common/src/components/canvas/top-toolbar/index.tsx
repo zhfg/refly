@@ -20,6 +20,7 @@ import './index.scss';
 import { IconLink } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuBookCopy } from 'react-icons/lu';
 import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -34,6 +35,9 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   }));
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
+  }));
+  const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
@@ -93,6 +97,10 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
   const handleDuplicate = () => {
+    if (!isLogin) {
+      setLoginModalOpen(true);
+      return;
+    }
     duplicateCanvas(canvasId, () => {});
   };
 
@@ -151,27 +159,26 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
 
-          {isShareCanvas && isLogin && (
-            <Button
-              loading={duplicating}
-              icon={<LuBookCopy className="flex items-center" />}
-              onClick={handleDuplicate}
-            >
-              {t('common.duplicate')}
-            </Button>
-          )}
-
           {isShareCanvas && (
-            <Button
-              type="primary"
-              icon={<IconLink className="flex items-center" />}
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                message.success(t('shareContent.copyLinkSuccess'));
-              }}
-            >
-              {t('canvas.toolbar.copyLink')}
-            </Button>
+            <>
+              <Button
+                loading={duplicating}
+                icon={<LuBookCopy className="flex items-center" />}
+                onClick={handleDuplicate}
+              >
+                {t('common.duplicate')}
+              </Button>
+              <Button
+                type="primary"
+                icon={<IconLink className="flex items-center" />}
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  message.success(t('shareContent.copyLinkSuccess'));
+                }}
+              >
+                {t('canvas.toolbar.copyLink')}
+              </Button>
+            </>
           )}
         </div>
       </div>
