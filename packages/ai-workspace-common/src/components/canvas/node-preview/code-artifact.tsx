@@ -12,6 +12,7 @@ import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { ConfigScope, Skill } from '@refly/openapi-schema';
+import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -25,7 +26,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const { addNode } = useAddNode();
 
   // Use activeTab from node metadata with fallback to 'code'
-  const { activeTab = 'code' } = node.data?.metadata || {};
+  const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
 
   // Sync local tab state with node metadata changes
@@ -160,7 +161,6 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
 
   // Determine which content to show - prefer action result store content, fallback to document content
   const content = node?.data?.contentPreview || '';
-  const { language = 'typescript' } = node.data?.metadata || {};
   const isGenerating = node.data?.metadata?.status === 'generating';
 
   return (
@@ -178,6 +178,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             onRequestFix={handleRequestFix}
             onChange={handleCodeChange}
             readOnly={false}
+            type={type as CodeArtifactType}
           />
         )}
       </CodeViewerLayout>

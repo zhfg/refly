@@ -51,6 +51,8 @@ export interface ResourceNodeMeta {
 export interface CodeArtifactNodeMeta {
   status?: 'generating' | 'finish' | 'failed';
   language?: string;
+  type?: string;
+  title?: string;
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;

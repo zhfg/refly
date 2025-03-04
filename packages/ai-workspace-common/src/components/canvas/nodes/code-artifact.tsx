@@ -41,7 +41,7 @@ import { ConfigScope, Skill } from '@refly/openapi-schema';
 
 const NodeContent = memo(
   ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
-    const { language = 'typescript', activeTab = 'code' } = data?.metadata ?? {};
+    const { language = 'html', activeTab = 'code', type = 'text/html' } = data?.metadata ?? {};
     const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
     const { t } = useTranslation();
     const setNodeDataByEntity = useSetNodeDataByEntity();
@@ -173,6 +173,7 @@ const NodeContent = memo(
               }
             }}
             readOnly={true}
+            type={type}
           />
         )}
       </CodeViewerLayout>
@@ -188,8 +189,11 @@ const NodeContent = memo(
     const activeTabEqual =
       prevProps.data?.metadata?.activeTab === nextProps.data?.metadata?.activeTab;
     const sizeModeEqual = prevProps.data?.metadata?.sizeMode === nextProps.data?.metadata?.sizeMode;
+    const typeEqual = prevProps.data?.metadata?.type === nextProps.data?.metadata?.type;
 
-    return contentEqual && languageEqual && statusEqual && activeTabEqual && sizeModeEqual;
+    return (
+      contentEqual && languageEqual && statusEqual && activeTabEqual && sizeModeEqual && typeEqual
+    );
   },
 );
 

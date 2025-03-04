@@ -724,6 +724,15 @@ const translations = {
     contentTitle: '画布内容',
     loadingContent: '加载内容中...',
     thinking: '思考中...',
+    svg: {
+      downloadAsSvg: '下载为 SVG',
+      downloadAsPng: '下载为 PNG',
+      copyToClipboard: '复制 PNG 到剪贴板',
+      downloadSuccess: '下载成功',
+      downloadError: '下载失败',
+      copySuccess: '已复制到剪贴板',
+      copyError: '复制失败',
+    },
   },
   resourceType: {
     weblink: '网页链接',

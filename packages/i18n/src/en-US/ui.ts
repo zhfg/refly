@@ -727,6 +727,15 @@ const translations = {
     contentTitle: 'Canvas Content',
     loadingContent: 'Loading content...',
     thinking: 'Thinking...',
+    svg: {
+      downloadAsSvg: 'Download as SVG',
+      downloadAsPng: 'Download as PNG',
+      copyToClipboard: 'Copy PNG to Clipboard',
+      downloadSuccess: 'Downloaded successfully',
+      downloadError: 'Failed to download',
+      copySuccess: 'Copied to clipboard',
+      copyError: 'Failed to copy',
+    },
   },
   resourceType: {
     weblink: 'Web Link',

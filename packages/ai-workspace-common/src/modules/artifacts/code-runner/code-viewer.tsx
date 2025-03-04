@@ -1,9 +1,23 @@
 import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button, Tooltip, Divider, message } from 'antd';
-import CodeRunner from './code-runner-react';
+import Renderer from './render';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
+import { CodeArtifactType } from './types';
+
+// Function to get simple type description
+const getSimpleTypeDescription = (type: CodeArtifactType): string => {
+  const typeMap: Record<CodeArtifactType, string> = {
+    'application/refly.artifacts.react': 'React',
+    'image/svg+xml': 'SVG',
+    'application/refly.artifacts.mermaid': 'Mermaid',
+    'text/markdown': 'Markdown',
+    'application/refly.artifacts.code': 'Code',
+    'text/html': 'HTML',
+  };
+  return typeMap[type] ?? type;
+};
 
 export default memo(
   function CodeViewer({
@@ -17,6 +31,7 @@ export default memo(
     onRequestFix,
     onChange,
     readOnly = false,
+    type = 'text/html',
   }: {
     code: string;
     language: string;
@@ -28,7 +43,9 @@ export default memo(
     onRequestFix: (e: string) => void;
     onChange?: (code: string) => void;
     readOnly?: boolean;
+    type?: CodeArtifactType;
   }) {
+    console.log('code-artifact-viewer', code, language, title, type);
     const { t } = useTranslation();
     const [refresh, setRefresh] = useState(0);
     // Track editor content for controlled updates
@@ -235,7 +252,7 @@ export default memo(
         {/* Breadcrumb and action buttons */}
         <div className="flex justify-between items-center py-2 border-b border-gray-200 bg-white">
           <div className="text-sm text-gray-600">
-            <span className="text-gray-500">{language}</span>
+            <span className="text-gray-500">{getSimpleTypeDescription(type)}</span>
           </div>
 
           {actionButtons}
@@ -320,11 +337,13 @@ export default memo(
             <div className="h-full flex items-center justify-center">
               {language && (
                 <div className="w-full h-full">
-                  <CodeRunner
-                    onRequestFix={onRequestFix}
-                    code={editorContent}
-                    language={language}
+                  <Renderer
+                    content={editorContent}
+                    type={type}
                     key={refresh}
+                    title={title}
+                    language={language}
+                    onRequestFix={onRequestFix}
                   />
                 </div>
               )}
@@ -342,7 +361,8 @@ export default memo(
       prevProps.title === nextProps.title &&
       prevProps.isGenerating === nextProps.isGenerating &&
       prevProps.activeTab === nextProps.activeTab &&
-      prevProps.readOnly === nextProps.readOnly
+      prevProps.readOnly === nextProps.readOnly &&
+      prevProps.type === nextProps.type
     );
   },
 );

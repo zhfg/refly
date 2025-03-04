@@ -12,11 +12,7 @@ import { GraphState } from '../scheduler/types';
 import { randomUUID } from 'node:crypto';
 
 // Import prompt sections
-import {
-  reactiveArtifactInstructions,
-  reactiveArtifactGoals,
-} from '../scheduler/module/artifacts/prompt';
-import { reactiveArtifactExamples } from '../scheduler/module/artifacts/examples';
+import { reactiveArtifactInstructions } from '../scheduler/module/artifacts/prompt';
 
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
@@ -46,56 +42,17 @@ export class CodeArtifacts extends BaseSkill {
   icon: Icon = { type: 'emoji', value: '🧩' };
 
   configSchema: SkillTemplateConfigDefinition = {
-    items: [
-      {
-        key: 'optimizeComponents',
-        inputMode: 'switch',
-        defaultValue: false,
-        labelDict: {
-          en: 'Optimize Components',
-          'zh-CN': '优化组件',
-        },
-        descriptionDict: {
-          en: 'Enable performance optimizations (React.memo, useMemo, useCallback)',
-          'zh-CN': '启用性能优化 (React.memo, useMemo, useCallback)',
-        },
-      },
-      {
-        key: 'useTailwind',
-        inputMode: 'switch',
-        defaultValue: false,
-        labelDict: {
-          en: 'Use Tailwind CSS',
-          'zh-CN': '使用 Tailwind CSS',
-        },
-        descriptionDict: {
-          en: 'Style components using Tailwind CSS utility classes',
-          'zh-CN': '使用 Tailwind CSS 实用类设计组件',
-        },
-      },
-      {
-        key: 'strictErrorHandling',
-        inputMode: 'switch',
-        defaultValue: false,
-        labelDict: {
-          en: 'Strict Error Handling',
-          'zh-CN': '严格错误处理',
-        },
-        descriptionDict: {
-          en: 'Add comprehensive error handling and edge case management',
-          'zh-CN': '添加全面的错误处理和边缘情况管理',
-        },
-      },
-    ],
+    items: [],
   };
 
   invocationConfig: SkillInvocationConfig = {};
 
-  description = 'Generate React components for data visualization and interactive UIs';
+  description =
+    'Generate artifacts for the given query, including code snippets, html, svg, markdown, and more';
 
   schema = z.object({
-    query: z.string().optional().describe('The request for generating a component'),
-    images: z.array(z.string()).optional().describe('Reference images for the component'),
+    query: z.string().optional().describe('The request for generating an artifact'),
+    images: z.array(z.string()).optional().describe('Reference images for the artifact'),
   });
 
   graphState: StateGraphArgs<BaseSkillState>['channels'] = {
@@ -104,11 +61,7 @@ export class CodeArtifacts extends BaseSkill {
 
   // Generate the full prompt by combining all sections
   generateFullPrompt = (): string => {
-    return `${reactiveArtifactInstructions}
-
-${reactiveArtifactGoals}
-
-${reactiveArtifactExamples}`;
+    return `${reactiveArtifactInstructions}`;
   };
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig) => {
@@ -132,17 +85,30 @@ ${reactiveArtifactExamples}`;
       state,
     });
 
+    // Process URLs from frontend context if available
+    const contextUrls = config.configurable?.urls || [];
+    const contextUrlSources = await processContextUrls(contextUrls, config, this);
+
+    // Combine contextUrlSources with other sources if needed
+    if (contextUrlSources.length > 0) {
+      // If you have existing sources array, you can combine them
+      // sources = [...sources, ...contextUrlSources];
+      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
+    }
+
     // Extract URLs from the query and crawl them if needed
-    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+    const { sources: querySources, analysis } = await extractAndCrawlUrls(query, config, this, {
       concurrencyLimit: 5,
       batchSize: 8,
     });
 
     this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
-    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+    this.engine.logger.log(`Extracted URL sources count: ${querySources.length}`);
 
     let context = '';
     let sources = [];
+
+    const urlSources = [...contextUrlSources, ...querySources];
 
     // Consider URL sources for context preparation
     const hasUrlSources = urlSources.length > 0;
@@ -180,7 +146,7 @@ ${reactiveArtifactExamples}`;
     const module = {
       // Custom system prompt that includes examples
       buildSystemPrompt: () => {
-        return buildArtifactsFullSystemPrompt(reactiveArtifactExamples);
+        return buildArtifactsFullSystemPrompt();
       },
       buildContextUserPrompt: buildArtifactsContextUserPrompt,
       buildUserPrompt: buildArtifactsUserPrompt,
@@ -202,119 +168,11 @@ ${reactiveArtifactExamples}`;
     return { requestMessages, sources, context, query };
   };
 
-  /**
-   * Extract and validate React code from model response
-   * @param response The model's response
-   * @returns Validated React code or null if validation fails
-   */
-  validateReactCode = (response: string): { valid: boolean; issues: string[] } => {
-    const issues: string[] = [];
-
-    // Check if response contains reflyArtifact
-    if (!response.includes('<reflyArtifact')) {
-      issues.push('Missing reflyArtifact tag');
-      return { valid: false, issues };
-    }
-
-    // Extract the actual code content from reflyArtifact tag
-    const startTag = '<reflyArtifact';
-    const endTag = '</reflyArtifact>';
-    const startIndex = response.indexOf(startTag);
-    const endIndex = response.indexOf(endTag);
-
-    if (startIndex === -1 || endIndex === -1) {
-      issues.push('Invalid reflyArtifact tags structure');
-      return { valid: false, issues };
-    }
-
-    const content = response.substring(startIndex, endIndex + endTag.length);
-
-    // Basic checks for required elements
-    const requiredImports = [
-      { name: 'React', pattern: /import\s+React/i },
-      { name: 'useState', pattern: /import.*useState/i },
-      { name: 'useCallback', pattern: /import.*useCallback/i },
-      { name: 'useMemo', pattern: /import.*useMemo/i },
-    ];
-
-    for (const { name, pattern } of requiredImports) {
-      if (!pattern.test(content)) {
-        issues.push(`Missing required import: ${name}`);
-      }
-    }
-
-    // Check for duplicate variable definitions
-    const variableDefinitionPattern = /const\s+(\w+)\s*=/g;
-    const definedVariables = new Set<string>();
-    let match: RegExpExecArray | null = variableDefinitionPattern.exec(content);
-    while (match !== null) {
-      const varName = match[1];
-      if (definedVariables.has(varName)) {
-        issues.push(`Duplicate variable definition: ${varName}`);
-      }
-      definedVariables.add(varName);
-      match = variableDefinitionPattern.exec(content);
-    }
-
-    // Check for proper export
-    if (!content.includes('export default')) {
-      issues.push('Missing default export');
-    }
-
-    // Check for proper React.memo usage
-    if (content.includes('React.FC') && !content.includes('React.memo')) {
-      issues.push('Missing React.memo optimization');
-    }
-
-    // Check for proper TypeScript typing
-    if (!content.includes('type') && !content.includes('interface')) {
-      issues.push('Missing TypeScript type definitions');
-    }
-
-    // Check for proper dependency arrays in useEffect
-    const useEffectPattern = /useEffect\(\s*\(\)\s*=>\s*{[^}]*}\s*,\s*\[(.*?)]/g;
-    let effectMatch: RegExpExecArray | null = useEffectPattern.exec(content);
-    while (effectMatch !== null) {
-      // Empty dependency array is valid, but no dependency array is a problem
-      effectMatch = useEffectPattern.exec(content);
-    }
-
-    // Check for empty dependency array in useEffect
-    if (content.includes('useEffect') && !useEffectPattern.test(content)) {
-      issues.push('Missing or invalid dependency array in useEffect');
-    }
-
-    // Check for Tailwind CSS usage
-    if (!content.includes('className=')) {
-      issues.push('Missing Tailwind CSS classes (className prop)');
-    }
-
-    // Check for proper key props in array mapping
-    if (content.includes('.map(') && !content.includes('key={')) {
-      issues.push('Missing key prop in array mapping');
-    }
-
-    // Check for null checks or optional chaining
-    if (content.includes('.map(') && !content.includes('?.') && !content.includes('&& ')) {
-      issues.push('Missing null checks before array operations');
-    }
-
-    return {
-      valid: issues.length === 0,
-      issues,
-    };
-  };
-
   callGenerateArtifact = async (
     state: GraphState,
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
     const { currentSkill } = config.configurable;
-
-    // Get configuration values
-    const optimizeComponents = config?.configurable?.tplConfig?.optimizeComponents?.value ?? true;
-    const useTailwind = config?.configurable?.tplConfig?.useTailwind?.value ?? true;
-    const strictErrorHandling = config?.configurable?.tplConfig?.strictErrorHandling?.value ?? true;
 
     // Preprocess the query
     const { requestMessages, sources, query } = await this.commonPreprocess(state, config);
@@ -381,34 +239,8 @@ ${reactiveArtifactExamples}`;
         ...config.metadata,
         ...currentSkill,
         artifact,
-        artifactConfig: {
-          optimizeComponents,
-          useTailwind,
-          strictErrorHandling,
-          codeStandards: {
-            useSingleQuotes: true,
-            useEnglishComments: true,
-            useOptionalChaining: true,
-            useNullishCoalescing: true,
-            validateArraysBeforeUse: true,
-            validatePropsBeforeDestructuring: true,
-            useProperKeyProps: true,
-            avoidInlineObjectCreation: true,
-          },
-        },
       },
     };
-
-    // Process URLs from frontend context if available
-    const contextUrls = config.configurable?.urls || [];
-    const contextUrlSources = await processContextUrls(contextUrls, config, this);
-
-    // Combine contextUrlSources with other sources if needed
-    if (contextUrlSources.length > 0) {
-      // If you have existing sources array, you can combine them
-      // sources = [...sources, ...contextUrlSources];
-      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
-    }
 
     // Generate the response
     const responseMessage = await model.invoke(requestMessages, enhancedConfig);

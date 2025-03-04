@@ -15,10 +15,12 @@ const ReactCodeRunner = memo(
     code,
     // biome-ignore lint/correctness/noUnusedVariables: <explanation>
     language,
+    title,
     onRequestFix,
     showErrorMessage = true,
   }: {
     code: string;
+    title: string;
     language?: string;
     onRequestFix?: (e: string) => void;
     showErrorMessage?: boolean;
@@ -28,19 +30,19 @@ const ReactCodeRunner = memo(
     const shadcnFiles = useMemo(
       () => ({
         '/public/index.html': `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${t('codeArtifact.defaultTitle')}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-          </head>
-          <body>
-            <div id="root"></div>
-          </body>
-        </html>
-      `,
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>${title || t('codeArtifact.defaultTitle')}</title>
+              <script src="https://cdn.tailwindcss.com"></script>
+            </head>
+            <body>
+              <div id="root"></div>
+            </body>
+          </html>
+        `,
       }),
       [t],
     );
@@ -68,20 +70,20 @@ const ReactCodeRunner = memo(
     // Memoize tsconfig
     const tsConfig = useMemo(
       () => `{
-      "include": [
-        "./**/*"
-      ],
-      "compilerOptions": {
-        "strict": true,
-        "esModuleInterop": true,
-        "lib": [ "dom", "es2015" ],
-        "jsx": "react-jsx",
-        "baseUrl": "./",
-        "paths": {
-          "@/components/*": ["components/*"]
+        "include": [
+          "./**/*"
+        ],
+        "compilerOptions": {
+          "strict": true,
+          "esModuleInterop": true,
+          "lib": [ "dom", "es2015" ],
+          "jsx": "react-jsx",
+          "baseUrl": "./",
+          "paths": {
+            "@/components/*": ["components/*"]
+          }
         }
-      }
-    }`,
+      }`,
       [],
     );
 
