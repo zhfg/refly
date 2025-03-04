@@ -79,7 +79,7 @@ export const CanvasTitle = memo(
           {!hasCanvasSynced ? (
             <Skeleton className="w-28" active paragraph={false} />
           ) : (
-            <Typography.Text className="w-72" ellipsis={{ tooltip: true }}>
+            <Typography.Text className="!max-w-72" ellipsis={{ tooltip: true }}>
               {canvasTitle || t('common.untitled')}
             </Typography.Text>
           )}
