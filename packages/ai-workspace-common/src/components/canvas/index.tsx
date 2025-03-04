@@ -8,6 +8,7 @@ import {
   useReactFlow,
   Node,
   Edge,
+  useStoreApi,
 } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -46,6 +47,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
 import { CustomEdge } from './edges/custom-edge';
+import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -55,6 +57,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import { useUploadMinimap } from '@refly-packages/ai-workspace-common/hooks/use-upload-minimap';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -80,6 +83,64 @@ interface ContextMenuState {
 // Add new memoized components
 const MemoizedBackground = memo(Background);
 const MemoizedMiniMap = memo(MiniMap);
+
+const MiniMapNode = (props: any) => {
+  const { x, y, width, height, style, className, id: nodeId } = props;
+  const nodes = useStoreApi().getState().nodes;
+  const node = nodes.find((n) => n.id === nodeId);
+
+  const getMiniMapNodeColor = useCallback((node: Node) => {
+    if (node.type === 'memo') {
+      const data = node.data as any;
+      return data?.metadata?.bgColor ?? '#FFFEE7';
+    }
+    if (node.type === 'group') {
+      return 'transparent';
+    }
+
+    return NODE_MINI_MAP_COLORS[node.type as CanvasNodeType] ?? '#6172F3';
+  }, []);
+
+  const getMiniMapNodeStrokeColor = useCallback((node: Node) => {
+    return node.type === 'group' ? '#363434' : 'transparent';
+  }, []);
+
+  if (!node || node.type !== 'image' || !(node.data as any)?.metadata?.imageUrl) {
+    return (
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={12}
+        ry={12}
+        style={{
+          fill: getMiniMapNodeColor(node),
+          stroke: getMiniMapNodeStrokeColor(node),
+          strokeWidth: 10,
+          opacity: 0.5,
+          strokeDasharray: node?.type === 'group' ? '10,10' : 'none',
+        }}
+      />
+    );
+  }
+
+  return (
+    <image
+      href={(node.data as any)?.metadata?.imageUrl}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      className={`minimap-node-image ${className || ''}`}
+      style={{
+        ...style,
+        objectFit: 'cover',
+        borderRadius: '12px',
+      }}
+    />
+  );
+};
 
 const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
@@ -306,6 +367,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     };
   }, [provider?.status]);
 
+  const { handleUpdateCanvasMiniMap } = useUploadMinimap();
+
   useEffect(() => {
     const unsubscribe = locateToNodePreviewEmitter.on(
       'locateToNodePreview',
@@ -326,6 +389,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         }
       },
     );
+
+    setTimeout(() => {
+      if (!readonly) {
+        handleUpdateCanvasMiniMap(canvasId);
+      }
+    }, 3000);
 
     return unsubscribe;
   }, [canvasId]);
@@ -469,6 +538,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
         zoomable={false}
         pannable={false}
+        nodeComponent={MiniMapNode}
       />
     ),
     [miniMapStyles],

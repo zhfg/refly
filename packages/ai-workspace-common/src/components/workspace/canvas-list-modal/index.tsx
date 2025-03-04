@@ -6,8 +6,8 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Canvas } from '@refly/openapi-schema';
-import { IconCanvas, IconPlay } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { List, Modal, Button, Empty } from 'antd';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Modal, Empty, Spin, Divider, Typography } from 'antd';
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { LOCALE } from '@refly/common-types';
@@ -19,10 +19,62 @@ interface CanvasListProps {
   setVisible: (visible: boolean) => void;
 }
 
-export const CanvasListModal = (props: CanvasListProps) => {
-  const { visible, setVisible } = props;
+const CanvasItem = (props: {
+  canvas: Canvas;
+  handleClickCanvas: (canvas: Canvas) => void;
+  afterDelete: (canvas: Canvas) => void;
+  afterRename: (newTitle: string, canvasId: string) => void;
+}) => {
+  const { canvas, handleClickCanvas, afterDelete, afterRename } = props;
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+
+  return (
+    <div
+      className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200"
+      onClick={() => handleClickCanvas(canvas)}
+    >
+      <div className="h-36 overflow-hidden">
+        {canvas?.minimapUrl ? (
+          <img src={canvas?.minimapUrl} alt="minimap" className="w-full h-full p-3 object-cover" />
+        ) : (
+          <div className="flex items-center justify-center w-full h-full bg-gray-100" />
+        )}
+      </div>
+      <Divider className="m-0 text-gray-200" />
+      <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
+        <div className="flex items-center gap-3 mb-2">
+          <IconCanvas size={24} className="text-gray-500" />
+          <div className="flex-1 min-w-0">
+            <Typography.Text className="text-sm font-medium w-48" ellipsis={{ tooltip: true }}>
+              {canvas?.title || t('common.untitled')}
+            </Typography.Text>
+
+            <p className="text-xs text-gray-500">
+              {time(canvas?.updatedAt, language as LOCALE)
+                .utc()
+                .fromNow()}
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <CanvasActionDropdown
+            canvasId={canvas?.canvasId}
+            canvasName={canvas?.title}
+            afterDelete={() => afterDelete(canvas)}
+            afterRename={(newTitle) => afterRename(newTitle, canvas?.canvasId ?? '')}
+            handleUseCanvas={() => handleClickCanvas(canvas)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const CanvasListModal = (props: CanvasListProps) => {
+  const { visible, setVisible } = props;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -31,7 +83,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
       });
       return res?.data;
     },
-    pageSize: 20,
+    pageSize: 12,
   });
 
   useEffect(() => {
@@ -45,51 +97,12 @@ export const CanvasListModal = (props: CanvasListProps) => {
     navigate(`/canvas/${canvas.canvasId}`);
   };
 
-  const CanvasItem = (props: { canvas: Canvas }) => {
-    const { canvas } = props;
+  const afterDelete = (canvas: Canvas) => {
+    setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
+  };
 
-    return (
-      <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="font-medium">{canvas.title || t('common.untitled')}</div>
-          </div>
-
-          <div className="mt-1">
-            <div className="text-xs text-black/40">
-              {time(canvas.updatedAt, language as LOCALE)
-                .utc()
-                .fromNow()}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            style={{ borderRadius: 8, cursor: 'pointer' }}
-            size="small"
-            color="default"
-            variant="filled"
-            icon={<IconPlay />}
-            onClick={() => handleClickCanvas(canvas)}
-          >
-            <span className="text-xs hover:font-medium">
-              {t('workspace.canvasListModal.continue')}
-            </span>
-          </Button>
-          <CanvasActionDropdown
-            canvasId={canvas.canvasId}
-            canvasName={canvas.title}
-            afterDelete={() => setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))}
-            afterRename={(newTitle, canvasId) => {
-              setDataList(
-                dataList.map((n) => (n.canvasId === canvasId ? { ...n, title: newTitle } : n)),
-              );
-            }}
-          />
-        </div>
-      </div>
-    );
+  const afterRename = (newTitle: string, canvasId: string) => {
+    setDataList(dataList.map((n) => (n.canvasId === canvasId ? { ...n, title: newTitle } : n)));
   };
 
   return (
@@ -107,24 +120,28 @@ export const CanvasListModal = (props: CanvasListProps) => {
       onCancel={() => setVisible(false)}
       focusTriggerAfterClose={false}
     >
-      {isRequesting || dataList.length > 0 ? (
-        <List
-          itemLayout="vertical"
-          dataSource={dataList}
-          locale={{ emptyText: t('common.empty') }}
-          loading={isRequesting}
-          loadMore={
-            dataList.length > 0 ? (
-              <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
-            ) : null
-          }
-          renderItem={(item: Canvas) => <CanvasItem canvas={item} />}
-        />
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <Empty description={t('common.empty')} />
-        </div>
-      )}
+      <Spin className="spin" spinning={isRequesting}>
+        {isRequesting || dataList.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+              {dataList.map((item) => (
+                <CanvasItem
+                  key={item.canvasId}
+                  canvas={item}
+                  handleClickCanvas={handleClickCanvas}
+                  afterDelete={afterDelete}
+                  afterRename={afterRename}
+                />
+              ))}
+            </div>
+            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+          </>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <Empty description={t('common.empty')} />
+          </div>
+        )}
+      </Spin>
     </Modal>
   );
 };

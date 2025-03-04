@@ -4,6 +4,7 @@ import {
   IconMoreHorizontal,
   IconDelete,
   IconEdit,
+  IconPlayOutline,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ interface CanvasActionDropdown {
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
   afterRename?: (newTitle: string, canvasId: string) => void;
+  handleUseCanvas?: () => void;
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
@@ -30,6 +32,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     updateShowStatus,
     afterDelete,
     afterRename,
+    handleUseCanvas,
   } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
@@ -65,6 +68,22 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   };
 
   const items: MenuProps['items'] = [
+    handleUseCanvas && {
+      label: (
+        <div
+          className="flex items-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            setPopupVisible(false);
+            handleUseCanvas();
+          }}
+        >
+          <IconPlayOutline size={16} className="mr-2" />
+          {t('workspace.canvasListModal.continue')}
+        </div>
+      ),
+      key: 'useCanvas',
+    },
     {
       label: (
         <div
@@ -85,7 +104,8 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
       label: (
         <div
           className="flex items-center text-red-600"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setIsDeleteModalOpen(true);
             setPopupVisible(false);
           }}
@@ -154,38 +174,38 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           handleModalOk={handleModalOk}
           handleModalCancel={handleModalCancel}
         />
-      </div>
 
-      <Modal
-        title={
-          <div className="flex items-center gap-2">
-            <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
-            {t('common.deleteConfirmMessage')}
+        <Modal
+          title={
+            <div className="flex items-center gap-2">
+              <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
+              {t('common.deleteConfirmMessage')}
+            </div>
+          }
+          centered
+          width={416}
+          open={isDeleteModalOpen}
+          onOk={handleDelete}
+          onCancel={() => setIsDeleteModalOpen(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          okButtonProps={{ danger: true, loading: isLoading }}
+          destroyOnClose
+          closeIcon={null}
+          confirmLoading={isLoading}
+        >
+          <div className="pl-10">
+            <div className="mb-2">
+              {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
+                canvas: canvasName || t('common.untitled'),
+              })}
+            </div>
+            <Checkbox onChange={onChange} className="mb-2 text-[13px]">
+              {t('canvas.toolbar.deleteCanvasFile')}
+            </Checkbox>
           </div>
-        }
-        centered
-        width={416}
-        open={isDeleteModalOpen}
-        onOk={handleDelete}
-        onCancel={() => setIsDeleteModalOpen(false)}
-        okText={t('common.confirm')}
-        cancelText={t('common.cancel')}
-        okButtonProps={{ danger: true, loading: isLoading }}
-        destroyOnClose
-        closeIcon={null}
-        confirmLoading={isLoading}
-      >
-        <div className="pl-10">
-          <div className="mb-2">
-            {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
-              canvas: canvasName || t('common.untitled'),
-            })}
-          </div>
-          <Checkbox onChange={onChange} className="mb-2 text-[13px]">
-            {t('canvas.toolbar.deleteCanvasFile')}
-          </Checkbox>
-        </div>
-      </Modal>
+        </Modal>
+      </div>
     </>
   );
 };

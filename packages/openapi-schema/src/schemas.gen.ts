@@ -118,6 +118,10 @@ export const CanvasSchema = {
       description: 'Canvas status',
       $ref: '#/components/schemas/CanvasStatus',
     },
+    minimapUrl: {
+      type: 'string',
+      description: 'Minimap URL',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -2145,6 +2149,10 @@ export const UpsertCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    minimapStorageKey: {
+      type: 'string',
+      description: 'Minimap storage key',
     },
     isPublic: {
       type: 'boolean',
