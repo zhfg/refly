@@ -192,15 +192,15 @@ export class CanvasService {
       return;
     }
 
-    const canvas = await this.prisma.canvas.findFirst({
+    const sourceCanvas = await this.prisma.canvas.findFirst({
       where: { canvasId: sourceCanvasId, deletedAt: null },
     });
 
-    if (!canvas) {
+    if (!sourceCanvas) {
       throw new CanvasNotFoundError();
     }
 
-    const readable = await this.minio.client.getObject(canvas.stateStorageKey);
+    const readable = await this.minio.client.getObject(sourceCanvas.stateStorageKey);
     const state = await streamToBuffer(readable);
 
     const doc = new Y.Doc();
@@ -213,7 +213,7 @@ export class CanvasService {
 
     if (duplicateEntities) {
       // Duplicate each entity
-      const limit = pLimit(3); // Limit concurrent operations
+      const limit = pLimit(5); // Limit concurrent operations
 
       await Promise.all(
         nodes.map((node) =>
@@ -254,23 +254,20 @@ export class CanvasService {
                 }
                 break;
               }
-              case 'image': {
-                if (node.data?.metadata?.storageKey) {
-                  const file = await this.miscService.duplicateFile(
-                    user,
-                    node.data.metadata.storageKey as string,
-                  );
-                  if (file) {
-                    node.data.metadata.imageUrl = file.url;
-                    node.data.metadata.storageKey = file.storageKey;
-                  }
-                }
-                break;
-              }
             }
           }),
         ),
       );
+    }
+
+    if (sourceCanvas.uid !== user.uid) {
+      await this.miscService.duplicateFilesByEntity(user, {
+        sourceEntityId: sourceCanvasId,
+        sourceEntityType: 'canvas',
+        sourceUid: sourceCanvas.uid,
+        targetEntityId: targetCanvasId,
+        targetEntityType: 'canvas',
+      });
     }
 
     doc.transact(() => {
@@ -381,10 +378,6 @@ export class CanvasService {
       this.prisma.canvas.update({
         where: { canvasId },
         data: { deletedAt: new Date() },
-      }),
-      this.miscService.removeFilesByEntity(user, {
-        entityId: canvas.canvasId,
-        entityType: 'canvas',
       }),
       this.elasticsearch.deleteCanvas(canvas.canvasId),
     ];

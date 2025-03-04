@@ -461,6 +461,8 @@ model ShareRecord {
   pk               BigInt    @id @default(autoincrement())
   /// Share record id
   shareId          String    @unique @map("share_id")
+  /// Title
+  title            String    @default("") @map("title")
   /// Storage key
   storageKey       String    @map("storage_key")
   /// UID
