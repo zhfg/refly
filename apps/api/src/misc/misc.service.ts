@@ -151,21 +151,53 @@ export class MiscService implements OnModuleInit {
     return this.internalMinio.client;
   }
 
-  async batchRemoveObjects(objects: FileObject[]) {
-    const objectMap = new Map<FileVisibility, Set<string>>();
-    for (const fo of objects) {
-      const { visibility, storageKey } = fo;
-      if (!objectMap.has(visibility)) {
-        objectMap.set(visibility, new Set());
+  async batchRemoveObjects(user: User | null, objects: FileObject[]) {
+    // Group objects by storageKey for efficient querying
+    const storageKeys = objects.map((fo) => fo.storageKey);
+
+    // First mark the user's files as deleted in the database
+    await this.prisma.staticFile.updateMany({
+      where: {
+        storageKey: { in: storageKeys },
+        uid: user?.uid,
+      },
+      data: { deletedAt: new Date() },
+    });
+
+    // For each storage key, check if all records are now deleted
+    const objectsToRemove = new Map<FileVisibility, Set<string>>();
+
+    // Check each storage key to see if it has any non-deleted records
+    for (const storageKey of storageKeys) {
+      const remainingRecords = await this.prisma.staticFile.count({
+        where: {
+          storageKey,
+          deletedAt: null,
+        },
+      });
+
+      // If no remaining records, schedule this object for removal from storage
+      if (remainingRecords === 0) {
+        const matchingObject = objects.find((obj) => obj.storageKey === storageKey);
+
+        if (matchingObject) {
+          const { visibility } = matchingObject;
+          if (!objectsToRemove.has(visibility)) {
+            objectsToRemove.set(visibility, new Set());
+          }
+          objectsToRemove.get(visibility)?.add(storageKey);
+        }
       }
-      objectMap.get(visibility)?.add(storageKey);
     }
 
-    await Promise.all(
-      Array.from(objectMap.entries()).map(([visibility, storageKeys]) =>
-        this.minioClient(visibility).removeObjects(Array.from(storageKeys)),
-      ),
-    );
+    // Only remove objects from storage if they have no active database records
+    if (objectsToRemove.size > 0) {
+      await Promise.all(
+        Array.from(objectsToRemove.entries()).map(([visibility, storageKeys]) =>
+          this.minioClient(visibility).removeObjects(Array.from(storageKeys)),
+        ),
+      );
+    }
   }
 
   generateFileURL(object: FileObject, options?: { download?: boolean }) {
@@ -373,6 +405,7 @@ export class MiscService implements OnModuleInit {
 
       await Promise.all([
         this.batchRemoveObjects(
+          user,
           files.map((file) => ({
             storageKey: file.storageKey,
             visibility: file.visibility as FileVisibility,
@@ -413,6 +446,7 @@ export class MiscService implements OnModuleInit {
     const storageKeysToRemove = currentStorageKeys.filter((key) => !storageKeys.includes(key));
 
     await this.batchRemoveObjects(
+      user,
       storageKeysToRemove.map((key) => ({ storageKey: key, visibility: 'private' })),
     );
     this.logger.log(`Compare and remove files: ${storageKeysToRemove.join(',')}`);
@@ -620,7 +654,7 @@ export class MiscService implements OnModuleInit {
     }, []);
 
     // Delete files from storage
-    await this.batchRemoveObjects(storageKeysToDelete);
+    await this.batchRemoveObjects(null, storageKeysToDelete);
 
     // Mark files as deleted in database
     await this.prisma.staticFile.updateMany({
@@ -694,36 +728,46 @@ export class MiscService implements OnModuleInit {
       },
     });
 
-    if (files.length === 0) {
+    if (!files?.length) {
       this.logger.log('No files found to duplicate');
       return { total: 0, duplicated: 0 };
     }
 
-    // Create new file records for each file
-    let duplicatedCount = 0;
-    for (const file of files) {
-      // Check if this file is already duplicated for the target entity and user
-      const existingDuplicate = await this.prisma.staticFile.findFirst({
-        where: {
-          uid: user.uid,
-          storageKey: file.storageKey,
-          entityId: targetEntityId,
-          entityType: targetEntityType,
-          deletedAt: null,
-        },
-      });
+    // Find all existing duplicates in a single query to avoid multiple DB hits
+    const existingDuplicates = await this.prisma.staticFile.findMany({
+      where: {
+        uid: user.uid,
+        storageKey: { in: files.map((file) => file.storageKey) },
+        entityId: targetEntityId,
+        entityType: targetEntityType,
+        deletedAt: null,
+      },
+      select: {
+        storageKey: true,
+      },
+    });
 
-      if (!existingDuplicate) {
-        await this.prisma.staticFile.create({
-          data: {
-            ...omit(file, ['pk', 'uid', 'entityId', 'entityType', 'createdAt', 'updatedAt']),
-            uid: user.uid,
-            entityId: targetEntityId,
-            entityType: targetEntityType,
-          },
-        });
-        duplicatedCount++;
-      }
+    // Create a set of existing storage keys for efficient lookup
+    const existingStorageKeys = new Set(existingDuplicates?.map((file) => file.storageKey) ?? []);
+
+    // Prepare batch insert data
+    const filesToCreate = files
+      .filter((file) => !existingStorageKeys.has(file.storageKey))
+      .map((file) => ({
+        ...omit(file, ['pk', 'uid', 'entityId', 'entityType', 'createdAt', 'updatedAt']),
+        uid: user.uid,
+        entityId: targetEntityId,
+        entityType: targetEntityType,
+      }));
+
+    let duplicatedCount = 0;
+    if (filesToCreate?.length > 0) {
+      // Batch insert all new files at once
+      const result = await this.prisma.staticFile.createMany({
+        data: filesToCreate,
+        skipDuplicates: true, // As an extra precaution against duplicates
+      });
+      duplicatedCount = result.count;
     }
 
     this.logger.log(`Duplicated ${duplicatedCount} out of ${files.length} files`);

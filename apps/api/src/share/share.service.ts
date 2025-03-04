@@ -377,6 +377,7 @@ export class ShareService {
     });
 
     await this.miscService.batchRemoveObjects(
+      user,
       allRecords.map((r) => ({
         storageKey: r.storageKey,
         visibility: 'public',
