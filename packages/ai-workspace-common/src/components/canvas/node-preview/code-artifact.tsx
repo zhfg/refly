@@ -10,6 +10,8 @@ import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hook
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ConfigScope, Skill } from '@refly/openapi-schema';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -62,6 +64,22 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     (errorMessage: string) => {
       console.error('Code artifact error:', errorMessage);
 
+      // Define a proper code fix skill similar to editDoc
+      const codeFixSkill: Skill = {
+        name: 'codeArtifacts',
+        icon: {
+          type: 'emoji',
+          value: '🔧',
+        },
+        description: 'Fix code errors',
+        configSchema: {
+          items: [],
+        },
+      };
+
+      // Get the current model
+      const { selectedModel } = useChatStore.getState();
+
       // Create a skill node with the code artifact as context and error message in the query
       addNode(
         {
@@ -87,6 +105,20 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
                   errorMessage,
                 },
               ),
+              selectedSkill: codeFixSkill,
+              modelInfo: selectedModel,
+              tplConfig: {
+                codeErrorConfig: {
+                  value: {
+                    errorMessage,
+                    language: node.data?.metadata?.language || 'typescript',
+                    codeEntityId: node.data?.entityId || '',
+                  },
+                  configScope: 'runtime' as unknown as ConfigScope,
+                  displayValue: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                  label: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                },
+              },
             },
           },
         },

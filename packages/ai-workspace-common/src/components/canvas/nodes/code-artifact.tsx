@@ -36,6 +36,8 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ConfigScope, Skill } from '@refly/openapi-schema';
 
 const NodeContent = memo(
   ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
@@ -86,6 +88,22 @@ const NodeContent = memo(
       (error: string) => {
         if (!data.entityId) return;
 
+        // Define a proper code fix skill similar to editDoc
+        const codeFixSkill: Skill = {
+          name: 'codeArtifacts',
+          icon: {
+            type: 'emoji',
+            value: '🔧',
+          },
+          description: 'Fix code errors',
+          configSchema: {
+            items: [],
+          },
+        };
+
+        // Get the current model
+        const { selectedModel } = useChatStore.getState();
+
         addNode(
           {
             type: 'skill',
@@ -110,6 +128,20 @@ const NodeContent = memo(
                     errorMessage: error,
                   },
                 ),
+                selectedSkill: codeFixSkill,
+                modelInfo: selectedModel,
+                tplConfig: {
+                  codeErrorConfig: {
+                    value: {
+                      errorMessage: error,
+                      language: data?.metadata?.language || 'typescript',
+                      codeEntityId: data.entityId,
+                    },
+                    configScope: 'runtime' as unknown as ConfigScope,
+                    displayValue: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                    label: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                  },
+                },
               },
             },
           },

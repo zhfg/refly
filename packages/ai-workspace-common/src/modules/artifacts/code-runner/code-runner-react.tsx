@@ -5,7 +5,7 @@ import {
 } from '@codesandbox/sandpack-react/unstyled';
 // import dedent from 'dedent';
 import { CheckIcon, CopyIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
@@ -69,64 +69,78 @@ export default function ReactCodeRunner({
   );
 }
 
-function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
-  const { sandpack } = useSandpack();
-  const [didCopy, setDidCopy] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const { t } = useTranslation();
+const ErrorMessage = memo(
+  ({ onRequestFix }: { onRequestFix: (e: string) => void }) => {
+    const { sandpack } = useSandpack();
+    const [didCopy, setDidCopy] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+    const { t } = useTranslation();
 
-  if (!sandpack.error || !isVisible) return null;
+    const handleClose = useCallback(() => {
+      setIsVisible(false);
+    }, []);
 
-  return (
-    <div className="absolute inset-0 px-4 flex flex-col items-center justify-center gap-4 bg-white/5 text-base backdrop-blur-sm">
-      <div className="relative max-w-[400px] rounded-md bg-red-500 p-4 text-white shadow-xl shadow-black/20">
-        <div className="absolute right-2 top-2">
-          <Button
-            type="text"
-            onClick={() => setIsVisible(false)}
-            className="rounded-full p-1 text-red-100 hover:bg-red-600 hover:text-white"
-            aria-label="Close error message"
-          >
-            <IconClose />
-          </Button>
-        </div>
+    const handleCopy = useCallback(async () => {
+      if (!sandpack.error) return;
 
-        <p className="text-lg font-medium">{t('codeArtifact.fix.error', 'Error')}</p>
+      setDidCopy(true);
+      await window.navigator.clipboard.writeText(sandpack.error.message);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setDidCopy(false);
+    }, [sandpack.error]);
 
-        <p className="mt-4 line-clamp-[10] overflow-x-auto whitespace-pre font-mono text-xs">
-          {sandpack.error.message}
-        </p>
+    const handleRequestFix = useCallback(() => {
+      if (!sandpack.error) return;
+      onRequestFix(sandpack.error.message);
+    }, [sandpack.error, onRequestFix]);
 
-        <div className="mt-8 flex justify-between gap-4">
-          <Button
-            type="text"
-            onClick={async () => {
-              if (!sandpack.error) return;
+    if (!sandpack.error || !isVisible) return null;
 
-              setDidCopy(true);
-              await window.navigator.clipboard.writeText(sandpack.error.message);
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              setDidCopy(false);
-            }}
-            className="rounded border-red-300 px-2.5 py-1.5 text-sm font-semibold text-red-50"
-          >
-            {didCopy ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
-          </Button>
-          <Button
-            type="text"
-            onClick={() => {
-              if (!sandpack.error) return;
-              onRequestFix(sandpack.error.message);
-            }}
-            className="rounded bg-white px-2.5 py-1.5 text-sm font-medium text-black"
-          >
-            {t('codeArtifact.fix.tryToFix', 'Try to fix')}
-          </Button>
+    return (
+      <div className="absolute inset-0 px-4 flex flex-col items-center justify-center gap-4 bg-white/5 text-base backdrop-blur-sm">
+        <div className="relative max-w-[400px] rounded-md bg-red-500 p-4 text-white shadow-xl shadow-black/20">
+          <div className="absolute right-2 top-2">
+            <Button
+              type="text"
+              onClick={handleClose}
+              className="rounded-full p-1 text-red-100 hover:bg-red-600 hover:text-white"
+              aria-label="Close error message"
+            >
+              <IconClose />
+            </Button>
+          </div>
+
+          <p className="text-lg font-medium">{t('codeArtifact.fix.error', 'Error')}</p>
+
+          <p className="mt-4 line-clamp-[10] overflow-x-auto whitespace-pre font-mono text-xs">
+            {sandpack.error.message}
+          </p>
+
+          <div className="mt-8 flex justify-between gap-4">
+            <Button
+              type="text"
+              onClick={handleCopy}
+              className="rounded border-red-300 px-2.5 py-1.5 text-sm font-semibold text-red-50"
+            >
+              {didCopy ? <CheckIcon size={18} /> : <CopyIcon size={18} />}
+            </Button>
+            <Button
+              type="text"
+              onClick={handleRequestFix}
+              className="rounded bg-white px-2.5 py-1.5 text-sm font-medium text-black"
+            >
+              {t('codeArtifact.fix.tryToFix', 'Try to fix')}
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if the onRequestFix function reference changes
+    return prevProps.onRequestFix === nextProps.onRequestFix;
+  },
+);
 
 const shadcnFiles = {
   '/public/index.html': `
