@@ -467,6 +467,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             },
           },
         ],
+        website: [],
         group: [
           {
             key: 'ungroup',

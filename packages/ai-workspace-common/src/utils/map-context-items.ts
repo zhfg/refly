@@ -159,6 +159,15 @@ export const convertContextItemsToInvokeParams = (
           url: getClientOrigin(),
         },
       })),
+    urls: items
+      ?.filter((item) => item?.type === 'website')
+      .map((item) => ({
+        url: item.metadata?.url || '',
+        metadata: {
+          title: item.title,
+          ...item.metadata,
+        },
+      })),
   };
   const resultHistory = items
     ?.filter((item) => item.type === 'skillResponse')

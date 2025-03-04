@@ -24,6 +24,9 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { genSkillID } from '@refly-packages/utils/id';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 const DEFAULT_WIDTH = 580;
 const DEFAULT_HEIGHT = 400;
@@ -375,6 +378,7 @@ export const WebsiteNode = memo(
     const { addToContext } = useAddToContext();
     const { deleteNode } = useDeleteNode();
     const { getNode } = useReactFlow();
+    const { addNode } = useAddNode();
 
     // Hover effect
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
@@ -425,7 +429,9 @@ export const WebsiteNode = memo(
         type: 'website',
         title: data.title || t('canvas.nodes.website.defaultTitle', 'Website'),
         entityId: data.entityId,
-        metadata: data.metadata,
+        metadata: {
+          ...data.metadata,
+        },
       });
     }, [addToContext, data.metadata, data.title, data.entityId, t]);
 
@@ -441,25 +447,57 @@ export const WebsiteNode = memo(
       }
     }, [id, data, deleteNode]);
 
+    // Add Ask AI functionality
+    const handleAskAI = useCallback(() => {
+      const url = data?.metadata?.url;
+      if (!url) return;
+
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'website',
+                  title: data?.title || t('canvas.nodes.website.defaultTitle', 'Website'),
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ] as IContextItem[],
+            },
+          },
+        },
+        [{ type: 'website', entityId: data.entityId }],
+        false,
+        true,
+      );
+    }, [data, addNode, t]);
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>
