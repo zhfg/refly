@@ -3828,6 +3828,11 @@ export const UpdateUserSettingsRequestSchema = {
       description: 'User nickname',
       example: 'John Doe',
     },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+      example: 'https://example.com/avatar.png',
+    },
     uiLocale: {
       type: 'string',
       description: 'UI locale',

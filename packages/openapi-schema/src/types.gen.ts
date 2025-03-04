@@ -2710,6 +2710,10 @@ export type UpdateUserSettingsRequest = {
    */
   nickname?: string;
   /**
+   * User avatar
+   */
+  avatar?: string;
+  /**
    * UI locale
    */
   uiLocale?: string;

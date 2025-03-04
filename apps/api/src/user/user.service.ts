@@ -66,7 +66,7 @@ export class UserService {
       return tx.user.update({
         where: { uid: user.uid },
         data: {
-          ...pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
+          ...pick(data, ['name', 'nickname', 'avatar', 'uiLocale', 'outputLocale']),
           preferences: JSON.stringify(mergedPreferences),
           onboarding: JSON.stringify(mergedOnboarding),
         },
