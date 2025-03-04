@@ -71,7 +71,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
           type: 'emoji',
           value: '🔧',
         },
-        description: 'Fix code errors',
+        description: t('codeArtifact.fix.title'),
         configSchema: {
           items: [],
         },
@@ -85,7 +85,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
         {
           type: 'skill',
           data: {
-            title: t('codeArtifact.fixError', 'Fix Code Error'),
+            title: t('codeArtifact.fix.title'),
             entityId: genSkillID(),
             metadata: {
               contextItems: [
@@ -98,13 +98,9 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
                   metadata: node.data?.metadata,
                 },
               ] as IContextItem[],
-              query: t(
-                'codeArtifact.fixErrorQuery',
-                'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
-                {
-                  errorMessage,
-                },
-              ),
+              query: t('codeArtifact.fix.query', {
+                errorMessage,
+              }),
               selectedSkill: codeFixSkill,
               modelInfo: selectedModel,
               tplConfig: {
@@ -115,8 +111,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
                     codeEntityId: node.data?.entityId || '',
                   },
                   configScope: 'runtime' as unknown as ConfigScope,
-                  displayValue: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
-                  label: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                  displayValue: t('codeArtifact.fix.errorConfig'),
+                  label: t('codeArtifact.fix.errorConfig'),
                 },
               },
             },

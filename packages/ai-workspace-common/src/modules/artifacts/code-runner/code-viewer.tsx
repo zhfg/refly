@@ -1,8 +1,9 @@
 import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { Button, Tooltip, Divider } from 'antd';
+import { Button, Tooltip, Divider, message } from 'antd';
 import CodeRunner from './code-runner-react';
 import Editor, { Monaco } from '@monaco-editor/react';
+import { useTranslation } from 'react-i18next';
 
 export default memo(
   function CodeViewer({
@@ -28,6 +29,7 @@ export default memo(
     onChange?: (code: string) => void;
     readOnly?: boolean;
   }) {
+    const { t } = useTranslation();
     const [refresh, setRefresh] = useState(0);
     // Track editor content for controlled updates
     const [editorContent, setEditorContent] = useState(code);
@@ -49,21 +51,36 @@ export default memo(
     }, []);
 
     const handleCopyCode = useCallback(() => {
-      navigator.clipboard.writeText(editorContent);
-    }, [editorContent]);
+      navigator.clipboard
+        .writeText(editorContent)
+        .then(() => {
+          message.success(t('codeArtifact.copySuccess'));
+        })
+        .catch((error) => {
+          console.error('Failed to copy code:', error);
+          message.error(t('codeArtifact.copyError'));
+        });
+    }, [editorContent, t]);
 
     const handleDownload = useCallback(() => {
       const fileExtension = getFileExtensionForLanguage(language);
-      const blob = new Blob([editorContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title}.${fileExtension}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, [language, editorContent, title]);
+      const fileName = `${title}.${fileExtension}`;
+      try {
+        const blob = new Blob([editorContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        message.success(t('codeArtifact.downloadSuccess', { fileName }));
+      } catch (error) {
+        console.error('Failed to download file:', error);
+        message.error(t('codeArtifact.downloadError'));
+      }
+    }, [language, editorContent, title, t]);
 
     // Handle content changes from editor
     const handleEditorChange = useCallback(
@@ -75,6 +92,11 @@ export default memo(
       },
       [onChange],
     );
+
+    const handleRefresh = useCallback(() => {
+      setRefresh((r) => r + 1);
+      message.info(t('codeArtifact.refreshing'));
+    }, [t]);
 
     const getFileExtensionForLanguage = useMemo(
       () =>
@@ -111,7 +133,7 @@ export default memo(
             className={`${activeTab === 'preview' ? 'bg-green-600' : 'text-gray-600'}`}
             size="small"
           >
-            Preview
+            {t('codeArtifact.tabs.preview')}
           </Button>
 
           <Button
@@ -121,18 +143,18 @@ export default memo(
             className={`${activeTab === 'code' ? 'bg-green-600' : 'text-gray-600'}`}
             size="small"
           >
-            Code
+            {t('codeArtifact.tabs.code')}
           </Button>
         </div>
       ),
-      [activeTab, onTabChange],
+      [activeTab, onTabChange, t],
     );
 
     // Memoize action buttons
     const actionButtons = useMemo(
       () => (
         <div className="flex items-center space-x-2">
-          <Tooltip title="Copy code">
+          <Tooltip title={t('codeArtifact.buttons.copy')}>
             <Button
               type="text"
               icon={<FiCopy className="size-4" />}
@@ -142,7 +164,11 @@ export default memo(
             />
           </Tooltip>
 
-          <Tooltip title={`Download as ${title}.${getFileExtensionForLanguage(language)}`}>
+          <Tooltip
+            title={t('codeArtifact.buttons.download', {
+              fileName: `${title}.${getFileExtensionForLanguage(language)}`,
+            })}
+          >
             <Button
               type="text"
               icon={<FiDownload className="size-4" />}
@@ -153,7 +179,7 @@ export default memo(
           </Tooltip>
         </div>
       ),
-      [handleCopyCode, handleDownload, title, language, getFileExtensionForLanguage],
+      [handleCopyCode, handleDownload, title, language, getFileExtensionForLanguage, t],
     );
 
     return (
@@ -165,11 +191,11 @@ export default memo(
         <div className="flex items-center justify-between h-12 border-b border-gray-200 bg-white py-2">
           {renderTabs}
 
-          <Tooltip title="Refresh">
+          <Tooltip title={t('codeArtifact.buttons.refresh')}>
             <Button
               type="text"
               icon={<FiRefreshCw className="size-4" />}
-              onClick={() => setRefresh((r) => r + 1)}
+              onClick={handleRefresh}
               disabled={isGenerating}
               size="small"
               className="text-gray-600 hover:text-blue-600"
@@ -196,7 +222,9 @@ export default memo(
                 height="100%"
                 value={editorContent}
                 onChange={handleEditorChange}
-                language="markdown"
+                language={
+                  language === 'typescript' || language === 'javascript' ? language : 'markdown'
+                }
                 beforeMount={(monaco: Monaco) => {
                   // Configure Monaco instance before mounting
                   monaco.editor.defineTheme('github-custom', {

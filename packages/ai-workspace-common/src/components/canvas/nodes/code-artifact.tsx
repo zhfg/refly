@@ -95,7 +95,7 @@ const NodeContent = memo(
             type: 'emoji',
             value: '🔧',
           },
-          description: 'Fix code errors',
+          description: t('codeArtifact.fix.title'),
           configSchema: {
             items: [],
           },
@@ -108,7 +108,7 @@ const NodeContent = memo(
           {
             type: 'skill',
             data: {
-              title: t('codeArtifact.fix.title', 'Fix Code Error'),
+              title: t('codeArtifact.fix.title'),
               entityId: genSkillID(),
               metadata: {
                 contextItems: [
@@ -121,13 +121,9 @@ const NodeContent = memo(
                     metadata: data.metadata,
                   },
                 ] as IContextItem[],
-                query: t(
-                  'codeArtifact.fix.query',
-                  'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
-                  {
-                    errorMessage: error,
-                  },
-                ),
+                query: t('codeArtifact.fix.query', {
+                  errorMessage: error,
+                }),
                 selectedSkill: codeFixSkill,
                 modelInfo: selectedModel,
                 tplConfig: {
@@ -138,8 +134,8 @@ const NodeContent = memo(
                       codeEntityId: data.entityId,
                     },
                     configScope: 'runtime' as unknown as ConfigScope,
-                    displayValue: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
-                    label: t('codeArtifact.fix.errorConfig', 'Code Error Config'),
+                    displayValue: t('codeArtifact.fix.errorConfig'),
+                    label: t('codeArtifact.fix.errorConfig'),
                   },
                 },
               },
