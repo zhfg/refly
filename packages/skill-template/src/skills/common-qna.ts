@@ -18,7 +18,11 @@ import { prepareContext } from '../scheduler/utils/context';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 import { processQuery } from '../scheduler/utils/queryProcessor';
-import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
+import {
+  extractAndCrawlUrls,
+  isValidUrl,
+  crawlExtractedUrls,
+} from '../scheduler/utils/extract-weblink';
 
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';
@@ -79,14 +83,36 @@ export class CommonQnA extends BaseSkill {
       shouldSkipAnalysis: true, // For common QnA, we can skip analysis when there's no context and chat history
     });
 
+    // Process URLs from context first (frontend)
+    const contextUrls = config.configurable?.urls || [];
+    this.engine.logger.log(`Context URLs: ${safeStringifyJSON(contextUrls)}`);
+
+    // Process context URLs
+    let contextUrlSources: Source[] = [];
+    if (contextUrls.length > 0) {
+      const urls = contextUrls.map((item) => item.url).filter((url) => url && isValidUrl(url));
+      if (urls.length > 0) {
+        this.engine.logger.log(`Processing ${urls.length} URLs from context`);
+        contextUrlSources = await crawlExtractedUrls(urls, config, this, {
+          concurrencyLimit: 5,
+          batchSize: 8,
+        });
+        this.engine.logger.log(`Processed context URL sources count: ${contextUrlSources.length}`);
+      }
+    }
+
     // Extract URLs from the query and crawl them with optimized concurrent processing
-    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+    const { sources: queryUrlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
       concurrencyLimit: 5, // 增加并发爬取的URL数量限制
       batchSize: 8, // 增加每批处理的URL数量
     });
 
     this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
-    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+    this.engine.logger.log(`Extracted query URL sources count: ${queryUrlSources.length}`);
+
+    // Combine URL sources, prioritizing context URLs
+    const urlSources = [...contextUrlSources, ...queryUrlSources];
+    this.engine.logger.log(`Total URL sources count: ${urlSources.length}`);
 
     let context = '';
     let sources: Source[] = [];

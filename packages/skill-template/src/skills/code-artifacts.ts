@@ -26,6 +26,7 @@ import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { checkModelContextLenSupport } from '../scheduler/utils/model';
+import { processContextUrls } from '../utils/url-processing';
 
 // Import prompt building functions - only import what we need
 import {
@@ -397,6 +398,17 @@ ${reactiveArtifactExamples}`;
         },
       },
     };
+
+    // Process URLs from frontend context if available
+    const contextUrls = config.configurable?.urls || [];
+    const contextUrlSources = await processContextUrls(contextUrls, config, this);
+
+    // Combine contextUrlSources with other sources if needed
+    if (contextUrlSources.length > 0) {
+      // If you have existing sources array, you can combine them
+      // sources = [...sources, ...contextUrlSources];
+      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
+    }
 
     // Generate the response
     const responseMessage = await model.invoke(requestMessages, enhancedConfig);

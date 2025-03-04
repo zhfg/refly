@@ -16,6 +16,7 @@ import { prepareContext } from '../scheduler/utils/context';
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
+import { processContextUrls } from '../utils/url-processing';
 // prompts
 import * as customPrompt from '../scheduler/module/customPrompt/index';
 
@@ -158,14 +159,27 @@ export class CustomPrompt extends BaseSkill {
       shouldSkipAnalysis: true,
     });
 
+    // Process URLs from frontend context if available
+    const contextUrls = config.configurable?.urls || [];
+    const contextUrlSources = await processContextUrls(contextUrls, config, this);
+
+    // Combine contextUrlSources with other sources if needed
+    if (contextUrlSources.length > 0) {
+      // If you have existing sources array, you can combine them
+      // sources = [...sources, ...contextUrlSources];
+      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
+    }
+
     // Extract URLs from the query and crawl them with optimized concurrent processing
-    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+    const { sources: queryUrlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
       concurrencyLimit: 5, // Increase concurrent URL crawling limit
       batchSize: 8, // Increase batch size for URL processing
     });
 
     this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
-    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+    this.engine.logger.log(`Extracted URL sources count: ${queryUrlSources.length}`);
+
+    const urlSources = [...contextUrlSources, ...queryUrlSources];
 
     // Set current step
     config.metadata.step = { name: 'analyzeContext' };
