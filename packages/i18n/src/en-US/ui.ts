@@ -798,6 +798,8 @@ const translations = {
       addMemo: 'Add Memo',
       createDocument: 'Create Document',
       createDocumentDescription: 'Create a document for writing.',
+      createCodeArtifact: 'Create Code Artifact',
+      createCodeArtifactDescription: 'Create an empty code artifact to write your code',
       addDocument: 'Add Document',
       addDocumentDescription:
         'User-created content in Refly, created through AI writing or manually creating a new document, which can be searched and answered through the AI knowledge base.',

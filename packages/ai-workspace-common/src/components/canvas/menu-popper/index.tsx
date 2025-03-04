@@ -8,13 +8,14 @@ import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import {
   IconAskAI,
+  IconCodeArtifact,
   IconCreateDocument,
   IconDocument,
   IconImportResource,
   IconMemo,
   IconResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { genMemoID, genSkillID } from '@refly-packages/utils/id';
+import { genMemoID, genSkillID, genResourceID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useReactFlow } from '@xyflow/react';
@@ -75,6 +76,17 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       },
     },
     { key: 'divider-1', type: 'divider' },
+    {
+      key: 'createCodeArtifact',
+      icon: IconCodeArtifact,
+      type: 'button',
+      hoverContent: {
+        title: t('canvas.toolbar.createCodeArtifact'),
+        description: t('canvas.toolbar.createCodeArtifactDescription'),
+        videoUrl:
+          'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+      },
+    },
     {
       key: 'createDocument',
       icon: IconCreateDocument,
@@ -194,6 +206,25 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     });
   };
 
+  const createCodeArtifactNode = (position: { x: number; y: number }) => {
+    // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
+    const codeArtifactId = genResourceID();
+    addNode({
+      type: 'codeArtifact',
+      data: {
+        title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
+        entityId: codeArtifactId,
+        contentPreview: '',
+        metadata: {
+          status: 'finish',
+          language: 'typescript',
+          activeTab: 'code',
+        },
+      },
+      position: position,
+    });
+  };
+
   const handleMenuClick = async ({ key }: { key: string }) => {
     setActiveKey(key);
     switch (key) {
@@ -207,6 +238,10 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
         break;
       case 'createMemo':
         createMemo(position);
+        setOpen(false);
+        break;
+      case 'createCodeArtifact':
+        createCodeArtifactNode(position);
         setOpen(false);
         break;
       case 'addResource':
