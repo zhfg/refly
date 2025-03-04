@@ -322,7 +322,7 @@ ${reactiveArtifactExamples}`;
     config.metadata.step = { name: 'generateCodeArtifact' };
 
     // Create a code artifact entity
-    const title = `Code: ${query?.substring(0, 50) || 'React Component'}`;
+    const title = '';
     const codeEntityId = randomUUID();
 
     // Create and emit the code artifact

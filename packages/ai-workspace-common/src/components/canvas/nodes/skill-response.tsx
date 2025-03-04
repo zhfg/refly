@@ -620,17 +620,19 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && artifacts?.length > 0 && (
                     <div className="flex items-center gap-2">
-                      {artifacts.map((artifact) => (
-                        <div
-                          key={artifact.entityId}
-                          className="border border-solid border-gray-200 rounded-md px-2 py-2 w-full flex items-center gap-1"
-                        >
-                          {getArtifactIcon(artifact, 'text-gray-500')}
-                          <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
-                            {artifact.title}
-                          </span>
-                        </div>
-                      ))}
+                      {artifacts
+                        ?.filter((artifact) => artifact.title)
+                        .map((artifact) => (
+                          <div
+                            key={artifact.entityId}
+                            className="border border-solid border-gray-200 rounded-md px-2 py-2 w-full flex items-center gap-1"
+                          >
+                            {getArtifactIcon(artifact, 'text-gray-500')}
+                            <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
+                              {artifact.title}
+                            </span>
+                          </div>
+                        ))}
                     </div>
                   )}
 
