@@ -240,7 +240,7 @@ export default function CodeViewer({
         ) : (
           <div className="h-full flex items-center justify-center">
             {language && (
-              <div className="w-full h-full p-4">
+              <div className="w-full h-full">
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   code={editorContent}

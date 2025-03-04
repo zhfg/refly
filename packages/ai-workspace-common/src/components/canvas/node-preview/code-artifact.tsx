@@ -1,4 +1,4 @@
-import { useState, memo, useCallback } from 'react';
+import { useState, memo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CanvasNode,
@@ -18,10 +18,45 @@ interface CodeArtifactNodePreviewProps {
 
 const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNodePreviewProps) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { addNode } = useAddNode();
+
+  // Use activeTab from node metadata with fallback to 'code'
+  const { activeTab = 'code' } = node.data?.metadata || {};
+  const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
+
+  // Sync local tab state with node metadata changes
+  useEffect(() => {
+    // Only update if activeTab changes and is different from current state
+    const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
+    if (metadataActiveTab && metadataActiveTab !== currentTab) {
+      setCurrentTab(metadataActiveTab);
+    }
+  }, [node.data?.metadata?.activeTab, currentTab]);
+
+  // Update node data when tab changes
+  const handleTabChange = useCallback(
+    (tab: 'code' | 'preview') => {
+      setCurrentTab(tab);
+
+      if (node.data?.entityId) {
+        setNodeDataByEntity(
+          {
+            type: 'codeArtifact',
+            entityId: node.data.entityId,
+          },
+          {
+            metadata: {
+              ...node.data?.metadata,
+              activeTab: tab,
+            },
+          },
+        );
+      }
+    },
+    [node.data?.entityId, node.data?.metadata, setNodeDataByEntity],
+  );
 
   const handleRequestFix = useCallback(
     (errorMessage: string) => {
@@ -109,8 +144,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             language={language}
             title={node.data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
             isGenerating={isGenerating}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
+            activeTab={currentTab}
+            onTabChange={handleTabChange}
             onClose={handleClose}
             onRequestFix={handleRequestFix}
             onChange={handleCodeChange}
@@ -126,5 +161,8 @@ export const CodeArtifactNodePreview = memo(
   CodeArtifactNodePreviewComponent,
   (prevProps, nextProps) =>
     prevProps.artifactId === nextProps.artifactId &&
-    prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview,
+    prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview &&
+    prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status &&
+    prevProps.node?.data?.metadata?.language === nextProps.node?.data?.metadata?.language &&
+    prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab,
 );

@@ -39,12 +39,48 @@ import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components
 
 const NodeContent = memo(
   ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
-    const { language = 'typescript' } = data?.metadata ?? {};
-    const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
+    const { language = 'typescript', activeTab = 'code' } = data?.metadata ?? {};
     const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
     const { t } = useTranslation();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const { addNode } = useAddNode();
+
+    // Use activeTab from metadata with fallback to 'code'
+    const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(
+      activeTab as 'code' | 'preview',
+    );
+
+    // Sync local state with metadata changes
+    useEffect(() => {
+      // Only update if activeTab changes and is different from current state
+      const metadataActiveTab = data?.metadata?.activeTab as 'code' | 'preview';
+      if (metadataActiveTab && metadataActiveTab !== currentTab) {
+        setCurrentTab(metadataActiveTab);
+      }
+    }, [data?.metadata?.activeTab, currentTab]);
+
+    // Update node data when tab changes
+    const handleTabChange = useCallback(
+      (tab: 'code' | 'preview') => {
+        setCurrentTab(tab);
+
+        if (data.entityId) {
+          setNodeDataByEntity(
+            {
+              type: 'codeArtifact',
+              entityId: data.entityId,
+            },
+            {
+              metadata: {
+                ...data.metadata,
+                activeTab: tab,
+              },
+            },
+          );
+        }
+      },
+      [data.entityId, data.metadata, setNodeDataByEntity],
+    );
 
     const handleRequestFix = useCallback(
       (error: string) => {
@@ -111,8 +147,8 @@ const NodeContent = memo(
             language={language}
             title={data.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
             isGenerating={data?.metadata?.status === 'generating'}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
+            activeTab={currentTab}
+            onTabChange={handleTabChange}
             onClose={() => {
               setIsShowingCodeViewer(false);
             }}
@@ -123,6 +159,21 @@ const NodeContent = memo(
         )}
       </CodeViewerLayout>
     );
+  },
+  (prevProps, nextProps) => {
+    // Basic equality check for content
+    const contentEqual = prevProps.data?.contentPreview === nextProps.data?.contentPreview;
+
+    // Check metadata properties
+    const languageEqual = prevProps.data?.metadata?.language === nextProps.data?.metadata?.language;
+    const statusEqual = prevProps.data?.metadata?.status === nextProps.data?.metadata?.status;
+    const activeTabEqual =
+      prevProps.data?.metadata?.activeTab === nextProps.data?.metadata?.activeTab;
+
+    // Check operation state
+    const operatingEqual = prevProps.isOperating === nextProps.isOperating;
+
+    return contentEqual && languageEqual && statusEqual && activeTabEqual && operatingEqual;
   },
 );
 
@@ -364,6 +415,11 @@ export const CodeArtifactNode = memo(
     const nextSizeMode = nextProps.data?.metadata?.sizeMode;
     const sizeModeEqual = prevSizeMode === nextSizeMode;
 
+    // Compare activeTab specifically
+    const prevActiveTab = prevProps.data?.metadata?.activeTab;
+    const nextActiveTab = nextProps.data?.metadata?.activeTab;
+    const activeTabEqual = prevActiveTab === nextActiveTab;
+
     return (
       prevProps.id === nextProps.id &&
       prevProps.selected === nextProps.selected &&
@@ -373,7 +429,9 @@ export const CodeArtifactNode = memo(
       prevProps.data?.title === nextProps.data?.title &&
       prevProps.data?.contentPreview === nextProps.data?.contentPreview &&
       prevProps.data?.createdAt === nextProps.data?.createdAt &&
-      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata) &&
+      prevProps.data?.metadata?.status === nextProps.data?.metadata?.status &&
+      prevProps.data?.metadata?.language === nextProps.data?.metadata?.language &&
+      activeTabEqual &&
       styleEqual &&
       sizeModeEqual
     );

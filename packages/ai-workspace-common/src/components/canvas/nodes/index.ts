@@ -147,6 +147,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         language: 'typescript',
         sizeMode: 'adaptive',
         style: {},
+        activeTab: 'code',
       } as CodeArtifactNodeMeta;
 
     default:

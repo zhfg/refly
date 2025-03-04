@@ -29,6 +29,7 @@ import { useSubscriptionUsage } from '../use-subscription-usage';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getArtifactContentAndAttributes } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
+import { ARTIFACT_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/modules/artifacts/const';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -129,6 +130,9 @@ export const useInvokeAction = () => {
         (node) => node.data?.entityId === artifact.entityId && node.type === artifact.type,
       );
 
+      // Check if artifact is closed using the ARTIFACT_TAG_CLOSED_REGEX
+      const isArtifactClosed = ARTIFACT_TAG_CLOSED_REGEX.test(content);
+
       // If node doesn't exist, create it
       if (!existingNode) {
         addNode(
@@ -143,6 +147,8 @@ export const useInvokeAction = () => {
                 status: 'generating',
                 language: language || 'typescript', // Use extracted language or default
                 type: type || '', // Use extracted type if available
+                // If artifact is closed, set activeTab to preview
+                ...(isArtifactClosed && { activeTab: 'preview' }),
               },
             },
           },
@@ -169,6 +175,8 @@ export const useInvokeAction = () => {
               // Update language and type if available from extracted attributes
               ...(language && { language }),
               ...(type && { type }),
+              // If artifact is closed, set activeTab to preview
+              ...(isArtifactClosed && { activeTab: 'preview' }),
             },
           },
         );
@@ -327,17 +335,34 @@ export const useInvokeAction = () => {
     const artifacts = result.steps?.flatMap((s) => s.artifacts);
     if (artifacts?.length) {
       for (const artifact of artifacts) {
-        setNodeDataByEntity(
-          {
-            type: artifact.type,
-            entityId: artifact.entityId,
-          },
-          {
-            metadata: {
-              status: 'finish',
+        // Special handling for code artifacts - set activeTab to preview
+        if (artifact.type === 'codeArtifact') {
+          setNodeDataByEntity(
+            {
+              type: artifact.type,
+              entityId: artifact.entityId,
             },
-          },
-        );
+            {
+              metadata: {
+                status: 'finish',
+                activeTab: 'preview', // Set to preview when skill finishes
+              },
+            },
+          );
+        } else {
+          // For other artifact types, just update status
+          setNodeDataByEntity(
+            {
+              type: artifact.type,
+              entityId: artifact.entityId,
+            },
+            {
+              metadata: {
+                status: 'finish',
+              },
+            },
+          );
+        }
       }
     }
 

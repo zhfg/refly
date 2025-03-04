@@ -399,44 +399,7 @@ ${reactiveArtifactExamples}`;
     };
 
     // Generate the response
-    let responseMessage = await model.invoke(requestMessages, enhancedConfig);
-
-    // Validate the generated code - assuming the content is a string
-    const responseContent =
-      typeof responseMessage.content === 'string'
-        ? responseMessage.content
-        : JSON.stringify(responseMessage.content);
-
-    const validation = this.validateReactCode(responseContent);
-
-    // If there are issues, try to regenerate with more specific instructions
-    if (!validation.valid) {
-      this.engine.logger.log(`Validation issues: ${validation.issues.join(', ')}`);
-
-      // Add a system message about the validation issues
-      const issuesPrompt = `The previous response had the following code issues: ${validation.issues.join(', ')}. 
-Please regenerate the React component, ensuring you address these specific issues. 
-Remember to:
-- Avoid duplicate variable definitions
-- Include proper React imports
-- Use React.memo for functional components
-- Export the component as default
-- Use proper TypeScript typing
-- Ensure all variables are properly initialized
-- Use consistent syntax for event handlers`;
-
-      // Add the issues prompt to the request messages
-      const enhancedMessages = [
-        ...requestMessages,
-        {
-          role: 'system',
-          content: issuesPrompt,
-        },
-      ];
-
-      // Try again with enhanced instructions but without temperature parameter
-      responseMessage = await model.invoke(enhancedMessages, enhancedConfig);
-    }
+    const responseMessage = await model.invoke(requestMessages, enhancedConfig);
 
     // Signal completion of artifact generation
     this.emitEvent(

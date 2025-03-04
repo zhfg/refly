@@ -57,7 +57,14 @@ const PreviewComponent = memo(
     const statusEqual =
       prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
 
-    return basicPropsEqual && contentEqual && titleEqual && statusEqual;
+    // Check activeTab for codeArtifact nodes
+    let activeTabEqual = true;
+    if (prevProps.node?.type === 'codeArtifact') {
+      activeTabEqual =
+        prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    }
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && activeTabEqual;
   },
 );
 
@@ -138,6 +145,13 @@ export const NodePreview = memo(
     const statusEqual =
       prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
 
-    return basicPropsEqual && contentEqual && titleEqual && statusEqual;
+    // Check activeTab for codeArtifact nodes
+    let activeTabEqual = true;
+    if (prevProps.node?.type === 'codeArtifact') {
+      activeTabEqual =
+        prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    }
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && activeTabEqual;
   },
 );

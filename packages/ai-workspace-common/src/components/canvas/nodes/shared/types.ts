@@ -54,6 +54,7 @@ export interface CodeArtifactNodeMeta {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
+  activeTab?: 'code' | 'preview';
 }
 
 export type SkillNodeMeta = {
