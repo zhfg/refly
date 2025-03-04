@@ -41,40 +41,11 @@ const NodeContent = memo(
     const { t } = useTranslation();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const formRef = useRef<any>(null);
-
-    // Initialize form with current URL when entering edit mode
-    useEffect(() => {
-      if (isEditing && formRef.current && url) {
-        formRef.current.setFieldsValue({ url });
-      }
-    }, [isEditing, url]);
-
-    // Toggle between form and preview modes
-    const toggleMode = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        setIsEditing((prev) => !prev);
-        setNodeDataByEntity(
-          {
-            type: 'website',
-            entityId: data.entityId,
-          },
-          {
-            metadata: {
-              ...data.metadata,
-              viewMode: isEditing ? 'preview' : 'form',
-            },
-          },
-        );
-      },
-      [data.entityId, data.metadata, isEditing, setNodeDataByEntity],
-    );
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     // Handle form submission to save URL
     const handleSubmit = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        const values = formRef.current?.getFieldsValue();
+      (values: { url: string }) => {
         if (!values?.url) {
           message.error(t('canvas.nodes.website.urlRequired', 'URL is required'));
           return;
@@ -102,6 +73,34 @@ const NodeContent = memo(
         setIsEditing(false);
       },
       [data.entityId, data.metadata, setNodeDataByEntity, t],
+    );
+
+    // Initialize form with current URL when entering edit mode
+    useEffect(() => {
+      if (isEditing && formRef.current && url) {
+        formRef.current.setFieldsValue({ url });
+      }
+    }, [isEditing, url]);
+
+    // Toggle between form and preview modes
+    const toggleMode = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        setIsEditing((prev) => !prev);
+        setNodeDataByEntity(
+          {
+            type: 'website',
+            entityId: data.entityId,
+          },
+          {
+            metadata: {
+              ...data.metadata,
+              viewMode: isEditing ? 'preview' : 'form',
+            },
+          },
+        );
+      },
+      [data.entityId, data.metadata, isEditing, setNodeDataByEntity],
     );
 
     // Open website in a new tab
@@ -213,6 +212,7 @@ const NodeContent = memo(
           })}
         >
           <iframe
+            ref={iframeRef}
             src={url}
             title={data.title}
             className="w-full h-full border-0"
