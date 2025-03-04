@@ -36,6 +36,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 
 const NodeContent = memo(
   ({ data, isOperating }: { data: CanvasNodeData<ResourceNodeMeta>; isOperating: boolean }) => {
@@ -316,7 +317,11 @@ export const ResourceNode = memo(
           `}
           >
             <div className="flex flex-col h-full relative p-3 box-border">
-              <NodeHeader title={data.title} Icon={ResourceIcon} iconBgColor="#17B26A" />
+              <NodeHeader
+                title={data.title}
+                Icon={ResourceIcon}
+                iconBgColor={NODE_COLORS.resource}
+              />
 
               <div className="relative flex-grow min-h-0">
                 <div

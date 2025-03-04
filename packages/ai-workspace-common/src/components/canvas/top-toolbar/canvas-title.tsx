@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Tooltip, Skeleton } from 'antd';
+import { Tooltip, Skeleton, Typography } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -79,7 +79,9 @@ export const CanvasTitle = memo(
           {!hasCanvasSynced ? (
             <Skeleton className="w-28" active paragraph={false} />
           ) : (
-            canvasTitle || t('common.untitled')
+            <Typography.Text className="!max-w-72" ellipsis={{ tooltip: true }}>
+              {canvasTitle || t('common.untitled')}
+            </Typography.Text>
           )}
           <IconEdit />
         </div>

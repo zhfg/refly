@@ -100,6 +100,10 @@ export type Canvas = {
    */
   status?: CanvasStatus;
   /**
+   * Minimap URL
+   */
+  minimapUrl?: string;
+  /**
    * Canvas creation time
    */
   createdAt: string;
@@ -1670,6 +1674,10 @@ export type UpsertCanvasRequest = {
    * Canvas ID (only used for update)
    */
   canvasId?: string;
+  /**
+   * Minimap storage key
+   */
+  minimapStorageKey?: string;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {
