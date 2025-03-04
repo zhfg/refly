@@ -24,6 +24,7 @@ import {
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const TextArea = Input.TextArea;
 
@@ -44,8 +45,9 @@ const ConfigItem = React.memo(
     locale: string;
     configValue?: DynamicConfigValue;
     onValueChange: (field?: string, val?: any, displayValue?: string) => void;
+    readonly?: boolean;
   }): React.ReactNode => {
-    const { item, form, field, locale, configValue } = props;
+    const { item, form, field, locale, configValue, readonly } = props;
     // Use refs to store input values to maintain state across renders
     const inputRef = useRef<any>(null);
     const [initialValue, setInitialValue] = useState<any>(null);
@@ -106,6 +108,7 @@ const ConfigItem = React.memo(
             setInitialValue(val);
             onValueChange(val, String(val));
           }}
+          disabled={readonly}
         />
       );
     }
@@ -126,6 +129,7 @@ const ConfigItem = React.memo(
             setInitialValue(val);
             onValueChange(val, String(val));
           }}
+          disabled={readonly}
         />
       );
     }
@@ -142,6 +146,7 @@ const ConfigItem = React.memo(
             setInitialValue(val);
             onValueChange(val, val || val === 0 ? String(val) : '');
           }}
+          disabled={readonly}
         />
       );
     }
@@ -172,6 +177,7 @@ const ConfigItem = React.memo(
                   : optionValToDisplay.get(val),
               );
             }}
+            disabled={readonly}
           />
         );
       }
@@ -182,6 +188,7 @@ const ConfigItem = React.memo(
           onChange={(checkedValue) => {
             onValueChange(checkedValue, optionValToDisplay.get(checkedValue));
           }}
+          disabled={readonly}
         >
           {item.options.map((option) => (
             <Radio key={option.value} value={option.value}>
@@ -201,6 +208,7 @@ const ConfigItem = React.memo(
           onChange={(checked) => {
             onValueChange(checked, String(checked));
           }}
+          disabled={readonly}
         />
       );
     }
@@ -221,6 +229,7 @@ interface ConfigManagerProps {
   resetConfig?: () => void;
   setFormErrors: (errors: any) => void;
   onFormValuesChange?: (changedValues: any, allValues: any) => void;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export const ConfigManager = (props: ConfigManagerProps) => {
@@ -236,10 +245,12 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     formErrors,
     setFormErrors,
     onFormValuesChange,
+    onExpandChange,
   } = props;
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [formValues, setFormValues] = useState<Record<string, DynamicConfigValue>>({});
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const { readonly } = useCanvasContext();
 
   const isConfigItemRequired = useCallback(
     (schemaItem: DynamicConfigItem) => {
@@ -382,7 +393,13 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           size="mini"
           className="config-manager__toggle-button"
           icon={isExpanded ? <IconUp /> : <IconDown />}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            if (!readonly) {
+              setIsExpanded(!isExpanded);
+              onExpandChange?.(!isExpanded);
+            }
+          }}
+          disabled={readonly}
           aria-label={isExpanded ? t('common.collapse') : t('common.expand')}
         />
       </div>
@@ -401,7 +418,6 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           <Space direction="vertical" style={{ width: '100%' }}>
             {(schema.items || []).map((item) => {
               const field = getFormField(fieldPrefix, item.key);
-              // 使用本地状态或表单值
               const configValue = formValues[item.key] || form.getFieldValue(field);
 
               return (
@@ -424,7 +440,8 @@ export const ConfigManager = (props: ConfigManagerProps) => {
                           size="mini"
                           className="config-manager__reset-button"
                           icon={<IconRefresh />}
-                          onClick={() => handleReset(item.key)}
+                          onClick={() => !readonly && handleReset(item.key)}
+                          disabled={readonly}
                         >
                           {t('common.reset')}
                         </Button>
@@ -444,6 +461,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
                       locale={locale}
                       configValue={configValue}
                       onValueChange={handleValueChange}
+                      readonly={readonly}
                     />
                   </Form.Item>
                 </div>

@@ -490,6 +490,9 @@ export const SkillNode = memo(
                   tplConfig={tplConfig}
                   fieldPrefix="tplConfig"
                   configScope="runtime"
+                  onExpandChange={(_expanded) => {
+                    updateSize({ height: 'auto' });
+                  }}
                   resetConfig={() => {
                     const defaultConfig = skill?.tplConfig ?? {};
                     form.setFieldValue('tplConfig', defaultConfig);
