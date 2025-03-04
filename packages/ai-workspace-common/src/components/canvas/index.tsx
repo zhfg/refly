@@ -368,7 +368,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     };
   }, [provider?.status]);
 
-  const { handleUpdateCanvasMiniMap } = useUploadMinimap();
+  const { handleUpdateCanvasMiniMap } = useUploadMinimap(canvasId);
 
   useEffect(() => {
     const unsubscribe = locateToNodePreviewEmitter.on(
@@ -393,7 +393,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
     setTimeout(() => {
       if (!readonly) {
-        handleUpdateCanvasMiniMap(canvasId);
+        handleUpdateCanvasMiniMap();
       }
     }, 3000);
 

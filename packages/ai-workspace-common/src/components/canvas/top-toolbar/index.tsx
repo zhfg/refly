@@ -41,7 +41,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
-  const { provider, readonly, owner } = useCanvasContext();
+  const { provider, readonly, shareData } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
 
@@ -108,6 +108,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
     <>
       <Helmet>
         <title>{canvasTitle?.toString() || t('common.untitled')} · Refly</title>
+        {shareData?.minimapUrl && <meta property="og:image" content={shareData.minimapUrl} />}
       </Helmet>
       <div
         className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 bg-transparent ${
@@ -130,7 +131,11 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
           {readonly ? (
-            <ReadonlyCanvasTitle canvasTitle={canvasTitle} isLoading={false} owner={owner} />
+            <ReadonlyCanvasTitle
+              canvasTitle={canvasTitle}
+              isLoading={false}
+              owner={shareData?.owner}
+            />
           ) : (
             <CanvasTitle
               canvasId={canvasId}

@@ -118,6 +118,10 @@ export const CanvasSchema = {
       type: 'string',
       description: 'Minimap URL',
     },
+    minimapStorageKey: {
+      type: 'string',
+      description: 'Minimap storage key',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -2049,6 +2053,10 @@ export const RawCanvasDataSchema = {
     title: {
       type: 'string',
       description: 'Canvas title',
+    },
+    minimapUrl: {
+      type: 'string',
+      description: 'Minimap URL',
     },
     nodes: {
       type: 'array',
@@ -4426,6 +4434,10 @@ export const UploadRequestSchema = {
     visibility: {
       description: 'File visibility (default is private)',
       $ref: '#/components/schemas/FileVisibility',
+    },
+    storageKey: {
+      type: 'string',
+      description: 'Storage key (if provided, the file will be replaced if it already exists)',
     },
   },
 } as const;

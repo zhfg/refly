@@ -54,6 +54,8 @@ export class MiscController {
       file,
       entityId: body.entityId,
       entityType: body.entityType,
+      visibility: body.visibility,
+      storageKey: body.storageKey,
     });
     return buildSuccessResponse(result);
   }

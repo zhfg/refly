@@ -104,6 +104,10 @@ export type Canvas = {
    */
   minimapUrl?: string;
   /**
+   * Minimap storage key
+   */
+  minimapStorageKey?: string;
+  /**
    * Canvas creation time
    */
   createdAt: string;
@@ -1614,6 +1618,10 @@ export type RawCanvasData = {
    */
   title?: string;
   /**
+   * Minimap URL
+   */
+  minimapUrl?: string;
+  /**
    * Canvas nodes
    */
   nodes?: Array<CanvasNode>;
@@ -3098,6 +3106,10 @@ export type UploadRequest = {
    * File visibility (default is private)
    */
   visibility?: FileVisibility;
+  /**
+   * Storage key (if provided, the file will be replaced if it already exists)
+   */
+  storageKey?: string;
 };
 
 export type UploadResponse = BaseResponse & {

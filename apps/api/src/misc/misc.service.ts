@@ -27,6 +27,7 @@ import {
 import { FileObject } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
 import { ParserFactory } from '@/knowledge/parsers/factory';
+import { StaticFile } from '@prisma/client';
 
 @Injectable()
 export class MiscService implements OnModuleInit {
@@ -278,36 +279,59 @@ export class MiscService implements OnModuleInit {
       entityId?: string;
       entityType?: EntityType;
       visibility?: FileVisibility;
+      storageKey?: string;
     },
   ): Promise<UploadResponse['data']> {
-    const { file, entityId, entityType } = param;
+    const { file, entityId, entityType, visibility = 'private' } = param;
 
     if (entityId && entityType) {
       await this.checkEntity(user, entityId, entityType);
     }
 
+    let existingFile: StaticFile | null = null;
+    if (param.storageKey) {
+      existingFile = await this.prisma.staticFile.findFirst({
+        where: {
+          storageKey: param.storageKey,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+
+      if (!existingFile) {
+        throw new ParamsError(`File with key ${param.storageKey} not found`);
+      }
+    }
+
     const objectKey = randomUUID();
     const extension = path.extname(file.originalname);
     const contentType = mime.getType(extension) ?? file.mimetype ?? 'application/octet-stream';
-    const storageKey = `static/${objectKey}${extension}`;
+    const storageKey = param.storageKey ?? `static/${objectKey}${extension}`;
 
-    // Images should be public by default, unless specified otherwise
-    let visibility = param.visibility;
-    if (!visibility && contentType.startsWith('image/')) {
-      visibility = 'public';
+    if (existingFile) {
+      await this.prisma.staticFile.update({
+        where: { pk: existingFile.pk },
+        data: {
+          storageSize: file.buffer.length,
+          entityId,
+          entityType,
+          contentType,
+          visibility,
+        },
+      });
+    } else {
+      await this.prisma.staticFile.create({
+        data: {
+          uid: user.uid,
+          storageKey,
+          storageSize: file.buffer.length,
+          entityId,
+          entityType,
+          contentType,
+          visibility,
+        },
+      });
     }
-
-    await this.prisma.staticFile.create({
-      data: {
-        uid: user.uid,
-        storageKey,
-        storageSize: file.buffer.length,
-        entityId,
-        entityType,
-        contentType,
-        visibility,
-      },
-    });
 
     await this.minioClient(visibility).putObject(storageKey, file.buffer, {
       'Content-Type': contentType,

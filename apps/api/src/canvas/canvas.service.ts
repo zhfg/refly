@@ -69,8 +69,8 @@ export class CanvasService {
 
     return canvases.map((canvas) => ({
       ...canvas,
-      minimapUrl: canvas.minimap
-        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
         : undefined,
     }));
   }
@@ -86,8 +86,8 @@ export class CanvasService {
 
     return {
       ...canvas,
-      minimapUrl: canvas.minimap
-        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
         : undefined,
     };
   }
@@ -128,6 +128,7 @@ export class CanvasService {
         title: true,
         uid: true,
         stateStorageKey: true,
+        minimapStorageKey: true,
       },
       where: {
         canvasId,
@@ -160,6 +161,9 @@ export class CanvasService {
         nickname: userPo?.nickname,
         avatar: userPo?.avatar,
       },
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
+        : undefined,
     };
   }
 
@@ -354,14 +358,14 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    const originalMinimap = canvas.minimap;
+    const originalMinimap = canvas.minimapStorageKey;
     const updates: Prisma.CanvasUpdateInput = {};
 
     if (title !== undefined) {
       updates.title = title;
     }
     if (minimapStorageKey !== undefined) {
-      updates.minimap = minimapStorageKey;
+      updates.minimapStorageKey = minimapStorageKey;
     }
 
     const updatedCanvas = await this.prisma.$transaction(async (tx) => {
@@ -392,7 +396,11 @@ export class CanvasService {
     }
 
     // Remove original minimap if it exists
-    if (minimapStorageKey !== undefined && originalMinimap) {
+    if (
+      originalMinimap &&
+      minimapStorageKey !== undefined &&
+      minimapStorageKey !== originalMinimap
+    ) {
       await this.minio.client.removeObject(originalMinimap);
     }
 

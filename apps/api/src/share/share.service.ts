@@ -139,6 +139,10 @@ export class ShareService {
       }
     }
 
+    // Publish minimap
+    const minimapUrl = await this.miscService.publishFile(canvas.minimapStorageKey);
+    canvasData.minimapUrl = minimapUrl;
+
     // Upload public canvas data to Minio
     const { storageKey } = await this.miscService.uploadBuffer(user, {
       fpath: 'canvas.json',

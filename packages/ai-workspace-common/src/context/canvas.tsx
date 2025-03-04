@@ -4,7 +4,6 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { Edge } from '@xyflow/react';
-import { ShareUser } from '@refly/openapi-schema';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
@@ -17,7 +16,7 @@ interface CanvasContextType {
   localProvider: IndexeddbPersistence | null;
   readonly: boolean;
   shareNotFound?: boolean;
-  owner?: ShareUser;
+  shareData?: RawCanvasData;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -290,7 +289,7 @@ export const CanvasProvider = ({
       localProvider,
       readonly,
       shareNotFound,
-      owner: canvasData?.owner,
+      shareData: canvasData,
     }),
     [canvasId, provider, localProvider, readonly, shareNotFound, canvasData],
   );
