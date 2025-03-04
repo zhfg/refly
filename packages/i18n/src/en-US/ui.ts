@@ -519,37 +519,15 @@ const translations = {
     resendSuccess: 'Verification email sent successfully',
     submit: 'Submit',
   },
-  projectDetail: {
-    directory: {
-      newCanvas: 'New Canvas',
-      importResource: 'Import Resource',
-      chat: 'Chat',
-      empty: 'No Data',
-      move: 'Move',
-      remove: 'Remove',
-      delete: 'Delete',
-      projectSelector: {
-        title: 'Move Canvas',
-        tip: 'Please select the target project',
-      },
-    },
-    share: {
-      createShareFailed: 'Failed to create share, please try again!',
-      project: 'project',
-      canvas: 'canvas',
-      title: 'Share {{entityType}}',
-      description: 'Your {{entityType}} is being shared',
-      copyLink: 'Copy Link',
-      cancel: 'Cancel Share',
-      cancelShareFailed: 'Failed to cancel share, please try again!',
-      cancelShareSuccess: 'Cancel share successfully!',
-      sharing: 'Sharing',
-      copyLinkFailed: 'Failed to copy link, please try again!',
-      copyLinkSuccess: 'Link has been copied to the clipboard!',
-    },
-    contentArea: {
-      addCanvas: 'New Canvas',
-      addResource: 'New Resource',
+  share: {
+    keyFeatures: {
+      multiThreadedConversation: 'Multi-threaded Conversation',
+      multiModelIntegration: 'Multi-model Integration',
+      multiModalProcessing: 'Multi-Modal Processing',
+      aiPoweredSkillSystem: 'AI-Powered Skill System',
+      knowledgeBaseEngine: 'Knowledge Base Engine',
+      intelligentContentCapture: 'Intelligent Content Capture',
+      aiEnhancedEditor: 'AI-Enhanced Editor',
     },
   },
   shareContent: {

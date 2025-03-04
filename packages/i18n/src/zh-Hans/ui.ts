@@ -517,38 +517,15 @@ const translations = {
     resendSuccess: '验证邮件发送成功',
     submit: '提交',
   },
-  projectDetail: {
-    directory: {
-      newCanvas: '新画布',
-      importResource: '导入资源',
-      chat: 'Chat',
-      empty: '空空如也',
-      move: '移动',
-      remove: '移除',
-      delete: '删除',
-      projectSelector: {
-        title: '移动画布',
-        tip: '请选择目标项目',
-        success: '移动成功！',
-      },
-    },
-    share: {
-      createShareFailed: '创建分享失败，请重试！',
-      project: '项目',
-      canvas: '画布',
-      title: '分享{{entityType}}',
-      description: '你的{{entityType}}正在分享中',
-      copyLink: '复制链接',
-      cancel: '取消分享',
-      cancelShareFailed: '取消分享失败，请重试！',
-      cancelShareSuccess: '取消分享成功！',
-      sharing: '分享中',
-      copyLinkFailed: '复制链接失败，请重试！',
-      copyLinkSuccess: '链接已复制到剪切板！',
-    },
-    contentArea: {
-      addCanvas: '新画布',
-      addResource: '新资源',
+  share: {
+    keyFeatures: {
+      multiThreadedConversation: '多线程对话',
+      multiModelIntegration: '多模型集成',
+      multiModalProcessing: '多模态处理',
+      aiPoweredSkillSystem: 'AI驱动的技能系统',
+      knowledgeBaseEngine: '知识库引擎',
+      intelligentContentCapture: '智能内容采集',
+      aiEnhancedEditor: 'AI增强编辑器',
     },
   },
   shareContent: {
