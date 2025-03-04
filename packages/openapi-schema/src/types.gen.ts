@@ -15,7 +15,7 @@ export type User = {
 };
 
 /**
- * Refly user, used as JWT payload
+ * Refly user in shared entity
  */
 export type ShareUser = {
   /**
@@ -1605,6 +1605,10 @@ export type GetCanvasDetailResponse = BaseResponse & {
  * Raw canvas data
  */
 export type RawCanvasData = {
+  /**
+   * Canvas owner
+   */
+  owner?: ShareUser;
   /**
    * Canvas title
    */

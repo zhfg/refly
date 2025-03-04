@@ -41,7 +41,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
-  const { provider, readonly } = useCanvasContext();
+  const { provider, readonly, owner } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
 
@@ -130,7 +130,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
           {readonly ? (
-            <ReadonlyCanvasTitle canvasTitle={canvasTitle} isLoading={false} />
+            <ReadonlyCanvasTitle canvasTitle={canvasTitle} isLoading={false} owner={owner} />
           ) : (
             <CanvasTitle
               canvasId={canvasId}

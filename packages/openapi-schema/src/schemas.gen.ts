@@ -18,7 +18,7 @@ export const UserSchema = {
 
 export const ShareUserSchema = {
   type: 'object',
-  description: 'Refly user, used as JWT payload',
+  description: 'Refly user in shared entity',
   required: ['uid'],
   properties: {
     uid: {
@@ -2041,6 +2041,11 @@ export const RawCanvasDataSchema = {
   type: 'object',
   description: 'Raw canvas data',
   properties: {
+    owner: {
+      type: 'object',
+      description: 'Canvas owner',
+      $ref: '#/components/schemas/ShareUser',
+    },
     title: {
       type: 'string',
       description: 'Canvas title',

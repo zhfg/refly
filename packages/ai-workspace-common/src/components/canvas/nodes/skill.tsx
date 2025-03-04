@@ -497,9 +497,7 @@ export const SkillNode = memo(
                     const defaultConfig = skill?.tplConfig ?? {};
                     form.setFieldValue('tplConfig', defaultConfig);
                   }}
-                  onFormValuesChange={(changedValues, allValues) => {
-                    console.log('changedValues', changedValues);
-                    console.log('allValues', allValues);
+                  onFormValuesChange={(_, allValues) => {
                     handleTplConfigChange(allValues.tplConfig);
                   }}
                 />

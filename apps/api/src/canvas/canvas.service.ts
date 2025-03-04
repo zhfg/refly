@@ -135,6 +135,14 @@ export class CanvasService {
         deletedAt: null,
       },
     });
+    const userPo = await this.prisma.user.findUnique({
+      select: {
+        name: true,
+        nickname: true,
+        avatar: true,
+      },
+      where: { uid: canvas.uid },
+    });
 
     if (!canvas) {
       throw new CanvasNotFoundError();
@@ -146,6 +154,12 @@ export class CanvasService {
       title: canvas.title,
       nodes: doc?.getArray('nodes').toJSON() ?? [],
       edges: doc?.getArray('edges').toJSON() ?? [],
+      owner: {
+        uid: canvas.uid,
+        name: userPo?.name,
+        nickname: userPo?.nickname,
+        avatar: userPo?.avatar,
+      },
     };
   }
 
@@ -157,6 +171,7 @@ export class CanvasService {
     const { title, canvasId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
+      select: { title: true },
       where: { canvasId, deletedAt: null, uid: options?.checkOwnership ? user.uid : undefined },
     });
 

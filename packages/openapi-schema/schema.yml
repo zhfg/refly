@@ -1829,7 +1829,7 @@ components:
           description: Email
     ShareUser:
       type: object
-      description: Refly user, used as JWT payload
+      description: Refly user in shared entity
       required:
         - uid
       properties:
@@ -3407,6 +3407,10 @@ components:
       type: object
       description: Raw canvas data
       properties:
+        owner:
+          type: object
+          description: Canvas owner
+          $ref: '#/components/schemas/ShareUser'
         title:
           type: string
           description: Canvas title

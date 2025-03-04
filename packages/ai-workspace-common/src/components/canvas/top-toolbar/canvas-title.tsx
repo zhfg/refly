@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Tooltip, Skeleton, Typography } from 'antd';
+import { Tooltip, Skeleton, Typography, Avatar, Divider } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -7,6 +7,8 @@ import { IconCanvas, IconEdit } from '@refly-packages/ai-workspace-common/compon
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { CanvasRename } from './canvas-rename';
+import { ShareUser } from '@refly/openapi-schema';
+import { AiOutlineUser } from 'react-icons/ai';
 
 export const CanvasTitle = memo(
   ({
@@ -77,9 +79,9 @@ export const CanvasTitle = memo(
             />
           </Tooltip>
           {!hasCanvasSynced ? (
-            <Skeleton className="w-28" active paragraph={false} />
+            <Skeleton className="w-32" active paragraph={false} />
           ) : (
-            <Typography.Text className="!max-w-72" ellipsis={{ tooltip: true }}>
+            <Typography.Text className="!max-w-72 text-gray-500" ellipsis={{ tooltip: true }}>
               {canvasTitle || t('common.untitled')}
             </Typography.Text>
           )}
@@ -102,9 +104,11 @@ export const ReadonlyCanvasTitle = memo(
   ({
     canvasTitle,
     isLoading,
+    owner,
   }: {
     canvasTitle?: string;
     isLoading: boolean;
+    owner?: ShareUser;
   }) => {
     const { t } = useTranslation();
 
@@ -115,9 +119,28 @@ export const ReadonlyCanvasTitle = memo(
       >
         <IconCanvas />
         {isLoading ? (
-          <Skeleton className="w-28" active paragraph={false} />
+          <Skeleton className="w-32" active paragraph={false} />
         ) : (
-          canvasTitle || t('common.untitled')
+          <>
+            <Typography.Text className="!max-w-72 text-gray-500" ellipsis={{ tooltip: true }}>
+              {canvasTitle || t('common.untitled')}
+            </Typography.Text>
+
+            {owner && (
+              <>
+                <Divider type="vertical" className="h-4" />
+                <Avatar
+                  src={owner.avatar}
+                  size={18}
+                  shape="circle"
+                  icon={!owner.avatar ? <AiOutlineUser /> : undefined}
+                />
+                <Typography.Text className="text-gray-500 font-light text-sm">
+                  {`@${owner.name}`}
+                </Typography.Text>
+              </>
+            )}
+          </>
         )}
       </div>
     );
