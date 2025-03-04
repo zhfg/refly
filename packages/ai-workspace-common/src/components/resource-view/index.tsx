@@ -195,6 +195,7 @@ const ResourceContent = memo(
 export const ResourceView = memo(
   (props: ResourceViewProps) => {
     const { resourceId, shareId } = props;
+    const { readonly } = useCanvasContext();
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
     const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
@@ -282,23 +283,25 @@ export const ResourceView = memo(
                     title={t('resource.parse_failed')}
                     subTitle={genIndexErrorSubTitle(resourceDetail?.indexError, t)}
                     extra={
-                      <div className="flex justify-center items-center gap-2">
-                        <Button
-                          icon={<IconRefresh />}
-                          onClick={() => handleReindexResource(resourceId)}
-                        >
-                          {t('common.retry')}
-                        </Button>
-                        {resourceDetail?.indexError?.type === 'pageLimitExceeded' && (
+                      !readonly && (
+                        <div className="flex justify-center items-center gap-2">
                           <Button
-                            type="primary"
-                            icon={<IconSubscription />}
-                            onClick={() => setSubscribeModalVisible(true)}
+                            icon={<IconRefresh />}
+                            onClick={() => handleReindexResource(resourceId)}
                           >
-                            {t('common.upgradeSubscription')}
+                            {t('common.retry')}
                           </Button>
-                        )}
-                      </div>
+                          {resourceDetail?.indexError?.type === 'pageLimitExceeded' && (
+                            <Button
+                              type="primary"
+                              icon={<IconSubscription />}
+                              onClick={() => setSubscribeModalVisible(true)}
+                            >
+                              {t('common.upgradeSubscription')}
+                            </Button>
+                          )}
+                        </div>
+                      )
                     }
                   />
                 </div>

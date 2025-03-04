@@ -180,7 +180,7 @@ export class ShareService {
     const document = documentPO2DTO(documentDetail);
 
     // Process document images
-    document.content = await this.processContentImages(document.content);
+    document.content = await this.processContentImages(document.content ?? '');
     document.contentPreview = document.content.slice(0, 500);
 
     const { storageKey } = await this.miscService.uploadBuffer(user, {
@@ -218,7 +218,7 @@ export class ShareService {
     const resource = resourcePO2DTO(resourceDetail);
 
     // Process resource images
-    resource.content = await this.processContentImages(resource.content);
+    resource.content = await this.processContentImages(resource.content ?? '');
     resource.contentPreview = resource.content.slice(0, 500);
 
     const { storageKey } = await this.miscService.uploadBuffer(user, {
@@ -287,7 +287,7 @@ export class ShareService {
    */
   async processContentImages(content: string) {
     // Extract all markdown image references: ![alt](url)
-    const images = content.match(/!\[.*?\]\((.*?)\)/g);
+    const images = content?.match(/!\[.*?\]\((.*?)\)/g);
     if (!images?.length) {
       return content;
     }
