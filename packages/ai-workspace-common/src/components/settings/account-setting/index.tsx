@@ -1,4 +1,4 @@
-import { Button, Form, Input, Upload, Modal, message } from 'antd';
+import { Button, Form, Input, Upload, message } from 'antd';
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { AiOutlineUser } from 'react-icons/ai';
@@ -7,11 +7,19 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 // components
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
+import ImgCrop from 'antd-img-crop';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 export const AccountSetting = () => {
   const [form] = Form.useForm();
   const userStore = useUserStore();
   const { t } = useTranslation();
+
+  const { showSettingModal } = useSiderStoreShallow((state) => ({
+    showSettingModal: state.showSettingModal,
+  }));
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarError, setAvatarError] = useState(false);
 
   const [nameStatus, setNameStatus] = useState<'error' | 'success' | 'warning' | 'validating'>(
     'success',
@@ -26,6 +34,34 @@ export const AccountSetting = () => {
   const statusMap = {
     name: { status: nameStatus, setStatus: setNameStatus, setMessage: setNameMessage },
     email: { status: emailStatus, setStatus: setEmailStatus, setMessage: setEmailMessage },
+  };
+
+  const uploadAvatar = async (file: File) => {
+    const { data } = await getClient().upload({
+      body: { file, visibility: 'public' },
+    });
+    if (data?.data.url) {
+      setAvatarError(false);
+      setAvatarUrl(data.data.url);
+    }
+  };
+
+  const beforeUpload = (file: File) => {
+    const isValidType = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'].includes(file.type);
+    if (!isValidType) {
+      message.error(t('settings.account.onlyImageAllowed', { type: 'PNG, JPG, JPEG, GIF' }));
+      return Upload.LIST_IGNORE;
+    }
+
+    const isValidSize = file.size / 1024 / 1024 < 2;
+    if (!isValidSize) {
+      message.error(t('settings.account.imageSizeLimited', { size: 2 }));
+      return Upload.LIST_IGNORE;
+    }
+
+    uploadAvatar(file);
+
+    return false;
   };
 
   const checkUsername = async (name: string) => {
@@ -77,6 +113,7 @@ export const AccountSetting = () => {
         body: {
           name,
           nickname,
+          avatar: avatarUrl,
         },
       });
       if (error) {
@@ -85,56 +122,58 @@ export const AccountSetting = () => {
       }
       setLoading(false);
       message.success(t('settings.account.updateSuccess'));
-      userStore.setUserProfile({ ...userStore.userProfile, name, nickname });
+      userStore.setUserProfile({ ...userStore.userProfile, name, nickname, avatar: avatarUrl });
     });
   };
 
   useEffect(() => {
-    form.setFieldsValue({
-      ...userStore.userProfile,
-      avatar: [
-        {
-          uid: '-1',
-          url: userStore.userProfile?.avatar,
-          name: userStore.userProfile?.avatar,
-        },
-      ],
-    });
-  }, [userStore.userProfile]);
+    if (showSettingModal) {
+      form.setFieldsValue({
+        ...userStore.userProfile,
+      });
+      setAvatarUrl(userStore.userProfile?.avatar ?? '');
+      setAvatarError(false);
+    }
+  }, [showSettingModal]);
 
   return (
     <div className="w-full">
       <div className="max-w-[600px] mx-auto">
         <Form form={form} layout="vertical">
-          <Form.Item
-            label={t('settings.account.avatar')}
-            name="avatar"
-            valuePropName="fileList"
-            initialValue={[]}
-          >
-            <Upload
-              listType="picture-circle"
-              disabled
-              name="files"
-              action="/"
-              maxCount={1}
-              onPreview={(file) => {
-                Modal.info({
-                  title: t('settings.account.avatar'),
-                  okButtonProps: { style: { backgroundColor: '#00968F' } },
-                  icon: <AiOutlineUser size={22} className="mr-1" />,
-                  content: (
-                    <div className="text-center">
-                      <img
-                        src={file?.url ?? URL.createObjectURL(file?.originFileObj)}
-                        className="max-w-full"
-                        alt="avatar"
-                      />
+          <Form.Item label={t('settings.account.avatar')} name="avatar">
+            <ImgCrop
+              rotationSlider
+              modalTitle={t('settings.account.cropAvatar')}
+              modalOk={t('common.confirm')}
+              modalCancel={t('common.cancel')}
+            >
+              <Upload
+                listType="picture-circle"
+                name="avatar"
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+              >
+                <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                  {avatarUrl && !avatarError ? (
+                    <img
+                      src={avatarUrl}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                      onError={() => {
+                        setAvatarError(true);
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center">
+                      <AiOutlineUser size={32} className="text-white" />
+                      <div className="text-gray-400 text-xs mt-1">
+                        {t('settings.account.uploadAvatar')}
+                      </div>
                     </div>
-                  ),
-                });
-              }}
-            />
+                  )}
+                </div>
+              </Upload>
+            </ImgCrop>
           </Form.Item>
 
           <Form.Item

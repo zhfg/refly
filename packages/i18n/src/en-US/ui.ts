@@ -1445,6 +1445,10 @@ const translations = {
         title: 'Log Out Confirmation',
         message: 'Are you sure you want to log out?',
       },
+      uploadAvatar: 'Upload Avatar',
+      imageSizeLimited: 'Image must be less than {{size}}MB',
+      onlyImageAllowed: 'Only support {{type}} pictures',
+      cropAvatar: 'Crop Avatar',
     },
 
     language: {

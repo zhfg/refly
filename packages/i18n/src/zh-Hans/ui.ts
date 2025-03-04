@@ -1416,6 +1416,10 @@ const translations = {
         title: '退出登录',
         message: '确定退出登录吗？',
       },
+      uploadAvatar: '上传头像',
+      imageSizeLimited: '图片必须小于{{size}}MB',
+      onlyImageAllowed: '只支持上传{{type}}格式的图片',
+      cropAvatar: '裁剪头像',
     },
     language: {
       title: '语言设置',
