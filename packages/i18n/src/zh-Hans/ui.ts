@@ -1072,7 +1072,8 @@ const translations = {
       fromFile: '上传文件',
       dragOrClick: '点击或拖拽文件到此区域上传',
       unsupportedFileType: '请上传指定类型的文件',
-      supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
+      supportedFiles: '支持文件: {{formats}}，每个文件最大 {{size}}',
+      fileTooLarge: '文件大小不能超过 {{size}}',
       fileParsingUsage: '高级文件解析（包括 PDF）：今日已使用 {{used}}/{{limit}} 页',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
@@ -1450,6 +1451,8 @@ const translations = {
       libraryStorageDescription: '知识库中每个资源和文档计为一个文件。',
       advancedFileParsing: '高级文件解析',
       advancedFileParsingDescription: '支持表格、图片和公式提取的 PDF 解析，按解析页数计算用量。',
+      fileSizeLimit: '文件上传限制',
+      fileSizeLimitDescription: '每个文件大小不能超过 {{size}} MB。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
@@ -1488,6 +1491,7 @@ const translations = {
         dailyCounts: '{{count}} 次/每天',
         monthlyCounts: '{{count}} 次/每月',
         dailyPagesCount: '{{count}} 页/每天',
+        fileSizeLimit: '最大 {{count}} MB',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

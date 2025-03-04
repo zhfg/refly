@@ -1088,7 +1088,8 @@ const translations = {
       fromFile: 'Upload File',
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
-      supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
+      supportedFiles: 'Supported Files: {{formats}}. Max {{size}} each.',
+      fileTooLarge: 'File size cannot exceed {{size}}',
       fileParsingUsage:
         'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
       fromWeblink: 'Paste Weblink',
@@ -1481,6 +1482,8 @@ const translations = {
       advancedFileParsing: 'Advanced File Parsing',
       advancedFileParsingDescription:
         'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
+      fileSizeLimit: 'File Upload Limit',
+      fileSizeLimitDescription: 'Each file size cannot exceed {{size}} MB.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1520,6 +1523,7 @@ const translations = {
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
         dailyPagesCount: '{{count}} pages/day',
+        fileSizeLimit: 'Maximum {{count}} MB',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {

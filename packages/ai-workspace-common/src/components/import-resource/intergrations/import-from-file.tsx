@@ -13,6 +13,7 @@ import type { RcFile } from 'antd/es/upload/interface';
 import { genResourceID } from '@refly-packages/utils/id';
 import { LuInfo } from 'react-icons/lu';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 const { Dragger } = Upload;
 
@@ -24,7 +25,12 @@ interface FileItem {
   status?: 'uploading' | 'done' | 'error';
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const MAX_FILE_SIZE_FOR_DIFFERENT_PLAN = {
+  free: 5, // 5MB in bytes
+  plus: 10, // 10MB in bytes
+  pro: 20, // 20MB in bytes
+  max: 30, // 30MB in bytes
+};
 
 const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.docx', '.rtf', '.txt', '.md', '.html', '.epub'];
 
@@ -47,6 +53,15 @@ export const ImportFromFile = () => {
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [fileList, setFileList] = useState<FileItem[]>(storageFileList);
+
+  const { userProfile } = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+  }));
+
+  const planType = userProfile?.subscription?.planType || 'free';
+
+  const maxFileSize = `${MAX_FILE_SIZE_FOR_DIFFERENT_PLAN[planType]}MB`;
+  const maxFileSizeBytes = MAX_FILE_SIZE_FOR_DIFFERENT_PLAN[planType] * 1024 * 1024;
 
   const uploadFile = async (file: File, uid: string) => {
     const { data } = await getClient().upload({
@@ -71,8 +86,8 @@ export const ImportFromFile = () => {
       url: item.url,
     })),
     beforeUpload: async (file: File) => {
-      if (file.size > MAX_FILE_SIZE) {
-        message.error(t('resource.import.fileTooLarge', { size: '5MB' }));
+      if (file.size > maxFileSizeBytes) {
+        message.error(t('resource.import.fileTooLarge', { size: maxFileSize }));
         return Upload.LIST_IGNORE;
       }
 
@@ -201,6 +216,7 @@ export const ImportFromFile = () => {
                 formats: ALLOWED_FILE_EXTENSIONS.map((ext) => ext.slice(1).toUpperCase()).join(
                   ', ',
                 ),
+                size: maxFileSize,
               })}
             </p>
             {fileParsingUsage?.pagesLimit >= 0 && (
