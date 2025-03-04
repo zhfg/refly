@@ -4448,6 +4448,7 @@ export const CanvasNodeTypeSchema = {
   enum: [
     'document',
     'codeArtifact',
+    'website',
     'resource',
     'skill',
     'tool',

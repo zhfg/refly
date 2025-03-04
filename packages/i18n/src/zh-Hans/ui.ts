@@ -740,6 +740,7 @@ const translations = {
       skill: '技能',
       image: '图片',
       codeArtifact: '代码组件',
+      website: '网站',
     },
     export: {
       success: '导出图片成功',
@@ -844,6 +845,8 @@ const translations = {
       showTemplates: '显示模板',
       exportImage: '导出图片',
       copyLink: '复制链接',
+      createWebsite: '创建网站节点',
+      createWebsiteDescription: '创建一个网站节点以在画布中嵌入网站',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -974,6 +977,22 @@ const translations = {
       mouseDesc: '鼠标左键拖动画布，滚轮缩放',
       touchpad: '触控板友好模式',
       touchpadDesc: '双指同向移动拖动，双指张开捏合缩放',
+    },
+    nodes: {
+      website: {
+        defaultTitle: '网站',
+        addWebsite: '添加网站',
+        websiteUrl: '网站 URL',
+        urlRequired: '请输入网站 URL',
+        preview: '预览',
+        save: '保存并查看网站',
+        copyUrl: '复制 URL',
+        urlCopied: 'URL 已复制到剪贴板',
+        copyFailed: '复制失败',
+        openInNewTab: '在新标签页打开',
+        edit: '编辑',
+        noUrlProvided: '未提供网站 URL',
+      },
     },
   },
   resource: {

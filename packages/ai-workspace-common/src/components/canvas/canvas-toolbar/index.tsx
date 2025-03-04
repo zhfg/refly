@@ -12,7 +12,6 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { getRuntime } from '@refly/utils/env';
 import {
   IconAskAI,
-  IconAskAIInput,
   IconCreateDocument,
   IconDocument,
   IconImportResource,
@@ -20,10 +19,10 @@ import {
   IconResource,
   IconTemplate,
   IconCodeArtifact,
+  IconWebsite,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
@@ -94,6 +93,22 @@ const useToolbarConfig = (nodeLength: number) => {
           },
         },
         {
+          icon: IconWebsite,
+          value: 'createWebsite',
+          type: 'button',
+          domain: 'website',
+          tooltip: t('canvas.toolbar.createWebsite', 'Create Website Node'),
+          hoverContent: {
+            title: t('canvas.toolbar.createWebsite', 'Create Website Node'),
+            description: t(
+              'canvas.toolbar.createWebsiteDescription',
+              'Create a website node to embed a website in your canvas',
+            ),
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+          },
+        },
+        {
           icon: IconMemo,
           value: 'createMemo',
           type: 'button',
@@ -145,34 +160,34 @@ const useToolbarConfig = (nodeLength: number) => {
           domain: 'document',
           tooltip: t('canvas.toolbar.addDocument'),
         },
-        {
-          type: 'divider',
-          value: 'divider1',
-        },
-        {
-          icon: IconAskAIInput,
-          value: 'handleLaunchpad',
-          type: 'button',
-          domain: 'launchpad',
-          tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
-          hoverContent: {
-            title: t('canvas.toolbar.toggleLaunchpadTitle'),
-            videoUrl:
-              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
-          },
-        },
-        {
-          icon: IoAnalyticsOutline,
-          value: 'showEdges',
-          type: 'button',
-          domain: 'edges',
-          tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
-          hoverContent: {
-            title: t('canvas.toolbar.toggleEdgeTitle'),
-            videoUrl:
-              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
-          },
-        },
+        // {
+        //   type: 'divider',
+        //   value: 'divider1',
+        // },
+        // {
+        //   icon: IconAskAIInput,
+        //   value: 'handleLaunchpad',
+        //   type: 'button',
+        //   domain: 'launchpad',
+        //   tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+        //   hoverContent: {
+        //     title: t('canvas.toolbar.toggleLaunchpadTitle'),
+        //     videoUrl:
+        //       'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+        //   },
+        // },
+        // {
+        //   icon: IoAnalyticsOutline,
+        //   value: 'showEdges',
+        //   type: 'button',
+        //   domain: 'edges',
+        //   tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+        //   hoverContent: {
+        //     title: t('canvas.toolbar.toggleEdgeTitle'),
+        //     videoUrl:
+        //       'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
+        //   },
+        // },
         ...(nodeLength === 0 && showTemplateButton ? [showTemplateConfig] : []),
       ] as ToolbarItem[],
       modals: {
@@ -316,11 +331,27 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
     });
   }, [addNode, t]);
 
+  const createWebsiteNode = useCallback(() => {
+    addNode({
+      type: 'website',
+      data: {
+        title: t('canvas.nodes.website.defaultTitle', 'Website'),
+        entityId: genSkillID(),
+        metadata: {
+          viewMode: 'form',
+        },
+      },
+    });
+  }, [addNode, t]);
+
   const handleToolSelect = useCallback(
     (_event: React.MouseEvent, tool: string) => {
       switch (tool) {
         case 'importResource':
           setImportResourceModalVisible(true);
+          break;
+        case 'createWebsite':
+          createWebsiteNode();
           break;
         case 'createDocument':
           createSingleDocumentInCanvas();

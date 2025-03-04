@@ -9,6 +9,7 @@ import { MemoNode } from './memo/memo';
 import { GroupNode } from './group';
 import { ImageNode } from './image';
 import { CodeArtifactNode } from './code-artifact';
+import { WebsiteNode } from './website';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -33,6 +34,7 @@ export * from './memo/memo';
 export * from './group';
 export * from './image';
 export * from './code-artifact';
+export * from './website';
 
 // Node types mapping
 export const nodeTypes: NodeTypes = {
@@ -45,6 +47,7 @@ export const nodeTypes: NodeTypes = {
   group: GroupNode,
   image: ImageNode,
   codeArtifact: CodeArtifactNode,
+  website: WebsiteNode,
 };
 
 // Helper function to prepare node data

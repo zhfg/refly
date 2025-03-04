@@ -84,88 +84,6 @@ const NodeContent = memo(
       [data.entityId, data.metadata, setNodeDataByEntity],
     );
 
-    const handleRequestFix = useCallback(
-      (error: string) => {
-        if (!data.entityId) return;
-
-        // Define a proper code fix skill similar to editDoc
-        const codeFixSkill: Skill = {
-          name: 'codeArtifacts',
-          icon: {
-            type: 'emoji',
-            value: '🔧',
-          },
-          description: t('codeArtifact.fix.title'),
-          configSchema: {
-            items: [],
-          },
-        };
-
-        // Get the current model
-        const { selectedModel } = useChatStore.getState();
-
-        addNode(
-          {
-            type: 'skill',
-            data: {
-              title: t('codeArtifact.fix.title'),
-              entityId: genSkillID(),
-              metadata: {
-                contextItems: [
-                  {
-                    type: 'codeArtifact',
-                    title: data?.contentPreview
-                      ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
-                      : data.title,
-                    entityId: data.entityId,
-                    metadata: data.metadata,
-                  },
-                ] as IContextItem[],
-                query: t('codeArtifact.fix.query', {
-                  errorMessage: error,
-                }),
-                selectedSkill: codeFixSkill,
-                modelInfo: selectedModel,
-                tplConfig: {
-                  codeErrorConfig: {
-                    value: {
-                      errorMessage: error,
-                      language: data?.metadata?.language || 'typescript',
-                      codeEntityId: data.entityId,
-                    },
-                    configScope: 'runtime' as unknown as ConfigScope,
-                    displayValue: t('codeArtifact.fix.errorConfig'),
-                    label: t('codeArtifact.fix.errorConfig'),
-                  },
-                },
-              },
-            },
-          },
-          [{ type: 'codeArtifact', entityId: data.entityId }],
-          false,
-          true,
-        );
-      },
-      [addNode, data, t],
-    );
-
-    const handleCodeChange = useCallback(
-      (updatedCode: string) => {
-        if (data.entityId) {
-          setNodeDataByEntity(
-            {
-              type: 'codeArtifact',
-              entityId: data.entityId,
-            },
-            {
-              contentPreview: updatedCode,
-            },
-          );
-        }
-      },
-      [data.entityId, setNodeDataByEntity],
-    );
-
     // Always show the content, even when generating
     return (
       <CodeViewerLayout isShowing={isShowingCodeViewer}>
@@ -180,8 +98,80 @@ const NodeContent = memo(
             onClose={() => {
               setIsShowingCodeViewer(false);
             }}
-            onRequestFix={handleRequestFix}
-            onChange={handleCodeChange}
+            onRequestFix={(error) => {
+              if (!data.entityId) return;
+
+              // Define a proper code fix skill similar to editDoc
+              const codeFixSkill: Skill = {
+                name: 'codeArtifacts',
+                icon: {
+                  type: 'emoji',
+                  value: '🔧',
+                },
+                description: t('codeArtifact.fix.title'),
+                configSchema: {
+                  items: [],
+                },
+              };
+
+              // Get the current model
+              const { selectedModel } = useChatStore.getState();
+
+              addNode(
+                {
+                  type: 'skill',
+                  data: {
+                    title: t('codeArtifact.fix.title'),
+                    entityId: genSkillID(),
+                    metadata: {
+                      contextItems: [
+                        {
+                          type: 'codeArtifact',
+                          title: data?.contentPreview
+                            ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+                            : data.title,
+                          entityId: data.entityId,
+                          metadata: data.metadata,
+                        },
+                      ] as IContextItem[],
+                      query: t('codeArtifact.fix.query', {
+                        errorMessage: error,
+                      }),
+                      selectedSkill: codeFixSkill,
+                      modelInfo: selectedModel,
+                      tplConfig: {
+                        codeErrorConfig: {
+                          value: {
+                            errorMessage: error,
+                            language: data?.metadata?.language || 'typescript',
+                            codeEntityId: data.entityId,
+                          },
+                          configScope: 'runtime' as unknown as ConfigScope,
+                          displayValue: t('codeArtifact.fix.errorConfig'),
+                          label: t('codeArtifact.fix.errorConfig'),
+                        },
+                      },
+                    },
+                  },
+                },
+                [{ type: 'codeArtifact', entityId: data.entityId }],
+                false,
+                true,
+              );
+            }}
+            onChange={(updatedCode) => {
+              if (data.entityId) {
+                setNodeDataByEntity(
+                  {
+                    type: 'codeArtifact',
+                    entityId: data.entityId,
+                  },
+                  {
+                    contentPreview: updatedCode,
+                  },
+                );
+              }
+            }}
             readOnly={true}
           />
         )}
@@ -189,19 +179,17 @@ const NodeContent = memo(
     );
   },
   (prevProps, nextProps) => {
-    // Basic equality check for content
+    // Compare content
     const contentEqual = prevProps.data?.contentPreview === nextProps.data?.contentPreview;
 
-    // Check metadata properties
+    // Compare metadata properties
     const languageEqual = prevProps.data?.metadata?.language === nextProps.data?.metadata?.language;
     const statusEqual = prevProps.data?.metadata?.status === nextProps.data?.metadata?.status;
     const activeTabEqual =
       prevProps.data?.metadata?.activeTab === nextProps.data?.metadata?.activeTab;
+    const sizeModeEqual = prevProps.data?.metadata?.sizeMode === nextProps.data?.metadata?.sizeMode;
 
-    // Check operation state
-    const operatingEqual = prevProps.isOperating === nextProps.isOperating;
-
-    return contentEqual && languageEqual && statusEqual && activeTabEqual && operatingEqual;
+    return contentEqual && languageEqual && statusEqual && activeTabEqual && sizeModeEqual;
   },
 );
 

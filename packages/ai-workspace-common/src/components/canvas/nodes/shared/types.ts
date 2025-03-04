@@ -94,6 +94,16 @@ export type ImageNodeMeta = {
   storageKey: string;
 };
 
+// Website node metadata
+export interface WebsiteNodeMeta {
+  url?: string;
+  isEditing?: boolean;
+  viewMode?: 'form' | 'preview';
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
+
 // Type mapping for node metadata
 export type NodeMetadataMap = {
   document: DocumentNodeMeta;
@@ -103,6 +113,7 @@ export type NodeMetadataMap = {
   response: ResponseNodeMeta;
   image: ImageNodeMeta;
   codeArtifact: CodeArtifactNodeMeta;
+  website: WebsiteNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -128,4 +139,6 @@ export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'imag
 export type CodeArtifactNodeProps = NodeProps<
   Node<CanvasNodeData<CodeArtifactNodeMeta>, 'codeArtifact'>
 > &
+  CommonNodeProps;
+export type WebsiteNodeProps = NodeProps<Node<CanvasNodeData<WebsiteNodeMeta>, 'website'>> &
   CommonNodeProps;

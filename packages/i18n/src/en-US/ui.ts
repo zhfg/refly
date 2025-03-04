@@ -743,6 +743,7 @@ const translations = {
       skill: 'Skill',
       image: 'Image',
       codeArtifact: 'Code Artifact',
+      website: 'Website',
     },
     export: {
       success: 'Image exported successfully',
@@ -852,6 +853,8 @@ const translations = {
       showTemplates: 'Show Templates',
       exportImage: 'Export Image',
       copyLink: 'Copy Link',
+      createWebsite: 'Create Website Node',
+      createWebsiteDescription: 'Create a website node to embed a website in your canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -989,6 +992,22 @@ const translations = {
       mouseDesc: 'Left-click drag to pan, scroll wheel to zoom',
       touchpad: 'Touchpad-Friendly Mode',
       touchpadDesc: 'Two-finger pan to move, pinch to zoom',
+    },
+    nodes: {
+      website: {
+        defaultTitle: 'Website',
+        addWebsite: 'Add Website',
+        websiteUrl: 'Website URL',
+        urlRequired: 'Please enter a website URL',
+        preview: 'Preview',
+        save: 'Save and View Website',
+        copyUrl: 'Copy URL',
+        urlCopied: 'URL copied to clipboard',
+        copyFailed: 'Failed to copy URL',
+        openInNewTab: 'Open in new tab',
+        edit: 'Edit',
+        noUrlProvided: 'No website URL provided',
+      },
     },
   },
   resource: {

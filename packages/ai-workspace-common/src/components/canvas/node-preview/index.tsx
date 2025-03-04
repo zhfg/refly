@@ -8,6 +8,7 @@ import { NodePreviewHeader } from './node-preview-header';
 import { useState, useMemo, useCallback, useRef, memo } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CodeArtifactNodePreview } from './code-artifact';
+import { WebsiteNodePreview } from './website';
 
 const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
@@ -34,6 +35,8 @@ const PreviewComponent = memo(
         return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
       case 'codeArtifact':
         return <CodeArtifactNodePreview node={node} artifactId={node.data.entityId} />;
+      case 'website':
+        return <WebsiteNodePreview node={node} />;
       default:
         return null;
     }
@@ -57,14 +60,18 @@ const PreviewComponent = memo(
     const statusEqual =
       prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
 
-    // Check activeTab for codeArtifact nodes
-    let activeTabEqual = true;
+    // Check node-specific metadata
+    let nodeSpecificEqual = true;
     if (prevProps.node?.type === 'codeArtifact') {
-      activeTabEqual =
+      nodeSpecificEqual =
         prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    } else if (prevProps.node?.type === 'website') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.url === nextProps.node?.data?.metadata?.url &&
+        prevProps.node?.data?.metadata?.viewMode === nextProps.node?.data?.metadata?.viewMode;
     }
 
-    return basicPropsEqual && contentEqual && titleEqual && statusEqual && activeTabEqual;
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && nodeSpecificEqual;
   },
 );
 
@@ -145,13 +152,17 @@ export const NodePreview = memo(
     const statusEqual =
       prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
 
-    // Check activeTab for codeArtifact nodes
-    let activeTabEqual = true;
+    // Check node-specific metadata
+    let nodeSpecificEqual = true;
     if (prevProps.node?.type === 'codeArtifact') {
-      activeTabEqual =
+      nodeSpecificEqual =
         prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    } else if (prevProps.node?.type === 'website') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.url === nextProps.node?.data?.metadata?.url &&
+        prevProps.node?.data?.metadata?.viewMode === nextProps.node?.data?.metadata?.viewMode;
     }
 
-    return basicPropsEqual && contentEqual && titleEqual && statusEqual && activeTabEqual;
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && nodeSpecificEqual;
   },
 );

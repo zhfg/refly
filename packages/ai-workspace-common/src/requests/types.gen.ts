@@ -3108,6 +3108,7 @@ export type InMemorySearchResponse = BaseResponse & {
 export type CanvasNodeType =
   | 'document'
   | 'codeArtifact'
+  | 'website'
   | 'resource'
   | 'skill'
   | 'tool'

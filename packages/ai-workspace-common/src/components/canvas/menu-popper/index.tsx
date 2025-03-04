@@ -14,6 +14,7 @@ import {
   IconImportResource,
   IconMemo,
   IconResource,
+  IconWebsite,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { genMemoID, genSkillID, genResourceID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -83,6 +84,20 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.createCodeArtifact'),
         description: t('canvas.toolbar.createCodeArtifactDescription'),
+        videoUrl:
+          'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+      },
+    },
+    {
+      key: 'createWebsite',
+      icon: IconWebsite,
+      type: 'button',
+      hoverContent: {
+        title: t('canvas.toolbar.createWebsite', 'Create Website Node'),
+        description: t(
+          'canvas.toolbar.createWebsiteDescription',
+          'Create a website node to embed a website in your canvas',
+        ),
         videoUrl:
           'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
       },
@@ -225,6 +240,21 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     });
   };
 
+  const createWebsiteNode = (position: { x: number; y: number }) => {
+    addNode({
+      type: 'website',
+      data: {
+        title: t('canvas.nodes.website.defaultTitle', 'Website'),
+        entityId: genSkillID(),
+        metadata: {
+          viewMode: 'form',
+        },
+      },
+      position,
+    });
+    setOpen(false);
+  };
+
   const handleMenuClick = async ({ key }: { key: string }) => {
     setActiveKey(key);
     switch (key) {
@@ -243,6 +273,9 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       case 'createCodeArtifact':
         createCodeArtifactNode(position);
         setOpen(false);
+        break;
+      case 'createWebsite':
+        createWebsiteNode(position);
         break;
       case 'addResource':
         break;

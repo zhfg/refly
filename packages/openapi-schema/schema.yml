@@ -4905,6 +4905,7 @@ components:
       enum:
         - document
         - codeArtifact
+        - website
         - resource
         - skill
         - tool

@@ -50,37 +50,45 @@ export default memo(
       };
     }, []);
 
-    const handleCopyCode = useCallback(() => {
-      navigator.clipboard
-        .writeText(editorContent)
-        .then(() => {
-          message.success(t('codeArtifact.copySuccess'));
-        })
-        .catch((error) => {
-          console.error('Failed to copy code:', error);
-          message.error(t('codeArtifact.copyError'));
-        });
-    }, [editorContent, t]);
+    const handleCopyCode = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        navigator.clipboard
+          .writeText(editorContent)
+          .then(() => {
+            message.success(t('codeArtifact.copySuccess'));
+          })
+          .catch((error) => {
+            console.error('Failed to copy code:', error);
+            message.error(t('codeArtifact.copyError'));
+          });
+      },
+      [editorContent, t],
+    );
 
-    const handleDownload = useCallback(() => {
-      const fileExtension = getFileExtensionForLanguage(language);
-      const fileName = `${title}.${fileExtension}`;
-      try {
-        const blob = new Blob([editorContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        message.success(t('codeArtifact.downloadSuccess', { fileName }));
-      } catch (error) {
-        console.error('Failed to download file:', error);
-        message.error(t('codeArtifact.downloadError'));
-      }
-    }, [language, editorContent, title, t]);
+    const handleDownload = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        const fileExtension = getFileExtensionForLanguage(language);
+        const fileName = `${title}.${fileExtension}`;
+        try {
+          const blob = new Blob([editorContent], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          message.success(t('codeArtifact.downloadSuccess', { fileName }));
+        } catch (error) {
+          console.error('Failed to download file:', error);
+          message.error(t('codeArtifact.downloadError'));
+        }
+      },
+      [language, editorContent, title, t],
+    );
 
     // Handle content changes from editor
     const handleEditorChange = useCallback(
@@ -93,10 +101,14 @@ export default memo(
       [onChange],
     );
 
-    const handleRefresh = useCallback(() => {
-      setRefresh((r) => r + 1);
-      message.info(t('codeArtifact.refreshing'));
-    }, [t]);
+    const handleRefresh = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        setRefresh((r) => r + 1);
+        message.info(t('codeArtifact.refreshing'));
+      },
+      [t],
+    );
 
     const getFileExtensionForLanguage = useMemo(
       () =>
@@ -125,11 +137,14 @@ export default memo(
     // Memoize the render tabs
     const renderTabs = useMemo(
       () => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3" onClick={(e) => e.stopPropagation()}>
           <Button
             type={activeTab === 'preview' ? 'primary' : 'text'}
             icon={<FiEye className="size-4 mr-1" />}
-            onClick={() => onTabChange('preview')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onTabChange?.('preview');
+            }}
             className={`${activeTab === 'preview' ? 'bg-green-600' : 'text-gray-600'}`}
             size="small"
           >
@@ -139,7 +154,10 @@ export default memo(
           <Button
             type={activeTab === 'code' ? 'primary' : 'text'}
             icon={<FiCode className="size-4 mr-1" />}
-            onClick={() => onTabChange('code')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onTabChange?.('code');
+            }}
             className={`${activeTab === 'code' ? 'bg-green-600' : 'text-gray-600'}`}
             size="small"
           >
@@ -153,7 +171,7 @@ export default memo(
     // Memoize action buttons
     const actionButtons = useMemo(
       () => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
           <Tooltip title={t('codeArtifact.buttons.copy')}>
             <Button
               type="text"
@@ -179,7 +197,16 @@ export default memo(
           </Tooltip>
         </div>
       ),
-      [handleCopyCode, handleDownload, title, language, getFileExtensionForLanguage, t],
+      [
+        handleCopyCode,
+        handleDownload,
+        handleRefresh,
+        title,
+        language,
+        getFileExtensionForLanguage,
+        t,
+        isGenerating,
+      ],
     );
 
     return (
