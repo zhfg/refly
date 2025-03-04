@@ -13,7 +13,6 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
 import { CanvasActionDropdown } from './canvasActionDropdown';
-import { AiFillPicture } from 'react-icons/ai';
 
 interface CanvasListProps {
   visible: boolean;
@@ -35,13 +34,11 @@ const CanvasItem = (props: {
       className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200"
       onClick={() => handleClickCanvas(canvas)}
     >
-      <div className="h-36 px-4 py-3 overflow-hidden">
+      <div className="h-36 overflow-hidden">
         {canvas?.minimapUrl ? (
-          <img src={canvas?.minimapUrl} alt="minimap" className="w-full h-full object-cover" />
+          <img src={canvas?.minimapUrl} alt="minimap" className="w-full h-full p-3 object-cover" />
         ) : (
-          <div className="flex items-center justify-center w-full h-full border border-solid border-gray-200 rounded-md">
-            <AiFillPicture className="text-gray-500" size={40} />
-          </div>
+          <div className="flex items-center justify-center w-full h-full bg-gray-100" />
         )}
       </div>
       <Divider className="m-0 text-gray-200" />
