@@ -211,6 +211,7 @@ export const CodeArtifactNode = memo(
     const { edges } = useCanvasData();
     const { getNode } = useReactFlow();
     const { addNode } = useAddNode();
+    const { t } = useTranslation();
 
     const { sizeMode = 'adaptive' } = data?.metadata ?? {};
 
@@ -291,6 +292,22 @@ export const CodeArtifactNode = memo(
     }, [insertToDoc, data]);
 
     const handleAskAI = useCallback(() => {
+      // Get the current model
+      const { skillSelectedModel } = useChatStore.getState();
+
+      // Define a default code fix skill
+      const defaultCodeFixSkill: Skill = {
+        name: 'codeArtifacts',
+        icon: {
+          type: 'emoji',
+          value: '🔧',
+        },
+        description: t('codeArtifact.fix.title'),
+        configSchema: {
+          items: [],
+        },
+      };
+
       addNode(
         {
           type: 'skill',
@@ -302,12 +319,18 @@ export const CodeArtifactNode = memo(
                 {
                   type: 'codeArtifact',
                   title: data?.contentPreview
-                    ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+                    ? `${data.title} - ${data?.contentPreview?.slice(0, 10)}`
                     : data.title,
                   entityId: data.entityId,
-                  metadata: data.metadata,
+                  metadata: {
+                    ...data.metadata,
+                    withHistory: true,
+                  },
                 },
               ] as IContextItem[],
+              query: '',
+              selectedSkill: defaultCodeFixSkill,
+              modelInfo: skillSelectedModel,
             },
           },
         },
@@ -315,7 +338,7 @@ export const CodeArtifactNode = memo(
         false,
         true,
       );
-    }, [data, addNode]);
+    }, [data, addNode, t]);
 
     // Add event handling
     useEffect(() => {

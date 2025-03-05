@@ -387,6 +387,8 @@ export const SkillResponseNode = memo(
     const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
+      const { metadata } = data;
+      const { actionMeta, modelInfo } = metadata;
       addNode(
         {
           type: 'skill',
@@ -405,6 +407,8 @@ export const SkillResponseNode = memo(
                   },
                 },
               ],
+              selectedSkill: actionMeta,
+              modelInfo,
             },
           },
         },
