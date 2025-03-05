@@ -1,6 +1,6 @@
 import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { Button, Tooltip, Divider, message } from 'antd';
+import { Button, Tooltip, Divider, message, Select } from 'antd';
 import Renderer from './render';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,23 @@ const getSimpleTypeDescription = (type: CodeArtifactType): string => {
     'text/html': 'HTML',
   };
   return typeMap[type] ?? type;
+};
+
+// Function to get all available artifact types with labels
+const getArtifactTypeOptions = () => {
+  const typeMap: Record<CodeArtifactType, string> = {
+    'application/refly.artifacts.react': 'React',
+    'image/svg+xml': 'SVG',
+    'application/refly.artifacts.mermaid': 'Mermaid',
+    'text/markdown': 'Markdown',
+    'application/refly.artifacts.code': 'Code',
+    'text/html': 'HTML',
+  };
+
+  return Object.entries(typeMap).map(([value, label]) => ({
+    value: value as CodeArtifactType,
+    label,
+  }));
 };
 
 // Function to map CodeArtifactType to appropriate Monaco editor language
@@ -59,6 +76,7 @@ export default memo(
     onChange,
     readOnly = false,
     type = 'text/html',
+    onTypeChange,
   }: {
     code: string;
     language: string;
@@ -71,8 +89,9 @@ export default memo(
     onChange?: (code: string) => void;
     readOnly?: boolean;
     type?: CodeArtifactType;
+    onTypeChange?: (type: CodeArtifactType) => void;
   }) {
-    console.log('code-artifact-viewer', code, language, title, type);
+    // console.log('code-artifact-viewer', code, language, title, type);
     const { t } = useTranslation();
     const [refresh, setRefresh] = useState(0);
     // Track editor content for controlled updates
@@ -187,6 +206,8 @@ export default memo(
       [type],
     );
 
+    console.log('code-artifact-viewer', type);
+
     // Memoize the render tabs
     const renderTabs = useMemo(
       () => (
@@ -262,6 +283,8 @@ export default memo(
       ],
     );
 
+    // console.log('code-artifact-viewer', code, language, title, type);
+
     return (
       <div
         className="flex flex-col h-full border border-gray-200 bg-white"
@@ -287,8 +310,19 @@ export default memo(
 
         {/* Breadcrumb and action buttons */}
         <div className="flex justify-between items-center py-2 border-b border-gray-200 bg-white">
-          <div className="text-sm text-gray-600">
-            <span className="text-gray-500">{getSimpleTypeDescription(type)}</span>
+          <div className="flex items-center space-x-2">
+            {onTypeChange ? (
+              <Select
+                value={type}
+                onChange={onTypeChange}
+                options={getArtifactTypeOptions()}
+                size="small"
+                className="w-32"
+                dropdownMatchSelectWidth={false}
+              />
+            ) : (
+              <span className="text-sm text-gray-500">{getSimpleTypeDescription(type)}</span>
+            )}
           </div>
 
           {actionButtons}

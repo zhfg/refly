@@ -30,27 +30,33 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
+import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { ConfigScope, Skill } from '@refly/openapi-schema';
 
+interface NodeContentProps {
+  data: CanvasNodeData<CodeArtifactNodeMeta>;
+  isOperating?: boolean;
+}
+
 const NodeContent = memo(
-  ({ data }: { data: CanvasNodeData<CodeArtifactNodeMeta>; isOperating: boolean }) => {
+  ({ data, isOperating }: NodeContentProps) => {
     const { language = 'html', activeTab = 'code', type = 'text/html' } = data?.metadata ?? {};
     const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
-    const { t } = useTranslation();
-    const setNodeDataByEntity = useSetNodeDataByEntity();
-    const { addNode } = useAddNode();
-
-    // Use activeTab from metadata with fallback to 'code'
     const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(
       activeTab as 'code' | 'preview',
     );
+    const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
+    const { t } = useTranslation();
+
+    // Use isOperating for UI state (disabled controls when operating)
+    const isReadOnly = !!isOperating;
 
     // Sync local state with metadata changes
     useEffect(() => {
@@ -59,14 +65,23 @@ const NodeContent = memo(
       if (metadataActiveTab && metadataActiveTab !== currentTab) {
         setCurrentTab(metadataActiveTab);
       }
-    }, [data?.metadata?.activeTab, currentTab]);
+
+      // Update type if it changes in metadata
+      const metadataType = data?.metadata?.type as CodeArtifactType;
+      if (metadataType && metadataType !== currentType) {
+        setCurrentType(metadataType);
+      }
+    }, [data?.metadata?.activeTab, currentTab, data?.metadata?.type, currentType]);
+
+    const setNodeDataByEntity = useSetNodeDataByEntity();
+    const { addNode } = useAddNode();
 
     // Update node data when tab changes
     const handleTabChange = useCallback(
       (tab: 'code' | 'preview') => {
         setCurrentTab(tab);
 
-        if (data.entityId) {
+        if (data?.entityId) {
           setNodeDataByEntity(
             {
               type: 'codeArtifact',
@@ -81,7 +96,32 @@ const NodeContent = memo(
           );
         }
       },
-      [data.entityId, data.metadata, setNodeDataByEntity],
+      [data?.entityId, data?.metadata, setNodeDataByEntity],
+    );
+
+    // Handle type changes
+    const handleTypeChange = useCallback(
+      (newType: CodeArtifactType) => {
+        // Update local state first
+        setCurrentType(newType);
+
+        // Ensure newType is a valid CodeArtifactType
+        if (data?.entityId && newType) {
+          setNodeDataByEntity(
+            {
+              type: 'codeArtifact',
+              entityId: data.entityId,
+            },
+            {
+              metadata: {
+                ...data?.metadata,
+                type: newType,
+              },
+            },
+          );
+        }
+      },
+      [data?.entityId, data?.metadata, setNodeDataByEntity, setCurrentType],
     );
 
     // Always show the content, even when generating
@@ -89,12 +129,13 @@ const NodeContent = memo(
       <CodeViewerLayout isShowing={isShowingCodeViewer}>
         {isShowingCodeViewer && (
           <CodeViewer
-            code={data.contentPreview || ''}
+            code={data?.contentPreview || ''}
             language={language}
-            title={data.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
+            title={data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
             isGenerating={data?.metadata?.status === 'generating'}
             activeTab={currentTab}
             onTabChange={handleTabChange}
+            onTypeChange={handleTypeChange}
             onClose={() => {
               setIsShowingCodeViewer(false);
             }}
@@ -172,8 +213,8 @@ const NodeContent = memo(
                 );
               }
             }}
-            readOnly={true}
-            type={type}
+            readOnly={isReadOnly}
+            type={currentType}
           />
         )}
       </CodeViewerLayout>
@@ -462,6 +503,9 @@ export const CodeArtifactNode = memo(
     const prevActiveTab = prevProps.data?.metadata?.activeTab;
     const nextActiveTab = nextProps.data?.metadata?.activeTab;
     const activeTabEqual = prevActiveTab === nextActiveTab;
+    const prevType = prevProps.data?.metadata?.type;
+    const nextType = nextProps.data?.metadata?.type;
+    const typeEqual = prevType === nextType;
 
     return (
       prevProps.id === nextProps.id &&
@@ -475,6 +519,7 @@ export const CodeArtifactNode = memo(
       prevProps.data?.metadata?.status === nextProps.data?.metadata?.status &&
       prevProps.data?.metadata?.language === nextProps.data?.metadata?.language &&
       activeTabEqual &&
+      typeEqual &&
       styleEqual &&
       sizeModeEqual
     );
