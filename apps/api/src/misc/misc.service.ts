@@ -223,6 +223,9 @@ export class MiscService implements OnModuleInit {
    * @param storageKey - The storage key of the file to publish
    */
   async publishFile(storageKey: string) {
+    if (!storageKey) {
+      return '';
+    }
     const stream = await this.minioClient('private').getObject(storageKey);
     await this.minioClient('public').putObject(storageKey, stream);
     return this.generateFileURL({ visibility: 'public', storageKey });
