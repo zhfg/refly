@@ -8,6 +8,8 @@ import { SkillResponseNode } from './skill-response';
 import { MemoNode } from './memo/memo';
 import { GroupNode } from './group';
 import { ImageNode } from './image';
+import { CodeArtifactNode } from './code-artifact';
+import { WebsiteNode } from './website';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -16,6 +18,7 @@ import {
   SkillNodeMeta,
   ToolNodeMeta,
   ResponseNodeMeta,
+  CodeArtifactNodeMeta,
 } from './shared/types';
 import { t } from 'i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
@@ -30,6 +33,9 @@ export * from './skill-response';
 export * from './memo/memo';
 export * from './group';
 export * from './image';
+export * from './code-artifact';
+export * from './website';
+
 // Node types mapping
 export const nodeTypes: NodeTypes = {
   document: DocumentNode,
@@ -40,6 +46,8 @@ export const nodeTypes: NodeTypes = {
   memo: MemoNode,
   group: GroupNode,
   image: ImageNode,
+  codeArtifact: CodeArtifactNode,
+  website: WebsiteNode,
 };
 
 // Helper function to prepare node data
@@ -135,6 +143,15 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         sizeMode: 'adaptive',
         style: {},
       };
+
+    case 'codeArtifact':
+      return {
+        status: 'generating',
+        language: 'typescript',
+        sizeMode: 'adaptive',
+        style: {},
+        activeTab: 'code',
+      } as CodeArtifactNodeMeta;
 
     default:
       return {};

@@ -12,23 +12,23 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { getRuntime } from '@refly/utils/env';
 import {
   IconAskAI,
-  IconAskAIInput,
   IconCreateDocument,
   IconDocument,
   IconImportResource,
   IconMemo,
   IconResource,
   IconTemplate,
+  IconCodeArtifact,
+  IconWebsite,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { ToolButton, type ToolbarItem } from './tool-button';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
-import { genMemoID, genSkillID } from '@refly-packages/utils/id';
+import { genMemoID, genSkillID, genCodeArtifactID } from '@refly-packages/utils/id';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 interface ToolbarProps {
@@ -74,6 +74,38 @@ const useToolbarConfig = (nodeLength: number) => {
             title: t('canvas.toolbar.askAI'),
             description: t('canvas.toolbar.askAIDescription'),
             videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
+          },
+        },
+        {
+          icon: IconCodeArtifact,
+          value: 'createCodeArtifact',
+          type: 'button',
+          domain: 'codeArtifact',
+          tooltip: t('canvas.toolbar.createCodeArtifact', 'Create Code Artifact'),
+          hoverContent: {
+            title: t('canvas.toolbar.createCodeArtifact', 'Create Code Artifact'),
+            description: t(
+              'canvas.toolbar.createCodeArtifactDescription',
+              'Create an empty code artifact to write your code',
+            ),
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+          },
+        },
+        {
+          icon: IconWebsite,
+          value: 'createWebsite',
+          type: 'button',
+          domain: 'website',
+          tooltip: t('canvas.toolbar.createWebsite', 'Create Website Node'),
+          hoverContent: {
+            title: t('canvas.toolbar.createWebsite', 'Create Website Node'),
+            description: t(
+              'canvas.toolbar.createWebsiteDescription',
+              'Create a website node to embed a website in your canvas',
+            ),
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
           },
         },
         {
@@ -128,34 +160,34 @@ const useToolbarConfig = (nodeLength: number) => {
           domain: 'document',
           tooltip: t('canvas.toolbar.addDocument'),
         },
-        {
-          type: 'divider',
-          value: 'divider1',
-        },
-        {
-          icon: IconAskAIInput,
-          value: 'handleLaunchpad',
-          type: 'button',
-          domain: 'launchpad',
-          tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
-          hoverContent: {
-            title: t('canvas.toolbar.toggleLaunchpadTitle'),
-            videoUrl:
-              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
-          },
-        },
-        {
-          icon: IoAnalyticsOutline,
-          value: 'showEdges',
-          type: 'button',
-          domain: 'edges',
-          tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
-          hoverContent: {
-            title: t('canvas.toolbar.toggleEdgeTitle'),
-            videoUrl:
-              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
-          },
-        },
+        // {
+        //   type: 'divider',
+        //   value: 'divider1',
+        // },
+        // {
+        //   icon: IconAskAIInput,
+        //   value: 'handleLaunchpad',
+        //   type: 'button',
+        //   domain: 'launchpad',
+        //   tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+        //   hoverContent: {
+        //     title: t('canvas.toolbar.toggleLaunchpadTitle'),
+        //     videoUrl:
+        //       'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+        //   },
+        // },
+        // {
+        //   icon: IoAnalyticsOutline,
+        //   value: 'showEdges',
+        //   type: 'button',
+        //   domain: 'edges',
+        //   tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+        //   hoverContent: {
+        //     title: t('canvas.toolbar.toggleEdgeTitle'),
+        //     videoUrl:
+        //       'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
+        //   },
+        // },
         ...(nodeLength === 0 && showTemplateButton ? [showTemplateConfig] : []),
       ] as ToolbarItem[],
       modals: {
@@ -244,6 +276,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
   }));
 
   const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
+
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
@@ -281,11 +314,45 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
     });
   }, [addNode, t]);
 
+  const createCodeArtifactNode = useCallback(() => {
+    // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
+    const codeArtifactId = genCodeArtifactID();
+    addNode({
+      type: 'codeArtifact',
+      data: {
+        title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
+        entityId: codeArtifactId,
+        contentPreview: '',
+        metadata: {
+          status: 'finish',
+          language: 'typescript',
+          activeTab: 'code',
+        },
+      },
+    });
+  }, [addNode, t]);
+
+  const createWebsiteNode = useCallback(() => {
+    addNode({
+      type: 'website',
+      data: {
+        title: t('canvas.nodes.website.defaultTitle', 'Website'),
+        entityId: genSkillID(),
+        metadata: {
+          viewMode: 'form',
+        },
+      },
+    });
+  }, [addNode, t]);
+
   const handleToolSelect = useCallback(
     (_event: React.MouseEvent, tool: string) => {
       switch (tool) {
         case 'importResource':
           setImportResourceModalVisible(true);
+          break;
+        case 'createWebsite':
+          createWebsiteNode();
           break;
         case 'createDocument':
           createSingleDocumentInCanvas();
@@ -302,6 +369,9 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
         case 'createMemo':
           createMemo();
           break;
+        case 'createCodeArtifact':
+          createCodeArtifactNode();
+          break;
         case 'showTemplates':
           setShowTemplates(!showTemplates);
           break;
@@ -316,6 +386,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
       toggleEdgeVisible,
       createSkillNode,
       createMemo,
+      createCodeArtifactNode,
       onToolSelect,
       setShowTemplates,
     ],

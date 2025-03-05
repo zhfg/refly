@@ -8,7 +8,11 @@ import {
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
 import { countToken } from './token';
-import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD } from './constants';
+import {
+  MAX_NEED_RECALL_CONTENT_TOKEN,
+  MAX_NEED_RECALL_TOKEN,
+  SHORT_CONTENT_THRESHOLD,
+} from './constants';
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
 import { truncateTextWithToken } from './truncator';
@@ -175,7 +179,7 @@ export async function processSelectedContentWithSimilarity(
   for (const content of sortedContent) {
     const contentTokens = countToken(content.content);
 
-    if (contentTokens > MAX_NEED_RECALL_TOKEN || !content.metadata?.useWholeContent) {
+    if (contentTokens > MAX_NEED_RECALL_CONTENT_TOKEN) {
       // 2.1 大内容，直接走召回
       const contentMeta = content?.metadata as any as SkillContextContentItemMetadata;
       const relevantChunks = await inMemoryGetRelevantChunks(

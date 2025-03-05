@@ -14,10 +14,18 @@ interface ReasoningContentPreviewProps {
   isOperating: boolean;
   stepStatus: 'executing' | 'finish';
   className?: string;
+  resultId?: string;
 }
 
 export const ReasoningContentPreview = memo(
-  ({ content, sources, isOperating, stepStatus, className = '' }: ReasoningContentPreviewProps) => {
+  ({
+    content,
+    sources,
+    isOperating,
+    stepStatus,
+    className = '',
+    resultId,
+  }: ReasoningContentPreviewProps) => {
     const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(stepStatus !== 'executing');
 
@@ -80,6 +88,7 @@ export const ReasoningContentPreview = memo(
                 className={markdownClassName}
                 content={getParsedReasoningContent(content)}
                 sources={sources || []}
+                resultId={resultId}
               />
             </div>
           )}

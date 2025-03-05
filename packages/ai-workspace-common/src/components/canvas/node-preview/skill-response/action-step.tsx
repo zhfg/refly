@@ -163,7 +163,11 @@ const ReasoningContent = memo(
                 />
               </div>
               <div className={`skill-response-reasoning-${resultId}-${step.name}`}>
-                <Markdown content={getParsedReasoningContent(reasoningContent)} sources={sources} />
+                <Markdown
+                  content={getParsedReasoningContent(reasoningContent)}
+                  sources={sources}
+                  resultId={resultId}
+                />
                 <SelectionContext
                   containerClass={`skill-response-reasoning-${resultId}-${step.name}`}
                   getContextItem={buildContextItem}
@@ -202,10 +206,12 @@ const ActualContent = memo(
 
     if (!content) return null;
 
+    console.log('resultId', resultId);
+
     return (
       <div className="my-3 text-gray-600 text-base">
         <div className={`skill-response-content-${resultId}-${step.name}`}>
-          <Markdown content={content} sources={sources} />
+          <Markdown content={content} sources={sources} resultId={resultId} />
           {!readonly && (
             <SelectionContext
               containerClass={`skill-response-content-${resultId}-${step.name}`}

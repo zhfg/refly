@@ -31,6 +31,22 @@ const translations = {
       },
     },
   },
+  codeArtifacts: {
+    name: '小组件生成',
+    description: '根据需求和上下文生成小组件',
+    placeholder: '让 AI 帮您生成一个小组件...',
+    steps: {
+      analyzeQuery: {
+        name: '分析需求',
+      },
+      analyzeContext: {
+        name: '上下文分析',
+      },
+      generateCodeArtifact: {
+        name: '生成小组件',
+      },
+    },
+  },
   generateDoc: {
     name: '文档写作',
     description: '根据需求和上下文进行写作',

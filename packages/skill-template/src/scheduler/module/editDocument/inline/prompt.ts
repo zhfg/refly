@@ -16,6 +16,7 @@ import {
 } from './context';
 import { commonQueryAndContextPriorityRules, editDocumentContextRules } from '../common';
 import { buildSpecificQueryInstruction } from '../../common/query';
+import { buildFormatDisplayInstruction } from '../../common/format';
 
 // response.reflyDocument frontend need return surround content
 
@@ -150,6 +151,8 @@ ${inlineHighlightContextEmphasisPrompt}
 ${inlineOperationRulesPrompt}
 
 ${buildLocaleFollowInstruction(locale)}
+
+${buildFormatDisplayInstruction()}
 `;
 };
 

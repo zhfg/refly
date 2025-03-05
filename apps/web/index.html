@@ -45,6 +45,14 @@
       crossorigin="anonymous" />
     <!-- Load configuration before the app -->
     <script src="/config.js"></script>
+    <!-- Process polyfill -->
+    <script>
+      window.process = window.process || {
+        env: {},
+        browser: true,
+        version: '0.0.0'
+      };
+    </script>
   </head>
   <body class="font-inter">
     <div id="root"></div>

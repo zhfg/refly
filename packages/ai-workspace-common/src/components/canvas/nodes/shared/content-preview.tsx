@@ -8,10 +8,11 @@ interface ContentPreviewProps {
   sizeMode: 'compact' | 'adaptive';
   isOperating: boolean;
   className?: string;
+  resultId?: string;
 }
 
 export const ContentPreview = memo(
-  ({ content, sources, sizeMode, isOperating, className = '' }: ContentPreviewProps) => {
+  ({ content, sources, sizeMode, isOperating, className = '', resultId }: ContentPreviewProps) => {
     const previewContent = content ?? '';
 
     // Memoize className to prevent re-renders when only isOperating changes
@@ -26,7 +27,12 @@ export const ContentPreview = memo(
     );
 
     return (
-      <Markdown className={markdownClassName} content={previewContent} sources={sources ?? []} />
+      <Markdown
+        className={markdownClassName}
+        content={previewContent}
+        sources={sources ?? []}
+        resultId={resultId}
+      />
     );
   },
   (prevProps, nextProps) => {

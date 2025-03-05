@@ -1158,7 +1158,7 @@ export const ActionStatusSchema = {
 export const ArtifactTypeSchema = {
   type: 'string',
   description: 'Artifact type',
-  enum: ['document'],
+  enum: ['document', 'codeArtifact'],
 } as const;
 
 export const ArtifactStatusSchema = {
@@ -4639,6 +4639,8 @@ export const CanvasNodeTypeSchema = {
   type: 'string',
   enum: [
     'document',
+    'codeArtifact',
+    'website',
     'resource',
     'skill',
     'tool',

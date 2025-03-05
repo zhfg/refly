@@ -20,6 +20,7 @@ import { countToken } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
+import { processContextUrls } from '../utils/url-processing';
 
 // prompts
 import * as generateDocument from '../scheduler/module/generateDocument';
@@ -83,13 +84,25 @@ export class GenerateDoc extends BaseSkill {
     });
 
     // Extract URLs from the query and crawl them with optimized concurrent processing
-    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
-      concurrencyLimit: 5, // Increase concurrent URL crawling limit
-      batchSize: 8, // Increase batch size for URL processing
+    const { sources: queryUrlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+      concurrencyLimit: 5,
+      batchSize: 8,
     });
 
     this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
-    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+    this.engine.logger.log(`Extracted query URL sources count: ${queryUrlSources.length}`);
+
+    // Process URLs from frontend context if available
+    const contextUrls = config.configurable?.urls || [];
+    const contextUrlSources = await processContextUrls(contextUrls, config, this);
+
+    if (contextUrlSources.length > 0) {
+      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
+    }
+
+    // Combine URL sources from context and query extraction
+    const urlSources = [...contextUrlSources, ...(queryUrlSources || [])];
+    this.engine.logger.log(`Total combined URL sources: ${urlSources.length}`);
 
     let context = '';
     let sources: Source[] = [];
@@ -112,7 +125,7 @@ export class GenerateDoc extends BaseSkill {
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
           rewrittenQueries,
-          urlSources, // Pass URL sources to the prepareContext function
+          urlSources, // Pass combined URL sources to prepareContext
         },
         {
           config,

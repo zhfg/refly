@@ -89,6 +89,10 @@ export const convertContextItemsToInvokeParams = (
   items: IContextItem[],
   getHistory: (item: IContextItem) => ActionResult[],
   getMemo?: (item: IContextItem) => { content: string; title: string }[],
+  getCodeArtifact?: (item: IContextItem) => { content: string; title: string }[],
+  getImages?: (
+    item: IContextItem,
+  ) => { storageKey: string; title: string; entityId: string; metadata: any }[],
 ): { context: SkillContext; resultHistory: ActionResult[]; images: string[] } => {
   const context = {
     contentList: [
@@ -114,6 +118,18 @@ export const convertContextItemsToInvokeParams = (
               domain: 'memo',
               entityId: item.entityId,
               title: memo.title,
+            },
+          })),
+        ) ?? []),
+      ...(items
+        ?.filter((item) => item.type === 'codeArtifact' && getCodeArtifact)
+        ?.flatMap((item) =>
+          getCodeArtifact(item).map((code) => ({
+            content: code.content,
+            metadata: {
+              domain: 'codeArtifact',
+              entityId: item.entityId,
+              title: code.title,
             },
           })),
         ) ?? []),
@@ -146,6 +162,15 @@ export const convertContextItemsToInvokeParams = (
           url: getClientOrigin(),
         },
       })),
+    urls: items
+      ?.filter((item) => item?.type === 'website')
+      .map((item) => ({
+        url: item.metadata?.url || '',
+        metadata: {
+          title: item.title,
+          ...item.metadata,
+        },
+      })),
   };
   const resultHistory = items
     ?.filter((item) => item.type === 'skillResponse')
@@ -156,8 +181,15 @@ export const convertContextItemsToInvokeParams = (
     });
   const images = items
     ?.filter((item) => item.type === 'image')
-    .map((item) => item.metadata?.storageKey)
-    .filter(Boolean);
+    .flatMap((item) => {
+      if (getImages) {
+        return getImages(item)
+          .map((img) => img.storageKey)
+          .filter(Boolean);
+      }
+      // Fallback to existing behavior if getImages is not provided
+      return item.metadata?.storageKey ? [item.metadata.storageKey] : [];
+    });
 
   return { context, resultHistory, images };
 };

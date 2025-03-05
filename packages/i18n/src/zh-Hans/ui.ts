@@ -743,6 +743,19 @@ const translations = {
   artifact: {
     generating: '生成中',
     completed: '已完成',
+    openComponent: '点击打开组件',
+    contentTitle: '画布内容',
+    loadingContent: '加载内容中...',
+    thinking: '思考中...',
+    svg: {
+      downloadAsSvg: '下载为 SVG',
+      downloadAsPng: '下载为 PNG',
+      copyToClipboard: '复制 PNG 到剪贴板',
+      downloadSuccess: '下载成功',
+      downloadError: '下载失败',
+      copySuccess: '已复制到剪贴板',
+      copyError: '复制失败',
+    },
   },
   resourceType: {
     weblink: '网页链接',
@@ -760,6 +773,8 @@ const translations = {
       memo: '备忘录',
       skill: '技能',
       image: '图片',
+      codeArtifact: '代码组件',
+      website: '网站',
     },
     export: {
       success: '导出图片成功',
@@ -813,6 +828,8 @@ const translations = {
       addMemo: '添加备忘录',
       createDocument: '新建文档',
       createDocumentDescription: '创建一篇文档以用于写作。',
+      createCodeArtifact: '创建代码组件',
+      createCodeArtifactDescription: '创建一个空白代码组件用于编写您的代码',
       addDocument: '添加文档',
       addDocumentDescription:
         '用户在 Refly 中创建的内容，通过 AI 写作创建，或手动创建新文档，可以通过 AI 知识库搜索问答。',
@@ -862,6 +879,8 @@ const translations = {
       showTemplates: '显示模板',
       exportImage: '导出图片',
       copyLink: '复制链接',
+      createWebsite: '创建网站节点',
+      createWebsiteDescription: '创建一个网站节点以在画布中嵌入网站',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -993,6 +1012,22 @@ const translations = {
       touchpad: '触控板友好模式',
       touchpadDesc: '双指同向移动拖动，双指张开捏合缩放',
     },
+    nodes: {
+      website: {
+        defaultTitle: '网站',
+        addWebsite: '添加网站',
+        websiteUrl: '网站 URL',
+        urlRequired: '请输入网站 URL',
+        preview: '预览',
+        save: '保存并查看网站',
+        copyUrl: '复制 URL',
+        urlCopied: 'URL 已复制到剪贴板',
+        copyFailed: '复制失败',
+        openInNewTab: '在新标签页打开',
+        edit: '编辑',
+        noUrlProvided: '未提供网站 URL',
+      },
+    },
   },
   resource: {
     multilingualSearch: {
@@ -1114,6 +1149,36 @@ const translations = {
       weblink: '网页链接',
       text: '文本',
     },
+  },
+  codeArtifact: {
+    fix: {
+      title: '修复代码错误',
+      query: '帮我优化这段代码。我遇到了以下错误：\n\n{{errorMessage}}',
+      tryToFix: '尝试修复',
+      error: '错误',
+      errorConfig: '代码错误配置',
+      requestingFix: '正在请求 AI 修复错误...',
+      closeErrorMessage: '关闭错误信息',
+      copyErrorMessage: '复制错误信息',
+      errorDismissed: '已关闭错误信息',
+    },
+    copySuccess: '代码已复制到剪贴板',
+    copyError: '复制代码失败',
+    downloadSuccess: '已下载 {{fileName}}',
+    downloadError: '下载文件失败',
+    refreshing: '预览刷新中...',
+    errorCopySuccess: '错误信息已复制到剪贴板',
+    errorCopyFailed: '复制错误信息失败',
+    tabs: {
+      preview: '预览',
+      code: '代码',
+    },
+    buttons: {
+      refresh: '刷新',
+      copy: '复制代码',
+      download: '下载为 {{fileName}}',
+    },
+    defaultTitle: '代码组件',
   },
   loggedHomePage: {
     searchEverything: '搜索任何内容',
