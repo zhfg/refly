@@ -59,7 +59,6 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
-import { useUploadMinimap } from '@refly-packages/ai-workspace-common/hooks/use-upload-minimap';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -294,6 +293,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         setSelectedEdgeId(null);
       }
 
+      if (readonly) return;
+
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastClickTime;
 
@@ -381,8 +382,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     };
   }, [provider?.status]);
 
-  const { handleUpdateCanvasMiniMap } = useUploadMinimap(canvasId);
-
   useEffect(() => {
     const unsubscribe = locateToNodePreviewEmitter.on(
       'locateToNodePreview',
@@ -403,12 +402,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         }
       },
     );
-
-    setTimeout(() => {
-      if (!readonly) {
-        handleUpdateCanvasMiniMap();
-      }
-    }, 3000);
 
     return unsubscribe;
   }, [canvasId]);

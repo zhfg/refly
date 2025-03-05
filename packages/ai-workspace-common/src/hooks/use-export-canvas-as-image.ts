@@ -300,7 +300,10 @@ export const useExportCanvasAsImage = () => {
 
       // create an svg blob
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      return svgBlob;
+
+      // Convert SVG Blob to PNG
+      const pngBlob = await svgBlobToPngBlob(svgBlob, svgClone);
+      return pngBlob ?? svgBlob;
     } catch (error) {
       console.error('Error exporting minimap as image:', error);
       return null;
@@ -309,5 +312,56 @@ export const useExportCanvasAsImage = () => {
     }
   }, [reactFlowInstance, isMinimapLoading, imageToBase64]);
 
-  return { exportCanvasAsImage, isLoading, getMinimap, isMinimapLoading };
+  const svgBlobToPngBlob = useCallback(
+    async (svgBlob: Blob, svgElement: SVGSVGElement): Promise<Blob | null> => {
+      try {
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        const width = svgElement?.width?.baseVal?.value ?? 800;
+        const height = svgElement?.height?.baseVal?.value ?? 600;
+
+        const img = new Image();
+        img.width = width;
+        img.height = height;
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = svgUrl;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('canvas context not found');
+        }
+
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        URL.revokeObjectURL(svgUrl);
+
+        return new Promise((resolve) => {
+          canvas.toBlob(
+            (blob) => {
+              resolve(blob);
+            },
+            'image/png',
+            1.0,
+          );
+        });
+      } catch (error) {
+        console.error('Error converting SVG to PNG:', error);
+        return null;
+      }
+    },
+    [],
+  );
+
+  return { exportCanvasAsImage, isLoading, getMinimap, isMinimapLoading, svgBlobToPngBlob };
 };

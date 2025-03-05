@@ -5,6 +5,7 @@ import { WebsiteNodeMeta } from '../nodes/shared/types';
 import { Button, Form, Input, message, Tooltip } from 'antd';
 import { FiCode, FiEye, FiExternalLink, FiCopy } from 'react-icons/fi';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface WebsiteNodePreviewProps {
   node: CanvasNode<WebsiteNodeMeta>;
@@ -16,6 +17,7 @@ const WebsiteNodePreviewComponent = ({ node }: WebsiteNodePreviewProps) => {
   const [isEditing, setIsEditing] = useState(viewMode === 'form' || !url);
   const formRef = useRef<any>(null);
   const setNodeDataByEntity = useSetNodeDataByEntity();
+  const { readonly } = useCanvasContext();
 
   // Initialize form with current URL when entering edit mode
   useEffect(() => {
@@ -124,10 +126,10 @@ const WebsiteNodePreviewComponent = ({ node }: WebsiteNodePreviewProps) => {
               },
             ]}
           >
-            <Input placeholder="https://example.com" className="w-full" />
+            <Input placeholder="https://example.com" className="w-full" disabled={readonly} />
           </Form.Item>
           <Form.Item className="mt-4">
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button type="primary" htmlType="submit" className="w-full" disabled={readonly}>
               {t('canvas.nodes.website.save', 'Save and View Website')}
             </Button>
           </Form.Item>
