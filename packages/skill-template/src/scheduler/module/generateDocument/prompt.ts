@@ -9,6 +9,7 @@ import { noContextExamples, contextualExamples } from './examples';
 import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
+import { buildFormatDisplayInstruction } from '../common/format';
 
 export const buildGenerateDocumentCommonPrompt = (example: string) => `
 ## Core Capabilities and Goals
@@ -143,6 +144,8 @@ export const buildGenerateDocumentUserPrompt = ({
      ${chatHistoryReminder()}
 
      ${buildLocaleFollowInstruction(locale)}
+
+     ${buildFormatDisplayInstruction()}
      `;
   }
 
@@ -166,6 +169,8 @@ ${buildQueryIntentAnalysisInstruction()}
  ${chatHistoryReminder()}
 
  ${buildLocaleFollowInstruction(locale)}
+
+ ${buildFormatDisplayInstruction()}
  `;
 };
 

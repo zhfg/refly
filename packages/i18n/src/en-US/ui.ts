@@ -768,6 +768,19 @@ const translations = {
   artifact: {
     generating: 'Generating',
     completed: 'Completed',
+    openComponent: 'Click to open component',
+    contentTitle: 'Canvas Content',
+    loadingContent: 'Loading content...',
+    thinking: 'Thinking...',
+    svg: {
+      downloadAsSvg: 'Download as SVG',
+      downloadAsPng: 'Download as PNG',
+      copyToClipboard: 'Copy PNG to Clipboard',
+      downloadSuccess: 'Downloaded successfully',
+      downloadError: 'Failed to download',
+      copySuccess: 'Copied to clipboard',
+      copyError: 'Failed to copy',
+    },
   },
   resourceType: {
     weblink: 'Web Link',
@@ -783,6 +796,8 @@ const translations = {
       memo: 'Memo',
       skill: 'Skill',
       image: 'Image',
+      codeArtifact: 'Code Artifact',
+      website: 'Website',
     },
     export: {
       success: 'Image exported successfully',
@@ -838,6 +853,8 @@ const translations = {
       addMemo: 'Add Memo',
       createDocument: 'Create Document',
       createDocumentDescription: 'Create a document for writing.',
+      createCodeArtifact: 'Create Code Artifact',
+      createCodeArtifactDescription: 'Create an empty code artifact to write your code',
       addDocument: 'Add Document',
       addDocumentDescription:
         'User-created content in Refly, created through AI writing or manually creating a new document, which can be searched and answered through the AI knowledge base.',
@@ -890,6 +907,8 @@ const translations = {
       showTemplates: 'Show Templates',
       exportImage: 'Export Image',
       copyLink: 'Copy Link',
+      createWebsite: 'Create Website Node',
+      createWebsiteDescription: 'Create a website node to embed a website in your canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -1028,6 +1047,22 @@ const translations = {
       touchpad: 'Touchpad-Friendly Mode',
       touchpadDesc: 'Two-finger pan to move, pinch to zoom',
     },
+    nodes: {
+      website: {
+        defaultTitle: 'Website',
+        addWebsite: 'Add Website',
+        websiteUrl: 'Website URL',
+        urlRequired: 'Please enter a website URL',
+        preview: 'Preview',
+        save: 'Save and View Website',
+        copyUrl: 'Copy URL',
+        urlCopied: 'URL copied to clipboard',
+        copyFailed: 'Failed to copy URL',
+        openInNewTab: 'Open in new tab',
+        edit: 'Edit',
+        noUrlProvided: 'No website URL provided',
+      },
+    },
   },
   resource: {
     multilingualSearch: {
@@ -1149,6 +1184,36 @@ const translations = {
       weblink: 'Web Link',
       text: 'Text',
     },
+  },
+  codeArtifact: {
+    fix: {
+      title: 'Fix Code Error',
+      query: 'Help me optimize this code. I got the following error:\n\n{{errorMessage}}',
+      tryToFix: 'Try to Fix',
+      error: 'Error',
+      errorConfig: 'Code Error Config',
+      requestingFix: 'Requesting AI to fix the error...',
+      closeErrorMessage: 'Close error message',
+      copyErrorMessage: 'Copy error message',
+      errorDismissed: 'Error message dismissed',
+    },
+    copySuccess: 'Code copied to clipboard',
+    copyError: 'Failed to copy code',
+    downloadSuccess: 'Downloaded {{fileName}}',
+    downloadError: 'Failed to download file',
+    refreshing: 'Refreshing preview...',
+    errorCopySuccess: 'Error message copied to clipboard',
+    errorCopyFailed: 'Failed to copy error message',
+    tabs: {
+      preview: 'Preview',
+      code: 'Code',
+    },
+    buttons: {
+      refresh: 'Refresh',
+      copy: 'Copy code',
+      download: 'Download as {{fileName}}',
+    },
+    defaultTitle: 'Code Artifact',
   },
   loggedHomePage: {
     searchEverything: 'Search',

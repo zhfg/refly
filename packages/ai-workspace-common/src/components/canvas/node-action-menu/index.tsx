@@ -451,6 +451,23 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             },
           },
         ],
+        codeArtifact: [
+          {
+            key: 'insertToDoc',
+            icon: FileInput,
+            label: t('canvas.nodeActions.insertToDoc'),
+            onClick: handleInsertToDoc,
+            type: 'button' as const,
+            disabled: !activeDocumentId,
+            hoverContent: {
+              title: t('canvas.nodeActions.insertToDoc'),
+              description: t('canvas.nodeActions.insertToDocDescription'),
+              videoUrl:
+                'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.webm',
+            },
+          },
+        ],
+        website: [],
         group: [
           {
             key: 'ungroup',

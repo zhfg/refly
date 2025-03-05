@@ -47,6 +47,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
 import { CustomEdge } from './edges/custom-edge';
+import { getFreshNodePreviews } from '../../utils/canvas';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 
 import '@xyflow/react/dist/style.css';
@@ -158,14 +159,26 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onEdgesChange, onConnect } = useEdgeOperations();
   const edgeStyles = useEdgeStyles();
 
-  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow(
-    (state) => ({
-      nodePreviews: state.config[canvasId]?.nodePreviews,
-      showPreview: state.showPreview,
-      showLaunchpad: state.showLaunchpad,
-      showMaxRatio: state.showMaxRatio,
-    }),
-  );
+  const { showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
+    showPreview: state.showPreview,
+    showLaunchpad: state.showLaunchpad,
+    showMaxRatio: state.showMaxRatio,
+  }));
+
+  const { rawNodePreviews } = useCanvasStoreShallow((state) => ({
+    rawNodePreviews: state.config[canvasId]?.nodePreviews ?? [],
+  }));
+
+  // Use the ReactFlow useNodes hoo
+
+  // Compute fresh node previews using the utility function
+  const nodePreviews = useMemo(() => {
+    // Prefer flowNodes from ReactFlow but fall back to canvas store nodes
+    const canvasNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+    const nodesSource = nodes.length > 0 ? nodes : canvasNodes;
+
+    return getFreshNodePreviews(nodesSource, rawNodePreviews);
+  }, [nodes, rawNodePreviews, canvasId]);
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } =
     useSiderStoreShallow((state) => ({
@@ -450,6 +463,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           break;
         case 'group':
           menuNodeType = 'group';
+          break;
+        case 'codeArtifact':
+          menuNodeType = 'codeArtifact';
+          break;
+        case 'website':
+          menuNodeType = 'website';
           break;
         default:
           return; // Don't show context menu for unknown node types

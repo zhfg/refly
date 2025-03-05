@@ -496,7 +496,6 @@ export const SkillNode = memo(
                   }}
                   onFormValuesChange={(changedValues, allValues) => {
                     console.log('changedValues', changedValues);
-                    console.log('allValues', allValues);
                     handleTplConfigChange(allValues.tplConfig);
                   }}
                 />

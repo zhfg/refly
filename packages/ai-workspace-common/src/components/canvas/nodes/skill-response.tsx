@@ -410,6 +410,8 @@ export const SkillResponseNode = memo(
     const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
+      const { metadata } = data;
+      const { actionMeta, modelInfo } = metadata;
       addNode(
         {
           type: 'skill',
@@ -428,6 +430,8 @@ export const SkillResponseNode = memo(
                   },
                 },
               ],
+              selectedSkill: actionMeta,
+              modelInfo,
             },
           },
         },
@@ -639,22 +643,25 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && artifacts?.length > 0 && (
                     <div className="flex items-center gap-2">
-                      {artifacts.map((artifact) => (
-                        <div
-                          key={artifact.entityId}
-                          className="border border-solid border-gray-200 rounded-sm px-2 py-2 w-full flex items-center gap-1"
-                        >
-                          {getArtifactIcon(artifact, 'text-gray-500')}
-                          <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
-                            {artifact.title}
-                          </span>
-                        </div>
-                      ))}
+                      {artifacts
+                        ?.filter((artifact) => artifact.title)
+                        .map((artifact) => (
+                          <div
+                            key={artifact.entityId}
+                            className="border border-solid border-gray-200 rounded-md px-2 py-2 w-full flex items-center gap-1"
+                          >
+                            {getArtifactIcon(artifact, 'text-gray-500')}
+                            <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
+                              {artifact.title}
+                            </span>
+                          </div>
+                        ))}
                     </div>
                   )}
 
                   {status !== 'failed' && metadata?.reasoningContent && (
                     <ReasoningContentPreview
+                      resultId={entityId}
                       content={metadata.reasoningContent}
                       sources={sources}
                       isOperating={isOperating}
@@ -664,6 +671,7 @@ export const SkillResponseNode = memo(
 
                   {status !== 'failed' && content && (
                     <ContentPreview
+                      resultId={entityId}
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}
                       isOperating={isOperating}

@@ -12,4 +12,3 @@ export * from './i18n';
 export * from './context-panel';
 export * from './env';
 export * from './extension-messaging';
-export * from './canvas/intent-matcher';

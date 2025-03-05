@@ -15,6 +15,7 @@ import {
   TokenUsageItem,
 } from '@refly/openapi-schema';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -47,6 +48,17 @@ export interface ResourceNodeMeta {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
+}
+
+export interface CodeArtifactNodeMeta {
+  status?: 'generating' | 'finish' | 'failed';
+  language?: string;
+  type?: CodeArtifactType;
+  title?: string;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+  activeTab?: 'code' | 'preview';
 }
 
 export type SkillNodeMeta = {
@@ -88,6 +100,16 @@ export type ImageNodeMeta = {
   storageKey: string;
 };
 
+// Website node metadata
+export interface WebsiteNodeMeta {
+  url?: string;
+  isEditing?: boolean;
+  viewMode?: 'form' | 'preview';
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
+
 // Type mapping for node metadata
 export type NodeMetadataMap = {
   document: DocumentNodeMeta;
@@ -96,6 +118,8 @@ export type NodeMetadataMap = {
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
   image: ImageNodeMeta;
+  codeArtifact: CodeArtifactNodeMeta;
+  website: WebsiteNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -117,4 +141,10 @@ export type SkillResponseNodeProps = NodeProps<
   CommonNodeProps;
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
 export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'image'>> &
+  CommonNodeProps;
+export type CodeArtifactNodeProps = NodeProps<
+  Node<CanvasNodeData<CodeArtifactNodeMeta>, 'codeArtifact'>
+> &
+  CommonNodeProps;
+export type WebsiteNodeProps = NodeProps<Node<CanvasNodeData<WebsiteNodeMeta>, 'website'>> &
   CommonNodeProps;

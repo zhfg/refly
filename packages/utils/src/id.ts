@@ -22,6 +22,7 @@ export enum IDPrefix {
   MEMO = 'm-',
   VERIFICATION_SESSION = 'vs-',
   IMAGE = 'img-',
+  CODE_ARTIFACT = 'ca-',
 }
 
 export function genUID(): string {
@@ -50,6 +51,10 @@ export function genDocumentID(): string {
 
 export function genResourceID(): string {
   return IDPrefix.RESOURCE + createId();
+}
+
+export function genCodeArtifactID(): string {
+  return IDPrefix.CODE_ARTIFACT + createId();
 }
 
 export function genCanvasID(): string {

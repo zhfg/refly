@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
   ActionStep,
   ActionStepMeta,
+  Artifact,
   Entity,
   InvokeSkillRequest,
   SkillEvent,
@@ -22,9 +23,14 @@ import {
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
-import { useFindMemo } from './use-find-memo';
+import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-memo';
 import { useUpdateActionResult } from './use-update-action-result';
 import { useSubscriptionUsage } from '../use-subscription-usage';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { getArtifactContentAndAttributes } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
+import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
+import { useFindImages } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-images';
+import { ARTIFACT_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/modules/artifacts/const';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -102,8 +108,85 @@ export const useInvokeAction = () => {
     return steps.map((step) => (step.name === updatedStep.name ? updatedStep : step));
   };
 
+  const onSkillStreamArtifact = (resultId: string, artifact: Artifact, content: string) => {
+    // Handle code artifact content if this is a code artifact stream
+    if (artifact && artifact.type === 'codeArtifact') {
+      // Get the code content and attributes as an object
+      const {
+        content: codeContent,
+        title,
+        language,
+        type,
+      } = getArtifactContentAndAttributes(content);
+
+      // Check if the node exists and create it if not
+      const canvasState = useCanvasStore.getState();
+      const currentCanvasId = canvasState.currentCanvasId;
+
+      // Skip if no active canvas
+      if (!currentCanvasId) return;
+
+      const canvasData = canvasState.data[currentCanvasId];
+      const existingNode = canvasData?.nodes?.find(
+        (node) => node.data?.entityId === artifact.entityId && node.type === artifact.type,
+      );
+
+      // Check if artifact is closed using the ARTIFACT_TAG_CLOSED_REGEX
+      const isArtifactClosed = ARTIFACT_TAG_CLOSED_REGEX.test(content);
+
+      // If node doesn't exist, create it
+      if (!existingNode) {
+        addNode(
+          {
+            type: artifact.type,
+            data: {
+              // Use extracted title if available, fallback to artifact.title
+              title: title || artifact.title,
+              entityId: artifact.entityId,
+              contentPreview: codeContent, // Set content preview for code artifact
+              metadata: {
+                status: 'generating',
+                language: language || 'typescript', // Use extracted language or default
+                type: type || '', // Use extracted type if available
+                // If artifact is closed, set activeTab to preview
+                ...(isArtifactClosed && { activeTab: 'preview' }),
+              },
+            },
+          },
+          [
+            {
+              type: 'skillResponse',
+              entityId: resultId,
+            },
+          ],
+        );
+      } else {
+        // Update existing node with new content and attributes
+        setNodeDataByEntity(
+          {
+            type: artifact.type,
+            entityId: artifact.entityId,
+          },
+          {
+            // Update title if available from extracted attributes
+            ...(title && { title }),
+            contentPreview: codeContent, // Update content preview
+            metadata: {
+              status: 'generating',
+              // Update language and type if available from extracted attributes
+              ...(language && { language }),
+              ...(type && { type }),
+              // If artifact is closed, set activeTab to preview
+              ...(isArtifactClosed && { activeTab: 'preview' }),
+            },
+          },
+        );
+      }
+    }
+  };
+
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { resultId, content, reasoningContent = '', step } = skillEvent;
+    const { resultId, content, reasoningContent = '', step, artifact } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
@@ -111,6 +194,7 @@ export const useInvokeAction = () => {
       return;
     }
 
+    // Regular stream content handling (non-code artifact)
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.content += content;
 
@@ -119,6 +203,9 @@ export const useInvokeAction = () => {
     } else {
       updatedStep.reasoningContent += reasoningContent;
     }
+
+    // Handle code artifact content if this is a code artifact stream
+    onSkillStreamArtifact(resultId, artifact, updatedStep.content);
 
     onUpdateResult(
       resultId,
@@ -249,17 +336,34 @@ export const useInvokeAction = () => {
     const artifacts = result.steps?.flatMap((s) => s.artifacts);
     if (artifacts?.length) {
       for (const artifact of artifacts) {
-        setNodeDataByEntity(
-          {
-            type: artifact.type,
-            entityId: artifact.entityId,
-          },
-          {
-            metadata: {
-              status: 'finish',
+        // Special handling for code artifacts - set activeTab to preview
+        if (artifact.type === 'codeArtifact') {
+          setNodeDataByEntity(
+            {
+              type: artifact.type,
+              entityId: artifact.entityId,
             },
-          },
-        );
+            {
+              metadata: {
+                status: 'finish',
+                activeTab: 'preview', // Set to preview when skill finishes
+              },
+            },
+          );
+        } else {
+          // For other artifact types, just update status
+          setNodeDataByEntity(
+            {
+              type: artifact.type,
+              entityId: artifact.entityId,
+            },
+            {
+              metadata: {
+                status: 'finish',
+              },
+            },
+          );
+        }
       }
     }
 
@@ -318,6 +422,8 @@ export const useInvokeAction = () => {
   const onStart = () => {};
   const findThreadHistory = useFindThreadHistory();
   const findMemo = useFindMemo();
+  const findCodeArtifact = useFindCodeArtifact();
+  const findImages = useFindImages();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
@@ -340,11 +446,30 @@ export const useInvokeAction = () => {
           title: node.data?.title,
           resultId: node.data?.entityId,
         })),
-      (item) =>
-        findMemo({ resultId: item.entityId }).map((node) => ({
-          content: node.data?.contentPreview ?? '',
-          title: node.data?.title ?? 'Memo',
-        })),
+      (item) => {
+        if (item.type === 'memo') {
+          return findMemo({ resultId: item.entityId }).map((node) => ({
+            content: node.data?.contentPreview ?? '',
+            title: node.data?.title ?? 'Memo',
+          }));
+        }
+        return [];
+      },
+      (item) => {
+        if (item.type === 'codeArtifact') {
+          return findCodeArtifact({ resultId: item.entityId }).map((node) => ({
+            content: node.data?.contentPreview ?? '',
+            title: node.data?.title ?? 'Code',
+          }));
+        }
+        return [];
+      },
+      (item) => {
+        if (item.type === 'image') {
+          return findImages({ resultId: item.entityId });
+        }
+        return [];
+      },
     );
 
     const param: InvokeSkillRequest = {

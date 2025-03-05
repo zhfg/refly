@@ -66,6 +66,16 @@ export type ResponseNodeMeta = {
   contextItems?: IContextItem[];
 };
 
+// Website node metadata
+export interface WebsiteNodeMeta {
+  url?: string;
+  isEditing?: boolean;
+  viewMode?: 'form' | 'preview';
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
+
 // Type mapping for node metadata
 export type NodeMetadataMap = {
   document: DocumentNodeMeta;
@@ -73,6 +83,7 @@ export type NodeMetadataMap = {
   skill: SkillNodeMeta;
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
+  website: WebsiteNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -93,3 +104,5 @@ export type SkillResponseNodeProps = NodeProps<
 > &
   CommonNodeProps;
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
+export type WebsiteNodeProps = NodeProps<Node<CanvasNodeData<WebsiteNodeMeta>, 'website'>> &
+  CommonNodeProps;

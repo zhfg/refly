@@ -18,6 +18,7 @@ import { truncateSource } from '../scheduler/utils/truncator';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 import { safeStringifyJSON } from '@refly-packages/utils';
+import { processContextUrls } from '../utils/url-processing';
 
 export class WebSearch extends BaseSkill {
   name = 'webSearch';
@@ -90,13 +91,25 @@ export class WebSearch extends BaseSkill {
     });
 
     // Extract URLs from the query and crawl them with optimized concurrent processing
-    const { sources: urlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
+    const { sources: queryUrlSources, analysis } = await extractAndCrawlUrls(query, config, this, {
       concurrencyLimit: 5, // Increase concurrent URL crawling limit
       batchSize: 8, // Increase batch size for URL processing
     });
 
     this.engine.logger.log(`URL extraction analysis: ${safeStringifyJSON(analysis)}`);
-    this.engine.logger.log(`Extracted URL sources count: ${urlSources.length}`);
+    this.engine.logger.log(`Extracted query URL sources count: ${queryUrlSources.length}`);
+
+    // Process URLs from frontend context if available
+    const contextUrls = config.configurable?.urls || [];
+    const contextUrlSources = await processContextUrls(contextUrls, config, this);
+
+    if (contextUrlSources.length > 0) {
+      this.engine.logger.log(`Added ${contextUrlSources.length} URL sources from context`);
+    }
+
+    // Combine URL sources from context and query extraction
+    const urlSources = [...contextUrlSources, ...(queryUrlSources || [])];
+    this.engine.logger.log(`Total combined URL sources: ${urlSources.length}`);
 
     // Set current step
     config.metadata.step = { name: 'webSearch' };
@@ -109,7 +122,7 @@ export class WebSearch extends BaseSkill {
         maxTokens: remainingTokens,
         enableMentionedContext: true,
         rewrittenQueries,
-        urlSources, // Pass URL sources to the prepareContext function
+        urlSources, // Use combined URL sources
       },
       {
         config,

@@ -7,6 +7,8 @@ import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState, useMemo, useCallback, useRef, memo } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { CodeArtifactNodePreview } from './code-artifact';
+import { WebsiteNodePreview } from './website';
 
 const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
@@ -31,15 +33,45 @@ const PreviewComponent = memo(
         return <ToolNodePreview />;
       case 'skillResponse':
         return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
+      case 'codeArtifact':
+        return <CodeArtifactNodePreview node={node} artifactId={node.data.entityId} />;
+      case 'website':
+        return <WebsiteNodePreview node={node} />;
       default:
         return null;
     }
   },
   (prevProps, nextProps) => {
-    return (
+    // Check type and entity ID
+    const basicPropsEqual =
       prevProps.node?.type === nextProps.node?.type &&
-      prevProps.node?.data?.entityId === nextProps.node?.data?.entityId
-    );
+      prevProps.node?.data?.entityId === nextProps.node?.data?.entityId;
+
+    if (!basicPropsEqual) return false;
+
+    // Check content preview
+    const contentEqual =
+      prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview;
+
+    // Check title
+    const titleEqual = prevProps.node?.data?.title === nextProps.node?.data?.title;
+
+    // Check metadata status (for generating state)
+    const statusEqual =
+      prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
+
+    // Check node-specific metadata
+    let nodeSpecificEqual = true;
+    if (prevProps.node?.type === 'codeArtifact') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    } else if (prevProps.node?.type === 'website') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.url === nextProps.node?.data?.metadata?.url &&
+        prevProps.node?.data?.metadata?.viewMode === nextProps.node?.data?.metadata?.viewMode;
+    }
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && nodeSpecificEqual;
   },
 );
 
@@ -107,10 +139,30 @@ export const NodePreview = memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.node?.id === nextProps.node?.id &&
-      prevProps.canvasId === nextProps.canvasId &&
-      prevProps.node?.data?.title === nextProps.node?.data?.title
-    );
+    const basicPropsEqual =
+      prevProps.node?.id === nextProps.node?.id && prevProps.canvasId === nextProps.canvasId;
+
+    if (!basicPropsEqual) return false;
+
+    const contentEqual =
+      prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview;
+
+    const titleEqual = prevProps.node?.data?.title === nextProps.node?.data?.title;
+
+    const statusEqual =
+      prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
+
+    // Check node-specific metadata
+    let nodeSpecificEqual = true;
+    if (prevProps.node?.type === 'codeArtifact') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    } else if (prevProps.node?.type === 'website') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.url === nextProps.node?.data?.metadata?.url &&
+        prevProps.node?.data?.metadata?.viewMode === nextProps.node?.data?.metadata?.viewMode;
+    }
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && nodeSpecificEqual;
   },
 );
