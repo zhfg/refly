@@ -35,7 +35,7 @@ const DEFAULT_HEIGHT = 400;
  * Website node content component that displays either a form for URL input or an iframe preview
  */
 const NodeContent = memo(
-  ({ data }: { data: CanvasNodeData<WebsiteNodeMeta> }) => {
+  ({ data, readonly }: { data: CanvasNodeData<WebsiteNodeMeta>; readonly: boolean }) => {
     const { url = '', viewMode = 'form', sizeMode = 'adaptive' } = data?.metadata ?? {};
     const [isEditing, setIsEditing] = useState(viewMode === 'form' || !url);
     const { t } = useTranslation();
@@ -167,10 +167,10 @@ const NodeContent = memo(
                 },
               ]}
             >
-              <Input placeholder="https://example.com" className="w-full" />
+              <Input placeholder="https://example.com" className="w-full" disabled={readonly} />
             </Form.Item>
             <Form.Item className="mt-4">
-              <Button type="primary" htmlType="submit" className="w-full">
+              <Button type="primary" htmlType="submit" className="w-full" disabled={readonly}>
                 {t('canvas.nodes.website.save', 'Save and View Website')}
               </Button>
             </Form.Item>
@@ -529,7 +529,9 @@ export const WebsiteNode = memo(
               />
 
               <div className="relative flex-grow min-h-0">
-                <div className="h-full overflow-y-auto">{data && <NodeContent data={data} />}</div>
+                <div className="h-full overflow-y-auto">
+                  {data && <NodeContent data={data} readonly={readonly} />}
+                </div>
               </div>
             </div>
 
