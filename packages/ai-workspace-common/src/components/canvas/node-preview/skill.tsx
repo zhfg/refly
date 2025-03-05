@@ -4,7 +4,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useTranslation } from 'react-i18next';
 import { IconClose } from '@arco-design/web-react/icon';
 import { Button } from 'antd';
-import { ModelInfo, Skill, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refly/openapi-schema';
 import { CanvasNode, CanvasNodeData, SkillNodeMeta } from '../nodes/shared/types';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -89,7 +89,7 @@ export const SkillNodePreview = memo(({ node }: SkillNodePreviewProps) => {
   });
 
   const { entityId, metadata = {} } = latestNode?.data ?? {};
-  const { query, selectedSkill, modelInfo, contextItems = [], tplConfig } = metadata;
+  const { query, selectedSkill, modelInfo, contextItems = [], tplConfig, runtimeConfig } = metadata;
   const skill = useFindSkill(selectedSkill?.name);
 
   const [localQuery, setLocalQuery] = useState(query);
@@ -137,6 +137,13 @@ export const SkillNodePreview = memo(({ node }: SkillNodePreviewProps) => {
   const setContextItems = useCallback(
     (items: IContextItem[]) => {
       setNodeDataByEntity({ entityId, type: 'skill' }, { metadata: { contextItems: items } });
+    },
+    [entityId, setNodeDataByEntity],
+  );
+
+  const setRuntimeConfig = useCallback(
+    (runtimeConfig: SkillRuntimeConfig) => {
+      setNodeDataByEntity({ entityId, type: 'skill' }, { metadata: { runtimeConfig } });
     },
     [entityId, setNodeDataByEntity],
   );
@@ -303,6 +310,8 @@ export const SkillNodePreview = memo(({ node }: SkillNodePreviewProps) => {
         handleAbort={abortAction}
         onUploadImage={handleImageUpload}
         contextItems={contextItems}
+        runtimeConfig={runtimeConfig}
+        setRuntimeConfig={setRuntimeConfig}
       />
     </div>
   );

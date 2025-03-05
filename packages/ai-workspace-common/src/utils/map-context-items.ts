@@ -3,6 +3,7 @@ import { Node, Edge } from '@xyflow/react';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { CanvasNodeFilter } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { omit } from '@refly/utils';
 
 export const convertResultContextToItems = (
   context: SkillContext,
@@ -66,7 +67,7 @@ export const convertResultContextToItems = (
     });
   }
 
-  return items;
+  return purgeContextItems(items);
 };
 
 export const convertContextItemsToNodeFilters = (items: IContextItem[]): CanvasNodeFilter[] => {
@@ -94,9 +95,10 @@ export const convertContextItemsToInvokeParams = (
     item: IContextItem,
   ) => { storageKey: string; title: string; entityId: string; metadata: any }[],
 ): { context: SkillContext; resultHistory: ActionResult[]; images: string[] } => {
+  const purgedItems = purgeContextItems(items);
   const context = {
     contentList: [
-      ...(items
+      ...(purgedItems
         ?.filter((item) => item.selection)
         ?.map((item) => ({
           content: item.selection?.content ?? '',
@@ -109,7 +111,7 @@ export const convertContextItemsToInvokeParams = (
             }),
           },
         })) ?? []),
-      ...(items
+      ...(purgedItems
         ?.filter((item) => item.type === 'memo' && getMemo)
         ?.flatMap((item) =>
           getMemo(item).map((memo) => ({
@@ -121,7 +123,7 @@ export const convertContextItemsToInvokeParams = (
             },
           })),
         ) ?? []),
-      ...(items
+      ...(purgedItems
         ?.filter((item) => item.type === 'codeArtifact' && getCodeArtifact)
         ?.flatMap((item) =>
           getCodeArtifact(item).map((code) => ({
@@ -134,7 +136,7 @@ export const convertContextItemsToInvokeParams = (
           })),
         ) ?? []),
     ],
-    resources: items
+    resources: purgedItems
       ?.filter((item) => item?.type === 'resource')
       .map((item) => ({
         resourceId: item.entityId,
@@ -148,7 +150,7 @@ export const convertContextItemsToInvokeParams = (
           ...item.metadata,
         },
       })),
-    documents: items
+    documents: purgedItems
       ?.filter((item) => item?.type === 'document')
       .map((item) => ({
         docId: item.entityId,
@@ -162,7 +164,7 @@ export const convertContextItemsToInvokeParams = (
           url: getClientOrigin(),
         },
       })),
-    urls: items
+    urls: purgedItems
       ?.filter((item) => item?.type === 'website')
       .map((item) => ({
         url: item.metadata?.url || '',
@@ -172,14 +174,14 @@ export const convertContextItemsToInvokeParams = (
         },
       })),
   };
-  const resultHistory = items
+  const resultHistory = purgedItems
     ?.filter((item) => item.type === 'skillResponse')
     .flatMap((item) => {
       return item.metadata?.withHistory
         ? getHistory(item)
         : [{ title: item.title, resultId: item.entityId }];
     });
-  const images = items
+  const images = purgedItems
     ?.filter((item) => item.type === 'image')
     .flatMap((item) => {
       if (getImages) {
@@ -255,4 +257,21 @@ export const convertContextItemsToEdges = (
     edgesToAdd,
     edgesToDelete,
   };
+};
+
+/**
+ * Purge the metadata from the context items
+ * @param items
+ * @returns purged context items
+ */
+export const purgeContextItems = (items: IContextItem[]): IContextItem[] => {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return items.map((item) => ({
+    ...omit(item, ['metadata']),
+    metadata: {
+      withHistory: item.metadata?.withHistory,
+    },
+  }));
 };

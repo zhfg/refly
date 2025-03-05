@@ -36,7 +36,12 @@ const CanvasItem = (props: {
     >
       <div className="h-36 overflow-hidden">
         {canvas?.minimapUrl ? (
-          <img src={canvas?.minimapUrl} alt="minimap" className="w-full h-full p-3 object-cover" />
+          <img
+            src={`${canvas?.minimapUrl}${canvas?.minimapUrl.includes('?') ? '&' : '?'}_t=${canvas?.updatedAt ?? Date.now()}`}
+            alt="minimap"
+            className="w-full h-full p-3 object-cover"
+            key={`minimap-${canvas?.canvasId}-${canvas?.updatedAt ?? Date.now()}`}
+          />
         ) : (
           <div className="flex items-center justify-center w-full h-full bg-gray-100" />
         )}

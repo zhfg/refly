@@ -13,6 +13,7 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { ConfigScope, Skill } from '@refly/openapi-schema';
 import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -24,7 +25,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { addNode } = useAddNode();
-
+  const { readonly } = useCanvasContext();
   // Use activeTab from node metadata with fallback to 'code'
   const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
@@ -211,8 +212,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             onClose={handleClose}
             onRequestFix={handleRequestFix}
             onChange={handleCodeChange}
-            readOnly={false}
-            type={currentType}
+            readOnly={readonly}
+            type={currentType as CodeArtifactType}
           />
         )}
       </CodeViewerLayout>

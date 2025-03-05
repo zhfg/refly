@@ -11,7 +11,10 @@ import {
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
-import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import {
+  convertResultContextToItems,
+  purgeContextItems,
+} from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { PreviewChatInput } from './preview-chat-input';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
@@ -164,7 +167,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const contextItems = useMemo(() => {
     // Prefer contextItems from node metadata
     if (data.metadata?.contextItems) {
-      return data.metadata?.contextItems;
+      return purgeContextItems(data.metadata?.contextItems);
     }
 
     // Fallback to contextItems from context (could be legacy nodes)
