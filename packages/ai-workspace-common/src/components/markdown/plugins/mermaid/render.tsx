@@ -3,9 +3,10 @@ import mermaid from 'mermaid';
 import { useTranslation } from 'react-i18next';
 import debounce from 'lodash.debounce';
 import { cn, BRANDING_NAME } from '@refly/utils';
-import { CopyIcon, DownloadIcon } from 'lucide-react';
+import { CopyIcon, DownloadIcon, Code } from 'lucide-react';
 import { Tooltip, Button, Space, message } from 'antd';
 import { domToPng } from 'modern-screenshot';
+import copyToClipboard from 'copy-to-clipboard';
 
 // Initialize mermaid config
 mermaid.initialize({
@@ -167,6 +168,27 @@ const MermaidComponent = memo(
       }
     }, [generatePng, diagramTitle, t]);
 
+    // Copy the source code to clipboard
+    const copySourceCode = useCallback(() => {
+      if (!mermaidCode) return;
+
+      const messageKey = 'copySourceCode';
+      try {
+        copyToClipboard(mermaidCode);
+        message.success({
+          content:
+            t('components.markdown.mermaid.copySourceSuccess') ?? 'Source code copied to clipboard',
+          key: messageKey,
+        });
+      } catch (error) {
+        console.error('Failed to copy source code:', error);
+        message.error({
+          content: t('components.markdown.mermaid.copySourceError') ?? 'Failed to copy source code',
+          key: messageKey,
+        });
+      }
+    }, [mermaidCode, t]);
+
     // Memoize the render function to maintain referential equality
     const renderDiagram = useCallback(
       debounce(async () => {
@@ -244,6 +266,18 @@ const MermaidComponent = memo(
         {rendered && (
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Space.Compact className="shadow-sm rounded-md overflow-hidden">
+              <Tooltip
+                title={t('components.markdown.mermaid.copySourceCode') ?? 'Copy source code'}
+              >
+                <Button
+                  type="default"
+                  className="flex items-center justify-center bg-white/80 hover:bg-white hover:text-green-600 hover:border-green-600 border-x border-gray-200"
+                  icon={<Code className="w-4 h-4" />}
+                  onClick={copySourceCode}
+                >
+                  <span className="sr-only">Source</span>
+                </Button>
+              </Tooltip>
               <Tooltip title={t('components.markdown.mermaid.downloadAsPng') ?? 'Download as PNG'}>
                 <Button
                   type="default"
