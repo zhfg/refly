@@ -29,6 +29,7 @@ import { useSubscriptionUsage } from '../use-subscription-usage';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getArtifactContentAndAttributes } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
+import { useFindImages } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-images';
 import { ARTIFACT_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/modules/artifacts/const';
 
 export const useInvokeAction = () => {
@@ -422,6 +423,7 @@ export const useInvokeAction = () => {
   const findThreadHistory = useFindThreadHistory();
   const findMemo = useFindMemo();
   const findCodeArtifact = useFindCodeArtifact();
+  const findImages = useFindImages();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
@@ -459,6 +461,12 @@ export const useInvokeAction = () => {
             content: node.data?.contentPreview ?? '',
             title: node.data?.title ?? 'Code',
           }));
+        }
+        return [];
+      },
+      (item) => {
+        if (item.type === 'image') {
+          return findImages({ resultId: item.entityId });
         }
         return [];
       },

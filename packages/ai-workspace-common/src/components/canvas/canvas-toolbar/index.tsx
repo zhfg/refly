@@ -276,6 +276,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
   }));
 
   const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
+
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 

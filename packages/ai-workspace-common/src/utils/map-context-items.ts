@@ -90,6 +90,9 @@ export const convertContextItemsToInvokeParams = (
   getHistory: (item: IContextItem) => ActionResult[],
   getMemo?: (item: IContextItem) => { content: string; title: string }[],
   getCodeArtifact?: (item: IContextItem) => { content: string; title: string }[],
+  getImages?: (
+    item: IContextItem,
+  ) => { storageKey: string; title: string; entityId: string; metadata: any }[],
 ): { context: SkillContext; resultHistory: ActionResult[]; images: string[] } => {
   const context = {
     contentList: [
@@ -178,8 +181,15 @@ export const convertContextItemsToInvokeParams = (
     });
   const images = items
     ?.filter((item) => item.type === 'image')
-    .map((item) => item.metadata?.storageKey)
-    .filter(Boolean);
+    .flatMap((item) => {
+      if (getImages) {
+        return getImages(item)
+          .map((img) => img.storageKey)
+          .filter(Boolean);
+      }
+      // Fallback to existing behavior if getImages is not provided
+      return item.metadata?.storageKey ? [item.metadata.storageKey] : [];
+    });
 
   return { context, resultHistory, images };
 };
