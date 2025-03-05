@@ -18,6 +18,7 @@ import { CanvasNodeFilter } from './use-node-selection';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { useNodePosition } from './use-node-position';
+import { purgeContextItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
@@ -114,6 +115,11 @@ export const useAddNode = () => {
         setSelectedNode(existingNode);
         setNodeCenter(existingNode.id);
         return;
+      }
+
+      // Purge context items if they exist
+      if (node.data.metadata?.contextItems) {
+        node.data.metadata.contextItems = purgeContextItems(node.data.metadata.contextItems);
       }
 
       // Find source nodes
