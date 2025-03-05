@@ -18,7 +18,7 @@ export const useFindImages = () => {
 
       // Extract the storageKey and other metadata
       const imageData = {
-        storageKey: startNode.data?.metadata?.storageKey ?? '',
+        storageKey: (startNode.data?.metadata?.storageKey as string) ?? '',
         title: startNode.data?.title ?? 'Image',
         entityId: startNode.data?.entityId ?? '',
         // Include any other relevant image metadata
