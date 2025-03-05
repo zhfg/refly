@@ -32,7 +32,7 @@ const Renderer = memo<RendererProps>(({ content, type, title, language, onReques
     }
 
     case 'application/refly.artifacts.mermaid': {
-      return <Markdown content={`\`\`\`mermaid\n${content}\`\`\``} />;
+      return <Markdown content={`\`\`\`mermaid\n${content}\n\`\`\``} />;
     }
 
     case 'text/markdown': {
