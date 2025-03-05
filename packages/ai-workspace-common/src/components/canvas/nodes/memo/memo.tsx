@@ -210,7 +210,7 @@ export const MemoNode = ({
         placeholder: t('knowledgeBase.context.memoPlaceholder'),
       }),
     ],
-    content: data?.contentPreview ?? '',
+    content: data?.metadata?.jsonContent || data?.contentPreview || '',
     editable: true,
     onUpdate: ({ editor }) => {
       onMemoUpdates(editor);
@@ -248,6 +248,7 @@ export const MemoNode = ({
     const markdown = editor.storage.markdown.getMarkdown();
     const maxLength = 1000;
 
+    // If content exceeds max length, truncate the content in the editor
     if (markdown.length > maxLength) {
       const truncatedContent = markdown.slice(0, maxLength);
       const currentPos = editor.state.selection.from;
@@ -257,12 +258,20 @@ export const MemoNode = ({
         return true;
       });
 
+      // Truncate the content in the editor
       editor.commands.setContent(truncatedContent);
 
       if (currentPos <= maxLength) {
         editor.commands.setTextSelection(currentPos);
       }
+
+      // Wait for the editor to update with truncated content
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
+
+    // Now get both markdown and JSON from the editor (which may have been truncated)
+    const updatedMarkdown = editor.storage.markdown.getMarkdown();
+    const jsonContent = editor.getJSON();
 
     setNodeDataByEntity(
       {
@@ -270,7 +279,11 @@ export const MemoNode = ({
         type: 'memo',
       },
       {
-        contentPreview: markdown?.slice(0, maxLength),
+        contentPreview: updatedMarkdown,
+        metadata: {
+          ...data?.metadata,
+          jsonContent: jsonContent,
+        },
       },
     );
   }, 500);
@@ -284,10 +297,15 @@ export const MemoNode = ({
           entityId: data?.entityId,
           type: 'memo',
         },
-        { metadata: { bgColor: color } },
+        {
+          metadata: {
+            ...data?.metadata,
+            bgColor: color,
+          },
+        },
       );
     },
-    [data?.entityId, setNodeDataByEntity],
+    [data?.entityId, data?.metadata, setNodeDataByEntity],
   );
 
   return (
