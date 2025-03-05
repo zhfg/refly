@@ -33,6 +33,19 @@ const getLanguageFromType = (type: CodeArtifactType, language: string): string =
   return languageMap[type] ?? language;
 };
 
+// Function to get file extension based on artifact type
+const getFileExtensionFromType = (type: CodeArtifactType): string => {
+  const extensionMap: Record<CodeArtifactType, string> = {
+    'application/refly.artifacts.react': 'tsx',
+    'image/svg+xml': 'svg',
+    'application/refly.artifacts.mermaid': 'mmd',
+    'text/markdown': 'md',
+    'application/refly.artifacts.code': '', // Will be determined by language
+    'text/html': 'html',
+  };
+  return extensionMap[type] ?? '';
+};
+
 export default memo(
   function CodeViewer({
     code,
@@ -144,6 +157,13 @@ export default memo(
     const getFileExtensionForLanguage = useMemo(
       () =>
         (lang: string): string => {
+          // First check if we have a type-specific extension
+          const typeExtension = getFileExtensionFromType(type);
+          if (typeExtension) {
+            return typeExtension;
+          }
+
+          // Fall back to language-based extension
           const extensionMap: Record<string, string> = {
             javascript: 'js',
             typescript: 'ts',
@@ -158,11 +178,13 @@ export default memo(
             rust: 'rs',
             jsx: 'jsx',
             tsx: 'tsx',
+            markdown: 'md',
+            xml: 'xml',
           };
 
-          return extensionMap[lang] || 'txt';
+          return extensionMap[lang.toLowerCase()] || 'txt';
         },
-      [],
+      [type],
     );
 
     // Memoize the render tabs
