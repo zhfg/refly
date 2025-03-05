@@ -166,23 +166,23 @@ const NodeFooter = memo(
     language: string;
   }) => {
     return (
-      <div className="flex-shrink-0 mt-2 flex justify-between items-center text-[10px] text-gray-400 relative z-20">
-        <div className="flex items-center gap-1">
+      <div className="flex-shrink-0 mt-2 flex flex-wrap justify-between items-center text-[10px] text-gray-400 relative z-20 gap-1">
+        <div className="flex flex-wrap items-center gap-1 max-w-[70%]">
           {model && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 overflow-hidden">
               <ModelIcon provider={modelInfo?.provider} />
-              <span>{model}</span>
+              <span className="truncate">{model}</span>
             </div>
           )}
           {model && tokenUsage ? <Divider type="vertical" className="mx-1" /> : null}
           {tokenUsage && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <IconToken className="w-3 h-3" />
               {tokenUsage.reduce((acc, t) => acc + t.inputTokens + t.outputTokens, 0)}
             </div>
           )}
         </div>
-        <div>
+        <div className="flex-shrink-0">
           {time(createdAt, language as LOCALE)
             ?.utc()
             ?.fromNow()}

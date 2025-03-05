@@ -5,9 +5,11 @@ import { Color } from 'antd/es/color-picker';
 import { NodeSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/node-selector';
 import { TextButtons } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/text-buttons';
 import { LinkSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/link-selector';
+import { ColorSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/color-selector';
 
 import './memo-editor.scss';
 import { useTranslation } from 'react-i18next';
+
 type MemoEditorProps = {
   editor: EditorInstance;
   bgColor: string;
@@ -15,9 +17,9 @@ type MemoEditorProps = {
 };
 
 export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackground }) => {
-  const [open, setOpen] = useState(false);
+  const [openNode, setOpenNode] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  const [_openColor, _setOpenColor] = useState(false);
+  const [openColor, setOpenColor] = useState(false);
   const { t } = useTranslation();
 
   // Define preset colors
@@ -37,6 +39,7 @@ export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackg
   const colorChange = (_color: Color, css: string) => {
     onChangeBackground?.(css);
   };
+
   return (
     <div className="absolute left-0 -top-[48px] z-50 px-2 bg-white rounded-lg shadow-lg">
       <div className="flex gap-1">
@@ -48,10 +51,10 @@ export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackg
           presets={[{ label: t('common.presetColors'), colors: presetColors }]}
         />
         <Divider className="mx-0 h-8" type="vertical" />
-        <NodeSelector open={open} onOpenChange={setOpen} triggerEditor={editor} />
+        <NodeSelector open={openNode} onOpenChange={setOpenNode} triggerEditor={editor} />
         <Divider className="mx-0 h-8" type="vertical" />
-        {/* <ColorSelector open={openColor} onOpenChange={setOpenColor} triggerEditor={editor} />
-        <Divider className="mx-0 h-8" type="vertical" /> */}
+        <ColorSelector open={openColor} onOpenChange={setOpenColor} triggerEditor={editor} />
+        <Divider className="mx-0 h-8" type="vertical" />
         <TextButtons triggerEditor={editor} />
         <LinkSelector open={openLink} onOpenChange={setOpenLink} triggerEditor={editor} />
       </div>
