@@ -18,11 +18,8 @@ import { prepareContext } from '../scheduler/utils/context';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 import { processQuery } from '../scheduler/utils/queryProcessor';
-import {
-  extractAndCrawlUrls,
-  isValidUrl,
-  crawlExtractedUrls,
-} from '../scheduler/utils/extract-weblink';
+import { extractAndCrawlUrls, crawlExtractedUrls } from '../scheduler/utils/extract-weblink';
+import { isValidUrl } from '@refly-packages/utils';
 
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';

@@ -1,6 +1,7 @@
 import { Source } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../base';
-import { isValidUrl, crawlExtractedUrls } from '../scheduler/utils/extract-weblink';
+import { crawlExtractedUrls } from '../scheduler/utils/extract-weblink';
+import { isValidUrl } from '@refly-packages/utils';
 
 /**
  * Processes URLs from the frontend context and returns sources.
