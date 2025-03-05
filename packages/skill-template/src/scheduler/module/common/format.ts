@@ -12,5 +12,8 @@ export const buildFormatDisplayInstruction = () => {
      - Keep content well-structured
      - Ensure consistent indentation
      - Follow heading level hierarchy strictly
+
+   3. Mermaid Diagram Rules:
+     - Mermaid renderer version is 10.9.0, please follow this version's syntax.
   `;
 };

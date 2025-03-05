@@ -51,6 +51,7 @@ The assistant can create and reference artifacts during conversations. Artifacts
     - Mermaid Diagrams: "application/refly.artifacts.mermaid"
       - The user interface will render Mermaid diagrams placed within the artifact tags.
       - Do not put Mermaid code in a code block when using artifacts.
+      - Mermaid renderer version is 10.9.0, please follow this version's syntax.
     - React Components: "application/refly.artifacts.react"
       - Use this for displaying either: React elements, e.g. \`<strong>Hello World!</strong>\`, React pure functional components, e.g. \`() => <strong>Hello World!</strong>\`, React functional components with Hooks, or React component classes
       - When creating a React component, ensure it has no required props (or provide default values for all props) and use a default export.
