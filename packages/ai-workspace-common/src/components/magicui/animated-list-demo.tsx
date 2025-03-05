@@ -27,10 +27,35 @@ export default function AnimatedListDemo({
 
   const notifications = [
     {
+      ...(t('landingPage.features.models.claude37', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.anthropic,
+    },
+    {
+      ...(t('landingPage.features.models.claude37thinking', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.anthropic,
+    },
+    {
       ...(t('landingPage.features.models.deepseekR1', {
         returnObjects: true,
       }) as unknown as ModelInfo),
       icon: ModelProviderIcons.deepseek,
+    },
+    {
+      ...(t('landingPage.features.models.gemini2flashthinking', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.google,
+    },
+
+    {
+      ...(t('landingPage.features.models.gemini2pro', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.google,
     },
     {
       ...(t('landingPage.features.models.o3mini', { returnObjects: true }) as unknown as ModelInfo),
@@ -69,6 +94,31 @@ export default function AnimatedListDemo({
     {
       ...(t('landingPage.features.models.o3mini', { returnObjects: true }) as unknown as ModelInfo),
       icon: ModelProviderIcons.openai,
+    },
+    {
+      ...(t('landingPage.features.models.claude37', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.anthropic,
+    },
+    {
+      ...(t('landingPage.features.models.claude37thinking', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.anthropic,
+    },
+    {
+      ...(t('landingPage.features.models.gemini2flashthinking', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.google,
+    },
+
+    {
+      ...(t('landingPage.features.models.gemini2pro', {
+        returnObjects: true,
+      }) as unknown as ModelInfo),
+      icon: ModelProviderIcons.google,
     },
   ];
 

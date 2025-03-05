@@ -241,6 +241,26 @@ const translations = {
           description: '最适合处理高度复杂任务的模型',
           provider: 'Anthropic',
         },
+        claude37: {
+          name: 'Claude 3.7 Sonnet',
+          description: '最适合处理高度复杂任务的模型',
+          provider: 'Anthropic',
+        },
+        claude37thinking: {
+          name: 'Claude 3.7 Sonnet Thinking',
+          description: '最先进的推理能力，最适合处理高度复杂任务的模型',
+          provider: 'Anthropic',
+        },
+        gemini2pro: {
+          name: 'Gemini Pro 2.0',
+          description: '最适合处理高度复杂任务的模型',
+          provider: 'Google',
+        },
+        gemini2flashthinking: {
+          name: 'Gemini 2.0 Flash Thinking',
+          description: '最先进的推理能力，最适合处理高度复杂任务的模型',
+          provider: 'Google',
+        },
         gemini: {
           name: 'Gemini Flash 2.0',
           description: '快速高效的日常任务处理',

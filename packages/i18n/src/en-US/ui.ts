@@ -283,6 +283,26 @@ const translations = {
           description: 'Most capable model for highly complex tasks',
           provider: 'Anthropic',
         },
+        claude37: {
+          name: 'Claude 3.7 Sonnet',
+          description: 'Most capable model for highly complex tasks',
+          provider: 'Anthropic',
+        },
+        claude37thinking: {
+          name: 'Claude 3.7 Sonnet Thinking',
+          description: 'Advanced reasoning and most capable model for highly complex tasks',
+          provider: 'Anthropic',
+        },
+        gemini2pro: {
+          name: 'Gemini Pro 2.0',
+          description: 'Most capable model for highly complex tasks',
+          provider: 'Google',
+        },
+        gemini2flashthinking: {
+          name: 'Gemini 2.0 Flash Thinking',
+          description: 'Advanced reasoning and most capable model for highly complex tasks',
+          provider: 'Google',
+        },
         gemini: {
           name: 'Gemini Flash 2.0',
           description: 'Fast and efficient for everyday tasks',
