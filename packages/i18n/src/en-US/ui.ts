@@ -449,7 +449,7 @@ const translations = {
     faq: {
       title: 'Frequently Asked Questions',
       Q1: 'Can Refly be used for free?',
-      A1: 'To enable more users to quickly start and experience Refly, we have provided all registered users with a one-time allocation of one million standard model tokens and sufficient storage space for trial use. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
+      A1: 'To enable more users to quickly start and experience Refly, we provide all registered users with knowledge base quota of 10 files and daily access to 3 pro model requests and 30 standard model requests. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
       Q2: 'What payment methods do you support?',
       A2: 'We support bank cards, Alipay, Amazon Pay, and Cash App Pay. The supported payment methods may be subject to change at any time. Please refer to the payment methods displayed in the Stripe checkout page for the most accurate information.',
       Q3: 'How can I change or cancel my subscription plan?',
