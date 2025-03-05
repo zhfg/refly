@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
-import { Mark } from '@refly/common-types';
-import { CanvasNodeType, SelectionKey } from '@refly/openapi-schema';
+import { CanvasNodeType, SelectionKey, SkillRuntimeConfig } from '@refly/openapi-schema';
 
 export interface FilterErrorInfo {
   [key: string]: {
@@ -34,22 +33,20 @@ interface ContextPanelState {
   contextItems: IContextItem[];
 
   // selection text
-  currentSelectedMark: Mark;
   enableMultiSelect: boolean;
 
-  currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
+  runtimeConfig?: SkillRuntimeConfig;
   filterErrorInfo: FilterErrorInfo;
   formErrors: Record<string, string>;
 
   // selected text context 面板相关的内容
-  updateCurrentSelectedMark: (mark: Mark) => void;
   updateEnableMultiSelect: (enableMultiSelect: boolean) => void;
-  updateCurrentSelectedMarks: (marks: Mark[]) => void;
   updateFilterErrorInfo: (errorInfo: FilterErrorInfo) => void;
   setFormErrors: (errors: Record<string, string>) => void;
 
   resetState: () => void;
 
+  setRuntimeConfig: (runtimeConfig: SkillRuntimeConfig) => void;
   addContextItem: (item: IContextItem) => void;
   setContextItems: (items: IContextItem[]) => void;
   removeContextItem: (entityId: string) => void;
@@ -58,9 +55,7 @@ interface ContextPanelState {
 }
 
 export const defaultSelectedTextCardState = {
-  currentSelectedMark: null as Mark,
   enableMultiSelect: true, // default enable multi select, later to see if we need to enable multiSelect ability
-  currentSelectedMarks: [] as Mark[],
   filterErrorInfo: {} as FilterErrorInfo,
   formErrors: {} as Record<string, string>,
 };
@@ -71,6 +66,7 @@ export const defaultState = {
   contextItems: [],
   checkedKeys: [],
   expandedKeys: [],
+  runtimeConfig: {} as SkillRuntimeConfig,
 
   ...defaultSelectedTextCardState,
 };
@@ -80,17 +76,15 @@ export const useContextPanelStore = create<ContextPanelState>()(
     ...defaultState,
 
     // selected text
-    updateCurrentSelectedMark: (mark: Mark) =>
-      set((state) => ({ ...state, currentSelectedMark: mark })),
     updateEnableMultiSelect: (enableMultiSelect: boolean) =>
       set((state) => ({ ...state, enableMultiSelect })),
-    updateCurrentSelectedMarks: (marks: Mark[]) =>
-      set((state) => ({ ...state, currentSelectedMarks: marks })),
     updateFilterErrorInfo: (errorInfo: FilterErrorInfo) =>
       set((state) => ({ ...state, filterErrorInfo: { ...state.filterErrorInfo, ...errorInfo } })),
     setFormErrors: (errors: Record<string, string>) =>
       set((state) => ({ ...state, formErrors: errors })),
 
+    setRuntimeConfig: (runtimeConfig: SkillRuntimeConfig) =>
+      set((state) => ({ ...state, runtimeConfig })),
     addContextItem: (item: IContextItem) =>
       set((state) => {
         const existingIndex = state.contextItems.findIndex(

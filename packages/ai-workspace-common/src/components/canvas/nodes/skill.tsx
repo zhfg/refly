@@ -9,7 +9,13 @@ import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { ModelInfo, Skill, SkillTemplateConfig } from '@refly/openapi-schema';
+import {
+  CanvasNodeType,
+  ModelInfo,
+  Skill,
+  SkillRuntimeConfig,
+  SkillTemplateConfig,
+} from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
@@ -136,7 +142,14 @@ export const SkillNode = memo(
     });
 
     const { entityId, metadata = {} } = data;
-    const { query, selectedSkill, modelInfo, contextItems = [], tplConfig } = metadata;
+    const {
+      query,
+      selectedSkill,
+      modelInfo,
+      contextItems = [],
+      tplConfig,
+      runtimeConfig,
+    } = metadata;
     const skill = useFindSkill(selectedSkill?.name);
 
     const [localQuery, setLocalQuery] = useState(query);
@@ -210,6 +223,13 @@ export const SkillNode = memo(
       [id, patchNodeData, addEdges, getNodes, getEdges, deleteElements, edgeStyles.hover],
     );
 
+    const setRuntimeConfig = useCallback(
+      (runtimeConfig: SkillRuntimeConfig) => {
+        patchNodeData(id, { metadata: { runtimeConfig } });
+      },
+      [id, patchNodeData],
+    );
+
     const resizeMoveable = useCallback((width: number, height: number) => {
       moveableRef.current?.request('resizable', { width, height });
     }, []);
@@ -281,6 +301,7 @@ export const SkillNode = memo(
             resultId,
             ...data?.metadata,
             tplConfig,
+            runtimeConfig,
           },
           {
             entityId: canvasId,
@@ -352,6 +373,46 @@ export const SkillNode = memo(
       [entityId, setNodeDataByEntity],
     );
 
+    // listen to edges changes and automatically update contextItems
+    useEffect(() => {
+      if (readonly) return;
+
+      const currentEdges = edges?.filter((edge) => edge.target === id) || [];
+      if (!currentEdges.length && !contextItems.length) return;
+
+      const nodes = getNodes() as CanvasNode<any>[];
+
+      // get all source nodes that are connected to the current node
+      const connectedSourceIds = new Set(currentEdges.map((edge) => edge.source));
+
+      // filter current contextItems, remove nodes that are no longer connected
+      const updatedContextItems = contextItems.filter((item) => {
+        const itemNode = nodes.find((node) => node.data?.entityId === item.entityId);
+        return itemNode && connectedSourceIds.has(itemNode.id);
+      });
+
+      // add new connected nodes to contextItems
+      for (const edge of currentEdges) {
+        const sourceNode = nodes.find((node) => node.id === edge.source);
+        if (!sourceNode?.data?.entityId || ['skill', 'group'].includes(sourceNode?.type)) continue;
+
+        const exists = updatedContextItems.some(
+          (item) => item.entityId === sourceNode.data.entityId,
+        );
+        if (!exists) {
+          updatedContextItems.push({
+            entityId: sourceNode.data.entityId,
+            type: sourceNode.type as CanvasNodeType,
+            title: sourceNode.data.title || '',
+          });
+        }
+      }
+
+      if (JSON.stringify(updatedContextItems) !== JSON.stringify(contextItems)) {
+        patchNodeData(id, { metadata: { contextItems: updatedContextItems } });
+      }
+    }, [edges, id, contextItems, getNodes, patchNodeData, readonly]);
+
     return (
       <div className={classNames({ nowheel: isOperating })}>
         <div
@@ -364,7 +425,7 @@ export const SkillNode = memo(
           style={containerStyle}
         >
           {!isDragging && !readonly && (
-            <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="skill" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
           <div className={`w-full h-full  ${getNodeCommonStyles({ selected, isHovered })}`}>
             {
@@ -448,6 +509,8 @@ export const SkillNode = memo(
                 handleAbort={abortAction}
                 onUploadImage={handleImageUpload}
                 contextItems={contextItems}
+                runtimeConfig={runtimeConfig}
+                setRuntimeConfig={setRuntimeConfig}
               />
             </div>
           </div>

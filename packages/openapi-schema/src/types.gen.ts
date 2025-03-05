@@ -104,6 +104,10 @@ export type Canvas = {
    */
   status?: CanvasStatus;
   /**
+   * Minimap URL
+   */
+  minimapUrl?: string;
+  /**
    * Canvas creation time
    */
   createdAt: string;
@@ -728,6 +732,16 @@ export type ActionMeta = {
 };
 
 /**
+ * Skill runtime config
+ */
+export type SkillRuntimeConfig = {
+  /**
+   * Whether to disable link parsing for input query
+   */
+  disableLinkParsing?: boolean;
+};
+
+/**
  * Skill template config (key is config item key, value is config value)
  */
 export type SkillTemplateConfig = {
@@ -1107,6 +1121,10 @@ export type ActionResult = {
    * Action template config
    */
   tplConfig?: SkillTemplateConfig;
+  /**
+   * Action runtime config
+   */
+  runtimeConfig?: SkillRuntimeConfig;
   /**
    * Action result history
    */
@@ -1666,6 +1684,10 @@ export type UpsertCanvasRequest = {
    * Canvas ID (only used for update)
    */
   canvasId?: string;
+  /**
+   * Minimap storage key
+   */
+  minimapStorageKey?: string;
   /**
    * Whether this canvas is public
    */
@@ -2474,6 +2496,10 @@ export type InvokeSkillRequest = {
    */
   resultHistory?: Array<ActionResult>;
   /**
+   * Skill runtime config
+   */
+  runtimeConfig?: SkillRuntimeConfig;
+  /**
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
@@ -3075,6 +3101,10 @@ export type ModelInfo = {
    * Model capabilities
    */
   capabilities?: ModelCapabilities;
+  /**
+   * Whether this model is the default model
+   */
+  isDefault?: boolean;
 };
 
 export type ListModelsResponse = BaseResponse & {

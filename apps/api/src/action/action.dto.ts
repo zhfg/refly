@@ -35,6 +35,7 @@ export function actionResultPO2DTO(
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     context: JSON.parse(result.context || '{}'),
     tplConfig: JSON.parse(result.tplConfig || '{}'),
+    runtimeConfig: JSON.parse(result.runtimeConfig || '{}'),
     history: JSON.parse(result.history || '[]'),
     errors: JSON.parse(result.errors || '[]'),
     createdAt: result.createdAt.toJSON(),

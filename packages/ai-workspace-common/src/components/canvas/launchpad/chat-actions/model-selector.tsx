@@ -213,6 +213,31 @@ const ModelLabel = memo(
 
 ModelLabel.displayName = 'ModelLabel';
 
+const isModelDisabled = (meter: TokenUsageMeter, model: ModelInfo) => {
+  if (meter && model) {
+    if (model.tier === 't1') {
+      return meter.t1CountUsed >= meter.t1CountQuota && meter.t1CountQuota >= 0;
+    }
+    if (model.tier === 't2') {
+      return meter.t2CountUsed >= meter.t2CountQuota && meter.t2CountQuota >= 0;
+    }
+  }
+  return false;
+};
+
+const selectAvailableModel = (
+  modelList: ModelInfo[],
+  tokenUsage: TokenUsageMeter,
+): ModelInfo | null => {
+  const defaultModel = modelList?.find((model) => model.isDefault);
+  if (defaultModel && !isModelDisabled(tokenUsage, defaultModel)) {
+    return defaultModel;
+  }
+
+  const availableModel = modelList?.find((model) => !isModelDisabled(tokenUsage, model));
+  return availableModel || null;
+};
+
 export const ModelSelector = memo(
   ({
     placement = 'bottomLeft',
@@ -364,30 +389,18 @@ export const ModelSelector = memo(
       return items;
     }, [t1Models, t2Models, freeModels, tokenUsage, planTier, setSubscribeModalVisible]);
 
-    const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
-      if (meter && model) {
-        if (model.tier === 't1') {
-          return meter.t1CountUsed >= meter.t1CountQuota && meter.t1CountQuota >= 0;
-        }
-        if (model.tier === 't2') {
-          return meter.t2CountUsed >= meter.t2CountQuota && meter.t2CountQuota >= 0;
-        }
-      }
-      return false;
-    }, []);
-
+    // Automatically select available model when:
+    // 1. No model is selected
+    // 2. Current model is disabled
+    // 3. Current model is not present in the model list
     useEffect(() => {
       if (
         !model ||
         isModelDisabled(tokenUsage, model) ||
         !modelList?.find((m) => m.name === model.name)
       ) {
-        const availableModel = modelList?.find((model) => !isModelDisabled(tokenUsage, model));
-        if (availableModel) {
-          setModel(availableModel);
-        } else {
-          setModel(null);
-        }
+        const availableModel = selectAvailableModel(modelList, tokenUsage);
+        setModel(availableModel);
       }
     }, [model, tokenUsage, modelList, isModelDisabled, setModel]);
 

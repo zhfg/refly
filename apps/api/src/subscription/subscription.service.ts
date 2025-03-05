@@ -100,6 +100,8 @@ export class SubscriptionService implements OnModuleInit {
   async createCheckoutSession(user: User, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
     const { planType, interval } = param;
+    const userPo = await this.prisma.user.findUnique({ where: { uid } });
+
     const plan = await this.prisma.subscriptionPlan.findFirst({
       where: { planType, interval },
     });
@@ -116,6 +118,28 @@ export class SubscriptionService implements OnModuleInit {
       throw new ParamsError(`No prices found for lookup key: ${lookupKey}`);
     }
 
+    // Try to find or create customer
+    let customerId = userPo?.customerId;
+
+    if (!customerId && userPo?.email) {
+      // Search for existing customers with this email
+      const existingCustomers = await this.stripeClient.customers.list({
+        email: userPo.email,
+        limit: 1,
+      });
+
+      if (existingCustomers.data.length > 0) {
+        // Use existing customer if found
+        customerId = existingCustomers.data[0].id;
+
+        // Update user with the found customerId
+        await this.prisma.user.update({
+          where: { uid },
+          data: { customerId },
+        });
+      }
+    }
+
     const price = prices.data[0];
     const session = await this.stripeClient.checkout.sessions.create({
       mode: 'subscription',
@@ -123,27 +147,66 @@ export class SubscriptionService implements OnModuleInit {
       success_url: this.config.get('stripe.sessionSuccessUrl'),
       cancel_url: this.config.get('stripe.sessionCancelUrl'),
       client_reference_id: uid,
-      customer_email: user.email,
+      customer: customerId || undefined,
+      customer_email: !customerId ? userPo?.email : undefined,
     });
 
-    await this.prisma.checkoutSession.create({
-      data: {
-        uid,
-        sessionId: session.id,
-        lookupKey,
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.checkoutSession.create({
+        data: {
+          uid,
+          sessionId: session.id,
+          lookupKey,
+        },
+      }),
+      // Only update if customer ID changed
+      ...(!userPo?.customerId || userPo.customerId !== session.customer
+        ? [
+            this.prisma.user.update({
+              where: { uid },
+              data: { customerId: session.customer as string },
+            }),
+          ]
+        : []),
+    ]);
 
     return session;
   }
 
   async createPortalSession(user: User) {
-    const { customerId } = await this.prisma.user.findUnique({
-      select: { customerId: true },
-      where: { uid: user.uid },
+    const userPo = await this.prisma.user.findUnique({
+      select: { customerId: true, email: true },
+      where: { uid: user?.uid },
     });
+    if (!userPo) {
+      throw new ParamsError(`No user found for uid ${user?.uid}`);
+    }
+
+    let customerId = userPo?.customerId;
     if (!customerId) {
-      throw new ParamsError(`No customer found for user ${user.uid}`);
+      // Check if email exists before searching
+      if (!userPo?.email) {
+        throw new ParamsError(`User ${user?.uid} has no email address`);
+      }
+
+      // Search for existing customers with this email
+      const existingCustomers = await this.stripeClient.customers.list({
+        email: userPo.email,
+        limit: 1,
+      });
+
+      if (existingCustomers?.data?.length > 0) {
+        // Use existing customer if found
+        customerId = existingCustomers.data[0]?.id;
+
+        // Update user with the found customerId
+        await this.prisma.user.update({
+          where: { uid: user?.uid },
+          data: { customerId },
+        });
+      } else {
+        throw new ParamsError(`No customer found for user ${user?.uid}`);
+      }
     }
 
     const session = await this.stripeClient.billingPortal.sessions.create({
@@ -354,6 +417,20 @@ export class SubscriptionService implements OnModuleInit {
         subscriptionId: session.subscription as string,
       },
     });
+
+    // Check if customerId is already associated with this user
+    const user = await this.prisma.user.findUnique({
+      where: { uid },
+      select: { customerId: true },
+    });
+
+    // Update user's customerId if it's missing or different
+    if (!user?.customerId || user.customerId !== customerId) {
+      await this.prisma.user.update({
+        where: { uid },
+        data: { customerId },
+      });
+    }
 
     const plan = await this.prisma.subscriptionPlan.findFirst({
       where: { lookupKey: checkoutSession.lookupKey },

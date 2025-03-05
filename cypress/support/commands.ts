@@ -90,4 +90,48 @@ beforeEach(() => {
       subscribers_count: 100,
     },
   }).as('githubApi');
+
+  cy.intercept('GET', 'https://react-tweet.vercel.app/api/tweet/**', {
+    statusCode: 200,
+    body: {
+      data: {
+        __typename: 'Tweet',
+        lang: 'en',
+        favorite_count: 2,
+        // created_at: '2025-01-14T15:55:04.000Z',
+        display_text_range: [0, 125],
+        entities: {
+          hashtags: [],
+          urls: [],
+          user_mentions: [],
+          symbols: [],
+        },
+        id_str: '1879195537259294991',
+        text: '',
+        user: {
+          id_str: '22260506',
+          name: '',
+          profile_image_url_https:
+            'https://pbs.twimg.com/profile_images/1246941661311238144/K6r3twlf_normal.jpg',
+          screen_name: 'ediyiqian',
+          verified: false,
+          is_blue_verified: true,
+          profile_image_shape: 'Circle',
+        },
+        edit_control: {
+          edit_tweet_ids: [],
+          editable_until_msecs: '1736873704000',
+          is_edit_eligible: true,
+          edits_remaining: '5',
+        },
+        conversation_count: 1,
+        news_action_type: 'conversation',
+        isEdited: false,
+        isStaleEdit: false,
+        note_tweet: {
+          id: '',
+        },
+      },
+    },
+  }).as('tweetApi');
 });

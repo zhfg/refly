@@ -4,8 +4,10 @@ import { createUploadFn } from './image-upload';
 import Magic from './ui/icons/magic';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { Editor, Range } from '@tiptap/core';
+import i18next from 'i18next';
 
 export const configureSuggestionItems = (param: { entityId: string; entityType: string }) => {
+  const t = (key: string) => i18next.t(key);
   const createBlockAfterCurrent = (editor: Editor, range: Range, createNodeType: () => void) => {
     const { $from } = editor.state.selection;
     let endPos = $from.end();
@@ -40,8 +42,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
 
   return createSuggestionItems([
     {
-      title: 'Ask AI',
-      description: 'Ask AI to help you write.',
+      title: t('editor.command.askAi'),
+      description: t('editor.command.askAiDescription'),
       searchTerms: ['ai', 'assistant'],
       icon: <Magic className="w-5 h-5" />,
       command: ({ editor, range }) => {
@@ -53,8 +55,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Text',
-      description: 'Just start typing with plain text.',
+      title: t('editor.command.text'),
+      description: t('editor.command.textDescription'),
       searchTerms: ['p', 'paragraph'],
       icon: <Text size={18} />,
       command: ({ editor, range }) => {
@@ -64,8 +66,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Heading 1',
-      description: 'Big section heading.',
+      title: t('editor.command.heading1'),
+      description: t('editor.command.heading1Description'),
       searchTerms: ['title', 'big', 'large'],
       icon: <Heading1 size={18} />,
       command: ({ editor, range }) => {
@@ -75,8 +77,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'To-do List',
-      description: 'Track tasks with a to-do list.',
+      title: t('editor.command.toDoList'),
+      description: t('editor.command.toDoListDescription'),
       searchTerms: ['todo', 'task', 'list', 'check', 'checkbox'],
       icon: <CheckSquare size={18} />,
       command: ({ editor, range }) => {
@@ -86,8 +88,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Bullet List',
-      description: 'Create a simple bullet list.',
+      title: t('editor.command.bulletList'),
+      description: t('editor.command.bulletListDescription'),
       searchTerms: ['unordered', 'point'],
       icon: <List size={18} />,
       command: ({ editor, range }) => {
@@ -97,8 +99,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Quote',
-      description: 'Capture a quote.',
+      title: t('editor.command.quote'),
+      description: t('editor.command.quoteDescription'),
       searchTerms: ['blockquote'],
       icon: <TextQuote size={18} />,
       command: ({ editor, range }) => {
@@ -108,8 +110,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Code',
-      description: 'Capture a code snippet.',
+      title: t('editor.command.code'),
+      description: t('editor.command.codeDescription'),
       searchTerms: ['codeblock'],
       icon: <Code size={18} />,
       command: ({ editor, range }) => {
@@ -119,8 +121,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Image',
-      description: 'Upload an image from your computer.',
+      title: t('editor.command.image'),
+      description: t('editor.command.imageDescription'),
       searchTerms: ['photo', 'picture', 'media'],
       icon: <ImageIcon size={18} />,
       command: ({ editor, range }) => {

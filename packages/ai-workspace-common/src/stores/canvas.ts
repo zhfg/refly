@@ -50,6 +50,7 @@ export interface CanvasState {
   addNodePreview: (canvasId: string, node: NodePreview) => void;
   setNodePreview: (canvasId: string, node: NodePreview) => void;
   removeNodePreview: (canvasId: string, nodeId: string) => void;
+  updateNodePreview: (canvasId: string, node: NodePreview) => void;
   setCanvasLocalSynced: (canvasId: string, syncedAt: number) => void;
   setCanvasRemoteSynced: (canvasId: string, syncedAt: number) => void;
   setShowPreview: (show: boolean) => void;
@@ -204,6 +205,14 @@ export const useCanvasStore = create<CanvasState>()(
           state.config[canvasId].nodePreviews ??= [];
           state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter(
             (n) => n.id !== nodeId,
+          );
+        }),
+      updateNodePreview: (canvasId, node) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].nodePreviews ??= [];
+          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.map((n) =>
+            n.id === node.id ? { ...n, ...node } : n,
           );
         }),
       setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),

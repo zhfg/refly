@@ -325,7 +325,7 @@ export const GroupNode = memo(
             {!isPreview && !hideActions && !readonly && (
               <>
                 {!isDragging && (
-                  <ActionButtons type="group" nodeId={id} isNodeHovered={isHovered} />
+                  <ActionButtons type="group" nodeId={id} isNodeHovered={selected && isHovered} />
                 )}
                 <GroupActionButtons
                   nodeId={id}
@@ -343,7 +343,7 @@ export const GroupNode = memo(
             resizable={true}
             edge={false}
             throttleResize={1}
-            renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
+            renderDirections={['nw', 'ne', 'sw', 'se']}
             onResizeStart={({ setOrigin, dragStart }) => {
               setOrigin(['%', '%']);
               if (dragStart && dragStart instanceof MouseEvent) {

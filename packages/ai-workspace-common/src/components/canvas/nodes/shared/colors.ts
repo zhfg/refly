@@ -15,3 +15,9 @@ export const NODE_COLORS: Record<CanvasNodeType | 'threadHistory', string> = {
   codeArtifact: '#3E63DD',
   website: '#17B26A',
 };
+export const NODE_MINI_MAP_COLORS = {
+  ...NODE_COLORS,
+  resource: '#40df2b',
+  group: '#bfc5bf',
+  memo: 'transparent',
+};

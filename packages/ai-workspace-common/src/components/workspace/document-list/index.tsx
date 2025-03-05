@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Dropdown, Button, Popconfirm, message, Empty, Divider } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Divider, Typography } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 
 import {
@@ -127,9 +127,9 @@ const DocumentCard = ({ item, onDelete }: { item: Document; onDelete: () => void
         <div className="flex items-center gap-3 mb-2">
           <IconDocumentFilled color={NODE_COLORS.document} size={24} />
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium max-w-48 truncate">
+            <Typography.Text className="text-sm font-medium w-48" ellipsis={{ tooltip: true }}>
               {item.title || t('common.untitled')}
-            </h3>
+            </Typography.Text>
             <p className="text-xs text-gray-500">
               {time(item.updatedAt, language as LOCALE)
                 .utc()

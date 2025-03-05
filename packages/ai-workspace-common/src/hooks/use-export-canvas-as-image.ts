@@ -9,6 +9,27 @@ export const useExportCanvasAsImage = () => {
   const { t } = useTranslation();
   const reactFlowInstance = useReactFlow();
   const [isLoading, setIsLoading] = useState(false);
+  const [isMinimapLoading, setIsMinimapLoading] = useState(false);
+
+  // Helper function to convert image to base64
+  const imageToBase64 = useCallback(async (imgUrl: string): Promise<string> => {
+    try {
+      const response = await fetch(imgUrl, {
+        mode: 'cors',
+        credentials: 'include', // Include cookies with the request
+      });
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Failed to convert image to base64:', error);
+      return imgUrl; // Return original URL if conversion fails
+    }
+  }, []);
 
   const exportCanvasAsImage = useCallback(
     async (canvasName = 'canvas') => {
@@ -47,7 +68,7 @@ export const useExportCanvasAsImage = () => {
           logging: false, // disable logging
           imageTimeout: 0, // do not timeout
           foreignObjectRendering: true,
-          onclone: (clonedDoc) => {
+          onclone: async (clonedDoc) => {
             // handle the cloned document, ensure all styles are applied correctly
             const clonedContainer = clonedDoc.querySelector('.react-flow');
             if (clonedContainer) {
@@ -71,11 +92,22 @@ export const useExportCanvasAsImage = () => {
                 }
               }
 
-              // handle potentially problematic images
+              // handle images: download and convert to base64
               const images = clonedContainer.querySelectorAll('img');
-              for (const img of images) {
-                img.crossOrigin = 'anonymous';
-              }
+              const imagePromises = Array.from(images).map(async (img) => {
+                try {
+                  if (img.src && !img.src.startsWith('data:')) {
+                    const base64Data = await imageToBase64(img.src);
+                    img.src = base64Data;
+                  }
+                  img.crossOrigin = 'anonymous';
+                } catch (error) {
+                  console.error('Error processing image:', error);
+                }
+              });
+
+              // Wait for all image conversions to complete
+              await Promise.all(imagePromises);
             }
           },
         });
@@ -99,8 +131,183 @@ export const useExportCanvasAsImage = () => {
         setIsLoading(false);
       }
     },
-    [reactFlowInstance, t],
+    [reactFlowInstance, t, imageToBase64],
   );
 
-  return { exportCanvasAsImage, isLoading };
+  const getMinimap = useCallback(async (): Promise<Blob | null> => {
+    if (isMinimapLoading) return null;
+
+    setIsMinimapLoading(true);
+    try {
+      if (!reactFlowInstance) {
+        throw new Error('React Flow instance not found');
+      }
+
+      const nodes = reactFlowInstance.getNodes();
+      if (!nodes?.length) {
+        return null;
+      }
+
+      // wait for the view to adjust
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // find the minimap container element
+      const minimapContainer = document.querySelector('.react-flow__minimap');
+      if (!minimapContainer) {
+        throw new Error('MiniMap container not found');
+      }
+
+      // find the svg element in the minimap
+      const svgElement = minimapContainer.querySelector('svg');
+      if (!svgElement) {
+        throw new Error('MiniMap SVG element not found');
+      }
+
+      // create a clone of the svg data
+      const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+
+      // set the svg style to ensure visibility
+      svgClone.style.backgroundColor = 'white';
+
+      // adjust the viewBox to ensure the content maximizes the svg and is centered
+      const contentElements = svgClone.querySelectorAll('rect, image');
+      if (contentElements?.length > 0) {
+        // calculate the bounding box of the content
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let maxX = Number.NEGATIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+
+        for (const element of contentElements) {
+          // use the element's attribute values first
+          if (element instanceof SVGGraphicsElement) {
+            let x = 0;
+            let y = 0;
+            let width = 0;
+            let height = 0;
+            let hasValues = false;
+
+            // for rect and image elements, read the attributes directly
+            if ('x' in element && 'y' in element && 'width' in element && 'height' in element) {
+              const xAttr = Number.parseFloat(element.getAttribute('x') || '0');
+              const yAttr = Number.parseFloat(element.getAttribute('y') || '0');
+              const widthAttr = Number.parseFloat(element.getAttribute('width') || '0');
+              const heightAttr = Number.parseFloat(element.getAttribute('height') || '0');
+
+              if (
+                !Number.isNaN(xAttr) &&
+                !Number.isNaN(yAttr) &&
+                !Number.isNaN(widthAttr) &&
+                !Number.isNaN(heightAttr)
+              ) {
+                x = xAttr;
+                y = yAttr;
+                width = widthAttr;
+                height = heightAttr;
+                hasValues = true;
+              }
+            }
+
+            // if the attributes are not directly read, try using getBBox
+            if (!hasValues) {
+              try {
+                const bbox = element.getBBox();
+                if (bbox && bbox.width > 0 && bbox.height > 0) {
+                  x = bbox.x;
+                  y = bbox.y;
+                  width = bbox.width;
+                  height = bbox.height;
+                  hasValues = true;
+                }
+              } catch (e) {
+                console.debug('无法获取元素的边界框:', e);
+              }
+            }
+
+            if (hasValues) {
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x + width);
+              maxY = Math.max(maxY, y + height);
+            }
+          }
+        }
+
+        // ensure there is a valid bounding box
+        if (
+          Number.isFinite(minX) &&
+          Number.isFinite(minY) &&
+          Number.isFinite(maxX) &&
+          Number.isFinite(maxY)
+        ) {
+          const padding = 100;
+          minX -= padding;
+          minY -= padding;
+          maxX += padding;
+          maxY += padding;
+
+          // calculate the width and height
+          const width = maxX - minX;
+          const height = maxY - minY;
+
+          // set the new viewBox
+          svgClone.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
+
+          // keep the aspect ratio but set to a suitable size
+          const aspectRatio = width / height;
+          const maxDimension = 800;
+
+          if (aspectRatio > 1) {
+            // width is greater than height
+            svgClone.setAttribute('width', `${maxDimension}`);
+            svgClone.setAttribute('height', `${maxDimension / aspectRatio}`);
+          } else {
+            // height is greater than width
+            svgClone.setAttribute('width', `${maxDimension * aspectRatio}`);
+            svgClone.setAttribute('height', `${maxDimension}`);
+          }
+
+          // set the preserveAspectRatio property to ensure centering
+          svgClone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        }
+      }
+
+      // remove unnecessary masks
+      const masks = svgClone.querySelectorAll('.react-flow__minimap-mask');
+      for (const mask of masks) {
+        mask.parentNode?.removeChild(mask);
+      }
+
+      // handle all image elements in the svg
+      const images = svgClone.querySelectorAll('image');
+      const imagePromises = Array.from(images).map(async (img) => {
+        const href = img?.getAttribute('href');
+        if (href && !href.startsWith('data:')) {
+          try {
+            const base64Data = await imageToBase64(href);
+            img.setAttribute('href', base64Data);
+          } catch (error) {
+            console.error('Error processing minimap image:', error);
+          }
+        }
+      });
+
+      await Promise.all(imagePromises);
+
+      // convert the svg to a string
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgClone);
+
+      // create an svg blob
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      return svgBlob;
+    } catch (error) {
+      console.error('Error exporting minimap as image:', error);
+      return null;
+    } finally {
+      setIsMinimapLoading(false);
+    }
+  }, [reactFlowInstance, isMinimapLoading, imageToBase64]);
+
+  return { exportCanvasAsImage, isLoading, getMinimap, isMinimapLoading };
 };

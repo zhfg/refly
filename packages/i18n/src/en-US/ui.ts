@@ -86,6 +86,51 @@ const translations = {
     aiSelector: {
       thinking: 'AI is thinking',
     },
+    command: {
+      askAi: 'Ask AI',
+      askAiDescription: 'Ask AI to help you write',
+      text: 'Text',
+      textDescription: 'Just start typing with plain text',
+      heading1: 'Heading 1',
+      heading1Description: 'Big section heading',
+      toDoList: 'To-do List',
+      toDoListDescription: 'Track tasks with a to-do list',
+      bulletList: 'Bullet List',
+      bulletListDescription: 'Create a simple bullet list',
+      quote: 'Quote',
+      quoteDescription: 'Capture a quote',
+      code: 'Code',
+      codeDescription: 'Capture a code snippet',
+      image: 'Image',
+      imageDescription: 'Upload an image from your computer',
+    },
+    nodeSelector: {
+      text: 'Text',
+      heading1: 'Heading 1',
+      heading2: 'Heading 2',
+      heading3: 'Heading 3',
+      toDoList: 'To-do List',
+      bulletList: 'Bullet List',
+      numberedList: 'Numbered List',
+      quote: 'Quote',
+      code: 'Code',
+    },
+    linkSelector: {
+      placeholder: 'Paste a link',
+    },
+    colorSelector: {
+      color: 'Color',
+      background: 'Background',
+      default: 'Default',
+      purple: 'Purple',
+      red: 'Red',
+      yellow: 'Yellow',
+      blue: 'Blue',
+      green: 'Green',
+      orange: 'Orange',
+      pink: 'Pink',
+      gray: 'Gray',
+    },
   },
   systemMaintenanceShutdown: {
     title: 'Dear Valued Users,',
@@ -1308,6 +1353,11 @@ const translations = {
     tab: {
       skillInstances: 'Installed Skills',
       skillTemplate: 'Marketplace',
+    },
+    runtimeConfig: {
+      parseLinks: 'Parse links',
+      parseLinksHint:
+        'This skill will automatically read {{count}} link(s) from the query and add them to the context',
     },
     createFromTemplate: 'Create from template',
     skillManagement: {

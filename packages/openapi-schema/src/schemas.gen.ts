@@ -118,6 +118,10 @@ export const CanvasSchema = {
       description: 'Canvas status',
       $ref: '#/components/schemas/CanvasStatus',
     },
+    minimapUrl: {
+      type: 'string',
+      description: 'Minimap URL',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -893,6 +897,17 @@ export const ActionMetaSchema = {
   },
 } as const;
 
+export const SkillRuntimeConfigSchema = {
+  type: 'object',
+  description: 'Skill runtime config',
+  properties: {
+    disableLinkParsing: {
+      type: 'boolean',
+      description: 'Whether to disable link parsing for input query',
+    },
+  },
+} as const;
+
 export const SkillTemplateConfigSchema = {
   type: 'object',
   description: 'Skill template config (key is config item key, value is config value)',
@@ -1320,6 +1335,11 @@ export const ActionResultSchema = {
       type: 'object',
       description: 'Action template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
+    },
+    runtimeConfig: {
+      type: 'object',
+      description: 'Action runtime config',
+      $ref: '#/components/schemas/SkillRuntimeConfig',
     },
     history: {
       type: 'array',
@@ -2129,6 +2149,10 @@ export const UpsertCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    minimapStorageKey: {
+      type: 'string',
+      description: 'Minimap storage key',
     },
     isPublic: {
       type: 'boolean',
@@ -3450,6 +3474,10 @@ export const InvokeSkillRequestSchema = {
         $ref: '#/components/schemas/ActionResult',
       },
     },
+    runtimeConfig: {
+      description: 'Skill runtime config',
+      $ref: '#/components/schemas/SkillRuntimeConfig',
+    },
     tplConfig: {
       description: 'Skill template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
@@ -4380,6 +4408,10 @@ export const ModelInfoSchema = {
     capabilities: {
       description: 'Model capabilities',
       $ref: '#/components/schemas/ModelCapabilities',
+    },
+    isDefault: {
+      type: 'boolean',
+      description: 'Whether this model is the default model',
     },
   },
 } as const;

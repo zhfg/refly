@@ -157,15 +157,25 @@ export const useAddNode = () => {
       // Create new edges if connecting to source nodes
       let updatedEdges = edges;
       if (connectTo?.length > 0 && sourceNodes?.length > 0) {
-        const newEdges = sourceNodes.map((sourceNode) => ({
-          id: `edge-${genUniqueId()}`,
-          source: sourceNode.id,
-          target: newNode.id,
-          style: edgeStyles.default,
-          type: 'default',
-        }));
+        const newEdges = sourceNodes
+          .filter((sourceNode) => {
+            // filter out the source nodes that already have an edge
+            return !edges?.some(
+              (edge) => edge.source === sourceNode.id && edge.target === newNode.id,
+            );
+          })
+          .map((sourceNode) => ({
+            id: `edge-${genUniqueId()}`,
+            source: sourceNode.id,
+            target: newNode.id,
+            style: edgeStyles.default,
+            type: 'default',
+          }));
 
-        updatedEdges = deduplicateEdges([...edges, ...newEdges]);
+        // only add new edges if there are any
+        if (newEdges.length > 0) {
+          updatedEdges = deduplicateEdges([...edges, ...newEdges]);
+        }
       }
 
       // Update nodes and edges

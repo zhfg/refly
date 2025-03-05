@@ -15,13 +15,26 @@ export const usePatchNodeData = (selectedCanvasId?: string) => {
 
   const syncNodesToYDoc = useCallback(
     (nodes: any[]) => {
-      ydoc?.transact(() => {
-        const yNodes = ydoc?.getArray('nodes');
-        yNodes?.delete(0, yNodes?.length ?? 0);
-        yNodes?.push(nodes);
-      });
+      if (!nodes?.length || !ydoc || provider?.status !== 'connected') return;
+
+      try {
+        ydoc.transact(() => {
+          const yNodes = ydoc.getArray('nodes');
+          if (!yNodes) return;
+
+          yNodes.delete(0, yNodes.length ?? 0);
+          yNodes.push(nodes);
+        });
+      } catch (error) {
+        console.error('Transaction error when syncing nodes:', error);
+
+        // Special handling for database connection closing
+        if (error instanceof DOMException && error.name === 'InvalidStateError') {
+          console.warn('Database connection is closing. Transaction aborted.');
+        }
+      }
     },
-    [ydoc],
+    [ydoc, provider],
   );
 
   return useCallback(

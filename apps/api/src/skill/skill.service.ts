@@ -398,13 +398,15 @@ export class SkillService {
       }
 
       param.input ??= existingResult.input
-        ? JSON.parse(existingResult.input)
+        ? safeParseJSON(existingResult.input)
         : { query: existingResult.title };
 
       param.modelName ??= existingResult.modelName;
       param.skillName ??= safeParseJSON(existingResult.actionMeta).name;
-      param.context ??= JSON.parse(existingResult.context);
-      param.resultHistory ??= JSON.parse(existingResult.history);
+      param.context ??= safeParseJSON(existingResult.context);
+      param.resultHistory ??= safeParseJSON(existingResult.history);
+      param.tplConfig ??= safeParseJSON(existingResult.tplConfig);
+      param.runtimeConfig ??= safeParseJSON(existingResult.runtimeConfig);
     }
 
     param.input ||= { query: '' };
@@ -444,7 +446,7 @@ export class SkillService {
 
     const purgeContext = (context: SkillContext) => {
       // remove actual content from context to save storage
-      const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
+      const contextCopy: SkillContext = safeParseJSON(JSON.stringify(context ?? {}));
       if (contextCopy.resources) {
         for (const { resource } of contextCopy.resources) {
           resource.content = '';
@@ -493,6 +495,7 @@ export class SkillService {
             input: JSON.stringify(param.input),
             context: JSON.stringify(purgeContext(param.context)),
             tplConfig: JSON.stringify(param.tplConfig),
+            runtimeConfig: JSON.stringify(param.runtimeConfig),
             history: JSON.stringify(purgeResultHistory(param.resultHistory)),
           },
         }),
@@ -524,6 +527,7 @@ export class SkillService {
           input: JSON.stringify(param.input),
           context: JSON.stringify(purgeContext(param.context)),
           tplConfig: JSON.stringify(param.tplConfig),
+          runtimeConfig: JSON.stringify(param.runtimeConfig),
           history: JSON.stringify(purgeResultHistory(param.resultHistory)),
         },
       });
@@ -682,7 +686,7 @@ export class SkillService {
       eventListener?: (data: SkillEvent) => void;
     },
   ): Promise<SkillRunnableConfig> {
-    const { context, tplConfig, modelInfo, resultHistory, eventListener } = data;
+    const { context, tplConfig, runtimeConfig, modelInfo, resultHistory, eventListener } = data;
     const userPo = await this.prisma.user.findUnique({
       select: { uiLocale: true, outputLocale: true },
       where: { uid: user.uid },
@@ -705,6 +709,7 @@ export class SkillService {
         locale: displayLocale,
         uiLocale: userPo.uiLocale,
         tplConfig,
+        runtimeConfig,
         resultId: data.result?.resultId,
       },
     };
@@ -1136,7 +1141,7 @@ export class SkillService {
       return;
     }
 
-    const timerConfig: TimerTriggerConfig = JSON.parse(trigger.timerConfig || '{}');
+    const timerConfig: TimerTriggerConfig = safeParseJSON(trigger.timerConfig || '{}');
     const { datetime, repeatInterval } = timerConfig;
 
     const repeatIntervalToMillis: Record<TimerInterval, number> = {
@@ -1148,10 +1153,11 @@ export class SkillService {
     };
 
     const param: InvokeSkillRequest = {
-      input: JSON.parse(trigger.input || '{}'),
+      input: safeParseJSON(trigger.input || '{}'),
       target: {},
-      context: JSON.parse(trigger.context || '{}'),
-      tplConfig: JSON.parse(trigger.tplConfig || '{}'),
+      context: safeParseJSON(trigger.context || '{}'),
+      tplConfig: safeParseJSON(trigger.tplConfig || '{}'),
+      runtimeConfig: {}, // TODO: add runtime config when trigger is ready
       skillId: trigger.skillId,
       triggerId: trigger.triggerId,
     };

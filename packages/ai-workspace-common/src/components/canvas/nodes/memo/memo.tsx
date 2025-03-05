@@ -309,7 +309,7 @@ export const MemoNode = ({
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={onUpdateBgColor} />
         )}
         {!isPreview && !hideActions && !isDragging && !readonly && (
-          <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />
+          <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered && selected} />
         )}
 
         <div

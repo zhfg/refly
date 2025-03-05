@@ -7,9 +7,12 @@ const UpdatedImage = Image.extend({
       ...this.parent?.(),
       src: {
         default: '',
-        parseHTML: (element) => element.getAttribute('src') || '',
+        parseHTML: (element) => {
+          const src = element?.getAttribute('src');
+          return src ?? '';
+        },
         renderHTML: (attributes) => ({
-          src: attributes.src || '',
+          src: attributes?.src ?? '',
         }),
       },
       width: {

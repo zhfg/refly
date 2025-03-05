@@ -59,7 +59,7 @@ export class CanvasService {
   async listCanvases(user: User, param: ListCanvasesData['query']) {
     const { page, pageSize } = param;
 
-    return this.prisma.canvas.findMany({
+    const canvases = await this.prisma.canvas.findMany({
       where: {
         uid: user.uid,
         deletedAt: null,
@@ -68,6 +68,13 @@ export class CanvasService {
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
+
+    return canvases.map((canvas) => ({
+      ...canvas,
+      minimapUrl: canvas.minimap
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+        : undefined,
+    }));
   }
 
   async getCanvasDetail(user: User, canvasId: string) {
@@ -79,17 +86,38 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    return canvas;
+    return {
+      ...canvas,
+      minimapUrl: canvas.minimap
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+        : undefined,
+    };
   }
 
   async getCanvasYDoc(stateStorageKey: string) {
-    const readable = await this.minio.client.getObject(stateStorageKey);
-    const state = await streamToBuffer(readable);
+    if (!stateStorageKey) {
+      return null;
+    }
 
-    const doc = new Y.Doc();
-    Y.applyUpdate(doc, state);
+    try {
+      const readable = await this.minio.client.getObject(stateStorageKey);
+      if (!readable) {
+        throw new Error('Canvas state not found');
+      }
 
-    return doc;
+      const state = await streamToBuffer(readable);
+      if (!state?.length) {
+        throw new Error('Canvas state is empty');
+      }
+
+      const doc = new Y.Doc();
+      Y.applyUpdate(doc, state);
+
+      return doc;
+    } catch (error) {
+      this.logger.warn(`Error getting canvas YDoc for key ${stateStorageKey}: ${error?.message}`);
+      return null;
+    }
   }
 
   async saveCanvasYDoc(stateStorageKey: string, doc: Y.Doc) {
@@ -122,8 +150,8 @@ export class CanvasService {
 
     return {
       title: canvas.title,
-      nodes: doc.getArray('nodes').toJSON(),
-      edges: doc.getArray('edges').toJSON(),
+      nodes: doc?.getArray('nodes').toJSON() ?? [],
+      edges: doc?.getArray('edges').toJSON() ?? [],
       isPublic: canvas.isPublic,
     };
   }
@@ -338,8 +366,16 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title, isPublic } = param;
+    const { canvasId, title, isPublic, minimapStorageKey } = param;
 
+    const canvas = await this.prisma.canvas.findUnique({
+      where: { canvasId, uid: user.uid, deletedAt: null },
+    });
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    const originalMinimap = canvas.minimap;
     const updates: Prisma.CanvasUpdateInput = {};
 
     if (title !== undefined) {
@@ -347,6 +383,9 @@ export class CanvasService {
     }
     if (isPublic !== undefined) {
       updates.isPublic = isPublic;
+    }
+    if (minimapStorageKey !== undefined) {
+      updates.minimap = minimapStorageKey;
     }
 
     const updatedCanvas = await this.prisma.$transaction(async (tx) => {
@@ -383,6 +422,11 @@ export class CanvasService {
         title.insert(0, param.title);
       });
       await connection.disconnect();
+    }
+
+    // Remove original minimap if it exists
+    if (minimapStorageKey !== undefined && originalMinimap) {
+      await this.minio.client.removeObject(originalMinimap);
     }
 
     await this.elasticsearch.upsertCanvas({

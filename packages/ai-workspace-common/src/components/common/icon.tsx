@@ -38,6 +38,7 @@ import {
   LuX,
   LuLink,
   LuShare2,
+  LuCirclePlay,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -111,6 +112,7 @@ export const IconPlus = HiPlus;
 export const IconMinus = HiMinus;
 export const IconCheck = LuCheck;
 export const IconPlay = HiMiniPlayCircle;
+export const IconPlayOutline = LuCirclePlay;
 export const IconRun = LuPlay;
 export const IconRerun = LuRotateCw;
 export const IconReply = HiOutlineReply;

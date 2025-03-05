@@ -9,7 +9,12 @@ import {
   ChatActions,
   CustomAction,
 } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
-import { ModelInfo, Skill } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import {
+  ModelInfo,
+  Skill,
+  SkillRuntimeConfig,
+  SkillTemplateConfig,
+} from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { convertContextItemsToEdges } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -34,7 +39,8 @@ interface EditChatInputProps {
   };
   setEditMode: (mode: boolean) => void;
   readonly?: boolean;
-  tplConfig?: any;
+  tplConfig?: SkillTemplateConfig;
+  runtimeConfig?: SkillRuntimeConfig;
 }
 
 const EditChatInputComponent = (props: EditChatInputProps) => {
@@ -49,12 +55,15 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     setEditMode,
     readonly,
     tplConfig: initialTplConfig,
+    runtimeConfig,
   } = props;
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
   const [editContextItems, setEditContextItems] = useState<IContextItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
+  const [editRuntimeConfig, setEditRuntimeConfig] = useState<SkillRuntimeConfig>(runtimeConfig);
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { t } = useTranslation();
   const [localActionMeta, setLocalActionMeta] = useState<{
@@ -193,6 +202,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           setEditQuery(query);
           setEditContextItems(contextItems);
           setEditModelInfo(modelInfo);
+          setEditRuntimeConfig(runtimeConfig);
 
           // Reset form values
           if (initialTplConfig) {
@@ -325,6 +335,8 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           query={editQuery}
           model={editModelInfo}
           setModel={setEditModelInfo}
+          runtimeConfig={editRuntimeConfig}
+          setRuntimeConfig={setEditRuntimeConfig}
           handleSendMessage={handleSendMessage}
           handleAbort={() => {}}
           customActions={customActions}
