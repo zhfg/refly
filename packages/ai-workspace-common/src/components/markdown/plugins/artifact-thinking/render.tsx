@@ -8,10 +8,17 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const isReflyThinkingClosed = (input = '') => {
-  const openTag = `<${ARTIFACT_THINKING_TAG}>`;
-  const closeTag = `</${ARTIFACT_THINKING_TAG}>`;
+  // More robust check - look for both the opening tag (anywhere) and the closing tag (after the opening)
+  const openTagPos = input.indexOf(`<${ARTIFACT_THINKING_TAG}`);
+  if (openTagPos === -1) return false;
 
-  return input.includes(openTag) && input.includes(closeTag);
+  // Find the end of the opening tag
+  const openTagEndPos = input.indexOf('>', openTagPos);
+  if (openTagEndPos === -1) return false;
+
+  // Check for closing tag after the opening tag
+  const closeTagPos = input.indexOf(`</${ARTIFACT_THINKING_TAG}>`, openTagEndPos);
+  return closeTagPos !== -1;
 };
 
 const Render = memo((props: { id: string }) => {

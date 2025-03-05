@@ -95,3 +95,70 @@ export const getArtifactContentAndAttributes = (content: string) => {
     ...attributes,
   };
 };
+
+// Function to extract content from reflyThinking tag
+export const getReflyThinkingContent = (content: string) => {
+  // Find the position of the first closing bracket of the opening tag
+  const openTagEndPos = content.indexOf('>', content.indexOf('<reflyThinking'));
+  if (openTagEndPos === -1) {
+    return '';
+  }
+
+  // Find the position of the closing tag
+  const closeTagStartPos = content.lastIndexOf('</reflyThinking>');
+
+  // Extract content between opening and closing tags
+  if (closeTagStartPos > -1) {
+    return content.substring(openTagEndPos + 1, closeTagStartPos).trim();
+  }
+
+  // No closing tag found, extract till the end
+  return content.substring(openTagEndPos + 1).trim();
+};
+
+// Function to extract content and attributes from reflyThinking tag
+export const getReflyThinkingContentAndAttributes = (content: string) => {
+  // Step 1: Find the opening tag and extract all attributes
+  const openingTagRegex = /<reflyThinking\b([^>]*)>/;
+  const openingMatch = openingTagRegex.exec(content);
+  const attributes: Record<string, string> = {};
+
+  if (openingMatch && openingMatch.length > 1) {
+    const attrStr = openingMatch[1];
+    // Use a regex that can handle quoted attribute values potentially containing spaces and special chars
+    const attrRegex = /(\w+)=["']([^"']*)["']/g;
+    let match: RegExpExecArray | null = null;
+
+    // Extract all attributes using regex
+    match = attrRegex.exec(attrStr);
+    while (match !== null) {
+      attributes[match[1]] = match[2];
+      match = attrRegex.exec(attrStr);
+    }
+  }
+
+  // Step 2: Extract the content between opening and closing tags
+  // We'll use a more precise approach to get everything between tags
+  let contentValue = '';
+
+  // Find the position of the first closing bracket of the opening tag
+  const openTagEndPos = content.indexOf('>', content.indexOf('<reflyThinking'));
+  if (openTagEndPos > -1) {
+    // Find the position of the closing tag
+    const closeTagStartPos = content.lastIndexOf('</reflyThinking>');
+
+    if (closeTagStartPos > -1) {
+      // Extract content between opening and closing tags
+      contentValue = content.substring(openTagEndPos + 1, closeTagStartPos).trim();
+    } else {
+      // No closing tag found, extract till the end
+      contentValue = content.substring(openTagEndPos + 1).trim();
+    }
+  }
+
+  return {
+    content: contentValue,
+    // Include all other attributes
+    ...attributes,
+  };
+};
