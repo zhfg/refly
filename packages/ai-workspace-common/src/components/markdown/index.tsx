@@ -35,15 +35,6 @@ export const Markdown = memo(
     const { content: rawContent } = props;
     const content = processWithArtifact(rawContent);
 
-    // Log all props for debugging
-    console.log('Markdown component received props:', {
-      resultId: props.resultId,
-      hasContent: !!rawContent,
-      contentLength: rawContent?.length,
-      hasSource: !!props.sources?.length,
-      allProps: Object.keys(props),
-    });
-
     const mdRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isKatexLoaded, setIsKatexLoaded] = useState(false);
@@ -64,8 +55,6 @@ export const Markdown = memo(
     // Memoize the parsed content
     const parsedContent = useMemo(() => markdownCitationParse(content), [content]);
 
-    console.log('Markdown', props);
-
     const artifactComponents = useMemo(() => {
       // Capture resultId from outer props scope
       const outerResultId = props.resultId;
@@ -73,7 +62,6 @@ export const Markdown = memo(
       return Object.fromEntries(
         markdownElements.map((element) => {
           const Component = element.Component;
-          console.log('element', element, props);
 
           return [
             element.tag,

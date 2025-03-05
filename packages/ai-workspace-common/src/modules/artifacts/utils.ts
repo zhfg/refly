@@ -28,31 +28,61 @@ export const processWithArtifact = (input = '') => {
 };
 
 export const getArtifactContent = (content: string) => {
-  const result = content.match(ARTIFACT_TAG_REGEX);
+  // Find the position of the first closing bracket of the opening tag
+  const openTagEndPos = content.indexOf('>', content.indexOf('<reflyArtifact'));
+  if (openTagEndPos === -1) {
+    return '';
+  }
 
-  return result?.groups?.content || '';
+  // Find the position of the closing tag
+  const closeTagStartPos = content.lastIndexOf('</reflyArtifact>');
+
+  // Extract content between opening and closing tags
+  if (closeTagStartPos > -1) {
+    return content.substring(openTagEndPos + 1, closeTagStartPos).trim();
+  }
+
+  // No closing tag found, extract till the end
+  return content.substring(openTagEndPos + 1).trim();
 };
 
 // Function to extract content and attributes from artifact tag
 export const getArtifactContentAndAttributes = (content: string) => {
-  const result = content.match(ARTIFACT_TAG_REGEX);
-  const contentValue = result?.groups?.content || '';
-
-  // Extract attributes like title, language, type
-  const attributeRegex = /<reflyArtifact\b([^>]*)>/;
-  const attributeMatch = attributeRegex.exec(content);
+  // Step 1: Find the opening tag and extract all attributes
+  const openingTagRegex = /<reflyArtifact\b([^>]*)>/;
+  const openingMatch = openingTagRegex.exec(content);
   const attributes: Record<string, string> = {};
 
-  // Only process attributes if there's a match with a first capturing group
-  if (attributeMatch && attributeMatch.length > 1) {
-    const attrStr = attributeMatch[1];
-    const attrRegex = /(\w+)="([^"]*)"/g;
-    let match: RegExpExecArray | null;
+  if (openingMatch && openingMatch.length > 1) {
+    const attrStr = openingMatch[1];
+    // Use a regex that can handle quoted attribute values potentially containing spaces and special chars
+    const attrRegex = /(\w+)=["']([^"']*)["']/g;
+    let match: RegExpExecArray | null = null;
 
+    // Extract all attributes using regex
     match = attrRegex.exec(attrStr);
     while (match !== null) {
       attributes[match[1]] = match[2];
       match = attrRegex.exec(attrStr);
+    }
+  }
+
+  // Step 2: Extract the content between opening and closing tags
+  // We'll use a more precise approach to get everything between tags
+  let contentValue = '';
+
+  // Find the position of the first closing bracket of the opening tag
+  const openTagEndPos = content.indexOf('>', content.indexOf('<reflyArtifact'));
+  if (openTagEndPos > -1) {
+    // Find the position of the closing tag
+    const closeTagStartPos = content.lastIndexOf('</reflyArtifact>');
+
+    if (closeTagStartPos > -1) {
+      // Extract content between opening and closing tags
+      contentValue = content.substring(openTagEndPos + 1, closeTagStartPos).trim();
+    } else {
+      // No closing tag found, extract till the end
+      contentValue = content.substring(openTagEndPos + 1).trim();
     }
   }
 
@@ -61,5 +91,7 @@ export const getArtifactContentAndAttributes = (content: string) => {
     title: attributes.title || '',
     language: attributes.language || 'typescript',
     type: attributes.type || '',
+    // Include all other attributes
+    ...attributes,
   };
 };

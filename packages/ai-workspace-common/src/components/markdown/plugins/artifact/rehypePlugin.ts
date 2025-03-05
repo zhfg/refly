@@ -1,74 +1,98 @@
 import { SKIP, visit } from 'unist-util-visit';
 
-import { ARTIFACT_TAG } from '@refly-packages/ai-workspace-common/modules/artifacts/const';
+import {
+  ARTIFACT_TAG,
+  ARTIFACT_TAG_REGEX,
+} from '@refly-packages/ai-workspace-common/modules/artifacts/const';
 
 function rehypePlugin() {
   return (tree: any) => {
     visit(tree, (node, index, parent) => {
-      if (node.type === 'element' && node.tagName === 'p' && node.children.length > 0) {
-        const firstChild = node.children[0];
-        if (firstChild.type === 'raw' && firstChild.value.startsWith(`<${ARTIFACT_TAG}`)) {
-          // 提取 reflyCanvas 的属性
-          const attributes: Record<string, string> = {};
-          const attributeRegex = /(\w+)="([^"]*)"/g;
-          let match: RegExpExecArray | null;
-          match = attributeRegex.exec(firstChild.value);
-          while (match !== null) {
-            attributes[match[1]] = match[2];
-            match = attributeRegex.exec(firstChild.value);
+      // Direct raw tag handling (complete artifact tag)
+      if (
+        node.type === 'raw' &&
+        (node.value.startsWith(`<${ARTIFACT_TAG}`) || node.value.includes(`<${ARTIFACT_TAG}`))
+      ) {
+        // Extract content from the complete tag
+        const match = ARTIFACT_TAG_REGEX.exec(node.value);
+        let content = '';
+        const attributes: Record<string, string> = {};
+
+        if (match?.groups?.content) {
+          content = match.groups.content;
+        }
+
+        // Extract attributes
+        const attributeRegex = /(\w+)="([^"]*)"/g;
+        const attrText = node.value.split('>')[0];
+
+        let attrMatch = attributeRegex.exec(attrText);
+        while (attrMatch !== null) {
+          attributes[attrMatch[1]] = attrMatch[2];
+          attrMatch = attributeRegex.exec(attrText);
+        }
+
+        // Create new node
+        const newNode = {
+          children: content ? [{ type: 'text', value: content }] : [],
+          properties: attributes,
+          tagName: ARTIFACT_TAG,
+          type: 'element',
+        };
+
+        // Replace the original node
+        parent.children.splice(index, 1, newNode);
+        return [SKIP, index];
+      }
+
+      // Handle paragraph containing artifact tags
+      if (node.type === 'element' && node.tagName === 'p' && node.children?.length > 0) {
+        // Check if any child is or contains an artifact tag
+        let hasArtifactTag = false;
+        let artifactContent = '';
+        const attributes: Record<string, string> = {};
+
+        // Simple check for artifact tag in paragraph text
+        const paragraphText = node.children
+          .map((child: any) => {
+            if (child.type === 'text') return child.value;
+            if (child.type === 'raw') return child.value;
+            return '';
+          })
+          .join('');
+
+        const match = ARTIFACT_TAG_REGEX.exec(paragraphText);
+
+        if (match) {
+          hasArtifactTag = true;
+          if (match.groups?.content) {
+            artifactContent = match.groups.content;
           }
 
-          // 创建新的 reflyCanvas 节点
+          // Extract attributes
+          const attributeRegex = /(\w+)="([^"]*)"/g;
+          const tagOpening = paragraphText.split('>')[0];
+          let attrMatch = attributeRegex.exec(tagOpening);
+
+          while (attrMatch !== null) {
+            attributes[attrMatch[1]] = attrMatch[2];
+            attrMatch = attributeRegex.exec(tagOpening);
+          }
+        }
+
+        if (hasArtifactTag) {
+          // Create new artifact node
           const newNode = {
-            children: [
-              {
-                type: 'text',
-                value: [node.children?.[1]]
-                  ?.map((child: any) => {
-                    if (child.type === 'raw') {
-                      return child.value;
-                    }
-                    if (child.type === 'text') {
-                      return child.value;
-                    }
-                    if (child.type === 'element' && child.tagName === 'a') {
-                      return child.children[0].value;
-                    }
-                    return '';
-                  })
-                  ?.join('')
-                  ?.trim(),
-              },
-            ],
+            children: artifactContent ? [{ type: 'text', value: artifactContent }] : [],
             properties: attributes,
             tagName: ARTIFACT_TAG,
             type: 'element',
           };
 
-          // 替换原来的 p 节点
+          // Replace the paragraph with the artifact node
           parent.children.splice(index, 1, newNode);
           return [SKIP, index];
         }
-      }
-      // 如果字符串是 <reflyCanvas identifier="ai-new-interpretation" type="image/svg+xml" title="人工智能新解释">
-      // 得到的节点就是：
-      // {
-      //   type: 'raw',
-      //   value:
-      //     '<reflyCanvas identifier="ai-new-interpretation" type="image/svg+xml" title="人工智能新解释">',
-      // }
-      else if (node.type === 'raw' && node.value.startsWith(`<${ARTIFACT_TAG}`)) {
-        // 创建新的 reflyCanvas 节点
-        const newNode = {
-          children: [],
-          properties: {},
-          tagName: ARTIFACT_TAG,
-          type: 'element',
-        };
-
-        // 替换原来的 p 节点
-        parent.children.splice(index, 1, newNode);
-        return [SKIP, index];
       }
     });
   };

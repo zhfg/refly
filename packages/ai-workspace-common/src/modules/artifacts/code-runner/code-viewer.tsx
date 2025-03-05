@@ -19,6 +19,20 @@ const getSimpleTypeDescription = (type: CodeArtifactType): string => {
   return typeMap[type] ?? type;
 };
 
+// Function to map CodeArtifactType to appropriate Monaco editor language
+const getLanguageFromType = (type: CodeArtifactType, language: string): string => {
+  const languageMap: Record<CodeArtifactType, string> = {
+    'application/refly.artifacts.react': 'typescript',
+    'image/svg+xml': 'xml',
+    'application/refly.artifacts.mermaid': 'markdown',
+    'text/markdown': 'markdown',
+    'application/refly.artifacts.code': language, // Use provided language
+    'text/html': 'html',
+  };
+
+  return languageMap[type] ?? language;
+};
+
 export default memo(
   function CodeViewer({
     code,
@@ -266,9 +280,7 @@ export default memo(
                 height="100%"
                 value={editorContent}
                 onChange={handleEditorChange}
-                language={
-                  language === 'typescript' || language === 'javascript' ? language : 'markdown'
-                }
+                language={getLanguageFromType(type, language)}
                 beforeMount={(monaco: Monaco) => {
                   // Configure Monaco instance before mounting
                   monaco.editor.defineTheme('github-custom', {
