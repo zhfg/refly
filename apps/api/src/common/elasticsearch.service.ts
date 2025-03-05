@@ -225,10 +225,13 @@ export class ElasticsearchService implements OnModuleInit {
 
   async duplicateResource(resourceId: string, newId: string, user: User): Promise<void> {
     try {
-      const { body } = await this.client.get<{ _source: ResourceDocument }>({
-        index: indexConfig.resource.index,
-        id: resourceId,
-      });
+      const { body } = await this.client.get<{ _source: ResourceDocument }>(
+        {
+          index: indexConfig.resource.index,
+          id: resourceId,
+        },
+        { ignore: [404] },
+      );
 
       if (!body?._source) {
         this.logger.warn(`Resource ${resourceId} not found`);
@@ -253,10 +256,13 @@ export class ElasticsearchService implements OnModuleInit {
 
   async duplicateDocument(documentId: string, newId: string, user: User): Promise<void> {
     try {
-      const { body } = await this.client.get<{ _source: DocumentDocument }>({
-        index: indexConfig.document.index,
-        id: documentId,
-      });
+      const { body } = await this.client.get<{ _source: DocumentDocument }>(
+        {
+          index: indexConfig.document.index,
+          id: documentId,
+        },
+        { ignore: [404] },
+      );
 
       if (!body?._source) {
         this.logger.warn(`Document ${documentId} not found`);

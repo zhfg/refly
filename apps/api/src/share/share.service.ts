@@ -140,8 +140,10 @@ export class ShareService {
     }
 
     // Publish minimap
-    const minimapUrl = await this.miscService.publishFile(canvas.minimapStorageKey);
-    canvasData.minimapUrl = minimapUrl;
+    if (canvas.minimapStorageKey) {
+      const minimapUrl = await this.miscService.publishFile(canvas.minimapStorageKey);
+      canvasData.minimapUrl = minimapUrl;
+    }
 
     // Upload public canvas data to Minio
     const { storageKey } = await this.miscService.uploadBuffer(user, {
@@ -310,6 +312,7 @@ export class ShareService {
         if (!originalUrl.startsWith(privateStaticEndpoint)) return null;
 
         const storageKey = originalUrl.replace(`${privateStaticEndpoint}/`, '');
+        if (!storageKey) return null;
 
         try {
           // Publish the file to public bucket
