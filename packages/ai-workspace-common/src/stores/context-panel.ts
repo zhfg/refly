@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { CanvasNodeType, SelectionKey, SkillRuntimeConfig } from '@refly/openapi-schema';
+import { purgeContextItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 export interface FilterErrorInfo {
   [key: string]: {
@@ -51,7 +52,6 @@ interface ContextPanelState {
   setContextItems: (items: IContextItem[]) => void;
   removeContextItem: (entityId: string) => void;
   clearContextItems: () => void;
-  updateContextItem: (item: IContextItem) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -97,30 +97,24 @@ export const useContextPanelStore = create<ContextPanelState>()(
           updatedItems[existingIndex] = item;
           return {
             ...state,
-            contextItems: updatedItems,
+            contextItems: purgeContextItems(updatedItems),
           };
         }
 
         // Add new item to end
         return {
           ...state,
-          contextItems: [...state.contextItems, item],
+          contextItems: purgeContextItems([...state.contextItems, item]),
         };
       }),
-    setContextItems: (items: IContextItem[]) => set((state) => ({ ...state, contextItems: items })),
+    setContextItems: (items: IContextItem[]) =>
+      set((state) => ({ ...state, contextItems: purgeContextItems(items) })),
     removeContextItem: (entityId: string) =>
       set((state) => ({
         ...state,
         contextItems: state.contextItems.filter((item) => item.entityId !== entityId),
       })),
     clearContextItems: () => set((state) => ({ ...state, contextItems: [] })),
-    updateContextItem: (updatedItem: IContextItem) =>
-      set((state) => ({
-        ...state,
-        contextItems: state.contextItems.map((item) =>
-          item.entityId === updatedItem.entityId ? { ...item, ...updatedItem } : item,
-        ),
-      })),
 
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),

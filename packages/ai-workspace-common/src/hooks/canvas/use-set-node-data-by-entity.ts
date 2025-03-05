@@ -5,6 +5,8 @@ import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNodeData } from '../../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasSync } from './use-canvas-sync';
+import { purgeContextItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export interface CanvasNodeFilter {
   type: CanvasNodeType;
@@ -21,11 +23,14 @@ export const useSetNodeDataByEntity = () => {
   const { syncNodesToYDoc } = useCanvasSync();
 
   return useCallback(
-    <T = any>(
-      filter: CanvasNodeFilter,
-      nodeData: Partial<CanvasNodeData<T>>,
-      selectedCanvasId?: string,
-    ) => {
+    (filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData>, selectedCanvasId?: string) => {
+      // Purge context items if they exist
+      if (Array.isArray(nodeData.metadata?.contextItems)) {
+        nodeData.metadata.contextItems = purgeContextItems(
+          nodeData.metadata.contextItems as IContextItem[],
+        );
+      }
+
       const { data } = useCanvasStore.getState();
       const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
       const currentNodes = data[canvasId]?.nodes ?? [];
