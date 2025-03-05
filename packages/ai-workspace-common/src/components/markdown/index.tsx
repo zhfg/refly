@@ -114,7 +114,7 @@ export const Markdown = memo(
                   ]}
                   components={{
                     ...artifactComponents,
-                    pre: CodeElement.Component,
+                    pre: (preProps) => <CodeElement.Component {...preProps} id={props.resultId} />,
                     a: (args) => LinkElement.Component(args, props?.sources || []),
                   }}
                   linkTarget={'_blank'}

@@ -54,9 +54,9 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
     new CodeArtifacts(engine),
     new WebSearch(engine),
+    new CustomPrompt(engine),
     new LibrarySearch(engine),
     new GenerateDoc(engine),
-    new CustomPrompt(engine),
     new RecommendQuestions(engine),
     new CommonQnA(engine),
     // new RewriteDoc(engine),

@@ -29,15 +29,23 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   // Use activeTab from node metadata with fallback to 'code'
   const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
+  const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
+  const data = node?.data;
 
-  // Sync local tab state with node metadata changes
+  // Sync local state with node metadata changes
   // useEffect(() => {
   //   // Only update if activeTab changes and is different from current state
   //   const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
   //   if (metadataActiveTab && metadataActiveTab !== currentTab) {
   //     setCurrentTab(metadataActiveTab);
   //   }
-  // }, [node.data?.metadata?.activeTab, currentTab]);
+
+  //   // Update type if it changes in metadata
+  //   const metadataType = node.data?.metadata?.type as CodeArtifactType;
+  //   if (metadataType && metadataType !== currentType) {
+  //     setCurrentType(metadataType);
+  //   }
+  // }, [node.data?.metadata?.activeTab, currentTab, node.data?.metadata?.type, currentType]);
 
   // Update node data when tab changes
   const handleTabChange = useCallback(
@@ -60,6 +68,30 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
       // }
     },
     [node.data?.entityId, node.data?.metadata, setNodeDataByEntity],
+  );
+
+  const handleTypeChange = useCallback(
+    (newType: CodeArtifactType) => {
+      // Update local state first
+      setCurrentType(newType);
+
+      // Ensure newType is a valid CodeArtifactType
+      // if (data?.entityId && newType) {
+      //   setNodeDataByEntity(
+      //     {
+      //       type: 'codeArtifact',
+      //       entityId: data.entityId,
+      //     },
+      //     {
+      //       metadata: {
+      //         ...data?.metadata,
+      //         type: newType,
+      //       },
+      //     },
+      //   );
+      // }
+    },
+    [data?.entityId, data?.metadata, setNodeDataByEntity, setCurrentType],
   );
 
   const handleRequestFix = useCallback(
@@ -133,21 +165,22 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     setIsShowingCodeViewer(false);
   }, []);
 
+  // Handle code changes
   const handleCodeChange = useCallback(
-    (updatedCode: string) => {
-      if (node?.data?.entityId) {
+    (newCode: string) => {
+      if (data?.entityId) {
         setNodeDataByEntity(
           {
             type: 'codeArtifact',
-            entityId: node.data.entityId,
+            entityId: data.entityId,
           },
           {
-            contentPreview: updatedCode,
+            contentPreview: newCode,
           },
         );
       }
     },
-    [node?.data?.entityId, setNodeDataByEntity],
+    [data?.entityId, setNodeDataByEntity],
   );
 
   if (!artifactId) {
@@ -175,11 +208,12 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             isGenerating={isGenerating}
             activeTab={currentTab}
             onTabChange={handleTabChange}
+            onTypeChange={handleTypeChange}
             onClose={handleClose}
             onRequestFix={handleRequestFix}
             onChange={handleCodeChange}
             readOnly={readonly}
-            type={type as CodeArtifactType}
+            type={currentType as CodeArtifactType}
           />
         )}
       </CodeViewerLayout>
@@ -194,5 +228,6 @@ export const CodeArtifactNodePreview = memo(
     prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview &&
     prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status &&
     prevProps.node?.data?.metadata?.language === nextProps.node?.data?.metadata?.language &&
-    prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab,
+    prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab &&
+    prevProps.node?.data?.metadata?.type === nextProps.node?.data?.metadata?.type,
 );
