@@ -102,7 +102,10 @@ export const NodeHeader = memo(
 
     return (
       <>
-        <div className={`flex-shrink-0 ${source === 'skillResponsePreview' ? 'mb-0' : 'mb-3'}`}>
+        <div
+          data-cy="skill-response-node-header"
+          className={`flex-shrink-0 ${source === 'skillResponsePreview' ? 'mb-0' : 'mb-3'}`}
+        >
           <div className="flex items-center gap-2">
             {showIcon && (
               <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
