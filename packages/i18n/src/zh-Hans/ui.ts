@@ -1745,6 +1745,14 @@ const translations = {
     markdown: {
       copySuccess: '复制成功',
       mermaidError: 'Mermaid 图表渲染失败',
+      mermaid: {
+        copySuccess: '图表已复制到剪贴板',
+        copyError: '复制图表失败',
+        downloadSuccess: '图表下载成功',
+        downloadError: '图表下载失败',
+        downloadAsPng: '下载为PNG',
+        copyToClipboard: '复制到剪贴板',
+      },
     },
   },
   copilot: {

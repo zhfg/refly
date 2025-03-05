@@ -1771,6 +1771,14 @@ const translations = {
     markdown: {
       copySuccess: 'Copied successfully',
       mermaidError: 'Failed to render Mermaid diagram',
+      mermaid: {
+        copySuccess: 'Diagram copied to clipboard',
+        copyError: 'Failed to copy diagram',
+        downloadSuccess: 'Diagram downloaded successfully',
+        downloadError: 'Failed to download diagram',
+        downloadAsPng: 'Download as PNG',
+        copyToClipboard: 'Copy to clipboard',
+      },
     },
   },
   copilot: {
