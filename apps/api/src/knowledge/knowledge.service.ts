@@ -130,7 +130,7 @@ export class KnowledgeService {
     }));
   }
 
-  async getResourceDetail(user: User | null, param: GetResourceDetailData['query']) {
+  async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
     const { resourceId } = param;
 
     if (!resourceId) {
@@ -140,29 +140,13 @@ export class KnowledgeService {
     const resource = await this.prisma.resource.findFirst({
       where: {
         resourceId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!resource) {
       throw new ResourceNotFoundError(`resource ${resourceId} not found`);
-    }
-
-    // If the resource is accessed by anonymous user or another user,
-    // check if the resource is publicly share via some canvases
-    if (!user || user.uid !== resource.uid) {
-      const shareRels = await this.prisma.canvasEntityRelation.count({
-        where: {
-          entityId: resource.resourceId,
-          entityType: 'resource',
-          isPublic: true,
-          deletedAt: null,
-        },
-      });
-
-      if (shareRels === 0) {
-        throw new ResourceNotFoundError(`resource ${resourceId} not found`);
-      }
     }
 
     let content: string;
@@ -376,6 +360,7 @@ export class KnowledgeService {
           buf: imageBuffer,
           entityId: resourceId,
           entityType: 'resource',
+          visibility: 'public',
         });
         uploadedImages[imagePath] = url;
       } catch (error) {
@@ -454,6 +439,7 @@ export class KnowledgeService {
               buf: imageBuffer,
               entityId: resourceId,
               entityType: 'resource',
+              visibility: 'public',
             });
 
             modifiedContent += `![${altText}](${url})`;
@@ -765,10 +751,6 @@ export class KnowledgeService {
     ]);
 
     const cleanups: Promise<any>[] = [
-      this.miscService.removeFilesByEntity(user, {
-        entityId: resourceId,
-        entityType: 'resource',
-      }),
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
       this.syncStorageUsage(user),
@@ -809,7 +791,7 @@ export class KnowledgeService {
   }
 
   async getDocumentDetail(
-    user: User | null,
+    user: User,
     params: GetDocumentDetailData['query'],
   ): Promise<DocumentModel & { content?: string }> {
     const { docId } = params;
@@ -821,29 +803,13 @@ export class KnowledgeService {
     const doc = await this.prisma.document.findFirst({
       where: {
         docId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
 
     if (!doc) {
       throw new DocumentNotFoundError('Document not found');
-    }
-
-    // If the document is accessed by anonymous user or another user,
-    // check if the document is publicly share via some canvases
-    if (!user || user.uid !== doc.uid) {
-      const shareRels = await this.prisma.canvasEntityRelation.count({
-        where: {
-          entityId: doc.docId,
-          entityType: 'document',
-          isPublic: true,
-          deletedAt: null,
-        },
-      });
-
-      if (shareRels === 0) {
-        throw new DocumentNotFoundError('Document not found');
-      }
     }
 
     let content: string;
@@ -979,11 +945,6 @@ export class KnowledgeService {
     const cleanups: Promise<any>[] = [
       this.ragService.deleteDocumentNodes(user, docId),
       this.elasticsearch.deleteDocument(docId),
-      this.miscService.removeFilesByEntity(user, {
-        entityId: docId,
-        entityType: 'document',
-      }),
-      // Add canvas node deletion
       this.canvasQueue.add('deleteNodes', {
         entities: [{ entityId: docId, entityType: 'document' }],
       }),
@@ -1032,19 +993,6 @@ export class KnowledgeService {
     const newStorageKey = `doc/${newDocId}.txt`;
     const newStateStorageKey = `state/${newDocId}`;
 
-    // Duplicate the files and index
-    await Promise.all([
-      this.minio.duplicateFile(sourceDoc.storageKey, newStorageKey),
-      this.minio.duplicateFile(sourceDoc.stateStorageKey, newStateStorageKey),
-      this.ragService.duplicateDocument({
-        sourceUid: sourceDoc.uid,
-        targetUid: user.uid,
-        sourceDocId: sourceDoc.docId,
-        targetDocId: newDocId,
-      }),
-      this.elasticsearch.duplicateDocument(sourceDoc.docId, newDocId, user),
-    ]);
-
     // Create the new document using the existing createDocument method
     const newDoc = await this.prisma.document.create({
       data: {
@@ -1062,6 +1010,33 @@ export class KnowledgeService {
         stateStorageKey: newStateStorageKey,
       },
     });
+
+    const migrations: Promise<any>[] = [
+      this.minio.duplicateFile(sourceDoc.storageKey, newStorageKey),
+      this.minio.duplicateFile(sourceDoc.stateStorageKey, newStateStorageKey),
+      this.ragService.duplicateDocument({
+        sourceUid: sourceDoc.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceDoc.docId,
+        targetDocId: newDocId,
+      }),
+      this.elasticsearch.duplicateDocument(sourceDoc.docId, newDocId, user),
+    ];
+
+    if (sourceDoc.uid !== user.uid) {
+      migrations.push(
+        this.miscService.duplicateFilesByEntity(user, {
+          sourceEntityId: sourceDoc.docId,
+          sourceEntityType: 'document',
+          sourceUid: sourceDoc.uid,
+          targetEntityId: newDocId,
+          targetEntityType: 'document',
+        }),
+      );
+    }
+
+    // Duplicate the files and index
+    await Promise.all(migrations);
 
     await this.syncStorageUsage(user);
 
@@ -1093,30 +1068,7 @@ export class KnowledgeService {
 
     // Create a new resource ID
     const newResourceId = genResourceID();
-
-    const migrations: Promise<any>[] = [
-      this.ragService.duplicateDocument({
-        sourceUid: sourceResource.uid,
-        targetUid: user.uid,
-        sourceDocId: sourceResource.resourceId,
-        targetDocId: newResourceId,
-      }),
-      this.elasticsearch.duplicateResource(sourceResource.resourceId, newResourceId, user),
-    ];
-
-    let newStorageKey: string;
-    if (sourceResource.storageKey) {
-      newStorageKey = `resources/${newResourceId}.txt`;
-      migrations.push(this.minio.duplicateFile(sourceResource.storageKey, newStorageKey));
-    }
-
-    await Promise.all(migrations);
-
-    let newRawFileKey: string;
-    if (sourceResource.rawFileKey) {
-      const { storageKey } = await this.miscService.duplicateFile(user, sourceResource.rawFileKey);
-      newRawFileKey = storageKey;
-    }
+    const newStorageKey = `resources/${newResourceId}.txt`;
 
     // Create the new resource
     const newResource = await this.prisma.resource.create({
@@ -1131,14 +1083,38 @@ export class KnowledgeService {
           'indexError',
           'identifier',
           'meta',
+          'rawFileKey',
         ]),
         resourceId: newResourceId,
         title: newTitle,
         uid: user.uid,
         storageKey: newStorageKey,
-        rawFileKey: newRawFileKey,
       },
     });
+
+    const migrations: Promise<any>[] = [
+      this.ragService.duplicateDocument({
+        sourceUid: sourceResource.uid,
+        targetUid: user.uid,
+        sourceDocId: sourceResource.resourceId,
+        targetDocId: newResourceId,
+      }),
+      this.elasticsearch.duplicateResource(sourceResource.resourceId, newResourceId, user),
+    ];
+    if (sourceResource.storageKey) {
+      migrations.push(this.minio.duplicateFile(sourceResource.storageKey, newStorageKey));
+    }
+    if (sourceResource.uid !== user.uid) {
+      this.miscService.duplicateFilesByEntity(user, {
+        sourceEntityId: sourceResource.resourceId,
+        sourceEntityType: 'resource',
+        sourceUid: sourceResource.uid,
+        targetEntityId: newResourceId,
+        targetEntityType: 'resource',
+      });
+    }
+
+    await Promise.all(migrations);
 
     await this.syncStorageUsage(user);
 

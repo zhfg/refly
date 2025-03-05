@@ -26,6 +26,7 @@ import { CanvasModule } from './canvas/canvas.module';
 import { CollabModule } from './collab/collab.module';
 import { ActionModule } from './action/action.module';
 import { RedisService } from '@/common/redis.service';
+import { ShareModule } from './share/share.module';
 
 class CustomThrottlerGuard extends ThrottlerGuard {
   protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
@@ -121,6 +122,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
     CanvasModule,
     CollabModule,
     ActionModule,
+    ShareModule,
   ],
   controllers: [AppController],
   providers: [

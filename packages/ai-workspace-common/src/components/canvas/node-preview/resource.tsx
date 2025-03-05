@@ -28,6 +28,7 @@ const ResourceNodePreviewComponent = ({ node, resourceId }: ResourceNodePreviewP
         deckSize={deckSize}
         setDeckSize={setDeckSize}
         nodeId={node.id}
+        shareId={node.data?.metadata?.shareId}
       />
     </div>
   );

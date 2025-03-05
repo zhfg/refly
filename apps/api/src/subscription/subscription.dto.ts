@@ -52,6 +52,7 @@ export type CheckFileParseUsageResult = {
   pageUsed: number;
   pageLimit: number;
   available: number;
+  fileUploadLimit?: number;
 };
 
 export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {

@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
-import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
+import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -24,19 +24,19 @@ const labelRender = (props: any) => {
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`text-white rounded-lg h-[30px] w-[30px] flex items-center justify-center ${
+        className={`text-white rounded-lg h-[30px] w-[30px] flex items-center justify-center translate-y-1 ${
           value === 'off' ? 'bg-gray-500' : 'bg-green-600'
         }`}
       >
         {value === 'off' ? (
-          <RiUserForbidLine className="w-5 h-5" />
+          <RiUserForbidLine className="w-6 h-6" />
         ) : (
-          <GrLanguage className="w-5 h-5" />
+          <GrLanguage className="w-6 h-6" />
         )}
       </div>
-      <div className="text-sm">
-        <div>{label}</div>
-        <div className="text-xs text-gray-500 leading-none">{title}</div>
+      <div className="text-sm py-1 flex flex-col">
+        <div className="font-medium">{label}</div>
+        <div className="text-xs leading-none">{title}</div>
       </div>
     </div>
   );
@@ -62,7 +62,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const [open, setOpen] = useState(false);
   const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [access, setAccess] = useState<ShareAccess>('off');
-  const shareLink = useMemo(() => `${getClientOrigin()}/share/canvas/${canvasId}`, [canvasId]);
+
   const [title, setTitle] = useState('');
   const accessOptions = useMemo(
     () => [
@@ -78,6 +78,18 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
       },
     ],
     [t],
+  );
+  const {
+    data,
+    refetch: refetchShares,
+    isLoading: isLoadingShares,
+  } = useListShares({
+    query: { entityId: canvasId, entityType: 'canvas' },
+  });
+  const shareRecord = useMemo(() => data?.data?.[0], [data]);
+  const shareLink = useMemo(
+    () => `${getClientOrigin()}/share/canvas/${shareRecord?.shareId}`,
+    [shareRecord],
   );
 
   const buttons = useMemo(
@@ -105,23 +117,38 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     [access, t],
   );
 
-  const { data: canvasData } = useGetCanvasData({ query: { canvasId } });
-
   useEffect(() => {
-    if (canvasData?.data) {
-      setAccess(canvasData.data.isPublic ? 'anyone' : 'off');
-      setTitle(canvasData.data.title || '');
-    }
-  }, [canvasData?.data]);
+    setAccess(shareRecord ? 'anyone' : 'off');
+    setTitle(''); // TODO: set title from shareRecord
+  }, [shareRecord]);
+
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const updateCanvasPermission = useCallback(
     async (value: ShareAccess) => {
-      const { data } = await getClient().updateCanvas({
-        body: { canvasId, isPublic: value === 'anyone' },
-      });
-      if (data.success) {
+      setUpdateLoading(true);
+      let success: boolean;
+      if (value === 'off') {
+        const { data, error } = await getClient().deleteShare({
+          body: { shareId: shareRecord?.shareId },
+        });
+        success = data.success && !error;
+      } else {
+        const { data, error } = await getClient().createShare({
+          body: {
+            entityId: canvasId,
+            entityType: 'canvas',
+            allowDuplication: true,
+          },
+        });
+        success = data.success && !error;
+      }
+      setUpdateLoading(false);
+
+      if (success) {
         message.success(t('shareContent.updateCanvasPermissionSuccess'));
         setAccess(value);
+        refetchShares();
       }
     },
     [canvasId, access],
@@ -159,6 +186,8 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
               variant="borderless"
               options={accessOptions}
               value={access}
+              loading={updateLoading || isLoadingShares}
+              disabled={updateLoading || isLoadingShares}
               onChange={handleAccessChange}
               labelRender={labelRender}
               optionRender={optionRender}
@@ -181,11 +210,11 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         </div>
       </div>
     ),
-    [accessOptions, access, setAccess, t, shareLink, buttons],
+    [accessOptions, access, setAccess, t, shareLink, buttons, updateLoading, isLoadingShares],
   );
 
   return (
-    <div className="hidden">
+    <div>
       <CreateTemplateModal
         canvasId={canvasId}
         title={title}

@@ -154,4 +154,36 @@
   .arco-form-item {
     margin-bottom: 0;
   }
+
+  .arco-input[disabled], 
+  .arco-textarea[disabled],
+  .arco-input-disabled,
+  .arco-textarea-disabled {
+    color: rgba(0, 0, 0, 0.9) !important;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.9) !important;
+  }
+  
+  .arco-form-item-disabled .arco-form-item-label {
+    color: rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .arco-select-disabled .arco-select-view-value {
+    color: rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .arco-input-number-disabled .arco-input-number-input,
+  .arco-input-number[disabled] .arco-input-number-input,
+  .arco-input-number .arco-input-number-input[disabled] {
+    color: rgba(0, 0, 0, 0.9) !important;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .arco-radio-disabled .arco-radio-label,
+  .arco-checkbox-disabled .arco-checkbox-label {
+    color: rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .arco-switch-disabled.arco-switch-checked {
+    background-color: rgba(22, 93, 255, 0.5) !important;
+  }
 }

@@ -48,6 +48,7 @@ declare global {
     ENV?: {
       API_URL?: string;
       COLLAB_URL?: string;
+      STATIC_PUBLIC_ENDPOINT?: string;
       SUBSCRIPTION_ENABLED?: boolean;
     };
   }

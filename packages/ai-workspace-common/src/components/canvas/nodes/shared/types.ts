@@ -39,6 +39,7 @@ export interface DocumentNodeMeta {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
+  shareId?: string;
 }
 
 export interface ResourceNodeMeta {
@@ -48,6 +49,7 @@ export interface ResourceNodeMeta {
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;
+  shareId?: string;
 }
 
 export interface CodeArtifactNodeMeta {
@@ -92,6 +94,7 @@ export type ResponseNodeMeta = {
   style?: React.CSSProperties;
   originalWidth?: number;
   reasoningContent?: string;
+  shareId?: string;
 };
 
 export type ImageNodeMeta = {

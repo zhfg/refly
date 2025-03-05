@@ -23,6 +23,7 @@ interface ActionMenuProps {
   getTarget: () => HTMLElement;
   sourceType: 'multilingualSearch' | 'sourceListModal';
   importActionMode: ImportActionMode;
+  disabled?: boolean;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
@@ -161,7 +162,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           <Button
             type="primary"
             onClick={handleSave}
-            disabled={disableSave()}
+            disabled={disableSave() || props.disabled}
             loading={saveLoading}
           >
             {t('common.saveToCanvas')}

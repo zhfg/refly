@@ -24,6 +24,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -43,6 +44,7 @@ import {
   ListLabelClassesData,
   ListLabelInstancesData,
   ListResourcesData,
+  ListSharesData,
   ListSkillInstancesData,
   ListSkillTriggersData,
 } from '../requests/types.gen';
@@ -143,6 +145,14 @@ export const ensureUseGetDocumentDetailData = (
   queryClient.ensureQueryData({
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions),
     queryFn: () => getDocumentDetail({ ...clientOptions }).then((response) => response.data),
+  });
+export const ensureUseListSharesData = (
+  queryClient: QueryClient,
+  clientOptions: Options<ListSharesData, true> = {},
+) =>
+  queryClient.ensureQueryData({
+    queryKey: Common.UseListSharesKeyFn(clientOptions),
+    queryFn: () => listShares({ ...clientOptions }).then((response) => response.data),
   });
 export const ensureUseListLabelClassesData = (
   queryClient: QueryClient,

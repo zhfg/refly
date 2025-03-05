@@ -18,15 +18,7 @@ const PreviewComponent = memo(
       case 'resource':
         return <ResourceNodePreview node={node} resourceId={node.data.entityId} />;
       case 'document':
-        return (
-          <DocumentNodePreview
-            nodeData={{
-              entityId: node.data?.entityId,
-              entityType: 'document',
-              node: node,
-            }}
-          />
-        );
+        return <DocumentNodePreview node={node} />;
       case 'skill':
         return <SkillNodePreview />;
       case 'tool':

@@ -19,6 +19,7 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
+  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,9 +29,11 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
+  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
+  duplicateShare,
   emailLogin,
   emailSignup,
   exportCanvas,
@@ -55,6 +58,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -113,6 +117,8 @@ import {
   CreateResourceError,
   CreateResourceWithFileData,
   CreateResourceWithFileError,
+  CreateShareData,
+  CreateShareError,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
   CreateSkillTriggerData,
@@ -131,12 +137,16 @@ import {
   DeleteReferencesError,
   DeleteResourceData,
   DeleteResourceError,
+  DeleteShareData,
+  DeleteShareError,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
   DuplicateCanvasData,
   DuplicateCanvasError,
+  DuplicateShareData,
+  DuplicateShareError,
   EmailLoginData,
   EmailLoginError,
   EmailSignupData,
@@ -177,6 +187,8 @@ import {
   ListModelsError,
   ListResourcesData,
   ListResourcesError,
+  ListSharesData,
+  ListSharesError,
   ListSkillInstancesData,
   ListSkillInstancesError,
   ListSkillsError,
@@ -405,6 +417,21 @@ export const useGetDocumentDetail = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListShares = <
+  TData = Common.ListSharesDefaultResponse,
+  TError = ListSharesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListSharesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListSharesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listShares({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClasses = <
@@ -1081,6 +1108,57 @@ export const useDeleteReferences = <
   useMutation<TData, TError, Options<DeleteReferencesData, true>, TContext>({
     mutationKey: Common.UseDeleteReferencesKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteReferences(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useCreateShare = <
+  TData = Common.CreateShareMutationResult,
+  TError = CreateShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<CreateShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<CreateShareData, true>, TContext>({
+    mutationKey: Common.UseCreateShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => createShare(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDeleteShare = <
+  TData = Common.DeleteShareMutationResult,
+  TError = DeleteShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DeleteShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DeleteShareData, true>, TContext>({
+    mutationKey: Common.UseDeleteShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => deleteShare(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDuplicateShare = <
+  TData = Common.DuplicateShareMutationResult,
+  TError = DuplicateShareError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DuplicateShareData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DuplicateShareData, true>, TContext>({
+    mutationKey: Common.UseDuplicateShareKeyFn(mutationKey),
+    mutationFn: (clientOptions) => duplicateShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateLabelClass = <

@@ -6,7 +6,8 @@ import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
+import { Document } from '@refly/openapi-schema';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
 interface DocumentContextType {
   docId: string;
@@ -31,10 +32,12 @@ const getTitleFromYDoc = (ydoc: Y.Doc) => {
 
 export const DocumentProvider = ({
   docId,
+  shareId,
   readonly = false,
   children,
 }: {
   docId: string;
+  shareId?: string;
   readonly?: boolean;
   children: React.ReactNode;
 }) => {
@@ -52,19 +55,16 @@ export const DocumentProvider = ({
     }));
 
   // Fetch document data from API when in readonly mode
-  const { data: documentData } = useGetDocumentDetail({ query: { docId } }, null, {
-    enabled: readonly,
-    refetchOnWindowFocus: false,
-  });
+  const { data: documentData } = useFetchShareData<Document>(shareId);
 
   // Set document data from API response when in readonly mode
   useEffect(() => {
-    if (readonly && documentData?.data) {
-      const { title, content } = documentData.data;
+    if (readonly && documentData) {
+      const { title, content } = documentData;
       updateDocument(docId, { docId, title, content });
       setIsLoading(false);
     }
-  }, [readonly, documentData, docId, updateDocument]);
+  }, [readonly, documentData, docId, shareId, updateDocument]);
 
   const updateDocumentData = useCallback(
     (ydoc: Y.Doc) => {

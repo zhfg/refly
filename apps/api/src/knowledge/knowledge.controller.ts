@@ -40,7 +40,6 @@ import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError } from '@refly-packages/errors';
 import { safeParseJSON } from '@refly-packages/utils';
-import { OptionalJwtAuthGuard } from '@/auth/guard/optional-jwt-auth.guard';
 
 @Controller('v1/knowledge')
 export class KnowledgeController {
@@ -66,10 +65,10 @@ export class KnowledgeController {
     return buildSuccessResponse(resources?.map(resourcePO2DTO));
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('resource/detail')
   async showResourceDetail(
-    @LoginedUser() user: User | null,
+    @LoginedUser() user: User,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
@@ -190,10 +189,10 @@ export class KnowledgeController {
     return buildSuccessResponse((documents ?? []).map(documentPO2DTO));
   }
 
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('document/detail')
   async getDocumentDetail(
-    @LoginedUser() user: User | null,
+    @LoginedUser() user: User,
     @Query('docId') docId: string,
   ): Promise<GetDocumentDetailResponse> {
     const document = await this.knowledgeService.getDocumentDetail(user, { docId });

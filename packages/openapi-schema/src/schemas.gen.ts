@@ -18,7 +18,7 @@ export const UserSchema = {
 
 export const ShareUserSchema = {
   type: 'object',
-  description: 'Refly user, used as JWT payload',
+  description: 'Refly user in shared entity',
   required: ['uid'],
   properties: {
     uid: {
@@ -109,10 +109,6 @@ export const CanvasSchema = {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
     },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
-    },
     status: {
       type: 'string',
       description: 'Canvas status',
@@ -121,6 +117,10 @@ export const CanvasSchema = {
     minimapUrl: {
       type: 'string',
       description: 'Minimap URL',
+    },
+    minimapStorageKey: {
+      type: 'string',
+      description: 'Minimap storage key',
     },
     createdAt: {
       type: 'string',
@@ -1609,6 +1609,10 @@ export const FileParsingMeterSchema = {
       type: 'number',
       description: 'File pages limit',
     },
+    fileUploadLimit: {
+      type: 'number',
+      description: 'File upload limit (in MB)',
+    },
   },
 } as const;
 
@@ -2045,15 +2049,25 @@ export const RawCanvasDataSchema = {
   type: 'object',
   description: 'Raw canvas data',
   properties: {
+    owner: {
+      type: 'object',
+      description: 'Canvas owner',
+      $ref: '#/components/schemas/ShareUser',
+    },
     title: {
       type: 'string',
       description: 'Canvas title',
+    },
+    minimapUrl: {
+      type: 'string',
+      description: 'Minimap URL',
     },
     nodes: {
       type: 'array',
       description: 'Canvas nodes',
       items: {
         type: 'object',
+        $ref: '#/components/schemas/CanvasNode',
       },
     },
     edges: {
@@ -2062,10 +2076,6 @@ export const RawCanvasDataSchema = {
       items: {
         type: 'object',
       },
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
     },
   },
 } as const;
@@ -2153,10 +2163,6 @@ export const UpsertCanvasRequestSchema = {
     minimapStorageKey: {
       type: 'string',
       description: 'Minimap storage key',
-    },
-    isPublic: {
-      type: 'boolean',
-      description: 'Whether this canvas is public',
     },
   },
 } as const;
@@ -2767,6 +2773,151 @@ export const SkillEventSchema = {
       $ref: '#/components/schemas/BaseResponse',
     },
   },
+} as const;
+
+export const ShareRecordSchema = {
+  type: 'object',
+  required: ['shareId', 'entityType', 'entityId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+      description: 'Entity type',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    allowDuplication: {
+      type: 'boolean',
+      description: 'Whether to allow duplication of the shared entity',
+    },
+    parentShareId: {
+      type: 'string',
+      description: 'Parent share ID',
+    },
+    createdAt: {
+      type: 'string',
+      description: 'Create timestamp',
+    },
+    updatedAt: {
+      type: 'string',
+      description: 'Update timestamp',
+    },
+  },
+} as const;
+
+export const CreateShareRequestSchema = {
+  type: 'object',
+  required: ['entityType', 'entityId'],
+  properties: {
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    allowDuplication: {
+      type: 'boolean',
+      description: 'Whether to allow duplication of the shared entity',
+      default: false,
+    },
+    parentShareId: {
+      type: 'string',
+      description: 'Parent share ID',
+    },
+  },
+} as const;
+
+export const CreateShareResultSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+  },
+} as const;
+
+export const CreateShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CreateShareResult',
+          description: 'Share created',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ListShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Share record list',
+          items: {
+            $ref: '#/components/schemas/ShareRecord',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const DeleteShareRequestSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+  },
+} as const;
+
+export const DuplicateShareRequestSchema = {
+  type: 'object',
+  required: ['shareId'],
+  properties: {
+    shareId: {
+      type: 'string',
+      description: 'Share ID',
+    },
+  },
+} as const;
+
+export const DuplicateShareResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Duplicated entity',
+          $ref: '#/components/schemas/Entity',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const ListLabelClassesResponseSchema = {
@@ -3694,6 +3845,11 @@ export const UpdateUserSettingsRequestSchema = {
       description: 'User nickname',
       example: 'John Doe',
     },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+      example: 'https://example.com/avatar.png',
+    },
     uiLocale: {
       type: 'string',
       description: 'UI locale',
@@ -4282,6 +4438,10 @@ export const UploadRequestSchema = {
     visibility: {
       description: 'File visibility (default is private)',
       $ref: '#/components/schemas/FileVisibility',
+    },
+    storageKey: {
+      type: 'string',
+      description: 'Storage key (if provided, the file will be replaced if it already exists)',
     },
   },
 } as const;

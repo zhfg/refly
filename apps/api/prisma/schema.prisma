@@ -248,31 +248,31 @@ model StaticFile {
 
 model Canvas {
   /// Primary key
-  pk              BigInt    @id @default(autoincrement())
+  pk                BigInt    @id @default(autoincrement())
   /// Canvas id
-  canvasId        String    @unique @map("canvas_id")
+  canvasId          String    @unique @map("canvas_id")
   /// Owner UID
-  uid             String    @map("uid")
+  uid               String    @map("uid")
   /// Canvas title
-  title           String    @default("Untitled") @map("title")
+  title             String    @default("Untitled") @map("title")
   /// Canvas yjs doc storage size (in bytes)
-  storageSize     BigInt    @default(0) @map("storage_size")
+  storageSize       BigInt    @default(0) @map("storage_size")
   /// Canvas yjs doc storage key
-  stateStorageKey String?   @map("state_storage_key")
+  stateStorageKey   String?   @map("state_storage_key")
   /// Minimap storage key
-  minimap         String?   @map("minimap_storage_key")
+  minimapStorageKey String?   @map("minimap_storage_key")
   /// Whether this canvas is readonly
-  readOnly        Boolean   @default(false) @map("read_only")
+  readOnly          Boolean   @default(false) @map("read_only")
   /// Whether this canvas is public
-  isPublic        Boolean   @default(false) @map("is_public")
+  isPublic          Boolean   @default(false) @map("is_public")
   /// Canvas status
-  status          String    @default("ready") @map("status")
+  status            String    @default("ready") @map("status")
   /// Create timestamp
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
   @@map("canvases")
@@ -458,6 +458,36 @@ model Document {
   @@map("documents")
 }
 
+model ShareRecord {
+  /// Primary key
+  pk               BigInt    @id @default(autoincrement())
+  /// Share record id
+  shareId          String    @unique @map("share_id")
+  /// Title
+  title            String    @default("") @map("title")
+  /// Storage key
+  storageKey       String    @map("storage_key")
+  /// UID
+  uid              String    @map("uid")
+  /// Whether to allow duplication of the shared entity
+  allowDuplication Boolean   @default(false) @map("allow_duplication")
+  /// Parent share id
+  parentShareId    String?   @map("parent_share_id")
+  /// Entity id
+  entityId         String    @map("entity_id")
+  /// Entity type
+  entityType       String    @map("entity_type")
+  /// Create timestamp
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([entityType, entityId, deletedAt])
+  @@map("share_records")
+}
+
 model Reference {
   /// Primary key
   pk          BigInt    @id @default(autoincrement())
@@ -641,6 +671,8 @@ model SubscriptionPlan {
   vectorStorageQuota BigInt   @default(1000000000) @map("vector_storage_quota")
   /// File parse limit (in pages)
   fileParsePageLimit Int      @default(-1) @map("file_parse_page_limit")
+  /// File upload limit (in MB)
+  fileUploadLimit    Int      @default(-1) @map("file_upload_limit")
   /// Create timestamp
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

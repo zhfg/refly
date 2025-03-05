@@ -17,6 +17,8 @@ tags:
     description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
+  - name: share
+    description: Share management endpoints
   - name: label
     description: Label management endpoints
   - name: action
@@ -928,6 +930,96 @@ paths:
       responses:
         '200':
           description: Successful operation
+  /share/new:
+    post:
+      tags:
+        - share
+      summary: Create share
+      description: Create new share for canvas
+      operationId: createShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShareResponse'
+  /share/list:
+    get:
+      tags:
+        - share
+      summary: List shares
+      description: List all shares
+      operationId: listShares
+      parameters:
+        - name: shareId
+          in: query
+          description: Share ID
+          schema:
+            type: string
+        - name: entityId
+          in: query
+          description: Entity ID
+          schema:
+            type: string
+        - name: entityType
+          in: query
+          description: Entity type
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListShareResponse'
+  /share/delete:
+    post:
+      tags:
+        - share
+      summary: Delete share
+      description: Delete an existing share
+      operationId: deleteShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /share/duplicate:
+    post:
+      tags:
+        - share
+      summary: Duplicate share
+      description: Duplicate an existing share
+      operationId: duplicateShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicateShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DuplicateShareResponse'
   /label/class/list:
     get:
       tags:
@@ -1737,7 +1829,7 @@ components:
           description: Email
     ShareUser:
       type: object
-      description: Refly user, used as JWT payload
+      description: Refly user in shared entity
       required:
         - uid
       properties:
@@ -1816,9 +1908,6 @@ components:
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
-        isPublic:
-          type: boolean
-          description: Whether this canvas is public
         status:
           type: string
           description: Canvas status
@@ -1826,6 +1915,9 @@ components:
         minimapUrl:
           type: string
           description: Minimap URL
+        minimapStorageKey:
+          type: string
+          description: Minimap storage key
         createdAt:
           type: string
           format: date-time
@@ -3023,6 +3115,9 @@ components:
         pagesLimit:
           type: number
           description: File pages limit
+        fileUploadLimit:
+          type: number
+          description: File upload limit (in MB)
     OperationMode:
       type: string
       description: Operation mode
@@ -3319,22 +3414,27 @@ components:
       type: object
       description: Raw canvas data
       properties:
+        owner:
+          type: object
+          description: Canvas owner
+          $ref: '#/components/schemas/ShareUser'
         title:
           type: string
           description: Canvas title
+        minimapUrl:
+          type: string
+          description: Minimap URL
         nodes:
           type: array
           description: Canvas nodes
           items:
             type: object
+            $ref: '#/components/schemas/CanvasNode'
         edges:
           type: array
           description: Canvas edges
           items:
             type: object
-        isPublic:
-          type: boolean
-          description: Whether this canvas is public
     ExportCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3394,9 +3494,6 @@ components:
         minimapStorageKey:
           type: string
           description: Minimap storage key
-        isPublic:
-          type: boolean
-          description: Whether this canvas is public
     UpsertCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3775,6 +3872,102 @@ components:
         error:
           description: Error data. Only present when `event` is `error`.
           $ref: '#/components/schemas/BaseResponse'
+    ShareRecord:
+      type: object
+      required:
+        - shareId
+        - entityType
+        - entityId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+          description: Entity type
+        entityId:
+          type: string
+          description: Entity ID
+        allowDuplication:
+          type: boolean
+          description: Whether to allow duplication of the shared entity
+        parentShareId:
+          type: string
+          description: Parent share ID
+        createdAt:
+          type: string
+          description: Create timestamp
+        updatedAt:
+          type: string
+          description: Update timestamp
+    CreateShareRequest:
+      type: object
+      required:
+        - entityType
+        - entityId
+      properties:
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+        entityId:
+          type: string
+          description: Entity ID
+        allowDuplication:
+          type: boolean
+          description: Whether to allow duplication of the shared entity
+          default: false
+        parentShareId:
+          type: string
+          description: Parent share ID
+    CreateShareResult:
+      type: object
+      required:
+        - shareId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+    CreateShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CreateShareResult'
+              description: Share created
+    ListShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Share record list
+              items:
+                $ref: '#/components/schemas/ShareRecord'
+    DeleteShareRequest:
+      type: object
+      required:
+        - shareId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+    DuplicateShareRequest:
+      type: object
+      required:
+        - shareId
+      properties:
+        shareId:
+          type: string
+          description: Share ID
+    DuplicateShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Duplicated entity
+              $ref: '#/components/schemas/Entity'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -4405,6 +4598,10 @@ components:
           type: string
           description: User nickname
           example: John Doe
+        avatar:
+          type: string
+          description: User avatar
+          example: https://example.com/avatar.png
         uiLocale:
           type: string
           description: UI locale
@@ -4798,6 +4995,9 @@ components:
         visibility:
           description: File visibility (default is private)
           $ref: '#/components/schemas/FileVisibility'
+        storageKey:
+          type: string
+          description: Storage key (if provided, the file will be replaced if it already exists)
     UploadResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -27,6 +27,7 @@ const translations = {
     finish: '完成',
     add: '添加',
     remove: '移除',
+    goBack: '返回',
     library: '知识库',
     untitled: '未命名',
     loading: '加载中...',
@@ -516,38 +517,15 @@ const translations = {
     resendSuccess: '验证邮件发送成功',
     submit: '提交',
   },
-  projectDetail: {
-    directory: {
-      newCanvas: '新画布',
-      importResource: '导入资源',
-      chat: 'Chat',
-      empty: '空空如也',
-      move: '移动',
-      remove: '移除',
-      delete: '删除',
-      projectSelector: {
-        title: '移动画布',
-        tip: '请选择目标项目',
-        success: '移动成功！',
-      },
-    },
-    share: {
-      createShareFailed: '创建分享失败，请重试！',
-      project: '项目',
-      canvas: '画布',
-      title: '分享{{entityType}}',
-      description: '你的{{entityType}}正在分享中',
-      copyLink: '复制链接',
-      cancel: '取消分享',
-      cancelShareFailed: '取消分享失败，请重试！',
-      cancelShareSuccess: '取消分享成功！',
-      sharing: '分享中',
-      copyLinkFailed: '复制链接失败，请重试！',
-      copyLinkSuccess: '链接已复制到剪切板！',
-    },
-    contentArea: {
-      addCanvas: '新画布',
-      addResource: '新资源',
+  share: {
+    keyFeatures: {
+      multiThreadedConversation: '多线程对话',
+      multiModelIntegration: '多模型集成',
+      multiModalProcessing: '多模态处理',
+      aiPoweredSkillSystem: 'AI驱动的技能系统',
+      knowledgeBaseEngine: '知识库引擎',
+      intelligentContentCapture: '智能内容采集',
+      aiEnhancedEditor: 'AI增强编辑器',
     },
   },
   shareContent: {
@@ -560,9 +538,9 @@ const translations = {
     copyLinkSuccess: '分享链接已复制到剪切板！',
     accessOptions: {
       anyone: '互联网获得链接的人',
-      anyoneDescription: '互联网获得链接的人可以查看',
+      anyoneDescription: '获得此链接的人均可查看',
       off: '未开启',
-      offDescription: '未开启访问权限',
+      offDescription: '仅你可访问',
     },
   },
   workspace: {
@@ -786,6 +764,8 @@ const translations = {
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
+    shareNotFound: '画布不存在',
+    shareNotFoundHint: '你尝试访问的共享画布无法找到。它可能已被删除，或者链接可能有误。',
     nodeTypes: {
       document: '文档',
       resource: '资源',
@@ -1104,7 +1084,10 @@ const translations = {
       fromFile: '上传文件',
       dragOrClick: '点击或拖拽文件到此区域上传',
       unsupportedFileType: '请上传指定类型的文件',
-      supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
+      supportedFiles: '支持文件: {{formats}}',
+      fileUploadLimit: '每个文件最大 {{size}}',
+      unlockUploadLimit: '解锁上传限制',
+      fileTooLarge: '文件大小不能超过 {{size}}',
       fileParsingUsage: '高级文件解析（包括 PDF）：今日已使用 {{used}}/{{limit}} 页',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
@@ -1478,6 +1461,10 @@ const translations = {
         title: '退出登录',
         message: '确定退出登录吗？',
       },
+      uploadAvatar: '上传头像',
+      imageSizeLimited: '图片必须小于{{size}}MB',
+      onlyImageAllowed: '只支持上传{{type}}格式的图片',
+      cropAvatar: '裁剪头像',
     },
     language: {
       title: '语言设置',
@@ -1508,6 +1495,8 @@ const translations = {
       libraryStorageDescription: '知识库中每个资源和文档计为一个文件。',
       advancedFileParsing: '高级文件解析',
       advancedFileParsingDescription: '支持表格、图片和公式提取的 PDF 解析，按解析页数计算用量。',
+      fileSizeLimit: '文件上传限制',
+      fileSizeLimitDescription: '每个文件大小不能超过 {{size}} MB。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
@@ -1546,6 +1535,7 @@ const translations = {
         dailyCounts: '{{count}} 次/每天',
         monthlyCounts: '{{count}} 次/每月',
         dailyPagesCount: '{{count}} 页/每天',
+        fileSizeLimit: '最大 {{count}} MB',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

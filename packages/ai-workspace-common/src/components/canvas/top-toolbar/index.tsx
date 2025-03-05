@@ -18,6 +18,9 @@ import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/compon
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import './index.scss';
 import { IconLink } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { LuBookCopy } from 'react-icons/lu';
+import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -33,9 +36,12 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
   }));
+  const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
+    setLoginModalOpen: state.setLoginModalOpen,
+  }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
 
-  const { provider, readonly } = useCanvasContext();
+  const { provider, readonly, shareData } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
 
@@ -89,14 +95,20 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const showWarning = connectionTimeout && !hasCanvasSynced && provider?.status !== 'connected';
 
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
   const handleDuplicate = () => {
-    setShowDuplicateModal(true);
+    if (!isLogin) {
+      setLoginModalOpen(true);
+      return;
+    }
+    duplicateCanvas(canvasId, () => {});
   };
 
   return (
     <>
       <Helmet>
         <title>{canvasTitle?.toString() || t('common.untitled')} · Refly</title>
+        {shareData?.minimapUrl && <meta property="og:image" content={shareData.minimapUrl} />}
       </Helmet>
       <div
         className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 bg-transparent ${
@@ -119,7 +131,11 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           )}
           {readonly ? (
-            <ReadonlyCanvasTitle canvasTitle={canvasTitle} isLoading={false} />
+            <ReadonlyCanvasTitle
+              canvasTitle={canvasTitle}
+              isLoading={false}
+              owner={shareData?.owner}
+            />
           ) : (
             <CanvasTitle
               canvasId={canvasId}
@@ -141,7 +157,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          {!readonly && !isShareCanvas && (
+          {!isShareCanvas && (
             <>
               <ShareSettings canvasId={canvasId} />
               <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
@@ -149,22 +165,25 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
           )}
 
           {isShareCanvas && (
-            <Button
-              type="primary"
-              icon={<IconLink className="flex items-center" />}
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                message.success(t('shareContent.copyLinkSuccess'));
-              }}
-            >
-              {t('canvas.toolbar.copyLink')}
-            </Button>
-          )}
-
-          {readonly && isLogin && (
-            <Button type="primary" onClick={handleDuplicate} className="hidden">
-              {t('common.duplicate')}
-            </Button>
+            <>
+              <Button
+                loading={duplicating}
+                icon={<LuBookCopy className="flex items-center" />}
+                onClick={handleDuplicate}
+              >
+                {t('common.duplicate')}
+              </Button>
+              <Button
+                type="primary"
+                icon={<IconLink className="flex items-center" />}
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  message.success(t('shareContent.copyLinkSuccess'));
+                }}
+              >
+                {t('canvas.toolbar.copyLink')}
+              </Button>
+            </>
           )}
         </div>
       </div>

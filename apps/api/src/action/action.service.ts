@@ -12,33 +12,19 @@ export class ActionService {
     private subscriptionService: SubscriptionService,
   ) {}
 
-  async getActionResult(user: User | null, param: GetActionResultData['query']) {
+  async getActionResult(user: User, param: GetActionResultData['query']) {
     const { resultId, version } = param;
 
     const result = await this.prisma.actionResult.findFirst({
       where: {
         resultId,
         version,
+        uid: user.uid,
       },
       orderBy: { version: 'desc' },
     });
     if (!result) {
       throw new ActionResultNotFoundError();
-    }
-
-    if (!user || user.uid !== result.uid) {
-      const shareRels = await this.prisma.canvasEntityRelation.count({
-        where: {
-          entityId: result.resultId,
-          entityType: 'skillResponse',
-          isPublic: true,
-          deletedAt: null,
-        },
-      });
-
-      if (shareRels === 0) {
-        throw new ActionResultNotFoundError();
-      }
     }
 
     // If the result is executing and the last updated time is more than 3 minutes ago,

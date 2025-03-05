@@ -19,6 +19,7 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
+  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,9 +29,11 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
+  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
+  duplicateShare,
   emailLogin,
   emailSignup,
   exportCanvas,
@@ -55,6 +58,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -209,6 +213,16 @@ export const UseGetDocumentDetailKeyFn = (
   clientOptions: Options<unknown, true>,
   queryKey?: Array<unknown>,
 ) => [useGetDocumentDetailKey, ...(queryKey ?? [clientOptions])];
+export type ListSharesDefaultResponse = Awaited<ReturnType<typeof listShares>>['data'];
+export type ListSharesQueryResult<
+  TData = ListSharesDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useListSharesKey = 'ListShares';
+export const UseListSharesKeyFn = (
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: Array<unknown>,
+) => [useListSharesKey, ...(queryKey ?? [clientOptions])];
 export type ListLabelClassesDefaultResponse = Awaited<ReturnType<typeof listLabelClasses>>['data'];
 export type ListLabelClassesQueryResult<
   TData = ListLabelClassesDefaultResponse,
@@ -519,6 +533,24 @@ export type DeleteReferencesMutationResult = Awaited<ReturnType<typeof deleteRef
 export const useDeleteReferencesKey = 'DeleteReferences';
 export const UseDeleteReferencesKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteReferencesKey,
+  ...(mutationKey ?? []),
+];
+export type CreateShareMutationResult = Awaited<ReturnType<typeof createShare>>;
+export const useCreateShareKey = 'CreateShare';
+export const UseCreateShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useCreateShareKey,
+  ...(mutationKey ?? []),
+];
+export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;
+export const useDeleteShareKey = 'DeleteShare';
+export const UseDeleteShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useDeleteShareKey,
+  ...(mutationKey ?? []),
+];
+export type DuplicateShareMutationResult = Awaited<ReturnType<typeof duplicateShare>>;
+export const useDuplicateShareKey = 'DuplicateShare';
+export const UseDuplicateShareKeyFn = (mutationKey?: Array<unknown>) => [
+  useDuplicateShareKey,
   ...(mutationKey ?? []),
 ];
 export type CreateLabelClassMutationResult = Awaited<ReturnType<typeof createLabelClass>>;

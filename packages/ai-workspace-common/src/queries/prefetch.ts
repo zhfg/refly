@@ -24,6 +24,7 @@ import {
   listLabelInstances,
   listModels,
   listResources,
+  listShares,
   listSkillInstances,
   listSkills,
   listSkillTriggers,
@@ -43,6 +44,7 @@ import {
   ListLabelClassesData,
   ListLabelInstancesData,
   ListResourcesData,
+  ListSharesData,
   ListSkillInstancesData,
   ListSkillTriggersData,
 } from '../requests/types.gen';
@@ -143,6 +145,14 @@ export const prefetchUseGetDocumentDetail = (
   queryClient.prefetchQuery({
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions),
     queryFn: () => getDocumentDetail({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseListShares = (
+  queryClient: QueryClient,
+  clientOptions: Options<ListSharesData, true> = {},
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseListSharesKeyFn(clientOptions),
+    queryFn: () => listShares({ ...clientOptions }).then((response) => response.data),
   });
 export const prefetchUseListLabelClasses = (
   queryClient: QueryClient,

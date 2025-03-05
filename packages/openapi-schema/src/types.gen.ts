@@ -15,7 +15,7 @@ export type User = {
 };
 
 /**
- * Refly user, used as JWT payload
+ * Refly user in shared entity
  */
 export type ShareUser = {
   /**
@@ -96,10 +96,6 @@ export type Canvas = {
    */
   readOnly?: boolean;
   /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
-  /**
    * Canvas status
    */
   status?: CanvasStatus;
@@ -107,6 +103,10 @@ export type Canvas = {
    * Minimap URL
    */
   minimapUrl?: string;
+  /**
+   * Minimap storage key
+   */
+  minimapStorageKey?: string;
   /**
    * Canvas creation time
    */
@@ -1329,6 +1329,10 @@ export type FileParsingMeter = {
    * File pages limit
    */
   pagesLimit: number;
+  /**
+   * File upload limit (in MB)
+   */
+  fileUploadLimit?: number;
 };
 
 /**
@@ -1610,25 +1614,27 @@ export type GetCanvasDetailResponse = BaseResponse & {
  */
 export type RawCanvasData = {
   /**
+   * Canvas owner
+   */
+  owner?: ShareUser;
+  /**
    * Canvas title
    */
   title?: string;
   /**
+   * Minimap URL
+   */
+  minimapUrl?: string;
+  /**
    * Canvas nodes
    */
-  nodes?: Array<{
-    [key: string]: unknown;
-  }>;
+  nodes?: Array<CanvasNode>;
   /**
    * Canvas edges
    */
   edges?: Array<{
     [key: string]: unknown;
   }>;
-  /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
 };
 
 export type ExportCanvasResponse = BaseResponse & {
@@ -1688,10 +1694,6 @@ export type UpsertCanvasRequest = {
    * Minimap storage key
    */
   minimapStorageKey?: string;
-  /**
-   * Whether this canvas is public
-   */
-  isPublic?: boolean;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {
@@ -2036,6 +2038,95 @@ export type SkillEvent = {
    * Error data. Only present when `event` is `error`.
    */
   error?: BaseResponse;
+};
+
+export type ShareRecord = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+  /**
+   * Entity type
+   */
+  entityType: EntityType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Whether to allow duplication of the shared entity
+   */
+  allowDuplication?: boolean;
+  /**
+   * Parent share ID
+   */
+  parentShareId?: string;
+  /**
+   * Create timestamp
+   */
+  createdAt?: string;
+  /**
+   * Update timestamp
+   */
+  updatedAt?: string;
+};
+
+export type CreateShareRequest = {
+  entityType: EntityType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Whether to allow duplication of the shared entity
+   */
+  allowDuplication?: boolean;
+  /**
+   * Parent share ID
+   */
+  parentShareId?: string;
+};
+
+export type CreateShareResult = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+};
+
+export type CreateShareResponse = BaseResponse & {
+  /**
+   * Share created
+   */
+  data?: CreateShareResult;
+};
+
+export type ListShareResponse = BaseResponse & {
+  /**
+   * Share record list
+   */
+  data?: Array<ShareRecord>;
+};
+
+export type DeleteShareRequest = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+};
+
+export type DuplicateShareRequest = {
+  /**
+   * Share ID
+   */
+  shareId: string;
+};
+
+export type DuplicateShareResponse = BaseResponse & {
+  /**
+   * Duplicated entity
+   */
+  data?: Entity;
 };
 
 export type ListLabelClassesResponse = BaseResponse & {
@@ -2635,6 +2726,10 @@ export type UpdateUserSettingsRequest = {
    */
   nickname?: string;
   /**
+   * User avatar
+   */
+  avatar?: string;
+  /**
    * UI locale
    */
   uiLocale?: string;
@@ -3015,6 +3110,10 @@ export type UploadRequest = {
    * File visibility (default is private)
    */
   visibility?: FileVisibility;
+  /**
+   * Storage key (if provided, the file will be replaced if it already exists)
+   */
+  storageKey?: string;
 };
 
 export type UploadResponse = BaseResponse & {
@@ -3605,6 +3704,51 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
+
+export type CreateShareData = {
+  body: CreateShareRequest;
+};
+
+export type CreateShareResponse2 = CreateShareResponse;
+
+export type CreateShareError = unknown;
+
+export type ListSharesData = {
+  query?: {
+    /**
+     * Entity ID
+     */
+    entityId?: string;
+    /**
+     * Entity type
+     */
+    entityType?: EntityType;
+    /**
+     * Share ID
+     */
+    shareId?: string;
+  };
+};
+
+export type ListSharesResponse = ListShareResponse;
+
+export type ListSharesError = unknown;
+
+export type DeleteShareData = {
+  body: DeleteShareRequest;
+};
+
+export type DeleteShareResponse = BaseResponse;
+
+export type DeleteShareError = unknown;
+
+export type DuplicateShareData = {
+  body: DuplicateShareRequest;
+};
+
+export type DuplicateShareResponse2 = DuplicateShareResponse;
+
+export type DuplicateShareError = unknown;
 
 export type ListLabelClassesData = {
   query?: {

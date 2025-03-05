@@ -29,7 +29,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { genCanvasID, genCanvasTemplateID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
-import { QUEUE_DELETE_KNOWLEDGE_ENTITY, QUEUE_DUPLICATE_CANVAS } from '@/utils/const';
+import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
 import { AutoNameCanvasJobData, DuplicateCanvasJobData } from './canvas.dto';
 import { streamToBuffer } from '@/utils';
 import { SubscriptionService } from '@/subscription/subscription.service';
@@ -52,8 +52,6 @@ export class CanvasService {
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_DELETE_KNOWLEDGE_ENTITY)
     private deleteKnowledgeQueue: Queue<DeleteKnowledgeEntityJobData>,
-    @InjectQueue(QUEUE_DUPLICATE_CANVAS)
-    private duplicateCanvasQueue: Queue<DuplicateCanvasJobData>,
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
@@ -71,8 +69,8 @@ export class CanvasService {
 
     return canvases.map((canvas) => ({
       ...canvas,
-      minimapUrl: canvas.minimap
-        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
         : undefined,
     }));
   }
@@ -88,8 +86,8 @@ export class CanvasService {
 
     return {
       ...canvas,
-      minimapUrl: canvas.minimap
-        ? this.miscService.generateFileURL({ storageKey: canvas.minimap })
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
         : undefined,
     };
   }
@@ -124,25 +122,30 @@ export class CanvasService {
     await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(doc)));
   }
 
-  async getCanvasRawData(user: User | null, canvasId: string): Promise<RawCanvasData> {
+  async getCanvasRawData(user: User, canvasId: string): Promise<RawCanvasData> {
     const canvas = await this.prisma.canvas.findFirst({
       select: {
         title: true,
         uid: true,
-        isPublic: true,
         stateStorageKey: true,
+        minimapStorageKey: true,
       },
       where: {
         canvasId,
+        uid: user.uid,
         deletedAt: null,
       },
     });
+    const userPo = await this.prisma.user.findUnique({
+      select: {
+        name: true,
+        nickname: true,
+        avatar: true,
+      },
+      where: { uid: canvas.uid },
+    });
 
     if (!canvas) {
-      throw new CanvasNotFoundError();
-    }
-
-    if ((!user || user.uid !== canvas.uid) && !canvas.isPublic) {
       throw new CanvasNotFoundError();
     }
 
@@ -152,15 +155,28 @@ export class CanvasService {
       title: canvas.title,
       nodes: doc?.getArray('nodes').toJSON() ?? [],
       edges: doc?.getArray('edges').toJSON() ?? [],
-      isPublic: canvas.isPublic,
+      owner: {
+        uid: canvas.uid,
+        name: userPo?.name,
+        nickname: userPo?.nickname,
+        avatar: userPo?.avatar,
+      },
+      minimapUrl: canvas.minimapStorageKey
+        ? this.miscService.generateFileURL({ storageKey: canvas.minimapStorageKey })
+        : undefined,
     };
   }
 
-  async duplicateCanvas(user: User, param: DuplicateCanvasRequest) {
+  async duplicateCanvas(
+    user: User,
+    param: DuplicateCanvasRequest,
+    options?: { checkOwnership?: boolean },
+  ) {
     const { title, canvasId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, deletedAt: null, OR: [{ uid: user.uid }, { isPublic: true }] },
+      select: { title: true },
+      where: { canvasId, deletedAt: null, uid: options?.checkOwnership ? user.uid : undefined },
     });
 
     if (!canvas) {
@@ -186,23 +202,12 @@ export class CanvasService {
       },
     });
 
-    // Queue the duplication job
-    await this.duplicateCanvasQueue.add(
-      'duplicateCanvas',
-      {
-        uid: user.uid,
-        sourceCanvasId: canvasId,
-        targetCanvasId: newCanvasId,
-        title: newCanvas.title,
-        duplicateEntities: canvas.uid !== user.uid || duplicateEntities,
-      },
-      {
-        jobId: `duplicate_${newCanvasId}`,
-        removeOnComplete: true,
-        removeOnFail: true,
-        attempts: 3,
-      },
-    );
+    await this._duplicateCanvas({
+      uid: user.uid,
+      sourceCanvasId: canvasId,
+      targetCanvasId: newCanvasId,
+      duplicateEntities,
+    });
 
     return newCanvas;
   }
@@ -218,15 +223,15 @@ export class CanvasService {
       return;
     }
 
-    const canvas = await this.prisma.canvas.findFirst({
+    const sourceCanvas = await this.prisma.canvas.findFirst({
       where: { canvasId: sourceCanvasId, deletedAt: null },
     });
 
-    if (!canvas) {
+    if (!sourceCanvas) {
       throw new CanvasNotFoundError();
     }
 
-    const readable = await this.minio.client.getObject(canvas.stateStorageKey);
+    const readable = await this.minio.client.getObject(sourceCanvas.stateStorageKey);
     const state = await streamToBuffer(readable);
 
     const doc = new Y.Doc();
@@ -239,7 +244,7 @@ export class CanvasService {
 
     if (duplicateEntities) {
       // Duplicate each entity
-      const limit = pLimit(3); // Limit concurrent operations
+      const limit = pLimit(5); // Limit concurrent operations
 
       await Promise.all(
         nodes.map((node) =>
@@ -280,22 +285,20 @@ export class CanvasService {
                 }
                 break;
               }
-              case 'image': {
-                if (node.data?.metadata?.storageKey) {
-                  const file = await this.miscService.duplicateFile(
-                    user,
-                    node.data.metadata.storageKey as string,
-                  );
-                  if (file) {
-                    node.data.metadata.storageKey = file.storageKey;
-                  }
-                }
-                break;
-              }
             }
           }),
         ),
       );
+    }
+
+    if (sourceCanvas.uid !== user.uid) {
+      await this.miscService.duplicateFilesByEntity(user, {
+        sourceEntityId: sourceCanvasId,
+        sourceEntityType: 'canvas',
+        sourceUid: sourceCanvas.uid,
+        targetEntityId: targetCanvasId,
+        targetEntityType: 'canvas',
+      });
     }
 
     doc.transact(() => {
@@ -315,25 +318,6 @@ export class CanvasService {
     this.logger.log(`Successfully duplicated canvas ${sourceCanvasId} to ${targetCanvasId}`);
   }
 
-  async duplicateCanvasFromQueue(jobData: DuplicateCanvasJobData) {
-    const { sourceCanvasId, targetCanvasId } = jobData;
-
-    try {
-      await this._duplicateCanvas(jobData);
-    } catch (error) {
-      this.logger.error(
-        `Error duplicating canvas ${sourceCanvasId} to ${targetCanvasId}: ${error?.stack}`,
-      );
-
-      // Update canvas status to failed
-      await this.prisma.canvas.update({
-        where: { canvasId: targetCanvasId },
-        data: { status: 'failed' },
-      });
-      throw error;
-    }
-  }
-
   async createCanvas(user: User, param: UpsertCanvasRequest) {
     const canvasId = genCanvasID();
     const stateStorageKey = `state/${canvasId}`;
@@ -343,7 +327,6 @@ export class CanvasService {
         canvasId,
         title: param.title,
         stateStorageKey,
-        isPublic: param.isPublic,
       },
     });
 
@@ -366,7 +349,7 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title, isPublic, minimapStorageKey } = param;
+    const { canvasId, title, minimapStorageKey } = param;
 
     const canvas = await this.prisma.canvas.findUnique({
       where: { canvasId, uid: user.uid, deletedAt: null },
@@ -375,17 +358,14 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    const originalMinimap = canvas.minimap;
+    const originalMinimap = canvas.minimapStorageKey;
     const updates: Prisma.CanvasUpdateInput = {};
 
     if (title !== undefined) {
       updates.title = title;
     }
-    if (isPublic !== undefined) {
-      updates.isPublic = isPublic;
-    }
     if (minimapStorageKey !== undefined) {
-      updates.minimap = minimapStorageKey;
+      updates.minimapStorageKey = minimapStorageKey;
     }
 
     const updatedCanvas = await this.prisma.$transaction(async (tx) => {
@@ -393,15 +373,6 @@ export class CanvasService {
         where: { canvasId, uid: user.uid, deletedAt: null },
         data: updates,
       });
-
-      if (updates.isPublic !== undefined) {
-        // Create share records for all entities in this canvas
-        await tx.canvasEntityRelation.updateMany({
-          where: { canvasId, deletedAt: null },
-          data: { isPublic: updates.isPublic },
-        });
-      }
-
       return canvas;
     });
 
@@ -425,7 +396,11 @@ export class CanvasService {
     }
 
     // Remove original minimap if it exists
-    if (minimapStorageKey !== undefined && originalMinimap) {
+    if (
+      originalMinimap &&
+      minimapStorageKey !== undefined &&
+      minimapStorageKey !== originalMinimap
+    ) {
       await this.minio.client.removeObject(originalMinimap);
     }
 
@@ -454,10 +429,6 @@ export class CanvasService {
       this.prisma.canvas.update({
         where: { canvasId },
         data: { deletedAt: new Date() },
-      }),
-      this.miscService.removeFilesByEntity(user, {
-        entityId: canvas.canvasId,
-        entityType: 'canvas',
       }),
       this.elasticsearch.deleteCanvas(canvas.canvasId),
     ];

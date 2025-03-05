@@ -19,6 +19,7 @@ const translations = {
     finish: 'Finish',
     add: 'Add',
     remove: 'Remove',
+    goBack: 'Go Back',
     library: 'Library',
     untitled: 'Untitled',
     loading: 'Loading...',
@@ -518,37 +519,15 @@ const translations = {
     resendSuccess: 'Verification email sent successfully',
     submit: 'Submit',
   },
-  projectDetail: {
-    directory: {
-      newCanvas: 'New Canvas',
-      importResource: 'Import Resource',
-      chat: 'Chat',
-      empty: 'No Data',
-      move: 'Move',
-      remove: 'Remove',
-      delete: 'Delete',
-      projectSelector: {
-        title: 'Move Canvas',
-        tip: 'Please select the target project',
-      },
-    },
-    share: {
-      createShareFailed: 'Failed to create share, please try again!',
-      project: 'project',
-      canvas: 'canvas',
-      title: 'Share {{entityType}}',
-      description: 'Your {{entityType}} is being shared',
-      copyLink: 'Copy Link',
-      cancel: 'Cancel Share',
-      cancelShareFailed: 'Failed to cancel share, please try again!',
-      cancelShareSuccess: 'Cancel share successfully!',
-      sharing: 'Sharing',
-      copyLinkFailed: 'Failed to copy link, please try again!',
-      copyLinkSuccess: 'Link has been copied to the clipboard!',
-    },
-    contentArea: {
-      addCanvas: 'New Canvas',
-      addResource: 'New Resource',
+  share: {
+    keyFeatures: {
+      multiThreadedConversation: 'Multi-threaded Conversation',
+      multiModelIntegration: 'Multi-model Integration',
+      multiModalProcessing: 'Multi-Modal Processing',
+      aiPoweredSkillSystem: 'AI-Powered Skill System',
+      knowledgeBaseEngine: 'Knowledge Base Engine',
+      intelligentContentCapture: 'Intelligent Content Capture',
+      aiEnhancedEditor: 'AI-Enhanced Editor',
     },
   },
   shareContent: {
@@ -561,9 +540,9 @@ const translations = {
     copyLinkSuccess: 'Share link copied to clipboard!',
     accessOptions: {
       anyone: 'Anyone with the link',
-      anyoneDescription: 'Anyone with the link can view',
-      off: 'Not enabled',
-      offDescription: 'Not enabled access permission',
+      anyoneDescription: 'Anyone with the link can access',
+      off: 'Disabled',
+      offDescription: 'Only you can access',
     },
   },
   workspace: {
@@ -789,6 +768,9 @@ const translations = {
   },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
+    shareNotFound: 'Canvas Not Found',
+    shareNotFoundHint:
+      "The shared canvas you're trying to access could not be found. It might have been deleted or the link may be incorrect.",
     nodeTypes: {
       document: 'Document',
       resource: 'Resource',
@@ -1119,7 +1101,10 @@ const translations = {
       fromFile: 'Upload File',
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
-      supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
+      supportedFiles: 'Supported Files: {{formats}}.',
+      fileUploadLimit: 'Limit for each file: {{size}}',
+      unlockUploadLimit: 'Unlock upload limit',
+      fileTooLarge: 'File size cannot exceed {{size}}',
       fileParsingUsage:
         'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
       fromWeblink: 'Paste Weblink',
@@ -1506,6 +1491,10 @@ const translations = {
         title: 'Log Out Confirmation',
         message: 'Are you sure you want to log out?',
       },
+      uploadAvatar: 'Upload Avatar',
+      imageSizeLimited: 'Image must be less than {{size}}MB',
+      onlyImageAllowed: 'Only support {{type}} pictures',
+      cropAvatar: 'Crop Avatar',
     },
 
     language: {
@@ -1538,6 +1527,8 @@ const translations = {
       advancedFileParsing: 'Advanced File Parsing',
       advancedFileParsingDescription:
         'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
+      fileSizeLimit: 'File Upload Limit',
+      fileSizeLimitDescription: 'Each file size cannot exceed {{size}} MB.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1577,6 +1568,7 @@ const translations = {
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
         dailyPagesCount: '{{count}} pages/day',
+        fileSizeLimit: 'Maximum {{count}} MB',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {

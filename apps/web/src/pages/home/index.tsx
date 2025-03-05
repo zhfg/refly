@@ -34,6 +34,11 @@ function Home() {
       <Helmet>
         <title>{t('landingPage.slogan')} · Refly</title>
         <meta name="description" content={t('landingPage.description')} />
+        <meta property="og:title" content={`${t('landingPage.slogan')} · Refly`} />
+        <meta property="og:description" content={t('landingPage.description')} />
+        <meta property="og:image" content="https://static.refly.ai/landing/product.webp" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
       </Helmet>
 
       {/*  Site header */}

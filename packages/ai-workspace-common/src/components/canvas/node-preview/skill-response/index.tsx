@@ -24,8 +24,9 @@ import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canv
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
-
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
+
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -75,20 +76,30 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!result);
+
+  const shareId = node.data?.metadata?.shareId;
+  const { data: shareData } = useFetchShareData(shareId);
+
+  useEffect(() => {
+    if (shareData && !result) {
+      updateActionResult(resultId, shareData);
+      setLoading(false);
+    }
+  }, [shareData, result, resultId, updateActionResult]);
 
   const fetchActionResult = async (resultId: string) => {
     setLoading(true);
     const { data, error } = await getClient().getActionResult({
       query: { resultId },
     });
+    setLoading(false);
 
     if (error || !data?.success) {
       return;
     }
 
     updateActionResult(resultId, data.data);
-    setLoading(false);
 
     const remoteResult = data.data;
     const node = getNodes().find((node) => node.data?.entityId === resultId);
@@ -111,12 +122,12 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   };
 
   useEffect(() => {
-    if (!result) {
+    if (!result && !shareId) {
       fetchActionResult(resultId);
-    } else {
+    } else if (result) {
       setLoading(false);
     }
-  }, [resultId, result]);
+  }, [resultId, result, shareId]);
 
   const scrollToBottom = useCallback(
     (event: { resultId: string; payload: ActionResult }) => {

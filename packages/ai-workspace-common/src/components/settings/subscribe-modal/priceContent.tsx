@@ -17,8 +17,10 @@ import { SubscriptionPlanType } from '@refly/openapi-schema';
 export type SubscriptionInterval = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
 
-const premiumModels = 'DeepSeek R1, GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro and more';
-const basicModels = 'GPT-4o Mini, DeepSeek V3, Llama 3.1 70B, Qwen 2.5 72B and more';
+const premiumModels =
+  'DeepSeek R1, GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Claude 3.7 Sonnet, DeepSeek R1, o3 Mini and more';
+const basicModels =
+  'GPT-4o Mini, DeepSeek V3, Llama 3.1 70B, Qwen 2.5 72B, Gemini Flash 2.0, DeepSeek V3, GPT-4o Mini and more';
 
 const gridSpan = {
   xs: 24,
@@ -272,6 +274,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const libraryTooltipContent = t('settings.subscription.libraryStorageDescription');
   const advancedFileParsing = t('settings.subscription.advancedFileParsing');
   const advancedFileParsingTooltip = t('settings.subscription.advancedFileParsingDescription');
+  const fileSizeLimitName = t('settings.subscription.fileSizeLimit');
 
   const unlimited = t('settings.subscription.subscribe.unlimited');
 
@@ -284,6 +287,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
         t1Period: 'daily',
         t2Period: 'daily',
         fileParseLimit: 50,
+        fileSizeLimit: 5,
       },
       plus: {
         t1Count: 100,
@@ -292,6 +296,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
         t1Period: 'monthly',
         t2Period: 'monthly',
         fileParseLimit: 100,
+        fileSizeLimit: 10,
       },
       pro: {
         t1Count: 300,
@@ -300,6 +305,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
         t1Period: 'monthly',
         t2Period: 'monthly',
         fileParseLimit: 300,
+        fileSizeLimit: 20,
       },
       max: {
         t1Count: -1,
@@ -308,6 +314,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
         t1Period: 'monthly',
         t2Period: 'monthly',
         fileParseLimit: 1000,
+        fileSizeLimit: 30,
       },
     };
 
@@ -350,6 +357,15 @@ export const PriceContent = (props: { source: PriceSource }) => {
           count: config.fileParseLimit,
         }),
         tooltip: advancedFileParsingTooltip,
+      },
+      {
+        name: fileSizeLimitName,
+        count: t('settings.subscription.subscribe.fileSizeLimit', {
+          count: config.fileSizeLimit,
+        }),
+        tooltip: t('settings.subscription.fileSizeLimitDescription', {
+          size: config.fileSizeLimit,
+        }),
       },
       {
         name: t(`settings.subscription.subscribe.${plan}.serviceSupport.name`),

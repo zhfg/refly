@@ -34,7 +34,7 @@ export interface DuplicateCanvasJobData {
 
 export function canvasPO2DTO(canvas: CanvasModel & { minimapUrl?: string }): Canvas {
   return {
-    ...pick(canvas, ['canvasId', 'title', 'isPublic', 'minimapUrl']),
+    ...pick(canvas, ['canvasId', 'title', 'minimapUrl', 'minimapStorageKey']),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };

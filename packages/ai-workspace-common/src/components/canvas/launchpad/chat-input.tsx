@@ -292,7 +292,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             className={cn(
               '!m-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
               inputClassName,
-              readonly && 'cursor-not-allowed text-gray-500',
+              readonly && 'cursor-not-allowed !text-black !bg-transparent',
             )}
             placeholder={
               selectedSkillName

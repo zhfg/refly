@@ -16,7 +16,7 @@ import { MINIO_EXTERNAL, MINIO_INTERNAL, MinioService } from '@/common/minio.ser
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { ConfigService } from '@nestjs/config';
-import { scrapeWeblink } from '@refly-packages/utils';
+import { omit, scrapeWeblink } from '@refly-packages/utils';
 import { QUEUE_IMAGE_PROCESSING, QUEUE_CLEAN_STATIC_FILES, streamToBuffer } from '@/utils';
 import {
   CanvasNotFoundError,
@@ -27,6 +27,7 @@ import {
 import { FileObject } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
 import { ParserFactory } from '@/knowledge/parsers/factory';
+import { StaticFile } from '@prisma/client';
 
 @Injectable()
 export class MiscService implements OnModuleInit {
@@ -151,21 +152,53 @@ export class MiscService implements OnModuleInit {
     return this.internalMinio.client;
   }
 
-  async batchRemoveObjects(objects: FileObject[]) {
-    const objectMap = new Map<FileVisibility, Set<string>>();
-    for (const fo of objects) {
-      const { visibility, storageKey } = fo;
-      if (!objectMap.has(visibility)) {
-        objectMap.set(visibility, new Set());
+  async batchRemoveObjects(user: User | null, objects: FileObject[]) {
+    // Group objects by storageKey for efficient querying
+    const storageKeys = objects.map((fo) => fo.storageKey);
+
+    // First mark the user's files as deleted in the database
+    await this.prisma.staticFile.updateMany({
+      where: {
+        storageKey: { in: storageKeys },
+        uid: user?.uid,
+      },
+      data: { deletedAt: new Date() },
+    });
+
+    // For each storage key, check if all records are now deleted
+    const objectsToRemove = new Map<FileVisibility, Set<string>>();
+
+    // Check each storage key to see if it has any non-deleted records
+    for (const storageKey of storageKeys) {
+      const remainingRecords = await this.prisma.staticFile.count({
+        where: {
+          storageKey,
+          deletedAt: null,
+        },
+      });
+
+      // If no remaining records, schedule this object for removal from storage
+      if (remainingRecords === 0) {
+        const matchingObject = objects.find((obj) => obj.storageKey === storageKey);
+
+        if (matchingObject) {
+          const { visibility } = matchingObject;
+          if (!objectsToRemove.has(visibility)) {
+            objectsToRemove.set(visibility, new Set());
+          }
+          objectsToRemove.get(visibility)?.add(storageKey);
+        }
       }
-      objectMap.get(visibility)?.add(storageKey);
     }
 
-    await Promise.all(
-      Array.from(objectMap.entries()).map(([visibility, storageKeys]) =>
-        this.minioClient(visibility).removeObjects(Array.from(storageKeys)),
-      ),
-    );
+    // Only remove objects from storage if they have no active database records
+    if (objectsToRemove.size > 0) {
+      await Promise.all(
+        Array.from(objectsToRemove.entries()).map(([visibility, storageKeys]) =>
+          this.minioClient(visibility).removeObjects(Array.from(storageKeys)),
+        ),
+      );
+    }
   }
 
   generateFileURL(object: FileObject, options?: { download?: boolean }) {
@@ -185,6 +218,16 @@ export class MiscService implements OnModuleInit {
     return `${endpoint}/${storageKey}`;
   }
 
+  /**
+   * Publish a private file to the public bucket
+   * @param storageKey - The storage key of the file to publish
+   */
+  async publishFile(storageKey: string) {
+    const stream = await this.minioClient('private').getObject(storageKey);
+    await this.minioClient('public').putObject(storageKey, stream);
+    return this.generateFileURL({ visibility: 'public', storageKey });
+  }
+
   async uploadBuffer(
     user: User,
     param: {
@@ -193,12 +236,13 @@ export class MiscService implements OnModuleInit {
       entityId?: string;
       entityType?: EntityType;
       visibility?: FileVisibility;
+      storageKey?: string;
     },
   ): Promise<UploadResponse['data']> {
     const { fpath, buf, entityId, entityType, visibility = 'private' } = param;
     const objectKey = randomUUID();
     const fileExtension = path.extname(fpath);
-    const storageKey = `static/${objectKey}${fileExtension}`;
+    const storageKey = param.storageKey ?? `static/${objectKey}${fileExtension}`;
     const contentType = mime.getType(fpath) ?? 'application/octet-stream';
 
     await this.prisma.staticFile.create({
@@ -209,6 +253,7 @@ export class MiscService implements OnModuleInit {
         entityId,
         entityType,
         contentType,
+        visibility,
       },
     });
 
@@ -234,6 +279,7 @@ export class MiscService implements OnModuleInit {
       entityId?: string;
       entityType?: EntityType;
       visibility?: FileVisibility;
+      storageKey?: string;
     },
   ): Promise<UploadResponse['data']> {
     const { file, entityId, entityType, visibility = 'private' } = param;
@@ -242,29 +288,57 @@ export class MiscService implements OnModuleInit {
       await this.checkEntity(user, entityId, entityType);
     }
 
+    let existingFile: StaticFile | null = null;
+    if (param.storageKey) {
+      existingFile = await this.prisma.staticFile.findFirst({
+        where: {
+          storageKey: param.storageKey,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+
+      if (!existingFile) {
+        throw new ParamsError(`File with key ${param.storageKey} not found`);
+      }
+    }
+
     const objectKey = randomUUID();
     const extension = path.extname(file.originalname);
     const contentType = mime.getType(extension) ?? file.mimetype ?? 'application/octet-stream';
-    const storageKey = `static/${objectKey}${extension}`;
+    const storageKey = param.storageKey ?? `static/${objectKey}${extension}`;
 
-    await this.prisma.staticFile.create({
-      data: {
-        uid: user.uid,
-        storageKey,
-        storageSize: file.buffer.length,
-        entityId,
-        entityType,
-        contentType,
-        visibility,
-      },
-    });
+    if (existingFile) {
+      await this.prisma.staticFile.update({
+        where: { pk: existingFile.pk },
+        data: {
+          storageSize: file.buffer.length,
+          entityId,
+          entityType,
+          contentType,
+          visibility,
+        },
+      });
+    } else {
+      await this.prisma.staticFile.create({
+        data: {
+          uid: user.uid,
+          storageKey,
+          storageSize: file.buffer.length,
+          entityId,
+          entityType,
+          contentType,
+          visibility,
+        },
+      });
+    }
 
     await this.minioClient(visibility).putObject(storageKey, file.buffer, {
       'Content-Type': contentType,
     });
 
     // Resize and convert to webp if it's an image
-    if (contentType?.startsWith('image/')) {
+    if (contentType.startsWith('image/')) {
       await this.imageQueue.add('resizeAndConvert', { storageKey, visibility });
     }
 
@@ -355,6 +429,7 @@ export class MiscService implements OnModuleInit {
 
       await Promise.all([
         this.batchRemoveObjects(
+          user,
           files.map((file) => ({
             storageKey: file.storageKey,
             visibility: file.visibility as FileVisibility,
@@ -395,6 +470,7 @@ export class MiscService implements OnModuleInit {
     const storageKeysToRemove = currentStorageKeys.filter((key) => !storageKeys.includes(key));
 
     await this.batchRemoveObjects(
+      user,
       storageKeysToRemove.map((key) => ({ storageKey: key, visibility: 'private' })),
     );
     this.logger.log(`Compare and remove files: ${storageKeysToRemove.join(',')}`);
@@ -422,35 +498,10 @@ export class MiscService implements OnModuleInit {
   ): Promise<{ data: Buffer; contentType: string }> {
     const file = await this.prisma.staticFile.findFirst({
       select: { uid: true, visibility: true, entityId: true, entityType: true, contentType: true },
-      where: { storageKey, deletedAt: null },
+      where: { storageKey, uid: user.uid, deletedAt: null },
     });
     if (!file) {
       throw new NotFoundException();
-    }
-
-    if (user.uid !== file.uid) {
-      if (file.entityType === 'canvas') {
-        const canvas = await this.prisma.canvas.findFirst({
-          where: { canvasId: file.entityId, isPublic: true, deletedAt: null },
-        });
-        if (!canvas) {
-          throw new NotFoundException();
-        }
-      } else if (file.entityType === 'resource' || file.entityType === 'document') {
-        const shareRels = await this.prisma.canvasEntityRelation.count({
-          where: {
-            entityId: file.entityId,
-            entityType: file.entityType,
-            isPublic: true,
-            deletedAt: null,
-          },
-        });
-        if (shareRels === 0) {
-          throw new NotFoundException();
-        }
-      } else {
-        throw new NotFoundException();
-      }
     }
 
     const readable = await this.minioClient(file.visibility as FileVisibility).getObject(
@@ -459,6 +510,30 @@ export class MiscService implements OnModuleInit {
     const data = await streamToBuffer(readable);
 
     return { data, contentType: file.contentType };
+  }
+
+  async getExternalFileStream(storageKey: string): Promise<{ data: Buffer; contentType: string }> {
+    try {
+      const [readable, stat] = await Promise.all([
+        this.minioClient('public').getObject(storageKey),
+        this.prisma.staticFile.findFirst({
+          select: { contentType: true },
+          where: { storageKey, deletedAt: null },
+        }),
+      ]);
+      const data = await streamToBuffer(readable);
+      return { data, contentType: stat?.contentType ?? 'application/octet-stream' };
+    } catch (error) {
+      // Check if it's the Minio S3Error for key not found
+      if (
+        error?.code === 'NoSuchKey' ||
+        error?.message?.includes('The specified key does not exist')
+      ) {
+        throw new NotFoundException(`File with key ${storageKey} not found`);
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   /**
@@ -603,7 +678,7 @@ export class MiscService implements OnModuleInit {
     }, []);
 
     // Delete files from storage
-    await this.batchRemoveObjects(storageKeysToDelete);
+    await this.batchRemoveObjects(null, storageKeysToDelete);
 
     // Mark files as deleted in database
     await this.prisma.staticFile.updateMany({
@@ -632,97 +707,94 @@ export class MiscService implements OnModuleInit {
   }
 
   /**
-   * Duplicates an existing static file and returns the new file information
-   * @param user - The user requesting the duplication
-   * @param storageKey - The storage key of the file to duplicate
-   * @param param - Optional parameters for the new file (entityId, entityType, visibility)
-   * @returns The new file information including storage key and URL
+   * Duplicates all files associated with an entity for a different user
+   * Only creates new database records, doesn't duplicate the actual files in storage
+   *
+   * @param user - The user who will own the duplicated files
+   * @param param - Parameters specifying source entity and optional target entity
+   * @returns Object containing counts of files processed and duplicated
    */
-  async duplicateFile(
+  async duplicateFilesByEntity(
     user: User,
-    storageKey: string,
-    param?: {
-      entityId?: string;
-      entityType?: EntityType;
-      visibility?: FileVisibility;
+    param: {
+      sourceEntityId: string;
+      sourceEntityType: EntityType;
+      sourceUid: string;
+      targetEntityId?: string;
+      targetEntityType?: EntityType;
     },
-  ): Promise<UploadResponse['data']> {
-    // Find the original file
-    const originalFile = await this.prisma.staticFile.findFirst({
+  ): Promise<{ total: number; duplicated: number }> {
+    const {
+      sourceEntityId,
+      sourceEntityType,
+      sourceUid,
+      targetEntityId = sourceEntityId,
+      targetEntityType = sourceEntityType,
+    } = param;
+
+    if (sourceUid === user.uid) {
+      this.logger.log('Source and target users are the same, skipping duplication');
+      return { total: 0, duplicated: 0 };
+    }
+
+    this.logger.log(
+      `Duplicating files from entity ${sourceEntityId} (${sourceEntityType}) to entity ${targetEntityId} (${targetEntityType}) for user ${user.uid}`,
+    );
+
+    // Find all files associated with the source entity
+    const files = await this.prisma.staticFile.findMany({
       where: {
-        storageKey,
+        entityId: sourceEntityId,
+        entityType: sourceEntityType,
+        uid: sourceUid ?? { not: user.uid }, // If sourceUid is provided, use it; otherwise exclude files already owned by the target user
         deletedAt: null,
+        visibility: 'private', // only duplicate private files
       },
     });
 
-    if (!originalFile) {
-      throw new NotFoundException('Original file not found');
+    if (!files?.length) {
+      this.logger.log('No files found to duplicate');
+      return { total: 0, duplicated: 0 };
     }
 
-    // Generate new storage key
-    const objectKey = randomUUID();
-    const extension = path.extname(storageKey);
-    const newStorageKey = `static/${objectKey}${extension}`;
-    const visibility = param?.visibility ?? (originalFile.visibility as FileVisibility);
+    // Find all existing duplicates in a single query to avoid multiple DB hits
+    const existingDuplicates = await this.prisma.staticFile.findMany({
+      where: {
+        uid: user.uid,
+        storageKey: { in: files.map((file) => file.storageKey) },
+        entityId: targetEntityId,
+        entityType: targetEntityType,
+        deletedAt: null,
+      },
+      select: {
+        storageKey: true,
+      },
+    });
 
-    try {
-      // Copy the file content
-      const sourceStream = await this.minioClient(
-        originalFile.visibility as FileVisibility,
-      ).getObject(storageKey);
-      const buffer = await streamToBuffer(sourceStream);
+    // Create a set of existing storage keys for efficient lookup
+    const existingStorageKeys = new Set(existingDuplicates?.map((file) => file.storageKey) ?? []);
 
-      // Create new file record
-      await this.prisma.staticFile.create({
-        data: {
-          uid: user.uid,
-          storageKey: newStorageKey,
-          storageSize: originalFile.storageSize,
-          entityId: param?.entityId ?? null,
-          entityType: param?.entityType ?? null,
-          contentType: originalFile.contentType,
-          visibility,
-        },
+    // Prepare batch insert data
+    const filesToCreate = files
+      .filter((file) => !existingStorageKeys.has(file.storageKey))
+      .map((file) => ({
+        ...omit(file, ['pk', 'uid', 'entityId', 'entityType', 'createdAt', 'updatedAt']),
+        uid: user.uid,
+        entityId: targetEntityId,
+        entityType: targetEntityType,
+      }));
+
+    let duplicatedCount = 0;
+    if (filesToCreate?.length > 0) {
+      // Batch insert all new files at once
+      const result = await this.prisma.staticFile.createMany({
+        data: filesToCreate,
+        skipDuplicates: true, // As an extra precaution against duplicates
       });
-
-      // Upload the duplicated file
-      await this.minioClient(visibility).putObject(newStorageKey, buffer, {
-        'Content-Type': originalFile.contentType,
-      });
-
-      // If there's a processed image, duplicate that too
-      if (originalFile.processedImageKey) {
-        const processedStream = await this.minioClient(
-          originalFile.visibility as FileVisibility,
-        ).getObject(originalFile.processedImageKey);
-        const processedBuffer = await streamToBuffer(processedStream);
-
-        const processedExtension = path.extname(originalFile.processedImageKey);
-        const newProcessedKey = `static-processed/${createId()}-${Date.now()}${processedExtension}`;
-
-        await this.minioClient(visibility).putObject(newProcessedKey, processedBuffer, {
-          'Content-Type': mime.getType(processedExtension) ?? 'image/webp',
-        });
-
-        // Update the new file record with the processed image key
-        await this.prisma.staticFile.update({
-          where: { pk: originalFile.pk },
-          data: { processedImageKey: newProcessedKey },
-        });
-      }
-
-      return {
-        storageKey: newStorageKey,
-        url: this.generateFileURL({ visibility, storageKey: newStorageKey }),
-      };
-    } catch (error) {
-      // Clean up any created resources if there's an error
-      await this.prisma.staticFile.deleteMany({
-        where: { storageKey: newStorageKey },
-      });
-
-      this.logger.error(`Failed to duplicate file ${storageKey}: ${error?.stack}`);
-      throw error;
+      duplicatedCount = result.count;
     }
+
+    this.logger.log(`Duplicated ${duplicatedCount} out of ${files.length} files`);
+    return { total: files.length, duplicated: duplicatedCount };
   }
 }

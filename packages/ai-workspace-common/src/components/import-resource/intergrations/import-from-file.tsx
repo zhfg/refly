@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, message, Upload, UploadProps } from 'antd';
-import { HiLink } from 'react-icons/hi';
+import { TbFile } from 'react-icons/tb';
 import { RiInboxArchiveLine } from 'react-icons/ri';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -13,6 +13,10 @@ import type { RcFile } from 'antd/es/upload/interface';
 import { genResourceID } from '@refly-packages/utils/id';
 import { LuInfo } from 'react-icons/lu';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { GrUnlock } from 'react-icons/gr';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 
 const { Dragger } = Upload;
 
@@ -23,8 +27,6 @@ interface FileItem {
   uid?: string;
   status?: 'uploading' | 'done' | 'error';
 }
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.docx', '.rtf', '.txt', '.md', '.html', '.epub'];
 
@@ -41,12 +43,24 @@ export const ImportFromFile = () => {
     setFileList: state.setFileList,
     fileList: state.fileList,
   }));
+  const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
+    setSubscribeModalVisible: state.setSubscribeModalVisible,
+  }));
 
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage, fileParsingUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [fileList, setFileList] = useState<FileItem[]>(storageFileList);
+
+  const { userProfile } = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+  }));
+
+  const planType = userProfile?.subscription?.planType || 'free';
+  const uploadLimit = fileParsingUsage?.fileUploadLimit ?? -1;
+  const maxFileSize = `${uploadLimit}MB`;
+  const maxFileSizeBytes = uploadLimit * 1024 * 1024;
 
   const uploadFile = async (file: File, uid: string) => {
     const { data } = await getClient().upload({
@@ -71,8 +85,8 @@ export const ImportFromFile = () => {
       url: item.url,
     })),
     beforeUpload: async (file: File) => {
-      if (file.size > MAX_FILE_SIZE) {
-        message.error(t('resource.import.fileTooLarge', { size: '5MB' }));
+      if (uploadLimit > 0 && file.size > maxFileSizeBytes) {
+        message.error(t('resource.import.fileTooLarge', { size: maxFileSize }));
         return Upload.LIST_IGNORE;
       }
 
@@ -176,6 +190,16 @@ export const ImportFromFile = () => {
   const canImportCount = getAvailableFileCount(storageUsage);
   const disableSave = fileList.length === 0 || fileList.length > canImportCount;
 
+  const genUploadHint = () => {
+    let hint = t('resource.import.supportedFiles', {
+      formats: ALLOWED_FILE_EXTENSIONS.map((ext) => ext.slice(1).toUpperCase()).join(', '),
+    });
+    if (uploadLimit > 0) {
+      hint += `. ${t('resource.import.fileUploadLimit', { size: maxFileSize })}`;
+    }
+    return hint;
+  };
+
   useEffect(() => {
     setStorageFileList(fileList);
   }, [fileList, setStorageFileList]);
@@ -185,9 +209,19 @@ export const ImportFromFile = () => {
       {/* header */}
       <div className="flex items-center gap-x-[8px] pt-6 px-6">
         <span className="flex items-center justify-center">
-          <HiLink className="text-lg" />
+          <TbFile className="text-lg" />
         </span>
         <div className="text-base font-bold">{t('resource.import.fromFile')}</div>
+        {subscriptionEnabled && planType === 'free' && (
+          <Button
+            type="text"
+            icon={<GrUnlock className="flex items-center justify-center" />}
+            onClick={() => setSubscribeModalVisible(true)}
+            className="text-green-600 font-medium"
+          >
+            {t('resource.import.unlockUploadLimit')}
+          </Button>
+        )}
       </div>
 
       {/* content */}
@@ -196,13 +230,7 @@ export const ImportFromFile = () => {
           <Dragger {...props}>
             <RiInboxArchiveLine className="text-3xl text-[#00968f]" />
             <p className="ant-upload-text mt-4 text-gray-600">{t('resource.import.dragOrClick')}</p>
-            <p className="ant-upload-hint text-gray-400 mt-2">
-              {t('resource.import.supportedFiles', {
-                formats: ALLOWED_FILE_EXTENSIONS.map((ext) => ext.slice(1).toUpperCase()).join(
-                  ', ',
-                ),
-              })}
-            </p>
+            <p className="ant-upload-hint text-gray-400 mt-2">{genUploadHint()}</p>
             {fileParsingUsage?.pagesLimit >= 0 && (
               <div className="text-green-500 mt-2 text-xs font-medium flex items-center justify-center gap-1">
                 <LuInfo />

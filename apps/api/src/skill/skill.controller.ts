@@ -45,7 +45,6 @@ import { skillInstancePO2DTO, skillTriggerPO2DTO } from './skill.dto';
 export class SkillController {
   constructor(private skillService: SkillService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get('/list')
   async listSkillTemplates(): Promise<ListSkillResponse> {
     return buildSuccessResponse(this.skillService.listSkills());

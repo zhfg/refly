@@ -7,13 +7,16 @@ import { Edge } from '@xyflow/react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetCanvasData } from '@refly-packages/ai-workspace-common/queries';
+import { RawCanvasData } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
 interface CanvasContextType {
   canvasId: string;
   provider: HocuspocusProvider | null;
   localProvider: IndexeddbPersistence | null;
   readonly: boolean;
+  shareNotFound?: boolean;
+  shareData?: RawCanvasData;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -74,16 +77,24 @@ export const CanvasProvider = ({
     setEdges: state.setEdges,
   }));
 
-  // Fetch canvas data from API when in readonly mode
-  const { data: canvasData } = useGetCanvasData({ query: { canvasId } }, null, {
-    enabled: readonly,
-    refetchOnWindowFocus: false,
-  });
+  // Use the hook to fetch canvas data when in readonly mode
+  const { data: canvasData, error: canvasError } = useFetchShareData<RawCanvasData>(
+    readonly ? canvasId : undefined,
+  );
+
+  // Check if it's a 404 error
+  const shareNotFound = useMemo(() => {
+    if (!canvasError) return false;
+    return (
+      canvasError.message.includes('404') ||
+      canvasError.message.includes('Failed to fetch share data: 404')
+    );
+  }, [canvasError]);
 
   // Set canvas data from API response when in readonly mode
   useEffect(() => {
-    if (readonly && canvasData?.data) {
-      const { title, nodes, edges } = canvasData.data;
+    if (readonly && canvasData) {
+      const { title, nodes, edges } = canvasData;
       setTitle(canvasId, title ?? '');
 
       // Type casting to handle the type mismatch
@@ -271,17 +282,19 @@ export const CanvasProvider = ({
     };
   }, [canvasId, readonly]);
 
-  const value = useMemo(
+  const canvasContext = useMemo<CanvasContextType>(
     () => ({
       canvasId,
-      provider: provider ?? null,
-      localProvider: localProvider ?? null,
+      provider,
+      localProvider,
       readonly,
+      shareNotFound,
+      shareData: canvasData,
     }),
-    [canvasId, provider, localProvider, readonly],
+    [canvasId, provider, localProvider, readonly, shareNotFound, canvasData],
   );
 
-  return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
+  return <CanvasContext.Provider value={canvasContext}>{children}</CanvasContext.Provider>;
 };
 
 export const useCanvasContext = () => {
