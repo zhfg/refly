@@ -85,6 +85,12 @@ const MermaidComponent = memo(
 
     // Copy the diagram to clipboard
     const copyImage = useCallback(async () => {
+      const messageKey = 'copyMermaid';
+      message.loading({
+        content: t('components.markdown.mermaid.copyStarted') ?? 'Starting to copy...',
+        key: messageKey,
+      });
+
       try {
         const dataUrl = await generatePng();
         if (!dataUrl) {
@@ -103,17 +109,27 @@ const MermaidComponent = memo(
           }),
         ]);
 
-        message.success(
-          t('components.markdown.mermaid.copySuccess') ?? 'Diagram copied to clipboard',
-        );
+        message.success({
+          content: t('components.markdown.mermaid.copySuccess') ?? 'Diagram copied to clipboard',
+          key: messageKey,
+        });
       } catch (error) {
         console.error('Failed to copy image:', error);
-        message.error(t('components.markdown.mermaid.copyError') ?? 'Failed to copy image');
+        message.error({
+          content: t('components.markdown.mermaid.copyError') ?? 'Failed to copy image',
+          key: messageKey,
+        });
       }
     }, [generatePng, t]);
 
     // Download the diagram as PNG
     const downloadImage = useCallback(async () => {
+      const messageKey = 'downloadMermaid';
+      message.loading({
+        content: t('components.markdown.mermaid.downloadStarted') ?? 'Starting download...',
+        key: messageKey,
+      });
+
       try {
         const dataUrl = await generatePng();
         if (!dataUrl) {
@@ -137,12 +153,17 @@ const MermaidComponent = memo(
           link.remove();
         }, 100);
 
-        message.success(
-          t('components.markdown.mermaid.downloadSuccess') ?? 'Diagram downloaded successfully',
-        );
+        message.success({
+          content:
+            t('components.markdown.mermaid.downloadSuccess') ?? 'Diagram downloaded successfully',
+          key: messageKey,
+        });
       } catch (error) {
         console.error('Failed to download image:', error);
-        message.error(t('components.markdown.mermaid.downloadError') ?? 'Failed to download image');
+        message.error({
+          content: t('components.markdown.mermaid.downloadError') ?? 'Failed to download image',
+          key: messageKey,
+        });
       }
     }, [generatePng, diagramTitle, t]);
 
@@ -209,7 +230,7 @@ const MermaidComponent = memo(
     const containerClassName = useMemo(
       () =>
         cn(
-          'mermaid-diagram w-full flex justify-center items-center overflow-x-auto relative',
+          'mermaid-diagram w-full flex justify-center items-center overflow-x-auto relative group',
           showOriginalCode && 'bg-gray-50 rounded',
         ),
       [showOriginalCode],
@@ -221,12 +242,12 @@ const MermaidComponent = memo(
 
         {/* Action Buttons - Only show when successfully rendered */}
         {rendered && (
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Space.Compact className="shadow-sm rounded-md overflow-hidden">
               <Tooltip title={t('components.markdown.mermaid.downloadAsPng') ?? 'Download as PNG'}>
                 <Button
                   type="default"
-                  className="flex items-center justify-center bg-white hover:bg-gray-50 hover:text-blue-600 hover:border-blue-600 border-x border-gray-200"
+                  className="flex items-center justify-center bg-white/80 hover:bg-white hover:text-blue-600 hover:border-blue-600 border-x border-gray-200"
                   icon={<DownloadIcon className="w-4 h-4" />}
                   onClick={downloadImage}
                 >
@@ -238,7 +259,7 @@ const MermaidComponent = memo(
               >
                 <Button
                   type="default"
-                  className="flex items-center justify-center bg-white hover:bg-gray-50 hover:text-purple-600 hover:border-purple-600 border border-gray-200"
+                  className="flex items-center justify-center bg-white/80 hover:bg-white hover:text-purple-600 hover:border-purple-600 border border-gray-200"
                   icon={<CopyIcon className="w-4 h-4" />}
                   onClick={copyImage}
                 >

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import { Button, Space, Tooltip, message } from 'antd';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { BRANDING_NAME } from '@refly/utils';
@@ -12,64 +12,106 @@ interface SVGRendererProps {
 
 const SVGRenderer = memo(({ content, title }: SVGRendererProps) => {
   const { t } = useTranslation();
-  const DOM_ID = 'artifact-svg';
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const generatePng = async () => {
-    return domToPng(document.querySelector(`#${DOM_ID}`) as HTMLDivElement, {
-      features: {
-        // Don't enable control character removal to prevent Safari emoji issues
-        removeControlCharacter: false,
-      },
-      // Use higher scale for better quality on high DPI displays
-      scale: 100,
-    });
-  };
+    const container = containerRef.current;
+    if (!container) return null;
 
-  const downloadImage = async (type: 'png' | 'svg') => {
     try {
-      let dataUrl = '';
-      if (type === 'png') {
-        dataUrl = await generatePng();
-      } else {
-        const blob = new Blob([content], { type: 'image/svg+xml' });
-        dataUrl = URL.createObjectURL(blob);
-      }
+      const dataUrl = await domToPng(container, {
+        features: {
+          // Don't enable control character removal to prevent Safari emoji issues
+          removeControlCharacter: false,
+        },
+        // Use higher scale for better quality on high DPI displays
+        scale: 3,
+        quality: 1.0,
+        backgroundColor: '#ffffff',
+      });
 
-      const link = document.createElement('a');
-      link.download = `${BRANDING_NAME}_${title}.${type}`;
-      link.href = dataUrl;
-      link.click();
-      link.remove();
-      message.success(t('artifact.svg.downloadSuccess'));
+      return dataUrl;
     } catch (error) {
-      console.error('Failed to download image:', error);
-      message.error(t('artifact.svg.downloadError'));
+      console.error('Failed to generate PNG:', error);
+      return null;
     }
   };
 
-  const copyImage = async () => {
+  const downloadImage = useCallback(
+    async (type: 'png' | 'svg') => {
+      const messageKey = 'downloadImage';
+      message.loading({ content: t('artifact.svg.downloadStarted'), key: messageKey });
+
+      try {
+        let dataUrl = '';
+        let blob: Blob;
+
+        if (type === 'png') {
+          dataUrl = await generatePng();
+          if (!dataUrl) {
+            throw new Error('Failed to generate PNG');
+          }
+          const response = await fetch(dataUrl);
+          blob = await response.blob();
+        } else {
+          // For SVG, properly serialize the SVG content with XML declaration
+          const svgContent = `<?xml version="1.0" encoding="UTF-8"?>${content}`;
+          blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+          dataUrl = URL.createObjectURL(blob);
+        }
+
+        const link = document.createElement('a');
+        link.download = `${BRANDING_NAME}_${title ?? 'image'}.${type}`;
+        link.href = dataUrl;
+        link.click();
+
+        // Clean up
+        setTimeout(() => {
+          URL.revokeObjectURL(dataUrl);
+          link.remove();
+        }, 100);
+
+        message.success({ content: t('artifact.svg.downloadSuccess'), key: messageKey });
+      } catch (error) {
+        console.error('Failed to download image:', error);
+        message.error({ content: t('artifact.svg.downloadError'), key: messageKey });
+      }
+    },
+    [title, t],
+  );
+
+  const copyImage = useCallback(async () => {
+    const messageKey = 'copyImage';
+    message.loading({ content: t('artifact.svg.copyStarted'), key: messageKey });
+
     try {
       const dataUrl = await generatePng();
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
+      if (!dataUrl) {
+        throw new Error('Failed to generate PNG');
+      }
+
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
       await navigator.clipboard.write([
         new ClipboardItem({
           [blob.type]: blob,
         }),
       ]);
-      message.success(t('artifact.svg.copySuccess'));
+
+      message.success({ content: t('artifact.svg.copySuccess'), key: messageKey });
     } catch (error) {
       console.error('Failed to copy image:', error);
-      message.error(t('artifact.svg.copyError'));
+      message.error({ content: t('artifact.svg.copyError'), key: messageKey });
     }
-  };
+  }, [t]);
 
   return (
     <div className="relative w-full h-full">
       {/* SVG Container */}
       <div className="w-full h-full flex items-center justify-center">
         <div
-          id={DOM_ID}
+          ref={containerRef}
           className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
           dangerouslySetInnerHTML={{ __html: content }}
