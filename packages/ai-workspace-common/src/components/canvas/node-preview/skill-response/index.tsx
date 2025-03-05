@@ -27,6 +27,7 @@ import { IconRerun } from '@refly-packages/ai-workspace-common/components/common
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
+import { processContentPreview } from '@refly-packages/ai-workspace-common/utils/content';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -106,16 +107,12 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     if (node && remoteResult) {
       patchNodeData(node.id, {
         title: remoteResult.title,
-        contentPreview: remoteResult.steps
-          ?.map((s) => s?.content || '')
-          .filter(Boolean)
-          .join('\n'),
+        contentPreview: processContentPreview(remoteResult.steps?.map((s) => s?.content || '')),
         metadata: {
           status: remoteResult.status,
-          reasoningContent: remoteResult.steps
-            ?.map((s) => s?.reasoningContent || '')
-            ?.filter(Boolean)
-            ?.join('\n'),
+          reasoningContent: processContentPreview(
+            remoteResult.steps?.map((s) => s?.reasoningContent || ''),
+          ),
         },
       });
     }

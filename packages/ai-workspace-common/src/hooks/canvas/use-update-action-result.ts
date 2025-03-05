@@ -8,6 +8,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { aggregateTokenUsage } from '@refly-packages/utils/models';
 import { useSetNodeDataByEntity } from './use-set-node-data-by-entity';
+import { processContentPreview } from '../../utils/content';
 
 const generateFullNodeDataUpdates = (
   payload: ActionResult,
@@ -15,10 +16,7 @@ const generateFullNodeDataUpdates = (
   return {
     title: payload.title,
     entityId: payload.resultId,
-    contentPreview: payload.steps
-      .map((s) => s?.content || '')
-      ?.filter(Boolean)
-      ?.join('\n'),
+    contentPreview: processContentPreview(payload.steps.map((s) => s?.content || '')),
     metadata: {
       status: payload.status,
       actionMeta: payload.actionMeta,
@@ -30,10 +28,7 @@ const generateFullNodeDataUpdates = (
         {},
       ),
       tokenUsage: aggregateTokenUsage(payload.steps.flatMap((s) => s.tokenUsage).filter(Boolean)),
-      reasoningContent: payload.steps
-        .map((s) => s?.reasoningContent || '')
-        ?.filter(Boolean)
-        ?.join('\n'),
+      reasoningContent: processContentPreview(payload.steps.map((s) => s?.reasoningContent || '')),
     },
   };
 };
@@ -54,16 +49,10 @@ const generatePartialNodeDataUpdates = (payload: ActionResult, event?: SkillEven
   const { event: eventType, log } = event ?? {};
 
   if (eventType === 'stream') {
-    nodeData.contentPreview = steps
-      .map((s) => s?.content || '')
-      ?.filter(Boolean)
-      ?.join('\n');
+    nodeData.contentPreview = processContentPreview(steps.map((s) => s?.content || ''));
     nodeData.metadata = {
       ...nodeData.metadata,
-      reasoningContent: steps
-        .map((s) => s?.reasoningContent || '')
-        ?.filter(Boolean)
-        ?.join('\n'),
+      reasoningContent: processContentPreview(steps.map((s) => s?.reasoningContent || '')),
     };
   } else if (eventType === 'artifact') {
     nodeData.metadata = {
