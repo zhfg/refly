@@ -92,7 +92,6 @@ export const useNodeOperations = () => {
 
           newNode.data.metadata.sizeMode = mode;
 
-          console.log('newNode', newNode);
           return newNode;
         }
         return node;

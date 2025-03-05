@@ -94,7 +94,7 @@ export const useAddNode = () => {
       shouldPreview = true,
       needSetCenter = true,
     ) => {
-      const { data } = useCanvasStore.getState();
+      const { data, nodeSizeMode } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const edges = data[canvasId]?.edges ?? [];
 
@@ -132,12 +132,22 @@ export const useAddNode = () => {
         edges,
       });
 
+      // Get default metadata and apply global nodeSizeMode
+      const defaultMetadata = getNodeDefaultMetadata(node.type);
+
+      // Apply the global nodeSizeMode to the new node's metadata
+      if (defaultMetadata && typeof defaultMetadata === 'object') {
+        // Using type assertion to avoid TypeScript errors since sizeMode is not on all node types
+        (defaultMetadata as any).sizeMode = nodeSizeMode;
+      }
+
       const enrichedData = {
         createdAt: new Date().toISOString(),
         ...node.data,
         metadata: {
-          ...getNodeDefaultMetadata(node.type),
+          ...defaultMetadata,
           ...node?.data?.metadata,
+          sizeMode: nodeSizeMode, // Ensure sizeMode is set even if not in defaultMetadata
         },
       };
 
@@ -147,6 +157,25 @@ export const useAddNode = () => {
         position: newPosition,
         selected: true,
       });
+
+      // Apply style based on nodeSizeMode
+      // if (nodeSizeMode === 'compact') {
+      //   newNode.style = {
+      //     ...newNode.style,
+      //     width: '288px',
+      //     height: 'auto',
+      //     maxHeight: '384px',
+      //   };
+      // } else if (nodeSizeMode === 'adaptive') {
+      //   // Safely access originalWidth with type checking
+      //   const width = (newNode.data.metadata as any)?.originalWidth || 288;
+      //   newNode.style = {
+      //     ...newNode.style,
+      //     width: `${width}px`,
+      //     height: 'auto',
+      //     maxHeight: undefined,
+      //   };
+      // }
 
       // Create updated nodes array with the new node
       const updatedNodes = deduplicateNodes([
@@ -207,7 +236,11 @@ export const useAddNode = () => {
         setNodeCenter(newNode.id);
       }
 
-      if (newNode.type === 'document' || (newNode.type === 'resource' && shouldPreview)) {
+      if (
+        newNode.type === 'document' ||
+        (newNode.type === 'resource' && shouldPreview) ||
+        (['skillResponse', 'codeArtifact', 'website'].includes(newNode.type) && shouldPreview)
+      ) {
         addNodePreview(canvasId, newNode);
         locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: newNode.id });
       }

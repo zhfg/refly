@@ -72,10 +72,16 @@ export type SkillNodeMeta = {
   contextItems?: IContextItem[];
   tplConfig?: SkillTemplateConfig;
   runtimeConfig?: SkillRuntimeConfig;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
 };
 
 export type ToolNodeMeta = {
   toolType: string;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
 };
 
 export type ResponseNodeMeta = {
@@ -101,6 +107,9 @@ export type ImageNodeMeta = {
   imageType: string;
   imageUrl: string;
   storageKey: string;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
 };
 
 // Website node metadata

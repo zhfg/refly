@@ -92,9 +92,15 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
     return {};
   }
 
+  // Base metadata to include in all node types
+  const baseMetadata = {
+    sizeMode: 'adaptive' as const, // Default size mode that will be overridden with global setting
+  };
+
   switch (nodeType) {
     case 'document':
       return {
+        ...baseMetadata,
         contentPreview: t('canvas.nodePreview.document.contentPreview'),
         // Add optional fields with default values
         title: '',
@@ -104,6 +110,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'resource':
       return {
+        ...baseMetadata,
         resourceType: 'weblink', // Default to weblink
         url: '',
         description: '',
@@ -113,12 +120,14 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'skill':
       return {
+        ...baseMetadata,
         query: '',
         modelInfo: null,
       } as SkillNodeMeta;
 
     case 'tool':
       return {
+        ...baseMetadata,
         toolType: 'TextToSpeech',
         configuration: {}, // Tool-specific configuration
         status: 'ready',
@@ -127,12 +136,14 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'skillResponse':
       return {
+        ...baseMetadata,
         status: 'waiting',
         version: 0,
       } as ResponseNodeMeta;
 
     case 'toolResponse':
       return {
+        ...baseMetadata,
         modelName: 'Tool Response',
         status: 'waiting',
         executionTime: null,
@@ -140,21 +151,21 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'image':
       return {
-        sizeMode: 'adaptive',
+        ...baseMetadata,
         style: {},
       };
 
     case 'codeArtifact':
       return {
+        ...baseMetadata,
         status: 'generating',
         language: 'typescript',
-        sizeMode: 'adaptive',
         style: {},
         activeTab: 'code',
       } as CodeArtifactNodeMeta;
 
     default:
-      return {};
+      return baseMetadata;
   }
 };
 
