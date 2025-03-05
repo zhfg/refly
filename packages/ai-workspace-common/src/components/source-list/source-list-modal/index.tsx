@@ -18,6 +18,7 @@ import {
   SearchLocale,
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface SourceListModalProps {
   classNames: string;
@@ -49,6 +50,8 @@ export const SourceListModal = (props: SourceListModalProps) => {
     setResults: state.setResults,
     setIsSearching: state.setIsSearching,
   }));
+
+  const { readonly } = useCanvasContext();
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -214,6 +217,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
         />
         <div className="source-list-modal-action-menu-container">
           <ActionMenu
+            disabled={readonly}
             importActionMode={
               activeTab === 'webSearch'
                 ? ImportActionMode.CREATE_RESOURCE
