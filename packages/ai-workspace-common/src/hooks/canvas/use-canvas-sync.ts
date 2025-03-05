@@ -5,6 +5,7 @@ import { Edge } from '@xyflow/react';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { UndoManager } from 'yjs';
 import { omit } from '@refly/utils';
+import { purgeContextItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 export const useCanvasSync = () => {
   const { provider } = useCanvasContext();
@@ -56,12 +57,24 @@ export const useCanvasSync = () => {
     const syncNodesToYDoc = (nodes: CanvasNode<any>[]) => {
       if (!nodes?.length) return;
 
+      // Purge context items from nodes
+      const purgedNodes = nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          metadata: {
+            ...node.data?.metadata,
+            contextItems: purgeContextItems(node.data?.metadata?.contextItems),
+          },
+        },
+      }));
+
       safeTransaction(() => {
         const yNodes = ydoc?.getArray('nodes');
         if (!yNodes) return;
 
         yNodes.delete(0, yNodes.length ?? 0);
-        yNodes.push(nodes);
+        yNodes.push(purgedNodes);
       });
     };
 

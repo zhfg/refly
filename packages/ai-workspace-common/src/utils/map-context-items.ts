@@ -265,6 +265,9 @@ export const convertContextItemsToEdges = (
  * @returns purged context items
  */
 export const purgeContextItems = (items: IContextItem[]): IContextItem[] => {
+  if (!Array.isArray(items)) {
+    return [];
+  }
   return items.map((item) => ({
     ...omit(item, ['metadata']),
     metadata: {
