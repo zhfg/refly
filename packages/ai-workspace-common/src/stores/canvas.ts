@@ -86,7 +86,7 @@ const defaultCanvasState = () => ({
   operatingNodeId: null,
   showEdges: false,
   clickToPreview: true,
-  nodeSizeMode: 'adaptive' as const,
+  nodeSizeMode: 'compact' as const,
   autoLayout: false,
   showTemplates: true,
 });
