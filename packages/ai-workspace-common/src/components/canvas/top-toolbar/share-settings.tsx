@@ -9,7 +9,6 @@ import { RiUserForbidLine } from 'react-icons/ri';
 import { GrLanguage } from 'react-icons/gr';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { getClientOrigin } from '@refly/utils/url';
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
 import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 
@@ -88,7 +87,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   });
   const shareRecord = useMemo(() => data?.data?.[0], [data]);
   const shareLink = useMemo(
-    () => `${getClientOrigin()}/share/canvas/${shareRecord?.shareId}`,
+    () => `${window.location.origin}/share/canvas/${shareRecord?.shareId}`,
     [shareRecord],
   );
 
