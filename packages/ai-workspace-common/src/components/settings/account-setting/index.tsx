@@ -9,11 +9,14 @@ import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import ImgCrop from 'antd-img-crop';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { BiSolidEdit } from 'react-icons/bi';
 
 export const AccountSetting = () => {
   const [form] = Form.useForm();
   const userStore = useUserStore();
   const { t } = useTranslation();
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
 
   const { showSettingModal } = useSiderStoreShallow((state) => ({
     showSettingModal: state.showSettingModal,
@@ -37,9 +40,12 @@ export const AccountSetting = () => {
   };
 
   const uploadAvatar = async (file: File) => {
+    if (loadingAvatar) return;
+    setLoadingAvatar(true);
     const { data } = await getClient().upload({
       body: { file, visibility: 'public' },
     });
+    setLoadingAvatar(false);
     if (data?.data.url) {
       setAvatarError(false);
       setAvatarUrl(data.data.url);
@@ -153,7 +159,18 @@ export const AccountSetting = () => {
                 showUploadList={false}
                 beforeUpload={beforeUpload}
               >
-                <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-full h-full group relative bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                  {loadingAvatar && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <AiOutlineLoading3Quarters size={22} className="animate-spin text-white" />
+                    </div>
+                  )}
+                  {!loadingAvatar && (
+                    <div className="absolute invisible group-hover:visible inset-0 bg-black/20 flex items-center justify-center">
+                      <BiSolidEdit size={22} className="text-white" />
+                    </div>
+                  )}
+
                   {avatarUrl && !avatarError ? (
                     <img
                       src={avatarUrl}
