@@ -136,18 +136,19 @@ export class CanvasService {
         deletedAt: null,
       },
     });
+
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
     const userPo = await this.prisma.user.findUnique({
       select: {
         name: true,
         nickname: true,
         avatar: true,
       },
-      where: { uid: canvas.uid },
+      where: { uid: user.uid },
     });
-
-    if (!canvas) {
-      throw new CanvasNotFoundError();
-    }
 
     const doc = await this.getCanvasYDoc(canvas.stateStorageKey);
 
