@@ -4,6 +4,7 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
+import { staticPrivateEndpoint } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const useExportCanvasAsImage = () => {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export const useExportCanvasAsImage = () => {
     try {
       const response = await fetch(imgUrl, {
         mode: 'cors',
-        credentials: 'include', // Include cookies with the request
+        ...(imgUrl.startsWith(staticPrivateEndpoint) ? { credentials: 'include' } : {}),
       });
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
