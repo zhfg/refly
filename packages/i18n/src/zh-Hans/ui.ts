@@ -177,7 +177,7 @@ const translations = {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: '支持文件上传和多模态图片处理⚡️ ',
+    messageText: 'v0.4.0 发布：代码组件、画布分享 & 订阅价格调整 🚀',
     tryForFree: '开始使用',
     tryItNow: '立即体验',
     creationEngine: '创作引擎',
@@ -332,7 +332,7 @@ const translations = {
       title: '计划与定价',
       subtitle: '踏上您的 AI 内容创作之旅',
       description: '注册并体验每天 20 次标准模型调用的无限期试用套餐。无需绑定信用卡。',
-      limitedOffer: '年订限时五折，享受永久优惠！',
+      limitedOffer: '年订限时五折，享受永久优惠！即将恢复原价！',
     },
     footer: {
       cta: {

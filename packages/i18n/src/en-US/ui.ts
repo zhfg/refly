@@ -166,7 +166,7 @@ const translations = {
         'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'Support file upload and multi-modal image processing⚡️ ',
+    messageText: 'v0.4.0 Released: Code Artifact, Canvas Sharing & Subscription Price Update 🚀',
     tryForFree: 'Get Started',
     tryItNow: 'Try It Now',
     creationEngine: 'Creation Engine',
@@ -375,7 +375,8 @@ const translations = {
       subtitle: 'Embark on your AI content creation journey with Refly',
       description:
         'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
-      limitedOffer: 'Save 50% forever with annual subscription - Limited time offer',
+      limitedOffer:
+        'Save 50% forever with annual subscription - Limited time offer, price will increase soon!',
     },
     footer: {
       cta: {
