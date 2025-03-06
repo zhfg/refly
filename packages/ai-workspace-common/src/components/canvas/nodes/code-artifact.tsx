@@ -420,7 +420,7 @@ export const CodeArtifactNode = memo(
           })}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="codeArtifact" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="codeArtifact" nodeId={id} isNodeHovered={isHovered && selected} />
           )}
 
           <div
@@ -431,7 +431,11 @@ export const CodeArtifactNode = memo(
         `}
           >
             <div className="flex flex-col h-full relative p-3 box-border">
-              <NodeHeader title={data.title} Icon={IconCodeArtifact} iconBgColor="#3E63DD" />
+              <NodeHeader
+                title={t('canvas.nodeTypes.codeArtifact')}
+                Icon={IconCodeArtifact}
+                iconBgColor="#3E63DD"
+              />
 
               <div className="relative flex-grow min-h-0">
                 <div
