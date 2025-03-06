@@ -376,7 +376,7 @@ const translations = {
       description:
         'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
       limitedOffer:
-        'Now 50% off forever with annual subscription! Price adjustment and unlimited plan discontinuation on March 14th (PT)',
+        'Now 50% off forever with annual subscription! Price adjustment and unlimited plan discontinuation on March 16th, 00:00 UTC',
     },
     footer: {
       cta: {
