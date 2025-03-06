@@ -18,7 +18,7 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
 
 const premiumModels =
-  'DeepSeek R1, GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Claude 3.7 Sonnet, DeepSeek R1, o3 Mini and more';
+  'DeepSeek R1, GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, Claude 3.7 Sonnet, o3 Mini and more';
 const basicModels =
   'GPT-4o Mini, DeepSeek V3, Llama 3.1 70B, Qwen 2.5 72B, Gemini Flash 2.0, DeepSeek V3, GPT-4o Mini and more';
 

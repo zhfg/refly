@@ -44,7 +44,10 @@ import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
-import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import {
+  useNodeSize,
+  MAX_HEIGHT_CLASS,
+} from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
@@ -586,7 +589,7 @@ export const SkillResponseNode = memo(
               </>
             )}
 
-            <div className="flex flex-col h-full p-3 box-border">
+            <div className={cn('flex flex-col h-full p-3 box-border', MAX_HEIGHT_CLASS)}>
               <NodeHeader
                 showIcon
                 disabled={readonly}
@@ -596,7 +599,7 @@ export const SkillResponseNode = memo(
                 updateTitle={onTitleChange}
               />
 
-              <div className={'flex-grow overflow-y-auto pr-2 -mr-2'}>
+              <div className={'relative flex-grow overflow-y-auto pr-2 -mr-2'}>
                 <div className="flex flex-col gap-3">
                   {status === 'failed' && (
                     <div

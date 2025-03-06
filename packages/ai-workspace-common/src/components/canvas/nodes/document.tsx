@@ -21,7 +21,10 @@ import {
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
-import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import {
+  useNodeSize,
+  MAX_HEIGHT_CLASS,
+} from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
@@ -29,6 +32,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import cn from 'classnames';
 
 export const DocumentNode = memo(
   ({
@@ -234,7 +238,7 @@ export const DocumentNode = memo(
                 />
               </>
             )}
-            <div className="flex flex-col h-full p-3 box-border">
+            <div className={cn('flex flex-col h-full p-3 box-border', MAX_HEIGHT_CLASS)}>
               <NodeHeader
                 title={data.title || t('common.untitled')}
                 Icon={HiOutlineDocumentText}

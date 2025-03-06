@@ -4,7 +4,10 @@ import { Image, Button } from 'antd';
 import { CanvasNode, ImageNodeProps } from './shared/types';
 import { ActionButtons } from './shared/action-buttons';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
-import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import {
+  useNodeSize,
+  MAX_HEIGHT_CLASS,
+} from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getNodeCommonStyles } from './index';
@@ -34,6 +37,7 @@ import {
   LuZoomOut,
 } from 'react-icons/lu';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import cn from 'classnames';
 
 const ICON_CLASS = 'text-xl flex items-center justify-center text-gray-200 hover:text-white';
 export const ImageNode = memo(
@@ -240,7 +244,7 @@ export const ImageNode = memo(
               </>
             )}
 
-            <div className="flex flex-col h-full relative p-3 box-border">
+            <div className={cn('flex flex-col h-full relative p-3 box-border', MAX_HEIGHT_CLASS)}>
               <NodeHeader
                 title={data.title}
                 Icon={IconImage}
