@@ -512,7 +512,7 @@ export const WebsiteNode = memo(
           onClick={onNodeClick}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="website" nodeId={id} isNodeHovered={isHovered} />
+            <ActionButtons type="website" nodeId={id} isNodeHovered={isHovered && selected} />
           )}
 
           <div

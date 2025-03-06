@@ -23,6 +23,7 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+import './index.scss';
 
 interface ModelSelectorProps {
   model: ModelInfo | null;
@@ -431,6 +432,8 @@ export const ModelSelector = memo(
         open={dropdownOpen}
         onOpenChange={setDropdownOpen}
         getPopupContainer={getPopupContainer}
+        overlayClassName="model-selector-overlay"
+        autoAdjustOverflow={true}
       >
         {!briefMode ? (
           <span className="text-xs flex items-center gap-1.5 text-gray-500 cursor-pointer transition-all duration-300 hover:text-gray-700">

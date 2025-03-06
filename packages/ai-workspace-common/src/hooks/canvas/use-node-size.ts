@@ -2,6 +2,14 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Node } from '@xyflow/react';
 import { useNodeData } from './use-node-data';
 
+export const MAX_HEIGHT = 1200;
+export const MAX_HEIGHT_CLASS = 'max-h-[1200px]';
+const COMPACT_MAX_HEIGHT = 384;
+
+const getMaxHeight = (height: number) => {
+  return Math.min(height, MAX_HEIGHT);
+};
+
 export interface NodeSize {
   width: number;
   height: number | 'auto';
@@ -33,16 +41,21 @@ export const useNodeSize = ({
 }: UseNodeSizeProps) => {
   const { setNodeStyle } = useNodeData();
 
+  const containerMaxHeight = useMemo(() => {
+    return sizeMode === 'compact' ? COMPACT_MAX_HEIGHT : MAX_HEIGHT;
+  }, [sizeMode]);
+
   // Initialize size from node measurements or defaults
   const initialSize = useMemo(
     (): NodeSize => ({
       width: node?.style?.width
         ? Number.parseInt(node.style.width as string)
         : (node?.measured?.width ?? defaultWidth),
-      height: node?.style?.height === 'auto' ? 'auto' : (node?.measured?.height ?? defaultHeight),
-      maxHeight: node?.style?.maxHeight
-        ? Number.parseInt(node.style.maxHeight as string)
-        : undefined,
+      height:
+        node?.style?.height === 'auto'
+          ? 'auto'
+          : getMaxHeight(Number(node?.measured?.height ?? defaultHeight)),
+      maxHeight: containerMaxHeight,
     }),
     [node?.measured?.width, node?.measured?.height, node?.style, defaultWidth, defaultHeight],
   );
@@ -52,6 +65,14 @@ export const useNodeSize = ({
   // Update size when node style changes
   const updateSize = useCallback((newSize: Partial<NodeSize>) => {
     setSize((prevSize) => ({ ...prevSize, ...newSize }));
+  }, []);
+
+  useEffect(() => {
+    setNodeStyle(id, {
+      width: `${size.width}px`,
+      height: `${size.height}px`,
+      maxHeight: size.maxHeight,
+    });
   }, []);
 
   // Monitor node style changes
@@ -64,11 +85,11 @@ export const useNodeSize = ({
         height:
           node.style.height === 'auto'
             ? 'auto'
-            : Number.parseInt(node.style.height as string) ||
-              (node?.measured?.height ?? defaultHeight),
-        maxHeight: node.style.maxHeight
-          ? Number.parseInt(node.style.maxHeight as string)
-          : undefined,
+            : getMaxHeight(
+                Number.parseInt(node.style.height as string) ||
+                  Number(node?.measured?.height ?? defaultHeight),
+              ),
+        maxHeight: containerMaxHeight,
       });
     }
   }, [
@@ -91,7 +112,7 @@ export const useNodeSize = ({
   const handleResize = useCallback(
     ({ target, width, height, direction }) => {
       const newWidth = Math.max(minWidth, Math.min(maxWidth, width));
-      const newHeight = Math.max(minHeight, height);
+      const newHeight = Math.max(minHeight, Math.min(height, MAX_HEIGHT));
 
       let newLeft = target.offsetLeft;
       let newTop = target.offsetTop;
@@ -114,6 +135,7 @@ export const useNodeSize = ({
       setNodeStyle(id, {
         width: `${newWidth}px`,
         height: `${newHeight}px`,
+        maxHeight: MAX_HEIGHT,
       });
     },
     [id, minWidth, maxWidth, minHeight, setNodeStyle, updateSize],
@@ -125,7 +147,7 @@ export const useNodeSize = ({
       position: 'relative',
       width: size.width,
       height: size.height,
-      maxHeight: sizeMode === 'compact' ? size.maxHeight : undefined,
+      maxHeight: containerMaxHeight,
       minWidth: sizeMode === 'compact' ? minWidth : defaultWidth,
       maxWidth,
       userSelect: isOperating ? 'text' : 'none',

@@ -27,7 +27,10 @@ import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/can
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
-import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import {
+  useNodeSize,
+  MAX_HEIGHT_CLASS,
+} from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
@@ -37,6 +40,7 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
+import cn from 'classnames';
 
 const NodeContent = memo(
   ({ data, isOperating }: { data: CanvasNodeData<ResourceNodeMeta>; isOperating: boolean }) => {
@@ -316,7 +320,7 @@ export const ResourceNode = memo(
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
-            <div className="flex flex-col h-full relative p-3 box-border">
+            <div className={cn('flex flex-col h-full relative p-3 box-border', MAX_HEIGHT_CLASS)}>
               <NodeHeader
                 title={data.title}
                 Icon={ResourceIcon}

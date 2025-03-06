@@ -246,7 +246,7 @@ export const MemoNode = ({
 
   const onMemoUpdates = useThrottledCallback(async (editor: EditorInstance) => {
     const markdown = editor.storage.markdown.getMarkdown();
-    const maxLength = 1000;
+    const maxLength = 2000;
 
     // If content exceeds max length, truncate the content in the editor
     if (markdown.length > maxLength) {

@@ -471,7 +471,7 @@ export const SkillNode = memo(
                 }}
                 selectedSkillName={skill?.name}
                 inputClassName="px-1 py-0"
-                maxRows={100}
+                maxRows={20}
                 handleSendMessage={handleSendMessage}
                 handleSelectSkill={(skill) => {
                   setQuery(localQuery?.slice(0, -1));
