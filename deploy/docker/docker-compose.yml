@@ -33,7 +33,7 @@ services:
       - DATABASE_URL=postgresql://refly:test@db:5432/refly?schema=refly
       - QDRANT_HOST=qdrant
       - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - STATIC_PUBLIC_ENDPOINT=/api/v1/misc
+      - STATIC_PUBLIC_ENDPOINT=/api/v1/misc/public
       - STATIC_PRIVATE_ENDPOINT=/api/v1/misc
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5800"]
@@ -51,6 +51,7 @@ services:
       - API_URL=/api
       - COLLAB_URL=/collab
       - STATIC_PUBLIC_ENDPOINT=/api/v1/misc/public
+      - STATIC_PRIVATE_ENDPOINT=/api/v1/misc
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s

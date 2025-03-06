@@ -5,6 +5,9 @@ export const wsServerOrigin =
 export const staticPublicEndpoint =
   (typeof window !== 'undefined' && window.ENV?.STATIC_PUBLIC_ENDPOINT) ||
   import.meta.env.VITE_STATIC_PUBLIC_ENDPOINT;
+export const staticPrivateEndpoint =
+  (typeof window !== 'undefined' && window.ENV?.STATIC_PRIVATE_ENDPOINT) ||
+  import.meta.env.VITE_STATIC_PRIVATE_ENDPOINT;
 
 export const subscriptionEnabled =
   Boolean(typeof window !== 'undefined' && window.ENV?.SUBSCRIPTION_ENABLED) ||

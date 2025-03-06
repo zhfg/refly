@@ -49,6 +49,7 @@ declare global {
       API_URL?: string;
       COLLAB_URL?: string;
       STATIC_PUBLIC_ENDPOINT?: string;
+      STATIC_PRIVATE_ENDPOINT?: string;
       SUBSCRIPTION_ENABLED?: boolean;
     };
   }
