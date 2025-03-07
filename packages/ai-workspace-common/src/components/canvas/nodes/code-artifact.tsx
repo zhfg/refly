@@ -408,12 +408,10 @@ export const CodeArtifactNode = memo(
     }, [id, handleAddToContext, handleDelete, handleInsertToDoc, handleAskAI]);
 
     return (
-      <div className={classNames({ nowheel: isOperating })}>
+      <div className={classNames({ nowheel: isOperating && isHovered })}>
         <div
           ref={targetRef}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
-          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
           className={classNames({
             'nodrag nopan select-text': isOperating,
@@ -424,11 +422,13 @@ export const CodeArtifactNode = memo(
           )}
 
           <div
+            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
-          h-full
-          flex flex-col
-          ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-        `}
+              h-full
+              flex flex-col
+              ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+            `}
           >
             <div className="flex flex-col h-full relative p-3 box-border">
               <NodeHeader
