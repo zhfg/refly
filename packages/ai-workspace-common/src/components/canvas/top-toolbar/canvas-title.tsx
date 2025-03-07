@@ -51,8 +51,10 @@ export const CanvasTitle = memo(
 
     // Refetch canvas list when canvas title changes
     useEffect(() => {
-      updateCanvasTitle(canvasId, canvasTitle);
-    }, [canvasTitle]);
+      if (hasCanvasSynced) {
+        updateCanvasTitle(canvasId, canvasTitle);
+      }
+    }, [canvasTitle, hasCanvasSynced]);
 
     return (
       <>

@@ -250,7 +250,7 @@ export const DocumentNode = memo(
               >
                 <ContentPreview
                   content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
-                  sizeMode={sizeMode}
+                  sizeMode={isPreview ? 'adaptive' : sizeMode}
                   isOperating={isOperating}
                   className="min-h-8"
                 />
