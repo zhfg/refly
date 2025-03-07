@@ -99,12 +99,12 @@ export const useCanvasSync = () => {
 
   const throttledSyncNodesToYDoc = useThrottledCallback(syncFunctions.syncNodesToYDoc, 500, {
     leading: true,
-    trailing: false,
+    trailing: true,
   });
 
   const throttledSyncEdgesToYDoc = useThrottledCallback(syncFunctions.syncEdgesToYDoc, 500, {
     leading: true,
-    trailing: false,
+    trailing: true,
   });
 
   return {
