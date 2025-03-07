@@ -303,12 +303,10 @@ export const ResourceNode = memo(
     }, [id, handleAddToContext, handleDelete, handleDeleteFile, handleAskAI, handleCreateDocument]);
 
     return (
-      <div className={classNames({ nowheel: isOperating })}>
+      <div className={classNames({ nowheel: isOperating && isHovered })}>
         <div
           ref={targetRef}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
-          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
           className={classNames({
             'nodrag nopan select-text': isOperating,
@@ -319,6 +317,8 @@ export const ResourceNode = memo(
           )}
 
           <div
+            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
             h-full
             flex flex-col
