@@ -84,7 +84,7 @@ const defaultCanvasState = () => ({
   showMaxRatio: true,
   showLaunchpad: true,
   operatingNodeId: null,
-  showEdges: false,
+  showEdges: true,
   clickToPreview: true,
   nodeSizeMode: 'compact' as const,
   autoLayout: false,
