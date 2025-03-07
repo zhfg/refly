@@ -39,8 +39,8 @@ export const calculateNodePosition = ({
 
   // Case 3: Connected to existing nodes
   if (sourceNodes?.length > 0) {
-    const { autoLayout } = useCanvasStore.getState();
-
+    // const { autoLayout } = useCanvasStore.getState();
+    const autoLayout = false;
     // Convert relative positions to absolute positions for calculations
     const sourceNodesAbsolute = sourceNodes.map((node) => ({
       ...node,
