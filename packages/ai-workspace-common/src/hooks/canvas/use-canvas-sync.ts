@@ -55,10 +55,10 @@ export const useCanvasSync = () => {
     };
 
     const syncNodesToYDoc = (nodes: CanvasNode<any>[]) => {
-      if (!nodes?.length) return;
+      const nodesToSync = nodes || [];
 
       // Purge context items from nodes
-      const purgedNodes = nodes.map((node) => ({
+      const purgedNodes = nodesToSync.map((node) => ({
         ...node,
         data: {
           ...node.data,
