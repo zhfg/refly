@@ -14,7 +14,6 @@ import {
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-import { RiLayoutLine } from 'react-icons/ri';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
@@ -112,17 +111,17 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
       description: t('canvas.contextMenu.toggleNodeSizeModeDescription'),
       videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.webm',
     },
-    {
-      key: 'toggleAutoLayout',
-      icon: RiLayoutLine,
-      type: 'button',
-      active: autoLayout,
-      title: autoLayout
-        ? t('canvas.contextMenu.disableAutoLayout')
-        : t('canvas.contextMenu.enableAutoLayout'),
-      description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
-    },
+    // {
+    //   key: 'toggleAutoLayout',
+    //   icon: RiLayoutLine,
+    //   type: 'button',
+    //   active: autoLayout,
+    //   title: autoLayout
+    //     ? t('canvas.contextMenu.disableAutoLayout')
+    //     : t('canvas.contextMenu.enableAutoLayout'),
+    //   description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
+    //   videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
+    // },
     {
       key: 'toggleHoverCard',
       icon: IconGuideLine,

@@ -221,7 +221,8 @@ export const useAddNode = () => {
       if (sourceNodes?.length > 0) {
         // Use setTimeout to ensure the new node and edges are added before layout
         setTimeout(() => {
-          const { autoLayout } = useCanvasStore.getState();
+          // const { autoLayout } = useCanvasStore.getState();
+          const autoLayout = false;
           if (!autoLayout) {
             if (needSetCenter) {
               setNodeCenter(newNode.id);

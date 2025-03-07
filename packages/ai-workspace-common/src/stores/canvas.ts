@@ -247,7 +247,6 @@ export const useCanvasStore = create<CanvasState>()(
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
-        autoLayout: state.autoLayout,
       }),
     },
   ),
