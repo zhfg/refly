@@ -250,7 +250,7 @@ export const ResourceNode = memo(
 
     useEffect(() => {
       if (remoteResult) {
-        const { contentPreview, indexStatus, indexError } = remoteResult;
+        const { contentPreview, indexStatus, indexError, title } = remoteResult;
 
         setNodeDataByEntity(
           {
@@ -258,6 +258,7 @@ export const ResourceNode = memo(
             type: 'resource',
           },
           {
+            title,
             contentPreview,
             metadata: {
               indexStatus,
