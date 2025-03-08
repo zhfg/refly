@@ -148,6 +148,7 @@ export const useInvokeAction = () => {
                 status: 'generating',
                 language: language || 'typescript', // Use extracted language or default
                 type: type || '', // Use extracted type if available
+                title: title || artifact?.title || '',
                 // If artifact is closed, set activeTab to preview
                 ...(isArtifactClosed && { activeTab: 'preview' }),
               },
@@ -176,6 +177,7 @@ export const useInvokeAction = () => {
               // Update language and type if available from extracted attributes
               ...(language && { language }),
               ...(type && { type }),
+              title: title || artifact?.title || '',
               // If artifact is closed, set activeTab to preview
               ...(isArtifactClosed && { activeTab: 'preview' }),
             },
