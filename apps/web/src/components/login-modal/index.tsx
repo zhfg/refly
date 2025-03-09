@@ -36,6 +36,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   }));
 
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
+  const isShareWebsite = useMatch('/share/website/:url');
 
   const { t } = useTranslation();
 
@@ -83,7 +84,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
         if (data.data?.skipVerification) {
           authStore.reset();
-          window.location.replace(isShareCanvas ? window.location.href : '/');
+          window.location.replace(isShareCanvas || isShareWebsite ? window.location.href : '/');
         } else {
           authStore.setEmail(values.email);
           authStore.setSessionId(data.data?.sessionId ?? null);
@@ -102,7 +103,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       if (data?.success) {
         authStore.setLoginModalOpen(false);
         authStore.reset();
-        window.location.replace(isShareCanvas ? window.location.href : '/');
+        window.location.replace(isShareCanvas || isShareWebsite ? window.location.href : '/');
       }
     }
   };

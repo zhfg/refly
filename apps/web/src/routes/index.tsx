@@ -19,7 +19,7 @@ const Home = lazy(() => import('@/pages/home'));
 const Canvas = lazy(() => import('@/pages/canvas'));
 const Pricing = lazy(() => import('@/pages/pricing'));
 const ShareCanvasPage = lazy(() => import('@/pages/share'));
-
+const ShareWebsitePage = lazy(() => import('@/pages/website-share'));
 const prefetchRoutes = () => {
   // Prefetch common routes
   import('@refly-packages/ai-workspace-common/components/request-access');
@@ -64,9 +64,10 @@ export const AppRouter = (props: { layout?: any }) => {
   const routeLogin = useMatch('/');
 
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
+  const isShareWebsite = useMatch('/share/website/:url');
   const isPricing = useMatch('/pricing');
 
-  if (!isShareCanvas && !isPricing) {
+  if (!isShareCanvas && !isShareWebsite && !isPricing) {
     if (!userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
       return <SuspenseLoading />;
     }
@@ -85,6 +86,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/" element={<HomeRedirect defaultNode={<Home />} />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
+          <Route path="/share/website/:url" element={<ShareWebsitePage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}

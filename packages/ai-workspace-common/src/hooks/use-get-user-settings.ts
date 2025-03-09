@@ -40,6 +40,7 @@ export const useGetUserSettings = () => {
   const { i18n } = useTranslation();
 
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
+  const isShareWebsite = useMatch('/share/website/:url');
   const isPricing = useMatch('/pricing');
 
   const getLoginStatus = async () => {
@@ -60,7 +61,7 @@ export const useGetUserSettings = () => {
       userStore.setUserProfile(undefined);
       userStore.setIsLogin(false);
 
-      if (!isShareCanvas && !isPricing) {
+      if (!(isShareCanvas || isShareWebsite) && !isPricing) {
         navigate(`/?${searchParams.toString()}`); // Extension should navigate to home
       }
 

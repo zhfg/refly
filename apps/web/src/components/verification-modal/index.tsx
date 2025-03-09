@@ -17,6 +17,7 @@ export const VerificationModal = () => {
     reset: state.reset,
   }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
+  const isShareWebsite = useMatch('/share/website/:url');
   const [isLoading, setIsLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [otp, setOtp] = useState('');
@@ -62,7 +63,7 @@ export const VerificationModal = () => {
 
     if (data?.success) {
       authStore.reset();
-      window.location.replace(isShareCanvas ? window.location.href : '/');
+      window.location.replace(isShareCanvas || isShareWebsite ? window.location.href : '/');
     }
   };
 
