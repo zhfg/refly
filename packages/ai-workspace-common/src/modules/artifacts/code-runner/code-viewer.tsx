@@ -336,7 +336,7 @@ export default memo(
             <Tooltip title={t('codeArtifact.buttons.share')}>
               <Button
                 type="text"
-                icon={<FiShare2 className="size-4" />}
+                icon={<FiShare2 className="size-4 text-green-600" />}
                 onClick={handleShare}
                 size="small"
                 className="text-gray-600 hover:text-blue-600"

@@ -1202,7 +1202,7 @@ const translations = {
       refresh: '刷新',
       copy: '复制代码',
       download: '下载 {{fileName}}',
-      share: '分享代码',
+      share: '分享小组件',
     },
     defaultTitle: '代码组件',
   },

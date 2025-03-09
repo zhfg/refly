@@ -1223,7 +1223,7 @@ const translations = {
       refresh: 'Refresh',
       copy: 'Copy code',
       download: 'Download {{fileName}}',
-      share: 'Share code',
+      share: 'Share code artifact',
     },
     defaultTitle: 'Code Artifact',
   },
