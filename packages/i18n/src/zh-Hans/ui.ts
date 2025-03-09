@@ -79,6 +79,8 @@ const translations = {
     dropImageHere: '拖放图片到这里',
     presetColors: '预设颜色',
     duplicate: '复制',
+    shareSuccess: '分享链接已复制到剪贴板!',
+    shareError: '分享失败，请重试！',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
@@ -1192,7 +1194,7 @@ const translations = {
     sharing: '分享代码中...',
     shareLoading: '加载分享代码中...',
     noCodeFound: '暂无代码内容',
-    shareSuccess: '分享链接已复制到剪贴板!',
+    shareSuccess: '分享链接已复制到剪贴板! ',
     shareError: '分享代码失败',
     errorCopySuccess: '错误信息已复制到剪贴板',
     errorCopyFailed: '复制错误信息失败',

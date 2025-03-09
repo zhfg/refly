@@ -244,7 +244,7 @@ export default memo(
           message.success(t('codeArtifact.shareSuccess'));
         }
       },
-      [editorContent, type, title, language, t],
+      [editorContent, type, title, language, t, entityId],
     );
 
     // Memoize the render tabs

@@ -71,6 +71,8 @@ const translations = {
     dropImageHere: 'Drop image here',
     presetColors: 'Preset Colors',
     duplicate: 'Duplicate',
+    shareSuccess: 'Share link copied to clipboard!',
+    shareError: 'Share failed, please try again!',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -1213,7 +1215,7 @@ const translations = {
     sharing: 'Sharing code...',
     shareLoading: 'Loading shared code...',
     noCodeFound: 'No code content found to display',
-    shareSuccess: 'Share link copied to clipboard!',
+    shareSuccess: 'Share link copied to clipboard: {{link}}',
     shareError: 'Failed to share code',
     errorCopySuccess: 'Error message copied to clipboard',
     errorCopyFailed: 'Failed to copy error message',
