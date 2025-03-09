@@ -5,7 +5,7 @@
 /**
  * Maximum number of characters allowed for node content preview
  */
-export const MAX_CONTENT_PREVIEW_LENGTH = 200;
+export const MAX_CONTENT_PREVIEW_LENGTH = 1000;
 
 /**
  * Truncates content to a maximum length
