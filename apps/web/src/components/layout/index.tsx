@@ -9,6 +9,7 @@ import { SubscribeModal } from '@refly-packages/ai-workspace-common/components/s
 import { ErrorBoundary } from '@sentry/react';
 import { VerificationModal } from '@/components/verification-modal';
 import { ResetPasswordModal } from '@/components/reset-password-modal';
+import { useIsSharePage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 
 import './index.scss';
 
@@ -25,7 +26,7 @@ export const AppLayout = (props: AppLayoutProps) => {
     isLogin: state.isLogin,
   }));
 
-  const matchShare = useMatch('/share/canvas/:canvasId');
+  const isSharePage = useIsSharePage();
   const matchPricing = useMatch('/pricing');
   const matchLogin = useMatch('/login');
 
@@ -33,7 +34,7 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   const hasBetaAccess = userStore.isLogin ? userStore.userProfile?.hasBetaAccess || false : true;
 
-  const showSider = matchShare || (!!userStore.userProfile && !matchPricing && !matchLogin);
+  const showSider = isSharePage || (!!userStore.userProfile && !matchPricing && !matchLogin);
 
   return (
     <ErrorBoundary>

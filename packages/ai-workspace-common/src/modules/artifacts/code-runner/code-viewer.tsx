@@ -1,10 +1,13 @@
-import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye } from 'react-icons/fi';
+import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye, FiShare2 } from 'react-icons/fi';
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button, Tooltip, Divider, message, Select } from 'antd';
 import Renderer from './render';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
 import { CodeArtifactType } from './types';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
 
 // Function to get simple type description
 const getSimpleTypeDescription = (type: CodeArtifactType): string => {
@@ -68,6 +71,7 @@ export default memo(
     code,
     language,
     title,
+    entityId,
     isGenerating,
     activeTab,
     onTabChange,
@@ -81,6 +85,7 @@ export default memo(
     code: string;
     language: string;
     title: string;
+    entityId: string;
     isGenerating: boolean;
     activeTab: string;
     onTabChange: (v: 'code' | 'preview') => void;
@@ -206,7 +211,41 @@ export default memo(
       [type],
     );
 
-    console.log('code-artifact-viewer', type);
+    const handleShare = useCallback(
+      async (event: React.MouseEvent) => {
+        event.stopPropagation();
+        const loadingMessage = message.loading(t('codeArtifact.sharing'), 0);
+
+        const { data, error } = await getClient().createShare({
+          body: {
+            entityId,
+            entityType: 'codeArtifact',
+            shareData: JSON.stringify({
+              content: editorContent,
+              type,
+              title,
+              language,
+            }),
+          },
+        });
+
+        if (!data.success || error) {
+          loadingMessage();
+          console.error('Failed to share code:', error);
+          message.error(t('codeArtifact.shareError'));
+        } else {
+          const shareLink = getShareLink('codeArtifact', data.data?.shareId ?? '');
+
+          // Copy the sharing link to clipboard
+          copyToClipboard(shareLink);
+
+          // Clear loading message and show success with the link
+          loadingMessage();
+          message.success(t('codeArtifact.shareSuccess'));
+        }
+      },
+      [editorContent, type, title, language, t, entityId],
+    );
 
     // Memoize the render tabs
     const renderTabs = useMemo(
@@ -274,12 +313,11 @@ export default memo(
       [
         handleCopyCode,
         handleDownload,
-        handleRefresh,
+        handleShare,
         title,
         language,
         getFileExtensionForLanguage,
         t,
-        isGenerating,
       ],
     );
 
@@ -294,16 +332,28 @@ export default memo(
         <div className="flex items-center justify-between h-12 border-b border-gray-200 bg-white py-2">
           {renderTabs}
 
-          <Tooltip title={t('codeArtifact.buttons.refresh')}>
-            <Button
-              type="text"
-              icon={<FiRefreshCw className="size-4" />}
-              onClick={handleRefresh}
-              disabled={isGenerating}
-              size="small"
-              className="text-gray-600 hover:text-blue-600"
-            />
-          </Tooltip>
+          <div className="flex items-center space-x-2">
+            <Tooltip title={t('codeArtifact.buttons.share')}>
+              <Button
+                type="text"
+                icon={<FiShare2 className="size-4 text-green-600" />}
+                onClick={handleShare}
+                size="small"
+                className="text-gray-600 hover:text-blue-600"
+              />
+            </Tooltip>
+
+            <Tooltip title={t('codeArtifact.buttons.refresh')}>
+              <Button
+                type="text"
+                icon={<FiRefreshCw className="size-4" />}
+                onClick={handleRefresh}
+                disabled={isGenerating}
+                size="small"
+                className="text-gray-600 hover:text-blue-600"
+              />
+            </Tooltip>
+          </div>
         </div>
 
         <Divider className="my-0" style={{ margin: 0, height: '1px' }} />

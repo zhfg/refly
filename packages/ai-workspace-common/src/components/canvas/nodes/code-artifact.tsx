@@ -137,6 +137,7 @@ const NodeContent = memo(
           title={data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
           isGenerating={data?.metadata?.status === 'generating'}
           activeTab={currentTab}
+          entityId={data?.entityId ?? ''}
           onTabChange={handleTabChange}
           onTypeChange={handleTypeChange}
           onClose={() => {
