@@ -13,13 +13,15 @@ import {
 import { useHandleUrlParamsCallback } from '@refly-packages/ai-workspace-common/hooks/use-handle-url-params-callback';
 import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
 import { HomeRedirect } from '@refly-packages/ai-workspace-common/components/home-redirect';
+import { useIsSharePage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 
 // Lazy load components
 const Home = lazy(() => import('@/pages/home'));
 const Canvas = lazy(() => import('@/pages/canvas'));
 const Pricing = lazy(() => import('@/pages/pricing'));
 const ShareCanvasPage = lazy(() => import('@/pages/share'));
-const ShareWebsitePage = lazy(() => import('@/pages/website-share'));
+const ShareCodePage = lazy(() => import('@/pages/code-share'));
+
 const prefetchRoutes = () => {
   // Prefetch common routes
   import('@refly-packages/ai-workspace-common/components/request-access');
@@ -63,11 +65,10 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch('/');
 
-  const isShareCanvas = useMatch('/share/canvas/:canvasId');
-  const isShareWebsite = useMatch('/share/website/:url');
+  const isSharePage = useIsSharePage();
   const isPricing = useMatch('/pricing');
 
-  if (!isShareCanvas && !isShareWebsite && !isPricing) {
+  if (!isSharePage && !isPricing) {
     if (!userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
       return <SuspenseLoading />;
     }
@@ -86,7 +87,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/" element={<HomeRedirect defaultNode={<Home />} />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
-          <Route path="/share/website/:url" element={<ShareWebsitePage />} />
+          <Route path="/share/code/:shareId" element={<ShareCodePage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}

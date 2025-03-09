@@ -1,47 +1,22 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { useMemo, useCallback } from 'react';
 import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { SiderPopover } from '@refly-packages/ai-workspace-common/components/sider/popover';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
 import { Button } from 'antd';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 
-const ShareCanvasPage = () => {
-  const { url = '' } = useParams();
-  const [isLoading, setIsLoading] = useState(true);
+const ShareCodePage = () => {
+  const { shareId = '' } = useParams();
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  const [codeData, setCodeData] = useState({
-    content: '',
-    type: 'text/html' as CodeArtifactType,
-    title: 'Shared Code',
-    language: 'javascript',
-  });
-
-  // Decode and parse the shared code data from URL parameter
-  useEffect(() => {
-    try {
-      if (url) {
-        const decodedData = JSON.parse(decodeURIComponent(atob(url)));
-        setCodeData({
-          content: decodedData?.content ?? '',
-          type: decodedData?.type ?? 'text/html',
-          title: decodedData?.title ?? 'Shared Code',
-          language: decodedData?.language ?? 'javascript',
-        });
-      }
-    } catch (error) {
-      console.error('Failed to parse shared code data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [url]);
+  const { data: codeData, loading: isLoading } = useFetchShareData(shareId);
 
   // Memoize the render key to prevent unnecessary re-renders
-  const renderKey = useMemo(() => Date.now().toString(), [codeData.content]);
+  const renderKey = useMemo(() => Date.now().toString(), [codeData?.content]);
 
   // Handle error reporting (no-op in read-only view)
   const handleRequestFix = useCallback(() => {}, []);
@@ -78,7 +53,7 @@ const ShareCanvasPage = () => {
 
       {/* Main content */}
       <div className="flex h-full w-full grow items-center justify-center bg-white overflow-hidden">
-        {codeData.content ? (
+        {codeData?.content ? (
           <div className="w-full h-full">
             <Renderer
               content={codeData.content}
@@ -97,4 +72,4 @@ const ShareCanvasPage = () => {
   );
 };
 
-export default ShareCanvasPage;
+export default ShareCodePage;

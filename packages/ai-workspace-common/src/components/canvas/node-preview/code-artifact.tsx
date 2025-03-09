@@ -205,6 +205,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             code={content}
             language={language}
             title={node.data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
+            entityId={node.data?.entityId ?? ''}
             isGenerating={isGenerating}
             activeTab={currentTab}
             onTabChange={handleTabChange}

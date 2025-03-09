@@ -17,6 +17,7 @@ import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/loca
 import { LOCALE } from '@refly/common-types';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
 import { UID_COOKIE } from '@refly-packages/utils/cookie';
+import { useIsSharePage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStoreShallow((state) => ({
@@ -39,8 +40,7 @@ export const useGetUserSettings = () => {
 
   const { i18n } = useTranslation();
 
-  const isShareCanvas = useMatch('/share/canvas/:canvasId');
-  const isShareWebsite = useMatch('/share/website/:url');
+  const isSharePage = useIsSharePage();
   const isPricing = useMatch('/pricing');
 
   const getLoginStatus = async () => {
@@ -61,7 +61,7 @@ export const useGetUserSettings = () => {
       userStore.setUserProfile(undefined);
       userStore.setIsLogin(false);
 
-      if (!(isShareCanvas || isShareWebsite) && !isPricing) {
+      if (!isSharePage && !isPricing) {
         navigate(`/?${searchParams.toString()}`); // Extension should navigate to home
       }
 

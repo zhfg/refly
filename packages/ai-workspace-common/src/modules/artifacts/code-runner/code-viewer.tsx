@@ -6,7 +6,8 @@ import Editor, { Monaco } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
 import { CodeArtifactType } from './types';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { getClientOrigin } from '@refly-packages/utils/url';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
 
 // Function to get simple type description
 const getSimpleTypeDescription = (type: CodeArtifactType): string => {
@@ -70,6 +71,7 @@ export default memo(
     code,
     language,
     title,
+    entityId,
     isGenerating,
     activeTab,
     onTabChange,
@@ -83,6 +85,7 @@ export default memo(
     code: string;
     language: string;
     title: string;
+    entityId: string;
     isGenerating: boolean;
     activeTab: string;
     onTabChange: (v: 'code' | 'preview') => void;
@@ -208,40 +211,37 @@ export default memo(
       [type],
     );
 
-    console.log('code-artifact-viewer', type);
-
     const handleShare = useCallback(
       async (event: React.MouseEvent) => {
         event.stopPropagation();
         const loadingMessage = message.loading(t('codeArtifact.sharing'), 0);
 
-        try {
-          // This would normally be an API call to share the code
-          // For now, we're just simulating a successful share
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+        const { data, error } = await getClient().createShare({
+          body: {
+            entityId,
+            entityType: 'codeArtifact',
+            shareData: JSON.stringify({
+              content: editorContent,
+              type,
+              title,
+              language,
+            }),
+          },
+        });
 
-          // Create a sharing link with the encoded content
-          const shareLink = `${getClientOrigin()}/share/website/${btoa(
-            encodeURIComponent(
-              JSON.stringify({
-                content: editorContent,
-                type,
-                title,
-                language,
-              }),
-            ),
-          )}`;
-
-          // Copy the sharing link to clipboard
-          await copyToClipboard(shareLink);
-
-          // Clear loading message and show success with the link
-          loadingMessage();
-          message.success(t('codeArtifact.shareSuccess', { link: shareLink }));
-        } catch (error) {
+        if (!data.success || error) {
           loadingMessage();
           console.error('Failed to share code:', error);
           message.error(t('codeArtifact.shareError'));
+        } else {
+          const shareLink = getShareLink('codeArtifact', data.data?.shareId ?? '');
+
+          // Copy the sharing link to clipboard
+          copyToClipboard(shareLink);
+
+          // Clear loading message and show success with the link
+          loadingMessage();
+          message.success(t('codeArtifact.shareSuccess', { link: data.data?.shareId }));
         }
       },
       [editorContent, type, title, language, t],
