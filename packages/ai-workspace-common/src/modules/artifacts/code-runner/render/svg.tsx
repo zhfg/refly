@@ -25,7 +25,7 @@ const SVGRenderer = memo(({ content, title }: SVGRendererProps) => {
           removeControlCharacter: false,
         },
         // Use higher scale for better quality on high DPI displays
-        scale: 3,
+        scale: 1,
         quality: 1.0,
         backgroundColor: '#ffffff',
       });
