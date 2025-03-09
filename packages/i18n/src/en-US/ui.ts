@@ -1215,8 +1215,8 @@ const translations = {
     sharing: 'Sharing code...',
     shareLoading: 'Loading shared code...',
     noCodeFound: 'No code content found to display',
-    shareSuccess: 'Share link copied to clipboard: {{link}}',
-    shareError: 'Failed to share code',
+    shareSuccess: 'Share link copied to clipboard!',
+    shareError: 'Failed to share code!',
     errorCopySuccess: 'Error message copied to clipboard',
     errorCopyFailed: 'Failed to copy error message',
     tabs: {
