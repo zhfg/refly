@@ -35,16 +35,15 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   // Sync local state with node metadata changes
   useEffect(() => {
     // Only update if activeTab changes and is different from current state
-    const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
-    if (metadataActiveTab && metadataActiveTab !== currentTab) {
-      setCurrentTab(metadataActiveTab);
-    }
-
+    // const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
+    // if (metadataActiveTab && metadataActiveTab !== currentTab) {
+    //   setCurrentTab(metadataActiveTab);
+    // }
     // Update type if it changes in metadata
-    const metadataType = node.data?.metadata?.type as CodeArtifactType;
-    if (metadataType && metadataType !== currentType) {
-      setCurrentType(metadataType);
-    }
+    // const metadataType = node.data?.metadata?.type as CodeArtifactType;
+    // if (metadataType && metadataType !== currentType) {
+    //   setCurrentType(metadataType);
+    // }
   }, [node.data?.metadata?.activeTab, currentTab, node.data?.metadata?.type, currentType]);
 
   // Update node data when tab changes
