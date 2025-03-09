@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { SiderPopover } from '@refly-packages/ai-workspace-common/components/sider/popover';
@@ -9,6 +10,7 @@ import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use
 
 const ShareCodePage = () => {
   const { shareId = '' } = useParams();
+  const { t } = useTranslation();
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,
     setCollapse: state.setCollapse,
@@ -24,7 +26,7 @@ const ShareCodePage = () => {
   if (isLoading) {
     return (
       <div className="flex h-full w-full grow items-center justify-center">
-        <div className="text-gray-500">Loading shared code...</div>
+        <div className="text-gray-500">{t('codeArtifact.shareLoading')}</div>
       </div>
     );
   }
@@ -65,7 +67,7 @@ const ShareCodePage = () => {
             />
           </div>
         ) : (
-          <div className="text-gray-500">No code content found to display</div>
+          <div className="text-gray-500">{t('codeArtifact.noCodeFound')}</div>
         )}
       </div>
     </div>

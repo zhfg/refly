@@ -241,7 +241,7 @@ export default memo(
 
           // Clear loading message and show success with the link
           loadingMessage();
-          message.success(t('codeArtifact.shareSuccess', { link: data.data?.shareId }));
+          message.success(t('codeArtifact.shareSuccess'));
         }
       },
       [editorContent, type, title, language, t],
