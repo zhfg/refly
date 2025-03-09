@@ -5,7 +5,7 @@
 /**
  * Maximum number of characters allowed for node content preview
  */
-export const MAX_CONTENT_PREVIEW_LENGTH = 1000;
+export const MAX_CONTENT_PREVIEW_LENGTH = 200;
 
 /**
  * Truncates content to a maximum length
@@ -20,7 +20,7 @@ export const truncateContent = (
   if (!content) return '';
   if (content.length <= maxLength) return content;
 
-  return content.substring(0, maxLength);
+  return `${content.substring(0, maxLength)}...`;
 };
 
 /**
@@ -33,9 +33,8 @@ export const truncateContent = (
 export const processContentPreview = (
   contents: (string | undefined)[] = [],
   separator = '\n',
-  maxLength = MAX_CONTENT_PREVIEW_LENGTH,
 ): string => {
   const filteredContents = contents.filter(Boolean) as string[];
   const joinedContent = filteredContents.join(separator);
-  return truncateContent(joinedContent, maxLength);
+  return joinedContent;
 };
