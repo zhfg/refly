@@ -22,25 +22,31 @@ import { NodeHeader } from './shared/node-header';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import {
+  MAX_HEIGHT_CLASS,
+  useNodeSize,
+} from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genSkillID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import cn from 'classnames';
+import Moveable from 'react-moveable';
 
-const DEFAULT_WIDTH = 580;
-const DEFAULT_HEIGHT = 400;
+const DEFAULT_WIDTH = 288;
+const DEFAULT_MIN_HEIGHT = 100;
 
 /**
  * Website node content component that displays either a form for URL input or an iframe preview
  */
 const NodeContent = memo(
   ({ data, readonly }: { data: CanvasNodeData<WebsiteNodeMeta>; readonly: boolean }) => {
-    const { url = '', viewMode = 'form' } = data?.metadata ?? {};
+    const { url = '', viewMode = 'form', sizeMode = 'adaptive' } = data?.metadata ?? {};
     const [isEditing, setIsEditing] = useState(viewMode === 'form' || !url);
     const { t } = useTranslation();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const formRef = useRef<any>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     // Update editing state when metadata changes
     useEffect(() => {
@@ -214,6 +220,142 @@ const NodeContent = memo(
             </Button>
           </div>
         </div>
+        <div
+          className={classNames('flex-1 overflow-hidden', {
+            'max-h-[40px]': sizeMode === 'compact',
+          })}
+        >
+          {sizeMode === 'adaptive' ? (
+            <iframe
+              ref={iframeRef}
+              src={url}
+              title={data.title}
+              className="w-full h-full border-0"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+              allow="fullscreen"
+              referrerPolicy="no-referrer"
+              loading="lazy"
+              onLoad={(e) => {
+                try {
+                  // Try to access iframe content to mute any audio/video elements
+                  const iframe = e.target as HTMLIFrameElement;
+                  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+
+                  if (iframeDoc) {
+                    // Function to handle media elements
+                    const handleMediaElement = (element: HTMLMediaElement) => {
+                      element.muted = true;
+                      element.autoplay = false;
+                      element.setAttribute('autoplay', 'false');
+                      element.setAttribute('preload', 'none');
+
+                      // Remove any existing event listeners
+                      const elementClone = element.cloneNode(true) as HTMLMediaElement;
+                      element.parentNode?.replaceChild(elementClone, element);
+
+                      // Prevent play attempts
+                      elementClone.addEventListener(
+                        'play',
+                        (e) => {
+                          if (elementClone.muted === false) {
+                            elementClone.muted = true;
+                            e.preventDefault();
+                            elementClone.pause();
+                          }
+                        },
+                        true,
+                      );
+                    };
+
+                    // Handle existing media elements
+                    const mediaElements = iframeDoc.querySelectorAll('video, audio, iframe');
+                    for (const element of Array.from(mediaElements)) {
+                      if (element instanceof HTMLMediaElement) {
+                        handleMediaElement(element);
+                      } else if (element instanceof HTMLIFrameElement) {
+                        // Handle nested iframes
+                        element.setAttribute('allow', 'fullscreen');
+                        element.setAttribute('autoplay', 'false');
+                      }
+                    }
+
+                    // Create observer to handle dynamically added elements
+                    const observer = new MutationObserver((mutations) => {
+                      for (const mutation of mutations) {
+                        for (const node of Array.from(mutation.addedNodes)) {
+                          if (node instanceof HTMLElement) {
+                            // Handle newly added media elements
+                            const newMediaElements = node.querySelectorAll('video, audio, iframe');
+                            for (const element of Array.from(newMediaElements)) {
+                              if (element instanceof HTMLMediaElement) {
+                                handleMediaElement(element);
+                              } else if (element instanceof HTMLIFrameElement) {
+                                element.setAttribute('allow', 'fullscreen');
+                                element.setAttribute('autoplay', 'false');
+                              }
+                            }
+
+                            // Also check if the node itself is a media element
+                            if (node instanceof HTMLMediaElement) {
+                              handleMediaElement(node);
+                            } else if (node instanceof HTMLIFrameElement) {
+                              node.setAttribute('allow', 'fullscreen');
+                              node.setAttribute('autoplay', 'false');
+                            }
+                          }
+                        }
+                      }
+                    });
+
+                    // Start observing
+                    observer.observe(iframeDoc.body, {
+                      childList: true,
+                      subtree: true,
+                    });
+
+                    // Add strict CSP
+                    const meta = iframeDoc.createElement('meta');
+                    meta.setAttribute('http-equiv', 'Content-Security-Policy');
+                    meta.setAttribute(
+                      'content',
+                      "media-src 'none'; autoplay 'none'; camera 'none'; microphone 'none'",
+                    );
+                    iframeDoc.head?.insertBefore(meta, iframeDoc.head.firstChild);
+
+                    // Add CSS to prevent autoplay and ensure muted state
+                    const style = iframeDoc.createElement('style');
+                    style.textContent = `
+                    video, audio, iframe {
+                      autoplay: false !important;
+                      muted: true !important;
+                    }
+                    video[autoplay], audio[autoplay], iframe[autoplay] {
+                      autoplay: false !important;
+                    }
+                    video:not([muted]), audio:not([muted]) {
+                      muted: true !important;
+                    }
+                    /* Bilibili specific */
+                    .bilibili-player-video {
+                      pointer-events: none !important;
+                    }
+                    .bilibili-player-video-control {
+                      pointer-events: auto !important;
+                    }
+                  `;
+                    iframeDoc.head?.appendChild(style);
+
+                    // Clean up observer when iframe is unloaded
+                    return () => observer.disconnect();
+                  }
+                } catch {
+                  // Ignore cross-origin errors
+                  console.debug('Cannot access iframe content due to same-origin policy');
+                }
+              }}
+            />
+          ) : null}
+        </div>
       </div>
     );
   },
@@ -225,7 +367,15 @@ const NodeContent = memo(
     const prevReadonly = prevProps.readonly;
     const nextReadonly = nextProps.readonly;
 
-    return prevUrl === nextUrl && prevViewMode === nextViewMode && prevReadonly === nextReadonly;
+    const prevSizeMode = prevProps.data?.metadata?.sizeMode;
+    const nextSizeMode = nextProps.data?.metadata?.sizeMode;
+
+    return (
+      prevUrl === nextUrl &&
+      prevViewMode === nextViewMode &&
+      prevReadonly === nextReadonly &&
+      prevSizeMode === nextSizeMode
+    );
   },
 );
 
@@ -244,9 +394,12 @@ export const WebsiteNode = memo(
     hideHandles = false,
     onNodeClick,
   }: WebsiteNodeProps) => {
-    const nodeRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isHovered, setIsHovered] = useState(false);
+    const [isResizing] = useState(false);
+    const targetRef = useRef<HTMLDivElement>(null);
+    const moveableRef = useRef<Moveable>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     const { addToContext } = useAddToContext();
     const { deleteNode } = useDeleteNode();
@@ -256,7 +409,8 @@ export const WebsiteNode = memo(
     // Hover effect
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
-    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+    const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
+      edges: state.data[state.currentCanvasId]?.edges ?? [],
       operatingNodeId: state.operatingNodeId,
     }));
 
@@ -276,10 +430,14 @@ export const WebsiteNode = memo(
       isOperating,
       minWidth: DEFAULT_WIDTH,
       maxWidth: 1200,
-      minHeight: DEFAULT_HEIGHT,
+      minHeight: DEFAULT_MIN_HEIGHT,
       defaultWidth: DEFAULT_WIDTH,
-      defaultHeight: DEFAULT_HEIGHT,
+      defaultHeight: 'auto',
     });
+
+    // Check if node has any connections
+    const isTargetConnected = edges?.some((edge) => edge.target === id);
+    const isSourceConnected = edges?.some((edge) => edge.source === id);
 
     // Handle mouse events
     const handleMouseEnter = useCallback(() => {
@@ -349,6 +507,17 @@ export const WebsiteNode = memo(
       );
     }, [data, addNode, t]);
 
+    // Enhanced resize handler
+    const handleEnhancedResize = useCallback(
+      (params: any) => {
+        if (iframeRef.current) {
+          iframeRef.current.style.pointerEvents = 'none';
+        }
+        handleResize(params);
+      },
+      [handleResize],
+    );
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
@@ -373,72 +542,77 @@ export const WebsiteNode = memo(
     }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     return (
-      <div className={classNames({ nowheel: isOperating })}>
+      <div className={classNames({ nowheel: isOperating && isHovered })} data-cy="website-node">
         <div
-          ref={nodeRef}
-          className={classNames('relative', {
-            'nodrag nopan select-text': isOperating,
+          ref={targetRef}
+          className={classNames({
+            'relative nodrag nopan select-text': isOperating,
+            'pointer-events-none': isResizing,
           })}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
-          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
         >
           {!isPreview && !hideActions && !isDragging && !readonly && (
-            <ActionButtons type="website" nodeId={id} isNodeHovered={isHovered && selected} />
+            <ActionButtons type="website" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
           <div
-            className={`
-              h-full
-              flex flex-col
-              ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-            `}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })} ${isResizing ? 'pointer-events-none' : ''}`}
           >
-            <div className="flex flex-col h-full relative p-3 box-border">
-              <NodeHeader
-                title={data.title || t('canvas.nodes.website.defaultTitle', 'Website')}
-                Icon={IconWebsite}
-              />
-
-              <div className="relative flex-grow min-h-0">
-                <div className="h-full overflow-y-auto">
-                  {data && <NodeContent data={data} readonly={readonly} />}
-                </div>
-              </div>
-            </div>
-
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
+                  id={`${id}-target`}
                   type="target"
                   position={Position.Left}
-                  id="target"
-                  isConnected={false}
+                  isConnected={isTargetConnected}
                   isNodeHovered={isHovered}
                   nodeType="website"
                 />
                 <CustomHandle
+                  id={`${id}-source`}
                   type="source"
                   position={Position.Right}
-                  id="source"
-                  isConnected={false}
+                  isConnected={isSourceConnected}
                   isNodeHovered={isHovered}
                   nodeType="website"
                 />
               </>
             )}
+
+            <div className={cn('flex flex-col h-full p-3 box-border', MAX_HEIGHT_CLASS)}>
+              <NodeHeader title={data?.title || t('canvas.nodeTypes.website')} Icon={IconWebsite} />
+
+              <div
+                className={cn('relative flex-grow overflow-y-auto pr-2 -mr-2', {
+                  'pointer-events-none': isResizing,
+                })}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    overflowY: 'auto',
+                  }}
+                  className={isResizing ? 'pointer-events-none' : ''}
+                >
+                  <NodeContent data={data} readonly={readonly} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {!isPreview && selected && sizeMode === 'adaptive' && !readonly && (
           <NodeResizerComponent
-            targetRef={nodeRef}
+            moveableRef={moveableRef}
+            targetRef={targetRef}
             isSelected={selected}
             isHovered={isHovered}
             isPreview={isPreview}
             sizeMode={sizeMode}
-            onResize={handleResize}
+            onResize={handleEnhancedResize}
           />
         )}
       </div>
