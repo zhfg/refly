@@ -308,16 +308,6 @@ export default memo(
               className="text-gray-600 hover:text-blue-600"
             />
           </Tooltip>
-
-          <Tooltip title={t('codeArtifact.buttons.share')}>
-            <Button
-              type="text"
-              icon={<FiShare2 className="size-4" />}
-              onClick={handleShare}
-              size="small"
-              className="text-gray-600 hover:text-blue-600"
-            />
-          </Tooltip>
         </div>
       ),
       [
