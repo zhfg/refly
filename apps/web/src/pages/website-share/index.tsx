@@ -6,7 +6,6 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { SiderPopover } from '@refly-packages/ai-workspace-common/components/sider/popover';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
 import { Button } from 'antd';
-import { code } from './code';
 
 const ShareCanvasPage = () => {
   const { url = '' } = useParams();
@@ -16,7 +15,7 @@ const ShareCanvasPage = () => {
     setCollapse: state.setCollapse,
   }));
   const [codeData, setCodeData] = useState({
-    content: code,
+    content: '',
     type: 'text/html' as CodeArtifactType,
     title: 'Shared Code',
     language: 'javascript',
