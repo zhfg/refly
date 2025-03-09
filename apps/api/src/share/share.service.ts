@@ -25,6 +25,7 @@ const SHARE_CODE_PREFIX = {
   canvas: 'can-',
   resource: 'res-',
   skillResponse: 'skr-',
+  codeArtifact: 'cod-',
 };
 
 function genShareId(entityType: keyof typeof SHARE_CODE_PREFIX): string {
@@ -282,6 +283,35 @@ export class ShareService {
     return { shareRecord, actionResult };
   }
 
+  async createShareForRawData(user: User, param: CreateShareRequest) {
+    const { entityId, entityType, shareData, parentShareId, allowDuplication } = param;
+    const shareId = genShareId(entityType as keyof typeof SHARE_CODE_PREFIX);
+
+    const { storageKey } = await this.miscService.uploadBuffer(user, {
+      fpath: 'rawData.json',
+      buf: Buffer.from(shareData),
+      entityId,
+      entityType,
+      visibility: 'public',
+      storageKey: `share/${shareId}.json`,
+    });
+
+    const shareRecord = await this.prisma.shareRecord.create({
+      data: {
+        shareId,
+        title: 'Raw Data',
+        uid: user.uid,
+        entityId,
+        entityType,
+        storageKey,
+        parentShareId,
+        allowDuplication,
+      },
+    });
+
+    return { shareRecord };
+  }
+
   /**
    * Process content images and replace them with public URLs
    * @param content - The content to process
@@ -357,6 +387,8 @@ export class ShareService {
         return (await this.createShareForResource(user, req)).shareRecord;
       case 'skillResponse':
         return (await this.createShareForSkillResponse(user, req)).shareRecord;
+      case 'codeArtifact':
+        return (await this.createShareForRawData(user, req)).shareRecord;
       default:
         throw new ParamsError(`Unsupported entity type ${req.entityType} for sharing`);
     }

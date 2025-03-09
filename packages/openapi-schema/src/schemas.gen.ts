@@ -402,7 +402,7 @@ export const DocumentSchema = {
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
-  enum: ['document', 'resource', 'canvas', 'user', 'skillResponse'],
+  enum: ['document', 'resource', 'canvas', 'user', 'skillResponse', 'codeArtifact'],
 } as const;
 
 export const EntitySchema = {
@@ -2783,6 +2783,10 @@ export const ShareRecordSchema = {
       type: 'string',
       description: 'Share ID',
     },
+    title: {
+      type: 'string',
+      description: 'Share title',
+    },
     entityType: {
       $ref: '#/components/schemas/EntityType',
       description: 'Entity type',
@@ -2816,10 +2820,15 @@ export const CreateShareRequestSchema = {
   properties: {
     entityType: {
       $ref: '#/components/schemas/EntityType',
+      description: 'Entity type',
     },
     entityId: {
       type: 'string',
       description: 'Entity ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Share title',
     },
     allowDuplication: {
       type: 'boolean',
@@ -2829,6 +2838,10 @@ export const CreateShareRequestSchema = {
     parentShareId: {
       type: 'string',
       description: 'Parent share ID',
+    },
+    shareData: {
+      type: 'string',
+      description: 'Raw share data (JSON string)',
     },
   },
 } as const;

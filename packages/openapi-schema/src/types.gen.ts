@@ -341,7 +341,13 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = 'document' | 'resource' | 'canvas' | 'user' | 'skillResponse';
+export type EntityType =
+  | 'document'
+  | 'resource'
+  | 'canvas'
+  | 'user'
+  | 'skillResponse'
+  | 'codeArtifact';
 
 /**
  * Entity
@@ -2046,6 +2052,10 @@ export type ShareRecord = {
    */
   shareId: string;
   /**
+   * Share title
+   */
+  title?: string;
+  /**
    * Entity type
    */
   entityType: EntityType;
@@ -2072,11 +2082,18 @@ export type ShareRecord = {
 };
 
 export type CreateShareRequest = {
+  /**
+   * Entity type
+   */
   entityType: EntityType;
   /**
    * Entity ID
    */
   entityId: string;
+  /**
+   * Share title
+   */
+  title?: string;
   /**
    * Whether to allow duplication of the shared entity
    */
@@ -2085,6 +2102,10 @@ export type CreateShareRequest = {
    * Parent share ID
    */
   parentShareId?: string;
+  /**
+   * Raw share data (JSON string)
+   */
+  shareData?: string;
 };
 
 export type CreateShareResult = {
