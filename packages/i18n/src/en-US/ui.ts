@@ -1210,6 +1210,9 @@ const translations = {
     downloadSuccess: 'Downloaded {{fileName}}',
     downloadError: 'Failed to download file',
     refreshing: 'Refreshing preview...',
+    sharing: 'Sharing code...',
+    shareSuccess: 'Share link copied to clipboard: {{link}}',
+    shareError: 'Failed to share code',
     errorCopySuccess: 'Error message copied to clipboard',
     errorCopyFailed: 'Failed to copy error message',
     tabs: {
@@ -1219,7 +1222,8 @@ const translations = {
     buttons: {
       refresh: 'Refresh',
       copy: 'Copy code',
-      download: 'Download as {{fileName}}',
+      download: 'Download {{fileName}}',
+      share: 'Share code',
     },
     defaultTitle: 'Code Artifact',
   },

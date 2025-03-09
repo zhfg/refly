@@ -1189,6 +1189,9 @@ const translations = {
     downloadSuccess: '已下载 {{fileName}}',
     downloadError: '下载文件失败',
     refreshing: '预览刷新中...',
+    sharing: '分享代码中...',
+    shareSuccess: '分享链接已复制到剪贴板：{{link}}',
+    shareError: '分享代码失败',
     errorCopySuccess: '错误信息已复制到剪贴板',
     errorCopyFailed: '复制错误信息失败',
     tabs: {
@@ -1198,7 +1201,8 @@ const translations = {
     buttons: {
       refresh: '刷新',
       copy: '复制代码',
-      download: '下载为 {{fileName}}',
+      download: '下载 {{fileName}}',
+      share: '分享代码',
     },
     defaultTitle: '代码组件',
   },
