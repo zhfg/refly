@@ -54,6 +54,7 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import cn from 'classnames';
 import { ReasoningContentPreview } from './shared/reasoning-content-preview';
 import { useUpdateSkillResponseTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-skill-response-title';
+import { truncateContent } from '@refly-packages/ai-workspace-common/utils/content';
 
 const POLLING_WAIT_TIME = 15000;
 
@@ -673,7 +674,7 @@ export const SkillResponseNode = memo(
                   {status !== 'failed' && metadata?.reasoningContent && (
                     <ReasoningContentPreview
                       resultId={entityId}
-                      content={metadata.reasoningContent}
+                      content={truncateContent(metadata.reasoningContent)}
                       sources={sources}
                       isOperating={isOperating}
                       stepStatus={status === 'executing' ? 'executing' : 'finish'}
@@ -683,7 +684,7 @@ export const SkillResponseNode = memo(
                   {status !== 'failed' && content && (
                     <ContentPreview
                       resultId={entityId}
-                      content={content || t('canvas.nodePreview.resource.noContentPreview')}
+                      content={truncateContent(content)}
                       sizeMode={sizeMode}
                       isOperating={isOperating}
                       sources={sources}

@@ -69,7 +69,7 @@ const MermaidComponent = memo(
           features: {
             removeControlCharacter: false,
           },
-          scale: 10, // Higher resolution
+          scale: 1, // Higher resolution
           quality: 1,
           backgroundColor: '#ffffff',
         });
