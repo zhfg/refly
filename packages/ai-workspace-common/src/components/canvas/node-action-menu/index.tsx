@@ -96,9 +96,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
   }, [nodeData?.metadata?.sizeMode]);
 
-  const { addNodePreview, nodePreviews } = useCanvasStoreShallow((state) => ({
+  const { addNodePreview, nodePreviews, clickToPreview } = useCanvasStoreShallow((state) => ({
     addNodePreview: state.addNodePreview,
     nodePreviews: state.config[canvasId]?.nodePreviews ?? [],
+    clickToPreview: state.clickToPreview,
   }));
   const { ungroupNodes } = useUngroupNodes();
 
@@ -398,7 +399,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
       ];
 
       const operationItems: MenuItem[] = [
-        {
+        !clickToPreview && {
           key: 'preview',
           icon: IconPreview,
           label: t('canvas.nodeActions.preview'),
