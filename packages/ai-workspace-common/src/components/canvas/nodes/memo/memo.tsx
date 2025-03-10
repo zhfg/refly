@@ -285,7 +285,7 @@ export const MemoNode = ({
         },
       },
     );
-  }, 500);
+  }, 200);
 
   const [bgColor, setBgColor] = useState((data?.metadata?.bgColor ?? '#FFFEE7') as string);
   const onUpdateBgColor = useCallback(
