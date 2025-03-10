@@ -254,7 +254,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { subscriptionId: param.subscriptionId, customerId: param.customerId },
       });
 
-      const plan = await this.prisma.subscriptionPlan.findFirst({
+      const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType: sub.planType },
       });
 
@@ -341,7 +341,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      const freePlan = await this.prisma.subscriptionPlan.findFirst({
+      const freePlan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType: 'free' },
       });
 
@@ -432,13 +432,9 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    const plan = await this.prisma.subscriptionPlan.findFirst({
+    const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
       where: { lookupKey: checkoutSession.lookupKey },
     });
-    if (!plan) {
-      this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
-      return;
-    }
 
     const { planType, interval } = plan;
 
@@ -474,21 +470,90 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const updates: Prisma.SubscriptionUpdateInput = {};
+    let planChanged = false;
+
+    // Track status changes
     if (subscription.status !== sub.status) {
       updates.status = subscription.status;
     }
+
+    // Track cancellation changes
     if (subscription.cancel_at && !sub.cancelAt) {
       updates.cancelAt = new Date(subscription.cancel_at * 1000);
+    } else if (!subscription.cancel_at && sub.cancelAt) {
+      // Handle cancellation removal (user undid cancellation)
+      updates.cancelAt = null;
+    }
+
+    // Handle plan/price changes (upgrades/downgrades)
+    if (subscription.items?.data?.length > 0) {
+      const item = subscription.items.data[0]; // Get the first subscription item
+      const priceId = item?.price?.id;
+
+      if (priceId) {
+        // Fetch price details to get the lookup key and determine plan type
+        try {
+          const price = await this.stripeClient.prices.retrieve(priceId);
+
+          if (price?.lookup_key && price.lookup_key !== sub.lookupKey) {
+            // Lookup key changed - this indicates a plan change
+            updates.lookupKey = price.lookup_key;
+
+            // Query the subscription plan from the database using the lookup key
+            const subscriptionPlan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+              where: { lookupKey: price.lookup_key },
+            });
+
+            // Set plan type and interval directly from the database record
+            if (subscriptionPlan.planType !== sub.planType) {
+              updates.planType = subscriptionPlan.planType;
+              planChanged = true;
+              this.logger.log(
+                `Plan upgraded/changed from ${sub.planType} to ${subscriptionPlan.planType}`,
+              );
+            }
+
+            if (subscriptionPlan.interval !== sub.interval) {
+              updates.interval = subscriptionPlan.interval;
+              this.logger.log(
+                `Billing interval changed from ${sub.interval} to ${subscriptionPlan.interval}`,
+              );
+            }
+          }
+        } catch (error) {
+          this.logger.error(`Error retrieving price details: ${error?.message ?? 'Unknown error'}`);
+          throw error;
+        }
+      }
     }
 
     if (Object.keys(updates).length > 0) {
       this.logger.log(
         `Subscription ${sub.subscriptionId} received updates: ${JSON.stringify(updates)}`,
       );
-      await this.prisma.subscription.update({
+      const updatedSubscription = await this.prisma.subscription.update({
         where: { subscriptionId: subscription.id },
         data: updates,
       });
+
+      // If plan changed, refresh user's usage meters to apply new limits
+      if (planChanged) {
+        try {
+          // Get the user associated with this subscription
+          const user = await this.prisma.user.findFirst({
+            where: { subscriptionId: subscription.id },
+          });
+
+          if (user) {
+            this.logger.log(`Refreshing usage meters for user ${user.uid} after plan change`);
+
+            // Reset usage meters to apply new plan limits
+            await this.getOrCreateUsageMeter(user, updatedSubscription);
+          }
+        } catch (error) {
+          this.logger.error(`Error refreshing usage meters: ${error?.message ?? 'Unknown error'}`);
+        }
+      }
     }
   }
 
@@ -570,7 +635,7 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const planType = sub?.planType || 'free';
-    const plan = await this.prisma.subscriptionPlan.findFirst({
+    const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
       select: { fileParsePageLimit: true, fileUploadLimit: true },
       where: { planType },
     });
@@ -639,7 +704,7 @@ export class SubscriptionService implements OnModuleInit {
           ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate() + 1)
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
-      const plan = await this.prisma.subscriptionPlan.findFirst({
+      const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType },
       });
 
@@ -691,25 +756,36 @@ export class SubscriptionService implements OnModuleInit {
         },
       });
 
-      if (activeMeter) {
-        return activeMeter;
-      }
-
       // Find the storage quota for the plan
       const planType = sub?.planType || 'free';
-      const plan = await this.prisma.subscriptionPlan.findFirst({
+      const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType },
       });
+
+      if (!plan) {
+        throw new Error(`No subscription plan found for type ${planType}`);
+      }
+
+      if (activeMeter) {
+        // If the plan has changed, update the quota
+        if (plan.fileCountQuota !== activeMeter.fileCountQuota) {
+          return prisma.storageUsageMeter.update({
+            where: { meterId: activeMeter.meterId },
+            data: {
+              fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
+            },
+          });
+        }
+        return activeMeter;
+      }
 
       return prisma.storageUsageMeter.create({
         data: {
           meterId: genStorageUsageMeterID(),
           uid,
           subscriptionId: sub?.subscriptionId,
-          fileCountQuota: plan?.fileCountQuota ?? this.config.get('quota.storage.file'),
+          fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
           fileCountUsed: 0,
-          objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
-          vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
     });
