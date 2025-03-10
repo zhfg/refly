@@ -699,6 +699,8 @@ model Subscription {
   status         String    @map("status")
   /// Whether this is a trial subscription
   isTrial        Boolean   @default(false) @map("is_trial")
+  /// Override plan quota (JSON string)
+  overridePlan   String?   @map("override_plan")
   /// Cancel timestamp
   cancelAt       DateTime? @map("cancel_at") @db.Timestamptz()
   /// Create timestamp
