@@ -417,6 +417,8 @@ const translations = {
       docs: '文档',
       discord: 'Discord',
       priceTag: '五折',
+      community: '用户交流群',
+      wechat: '微信',
     },
     faq: {
       title: '常见问题',

@@ -157,7 +157,11 @@ const translations = {
     },
   },
   landingPage: {
-    slogan: 'The AI Native Creation Engine',
+    title: 'The AI Native Creation Engine',
+    subTitle:
+      'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, Refly is the best way to transform ideas into quality content.',
+    getStarted: 'Get Started',
+    login: 'Login',
     simplySlogan: 'Creation Engine',
     description:
       'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
@@ -468,6 +472,8 @@ const translations = {
       docs: 'Docs',
       discord: 'Discord',
       priceTag: '-50%',
+      community: 'Community',
+      wechat: 'WeChat',
     },
     faq: {
       title: 'Frequently Asked Questions',
