@@ -117,12 +117,18 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
             triggerEditor={triggerEditor}
             onSelect={() => {
               editor?.commands.unsetColor();
-              name !== 'default' &&
+              if (name !== 'default') {
                 editor
                   ?.chain()
                   .focus()
                   .setColor(color ?? '')
                   .run();
+
+                // Force the editor to trigger an update event
+                setTimeout(() => {
+                  editor?.commands.focus();
+                }, 0);
+              }
             }}
             className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
           >
@@ -145,7 +151,14 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
             triggerEditor={triggerEditor}
             onSelect={() => {
               editor?.commands.unsetHighlight();
-              name !== 'default' && editor?.commands.setHighlight({ color });
+              if (name !== 'default') {
+                editor?.commands.setHighlight({ color });
+
+                // Force the editor to trigger an update event
+                setTimeout(() => {
+                  editor?.commands.focus();
+                }, 0);
+              }
             }}
             className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
           >
