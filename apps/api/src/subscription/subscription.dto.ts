@@ -15,6 +15,12 @@ import {
 } from '@prisma/client';
 import { pick } from '@/utils';
 
+export interface PlanQuota {
+  t1CountQuota: number;
+  t2CountQuota: number;
+  fileCountQuota: number;
+}
+
 export interface CreateSubscriptionParam {
   subscriptionId: string;
   customerId: string;
