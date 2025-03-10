@@ -16,7 +16,6 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { useEditor, EditorContent } from '@tiptap/react';
-import { Markdown as MarkdownPreview } from '@refly-packages/ai-workspace-common/components/markdown';
 import { Markdown } from 'tiptap-markdown';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
@@ -211,7 +210,7 @@ export const MemoNode = ({
       }),
     ],
     content: data?.metadata?.jsonContent || data?.contentPreview || '',
-    editable: true,
+    editable: !isPreview && !readonly,
     onUpdate: ({ editor }) => {
       onMemoUpdates(editor);
     },
@@ -359,16 +358,15 @@ export const MemoNode = ({
           )}
           <div className="flex flex-col h-full p-3 box-border">
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
-              {!isPreview && !readonly ? (
-                <div className="editor-wrapper" style={{ userSelect: 'text', cursor: 'text' }}>
-                  <EditorContent
-                    editor={editor}
-                    className={classNames('text-xs memo-node-editor h-full w-full')}
-                  />
-                </div>
-              ) : (
-                <MarkdownPreview className="text-xs" content={data?.contentPreview ?? ''} />
-              )}
+              <div
+                className="editor-wrapper"
+                style={{ userSelect: 'text', cursor: isPreview || readonly ? 'default' : 'text' }}
+              >
+                <EditorContent
+                  editor={editor}
+                  className={classNames('text-xs memo-node-editor h-full w-full')}
+                />
+              </div>
             </div>
 
             <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
