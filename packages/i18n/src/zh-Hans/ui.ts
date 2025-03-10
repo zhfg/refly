@@ -1010,6 +1010,7 @@ const translations = {
       documentDeleteConfirm:
         '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
       downloadFile: '下载文件',
+      editGroupNamePlaceholder: '请输入分组名称',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

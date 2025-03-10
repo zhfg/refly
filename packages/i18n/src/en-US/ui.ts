@@ -1032,6 +1032,7 @@ const translations = {
       documentDeleteConfirm:
         'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
       downloadFile: 'Download File',
+      editGroupNamePlaceholder: 'Please enter the group name',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
