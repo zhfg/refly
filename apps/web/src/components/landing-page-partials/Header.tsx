@@ -1,20 +1,24 @@
 import Logo from '@/assets/logo.svg';
-import { Button, Badge } from 'antd';
+import { Button, Badge, Dropdown } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   useNavigate,
   useLocation,
   useSearchParams,
 } from '@refly-packages/ai-workspace-common/utils/router';
 import './header.scss';
-import { FaDiscord, FaGithub } from 'react-icons/fa6';
+import { FaDiscord, FaGithub, FaCaretDown } from 'react-icons/fa6';
+import { FaWeixin } from 'react-icons/fa';
 import { EXTENSION_DOWNLOAD_LINK } from '@refly/utils/url';
 import {
   IconChrome,
+  IconDown,
+  IconLanguage,
   MemoizedIcon,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 
 function Header() {
   const navigate = useNavigate();
@@ -27,6 +31,32 @@ function Header() {
 
   const [value, setValue] = useState('product');
   const [starCount, setStarCount] = useState('913');
+
+  const feedbackItems = useMemo(
+    () => [
+      {
+        key: 'discord',
+        label: (
+          <div className="flex items-center gap-2">
+            <FaDiscord />
+            <span>{t('landingPage.tab.discord')}</span>
+          </div>
+        ),
+        onClick: () => window.open('https://discord.gg/bWjffrb89h', '_blank'),
+      },
+      {
+        key: 'wechat',
+        label: (
+          <div className="flex items-center gap-2">
+            <FaWeixin />
+            <span>{t('landingPage.tab.wechat')}</span>
+          </div>
+        ),
+        onClick: () => window.open('https://docs.refly.ai/images/wechat-qrcode.webp', '_blank'),
+      },
+    ],
+    [t],
+  );
 
   const tabOptions = [
     {
@@ -56,15 +86,14 @@ function Header() {
     },
     {
       label: (
-        <div
-          className="flex cursor-pointer items-center gap-1"
-          onClick={() => window.open('https://discord.gg/bWjffrb89h', '_blank')}
-        >
-          <FaDiscord />
-          {t('landingPage.tab.discord')}
-        </div>
+        <Dropdown menu={{ items: feedbackItems }} placement="bottom">
+          <div className="flex cursor-pointer items-center gap-1">
+            <span>{t('landingPage.tab.community')}</span>
+            <FaCaretDown className="text-xs" />
+          </div>
+        </Dropdown>
       ),
-      value: 'discord',
+      value: 'community',
     },
   ];
 
@@ -97,8 +126,8 @@ function Header() {
   }, [searchParams, setLoginModalOpen, navigate]);
 
   return (
-    <div className="fixed top-0 z-20 flex w-full !justify-center px-6 backdrop-blur-lg sm:px-6 md:px-6 lg:px-0">
-      <div className="relative flex max-w-7xl items-center justify-between py-4 md:w-[65%]">
+    <div className="fixed top-0 z-20 flex w-full !justify-center px-4 backdrop-blur-lg sm:px-6 md:px-6 lg:px-8">
+      <div className="relative flex w-full max-w-[1280px] items-center justify-between py-4 header-container">
         <div className="mr-4 flex shrink-0 flex-row items-center" style={{ height: 45 }}>
           <div
             className="flex h-full cursor-pointer flex-row items-center"
@@ -114,6 +143,7 @@ function Header() {
                 key={item.value}
                 className={`${value === item.value ? 'font-bold text-[#00968f]' : ''}`}
                 onClick={() => {
+                  if (item.value === 'community') return;
                   switch (item.value) {
                     case 'product':
                       navigate('/');
@@ -123,9 +153,6 @@ function Header() {
                       break;
                     case 'docs':
                       window.open('https://docs.refly.ai', '_blank');
-                      break;
-                    case 'discord':
-                      window.open('https://discord.gg/bWjffrb89h', '_blank');
                       break;
                   }
                 }}
@@ -137,6 +164,14 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <UILocaleList>
+            <Button type="text" size="middle" className="px-2 text-gray-600 hover:text-[#00968f]">
+              <IconLanguage className="h-4 w-4" />
+              {t('language')}{' '}
+              <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
+            </Button>
+          </UILocaleList>
+
           <Button
             type="text"
             size="middle"

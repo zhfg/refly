@@ -22,7 +22,7 @@ function HeroHome() {
   const isZhCN = i18n.language === 'zh-CN';
 
   return (
-    <section className="bg-gradient-to-b from-[#D2EAE1] via-[#FCFCFC] to-[#FFFFFF]">
+    <section className="bg-gradient-to-b from-[#D2EAE1] via-[#FCFCFC] to-[#FFFFFF] pt-24">
       <div className="relative mx-auto max-w-7xl px-4">
         {/* Illustration behind hero content */}
         <div
