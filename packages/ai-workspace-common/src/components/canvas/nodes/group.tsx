@@ -24,6 +24,7 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useThrottledCallback } from 'use-debounce';
+import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
 
 interface GroupMetadata {
   label?: string;
@@ -71,6 +72,7 @@ export const GroupNode = memo(
     const { addNode } = useAddNode();
     const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
     const setNodeDataByEntity = useSetNodeDataByEntity();
+    const { setNodeStyle } = useNodeData();
 
     // Memoize node and its measurements
     const node = useMemo(() => getNode(id), [id, getNode]);
@@ -234,6 +236,10 @@ export const GroupNode = memo(
       handleGroupCluster,
       handleLayoutCluster,
     ]);
+
+    useEffect(() => {
+      setNodeStyle(id, { zIndex: -1 });
+    }, [id, setNodeStyle]);
 
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);

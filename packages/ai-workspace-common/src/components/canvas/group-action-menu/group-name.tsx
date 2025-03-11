@@ -1,7 +1,7 @@
 import { Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useState, useEffect } from 'react';
-// import CommonColorPicker from '../nodes/shared/color-picker';
+import CommonColorPicker from '../nodes/shared/color-picker';
 
 interface GroupNameProps {
   title: string;
@@ -17,8 +17,8 @@ export const GroupName: FC<GroupNameProps> = ({
   onUpdateName,
   selected,
   readonly,
-  // bgColor,
-  // onChangeBgColor,
+  bgColor,
+  onChangeBgColor,
 }) => {
   const { t } = useTranslation();
   const [name, setName] = useState(title);
@@ -48,7 +48,7 @@ export const GroupName: FC<GroupNameProps> = ({
         pointerEvents: showInput ? 'auto' : 'none',
       }}
     >
-      <div className="flex gap-1">
+      <div className="flex gap-3">
         <Input
           className="!bg-transparent !border-none !shadow-none !pl-0 !text-base !text-black"
           disabled={readonly}
@@ -58,9 +58,9 @@ export const GroupName: FC<GroupNameProps> = ({
           onBlur={() => setIsEditing(false)}
           onFocus={() => setIsEditing(true)}
         />
-        {/* <div style={{ display: selected ? 'block' : 'none' }}>
+        <div style={{ display: selected ? 'block' : 'none' }}>
           <CommonColorPicker color={bgColor} onChange={onChangeBgColor} />
-        </div> */}
+        </div>
       </div>
     </div>
   );
