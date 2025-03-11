@@ -66,6 +66,7 @@ interface ZoomControlsProps {
   currentZoom: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onZoomReset: () => void;
   canZoomIn: boolean;
   canZoomOut: boolean;
   t: TFunction;
@@ -167,7 +168,15 @@ ModeSelector.displayName = 'ModeSelector';
 
 // Create a memoized zoom controls component
 const ZoomControls = memo(
-  ({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoomOut, t }: ZoomControlsProps) => (
+  ({
+    currentZoom,
+    onZoomIn,
+    onZoomOut,
+    onZoomReset,
+    canZoomIn,
+    canZoomOut,
+    t,
+  }: ZoomControlsProps) => (
     <>
       <TooltipButton
         tooltip={t('canvas.toolbar.tooltip.zoomOut')}
@@ -179,10 +188,12 @@ const ZoomControls = memo(
       </TooltipButton>
 
       <TooltipButton
-        tooltip={t('canvas.toolbar.tooltip.zoom')}
-        className={`${buttonClass} pointer-events-none mx-1.5`}
+        tooltip={t('canvas.toolbar.tooltip.zoomReset')}
+        className={`${buttonClass} mx-1.5`}
       >
-        <div className="text-xs">{Math.round(currentZoom * 100)}%</div>
+        <div className="text-xs" onClick={onZoomReset}>
+          {Math.round(currentZoom * 100)}%
+        </div>
       </TooltipButton>
 
       <TooltipButton
@@ -256,6 +267,10 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(
         reactFlowInstance?.zoomOut?.();
       }
     }, [currentZoom, reactFlowInstance]);
+
+    const handleZoomReset = useCallback(() => {
+      reactFlowInstance?.zoomTo(1);
+    }, [reactFlowInstance]);
 
     const handleFitView = useCallback(() => {
       reactFlowInstance?.fitView();
@@ -341,6 +356,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(
             currentZoom={currentZoom}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
+            onZoomReset={handleZoomReset}
             canZoomIn={canZoomIn}
             canZoomOut={canZoomOut}
             t={t}

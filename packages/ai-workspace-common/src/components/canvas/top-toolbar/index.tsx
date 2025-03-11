@@ -14,7 +14,6 @@ import { CanvasTitle, ReadonlyCanvasTitle } from './canvas-title';
 import { ToolbarButtons, WarningButton } from './buttons';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import ShareSettings from './share-settings';
-import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import './index.scss';
 import { IconLink } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -94,7 +93,6 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
   const showWarning = connectionTimeout && !hasCanvasSynced && provider?.status !== 'connected';
 
-  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
   const handleDuplicate = () => {
     if (!isLogin) {
@@ -187,11 +185,6 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
           )}
         </div>
       </div>
-      <DuplicateCanvasModal
-        canvasId={canvasId}
-        visible={showDuplicateModal}
-        setVisible={setShowDuplicateModal}
-      />
     </>
   );
 });
