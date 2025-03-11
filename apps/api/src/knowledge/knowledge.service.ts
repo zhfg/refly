@@ -834,7 +834,7 @@ export class KnowledgeService {
     }
 
     param.docId = genDocumentID();
-    param.title ||= 'Untitled';
+    param.title ||= '';
     param.initialContent ||= '';
 
     const createInput: Prisma.DocumentCreateInput = {
