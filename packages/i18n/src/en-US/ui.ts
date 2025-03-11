@@ -163,6 +163,7 @@ const translations = {
     getStarted: 'Get Started',
     login: 'Login',
     simplySlogan: 'Creation Engine',
+    slogan: 'The AI Native Creation Engine',
     description:
       'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
