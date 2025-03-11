@@ -61,7 +61,7 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   className,
   style,
   draggable = true,
-  zIndex = 0,
+  zIndex,
 }: {
   type: T;
   data: CanvasNodeData<NodeMetadataMap[T]>;
