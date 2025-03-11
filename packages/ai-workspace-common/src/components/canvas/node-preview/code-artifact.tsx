@@ -14,6 +14,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { ConfigScope, Skill } from '@refly/openapi-schema';
 import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { fullscreenEmitter } from '@refly-packages/ai-workspace-common/events/fullscreen';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -97,6 +98,11 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const handleRequestFix = useCallback(
     (errorMessage: string) => {
       console.error('Code artifact error:', errorMessage);
+
+      // Emit event to exit fullscreen mode before proceeding
+      if (node?.id) {
+        fullscreenEmitter.emit('exitFullscreenForFix', { nodeId: node.id });
+      }
 
       // Define a proper code fix skill similar to editDoc
       const codeFixSkill: Skill = {
