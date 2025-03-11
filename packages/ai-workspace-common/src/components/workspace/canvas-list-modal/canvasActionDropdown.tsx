@@ -114,7 +114,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
             setPopupVisible(false);
           }}
         >
-          <IconCopy size={16} className="mr-2" />
+          <IconCopy size={14} className="mr-2" />
           {t('canvas.toolbar.duplicate')}
         </div>
       ),

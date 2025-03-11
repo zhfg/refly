@@ -71,12 +71,13 @@ export const DuplicateCanvasModal = ({
       cancelText={t('common.cancel')}
       title={t('template.duplicateCanvas')}
     >
-      <div className="w-full h-full overflow-y-auto">
+      <div className="w-full h-full overflow-y-auto mt-3">
         <Form form={form} autoComplete="off">
           <Form.Item<FieldType>
             required
             label={t('template.canvasTitle')}
             name="title"
+            className="mb-3"
             rules={[{ required: true, message: t('common.required') }]}
           >
             <Input placeholder={t('template.duplicateCanvasTitlePlaceholder')} />
