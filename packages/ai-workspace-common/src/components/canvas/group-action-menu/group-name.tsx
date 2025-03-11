@@ -59,7 +59,7 @@ export const GroupName: FC<GroupNameProps> = ({
           onFocus={() => setIsEditing(true)}
         />
         <div style={{ display: selected ? 'block' : 'none' }}>
-          <CommonColorPicker color={bgColor} onChange={onChangeBgColor} />
+          <CommonColorPicker disabledAlpha={true} color={bgColor} onChange={onChangeBgColor} />
         </div>
       </div>
     </div>

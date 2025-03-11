@@ -24,7 +24,6 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useThrottledCallback } from 'use-debounce';
-import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
 
 interface GroupMetadata {
   label?: string;
@@ -72,7 +71,6 @@ export const GroupNode = memo(
     const { addNode } = useAddNode();
     const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
     const setNodeDataByEntity = useSetNodeDataByEntity();
-    const { setNodeStyle } = useNodeData();
 
     // Memoize node and its measurements
     const node = useMemo(() => getNode(id), [id, getNode]);
@@ -237,10 +235,6 @@ export const GroupNode = memo(
       handleLayoutCluster,
     ]);
 
-    useEffect(() => {
-      setNodeStyle(id, { zIndex: -1 });
-    }, [id, setNodeStyle]);
-
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
       onHoverStart();
@@ -345,7 +339,6 @@ export const GroupNode = memo(
               background: 'transparent',
               border: selected ? '2px dashed #00968F' : '2px dashed rgba(0, 0, 0, 0.1)',
               transition: 'all 0.2s ease',
-              backgroundColor: data.metadata?.bgColor || 'transparent',
             }}
           >
             {!isPreview && !hideHandles && (
@@ -369,15 +362,13 @@ export const GroupNode = memo(
               </>
             )}
 
-            {!isPreview && !hideActions && !readonly && (
+            {!isPreview && !hideActions && !isDragging && !readonly && (
               <>
-                {!isDragging && (
-                  <ActionButtons type="group" nodeId={id} isNodeHovered={selected && isHovered} />
-                )}
+                <ActionButtons type="group" nodeId={id} isNodeHovered={selected && isHovered} />
                 <GroupActionButtons
                   nodeId={id}
                   isTemporary={data.metadata?.isTemporary}
-                  isNodeHovered={isHovered}
+                  isNodeHovered={selected && isHovered}
                 />
               </>
             )}
@@ -389,6 +380,14 @@ export const GroupNode = memo(
               readonly={readonly}
               bgColor={data.metadata?.bgColor || 'rgba(255, 255, 255, 0)'}
               onChangeBgColor={handleChangeBgColor}
+            />
+
+            <div
+              className="absolute top-0 left-0 w-full h-full"
+              style={{
+                backgroundColor: data.metadata?.bgColor || 'transparent',
+                opacity: selected ? 0.5 : 1,
+              }}
             />
           </div>
         </div>

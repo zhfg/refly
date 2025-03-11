@@ -13,7 +13,12 @@ export const useNodeHoverEffect = (nodeId: string) => {
       const newEdgeStyle = isHovered ? edgeStyles.hover : edgeStyles.default;
 
       setNodes((nodes) =>
-        nodes.map((node) => (node.id === nodeId ? { ...node, zIndex: newZIndex } : node)),
+        nodes.map((node) => {
+          if (node.id === nodeId) {
+            return node.type === 'group' ? { ...node, zIndex: -1 } : { ...node, zIndex: newZIndex };
+          }
+          return node;
+        }),
       );
 
       setEdges((eds) =>

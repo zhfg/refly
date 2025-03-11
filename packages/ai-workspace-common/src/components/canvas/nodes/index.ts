@@ -61,6 +61,7 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   className,
   style,
   draggable = true,
+  zIndex = 0,
 }: {
   type: T;
   data: CanvasNodeData<NodeMetadataMap[T]>;
@@ -71,6 +72,7 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   className?: string;
   style?: React.CSSProperties;
   draggable?: boolean;
+  zIndex?: number;
 }) => {
   return {
     id: `node-${genUniqueId()}`,
@@ -83,6 +85,7 @@ export const prepareNodeData = <T extends CanvasNodeType>({
     className,
     style,
     draggable,
+    zIndex,
   };
 };
 
