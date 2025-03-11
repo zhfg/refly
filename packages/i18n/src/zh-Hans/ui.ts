@@ -884,6 +884,7 @@ const translations = {
         undo: '撤销',
         redo: '重做',
         zoom: '缩放百分比',
+        zoomReset: '重置',
         zoomIn: '放大',
         zoomOut: '缩小',
         fitView: '适应画布',
@@ -2099,7 +2100,7 @@ const translations = {
     searchPlaceholder: '请输入关键词搜索模板',
     noRelatedTemplates: '暂无相关模板',
     hideTemplates: '隐藏模板',
-    duplicateCanvasEntities: '同时复制该画布所包含的文档以及资源',
+    duplicateCanvasEntities: '复制该画布所包含的文档以及资源',
   },
 };
 

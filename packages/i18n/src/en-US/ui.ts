@@ -898,6 +898,7 @@ const translations = {
         undo: 'Undo',
         redo: 'Redo',
         zoom: 'Zoom Percentage',
+        zoomReset: 'Reset',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',
         fitView: 'Fit View',
@@ -2159,7 +2160,7 @@ const translations = {
     searchPlaceholder: 'Please enter keyword to search template',
     noRelatedTemplates: 'No related templates',
     hideTemplates: 'Hide Template',
-    duplicateCanvasEntities: 'Duplicate the canvas entities at the same time',
+    duplicateCanvasEntities: 'Duplicate the canvas entities',
   },
 };
 

@@ -61,6 +61,7 @@ const NodeContent = memo(
 
     // Use isOperating for UI state (disabled controls when operating)
     const isReadOnly = !!isOperating;
+    const { readonly: canvasReadOnly } = useCanvasContext();
 
     // Sync local state with metadata changes
     useEffect(() => {
@@ -218,6 +219,7 @@ const NodeContent = memo(
             }
           }}
           readOnly={isReadOnly}
+          canvasReadOnly={canvasReadOnly}
           type={currentType}
         />
       </div>

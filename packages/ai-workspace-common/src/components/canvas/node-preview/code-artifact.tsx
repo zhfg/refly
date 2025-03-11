@@ -25,7 +25,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { addNode } = useAddNode();
-  const { readonly } = useCanvasContext();
+  const { readonly: canvasReadOnly } = useCanvasContext();
   // Use activeTab from node metadata with fallback to 'code'
   const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
@@ -212,7 +212,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             onClose={handleClose}
             onRequestFix={handleRequestFix}
             onChange={handleCodeChange}
-            readOnly={readonly}
+            canvasReadOnly={canvasReadOnly}
             type={currentType as CodeArtifactType}
           />
         )}

@@ -82,13 +82,10 @@ export const DuplicateCanvasModal = ({
             <Input placeholder={t('template.duplicateCanvasTitlePlaceholder')} />
           </Form.Item>
 
-          <Form.Item
-            className="ml-2.5"
-            label={t('template.duplicateCanvasEntities')}
-            name="duplicateEntities"
-            valuePropName="checked"
-          >
-            <Checkbox />
+          <Form.Item className="ml-2.5" name="duplicateEntities" valuePropName="checked">
+            <Checkbox>
+              <span className="text-sm">{t('template.duplicateCanvasEntities')}</span>
+            </Checkbox>
           </Form.Item>
         </Form>
       </div>
