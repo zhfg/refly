@@ -5,6 +5,7 @@ import {
   IconDelete,
   IconEdit,
   IconPlayOutline,
+  IconCopy,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,7 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
 import { IoAlertCircle } from 'react-icons/io5';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
 
 interface CanvasActionDropdown {
   canvasId: string;
@@ -47,6 +49,8 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleteFile, setIsDeleteFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+
   const onChange: CheckboxProps['onChange'] = (e) => {
     setIsDeleteFile(e.target.checked);
   };
@@ -99,6 +103,22 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         </div>
       ),
       key: 'rename',
+    },
+    {
+      label: (
+        <div
+          className="flex items-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsDuplicateModalOpen(true);
+            setPopupVisible(false);
+          }}
+        >
+          <IconCopy size={16} className="mr-2" />
+          {t('canvas.toolbar.duplicate')}
+        </div>
+      ),
+      key: 'duplicate',
     },
     {
       label: (
@@ -205,6 +225,13 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
             </Checkbox>
           </div>
         </Modal>
+
+        <DuplicateCanvasModal
+          canvasId={canvasId}
+          visible={isDuplicateModalOpen}
+          setVisible={setIsDuplicateModalOpen}
+          canvasName={canvasName}
+        />
       </div>
     </>
   );

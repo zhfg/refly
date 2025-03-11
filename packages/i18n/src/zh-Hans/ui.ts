@@ -875,6 +875,7 @@ const translations = {
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
       rename: '重命名',
+      duplicate: '复制画布',
       syncingChanges: '同步中',
       synced: '上次同步于{{time}}',
       mouse: '鼠标模式',
@@ -916,6 +917,7 @@ const translations = {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
       deleteSuccess: '删除画布成功',
       addSuccess: '画布添加好啦，开始创作吧~',
+      duplicateSuccess: '复制画布成功',
     },
     skill: {
       askAI: 'AI 提问',
@@ -2097,6 +2099,7 @@ const translations = {
     searchPlaceholder: '请输入关键词搜索模板',
     noRelatedTemplates: '暂无相关模板',
     hideTemplates: '隐藏模板',
+    duplicateCanvasEntities: '同时复制该画布所包含的文档以及资源',
   },
 };
 
