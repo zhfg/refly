@@ -203,6 +203,12 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
       },
       escape: false,
     },
+    highlight: {
+      open: '==',
+      close: '==',
+      mixable: true,
+      expelEnclosingWhitespace: true,
+    },
   },
 );
 
