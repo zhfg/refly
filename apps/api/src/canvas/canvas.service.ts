@@ -230,11 +230,13 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    const readable = await this.minio.client.getObject(sourceCanvas.stateStorageKey);
-    const state = await streamToBuffer(readable);
-
     const doc = new Y.Doc();
-    Y.applyUpdate(doc, state);
+
+    if (sourceCanvas.stateStorageKey) {
+      const readable = await this.minio.client.getObject(sourceCanvas.stateStorageKey);
+      const state = await streamToBuffer(readable);
+      Y.applyUpdate(doc, state);
+    }
 
     const nodes: CanvasNode[] = doc.getArray('nodes').toJSON();
     this.logger.log(
