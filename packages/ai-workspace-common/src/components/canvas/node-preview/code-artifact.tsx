@@ -35,36 +35,37 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   // Sync local state with node metadata changes
   useEffect(() => {
     // Only update if activeTab changes and is different from current state
-    // const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
-    // if (metadataActiveTab && metadataActiveTab !== currentTab) {
-    //   setCurrentTab(metadataActiveTab);
-    // }
+    const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
+    if (metadataActiveTab && metadataActiveTab !== currentTab) {
+      setCurrentTab(metadataActiveTab);
+    }
+
     // Update type if it changes in metadata
-    // const metadataType = node.data?.metadata?.type as CodeArtifactType;
-    // if (metadataType && metadataType !== currentType) {
-    //   setCurrentType(metadataType);
-    // }
-  }, [node.data?.metadata?.activeTab, currentTab, node.data?.metadata?.type, currentType]);
+    const metadataType = node.data?.metadata?.type as CodeArtifactType;
+    if (metadataType && metadataType !== currentType) {
+      setCurrentType(metadataType);
+    }
+  }, [node.data?.metadata?.activeTab, node.data?.metadata?.type]);
 
   // Update node data when tab changes
   const handleTabChange = useCallback(
     (tab: 'code' | 'preview') => {
       setCurrentTab(tab);
 
-      if (node.data?.entityId) {
-        setNodeDataByEntity(
-          {
-            type: 'codeArtifact',
-            entityId: node.data.entityId,
-          },
-          {
-            metadata: {
-              ...node.data?.metadata,
-              activeTab: tab,
-            },
-          },
-        );
-      }
+      // if (node.data?.entityId) {
+      //   setNodeDataByEntity(
+      //     {
+      //       type: 'codeArtifact',
+      //       entityId: node.data.entityId,
+      //     },
+      //     {
+      //       metadata: {
+      //         ...node.data?.metadata,
+      //         activeTab: tab,
+      //       },
+      //     },
+      //   );
+      // }
     },
     [node.data?.entityId, node.data?.metadata, setNodeDataByEntity],
   );
@@ -75,20 +76,20 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
       setCurrentType(newType);
 
       // Ensure newType is a valid CodeArtifactType
-      if (data?.entityId && newType) {
-        setNodeDataByEntity(
-          {
-            type: 'codeArtifact',
-            entityId: data.entityId,
-          },
-          {
-            metadata: {
-              ...data?.metadata,
-              type: newType,
-            },
-          },
-        );
-      }
+      // if (data?.entityId && newType) {
+      //   setNodeDataByEntity(
+      //     {
+      //       type: 'codeArtifact',
+      //       entityId: data.entityId,
+      //     },
+      //     {
+      //       metadata: {
+      //         ...data?.metadata,
+      //         type: newType,
+      //       },
+      //     },
+      //   );
+      // }
     },
     [data?.entityId, data?.metadata, setNodeDataByEntity, setCurrentType],
   );
