@@ -461,7 +461,6 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const updates: Prisma.SubscriptionUpdateInput = {};
-    let planChanged = false;
 
     // Track status changes
     if (subscription.status !== sub.status) {
@@ -476,75 +475,14 @@ export class SubscriptionService implements OnModuleInit {
       updates.cancelAt = null;
     }
 
-    // Handle plan/price changes (upgrades/downgrades)
-    if (subscription.items?.data?.length > 0) {
-      const item = subscription.items.data[0]; // Get the first subscription item
-      const priceId = item?.price?.id;
-
-      if (priceId) {
-        // Fetch price details to get the lookup key and determine plan type
-        try {
-          const price = await this.stripeClient.prices.retrieve(priceId);
-
-          if (price?.lookup_key && price.lookup_key !== sub.lookupKey) {
-            // Lookup key changed - this indicates a plan change
-            updates.lookupKey = price.lookup_key;
-
-            // Query the subscription plan from the database using the lookup key
-            const subscriptionPlan = await this.prisma.subscriptionPlan.findFirstOrThrow({
-              where: { lookupKey: price.lookup_key },
-            });
-
-            // Set plan type and interval directly from the database record
-            if (subscriptionPlan.planType !== sub.planType) {
-              updates.planType = subscriptionPlan.planType;
-              planChanged = true;
-              this.logger.log(
-                `Plan upgraded/changed from ${sub.planType} to ${subscriptionPlan.planType}`,
-              );
-            }
-
-            if (subscriptionPlan.interval !== sub.interval) {
-              updates.interval = subscriptionPlan.interval;
-              this.logger.log(
-                `Billing interval changed from ${sub.interval} to ${subscriptionPlan.interval}`,
-              );
-            }
-          }
-        } catch (error) {
-          this.logger.error(`Error retrieving price details: ${error?.message ?? 'Unknown error'}`);
-          throw error;
-        }
-      }
-    }
-
     if (Object.keys(updates).length > 0) {
       this.logger.log(
         `Subscription ${sub.subscriptionId} received updates: ${JSON.stringify(updates)}`,
       );
-      const updatedSubscription = await this.prisma.subscription.update({
+      await this.prisma.subscription.update({
         where: { subscriptionId: subscription.id },
         data: updates,
       });
-
-      // If plan changed, refresh user's usage meters to apply new limits
-      if (planChanged) {
-        try {
-          // Get the user associated with this subscription
-          const user = await this.prisma.user.findFirst({
-            where: { subscriptionId: subscription.id },
-          });
-
-          if (user) {
-            this.logger.log(`Refreshing usage meters for user ${user.uid} after plan change`);
-
-            // Reset usage meters to apply new plan limits
-            await this.getOrCreateUsageMeter(user, updatedSubscription);
-          }
-        } catch (error) {
-          this.logger.error(`Error refreshing usage meters: ${error?.message ?? 'Unknown error'}`);
-        }
-      }
     }
   }
 
