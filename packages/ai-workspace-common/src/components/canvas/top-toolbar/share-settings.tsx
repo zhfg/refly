@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { Popover, Select, Button, Divider, message } from 'antd';
+import { ButtonProps } from 'antd/es/button';
 import {
   IconShare,
   IconClose,
@@ -12,6 +13,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
 import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
+import { MdOutlinePublish } from 'react-icons/md';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -128,17 +130,18 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         icon: <IconLink className="w-3.5 h-3.5 flex items-center justify-center" />,
         onClick: () => reshareAndCopyLink(),
         disabled: access === 'off',
+        type: 'default',
       },
-      // TODO: do not delete this
-      // {
-      //   label: 'publishTemplate',
-      //   icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
-      //   onClick: () => {
-      //     setCreateTemplateModalVisible(true);
-      //     setOpen(false);
-      //   },
-      //   disabled: false,
-      // },
+      {
+        label: 'publishTemplate',
+        icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
+        onClick: () => {
+          setCreateTemplateModalVisible(true);
+          setOpen(false);
+        },
+        disabled: false,
+        type: 'primary',
+      },
     ],
     [access, reshareAndCopyLink, t],
   );
@@ -249,7 +252,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
           {buttons.map((button) => (
             <Button
               className="w-full"
-              type="primary"
+              type={button.type as ButtonProps['type']}
               key={button.label}
               icon={button.icon}
               disabled={button.disabled || updateLoading}
