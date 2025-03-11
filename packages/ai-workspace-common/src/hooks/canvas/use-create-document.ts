@@ -1,6 +1,4 @@
 import { useCallback, useState } from 'react';
-import * as Y from 'yjs';
-import { IndexeddbPersistence } from 'y-indexeddb';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -8,40 +6,15 @@ import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/typ
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { genDocumentID } from '@refly-packages/utils/id';
-import { parseMarkdown } from '@refly-packages/utils/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { prosemirrorToYXmlFragment } from 'y-prosemirror';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
-
-const createLocalDocument = async (
-  docId: string,
-  title: string,
-  content: string,
-  refetchUsage: () => void,
-) => {
-  const ydoc = new Y.Doc();
-  const localProvider = new IndexeddbPersistence(docId, ydoc);
-
-  // Wait for local sync
-  await new Promise<void>((resolve) => {
-    localProvider.once('synced', () => resolve());
-  });
-
-  const yTitle = ydoc.getText('title');
-  yTitle.insert(0, title);
-
-  const node = parseMarkdown(content);
-  prosemirrorToYXmlFragment(node, ydoc.getXmlFragment('default'));
-
-  refetchUsage();
-};
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useCreateDocument = () => {
-  const [isCreating, _setIsCreating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
   const { addNode } = useAddNode();
@@ -79,19 +52,29 @@ export const useCreateDocument = () => {
         return null;
       }
 
-      const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-      const docId = genDocumentID();
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
-      await createLocalDocument(docId, title, parsedContent, refetchUsage);
+      setIsCreating(true);
+      const { data, error } = await getClient().createDocument({
+        body: {
+          title,
+          initialContent: parsedContent,
+        },
+      });
+      setIsCreating(false);
 
-      setDocumentLocalSyncedAt(docId, Date.now());
-      setDocumentRemoteSyncedAt(docId, Date.now());
+      if (!data.success || error) {
+        return;
+      }
+
+      const docId = data?.data?.docId;
 
       message.success(t('common.putSuccess'));
+      refetchUsage();
 
       if (addToCanvas) {
+        const nodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+
         // Find the source node
         const sourceNode = nodes.find((n) => n.data?.entityId === sourceNodeId);
 
@@ -144,13 +127,21 @@ export const useCreateDocument = () => {
         return null;
       }
 
-      const docId = genDocumentID();
       const title = '';
 
-      await createLocalDocument(docId, title, '', refetchUsage);
+      setIsCreating(true);
+      const { data, error } = await getClient().createDocument({
+        body: {
+          title,
+        },
+      });
+      setIsCreating(false);
 
-      setDocumentLocalSyncedAt(docId, Date.now());
-      setDocumentRemoteSyncedAt(docId, Date.now());
+      if (!data.success || error) {
+        return;
+      }
+
+      const docId = data?.data?.docId;
 
       message.success(t('common.putSuccess'));
 
@@ -185,13 +176,22 @@ export const useCreateDocument = () => {
         return null;
       }
 
-      const docId = genDocumentID();
       const newTitle = `${title} ${t('canvas.nodeActions.copy')}`;
 
-      await createLocalDocument(docId, newTitle, content, refetchUsage);
+      setIsCreating(true);
+      const { data, error } = await getClient().createDocument({
+        body: {
+          title: newTitle,
+          initialContent: content,
+        },
+      });
+      setIsCreating(false);
 
-      setDocumentLocalSyncedAt(docId, Date.now());
-      setDocumentRemoteSyncedAt(docId, Date.now());
+      if (!data.success || error) {
+        return;
+      }
+
+      const docId = data?.data?.docId;
 
       message.success(t('common.putSuccess'));
 
