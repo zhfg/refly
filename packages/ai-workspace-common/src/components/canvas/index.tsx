@@ -191,7 +191,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
-  const { provider, readonly, shareNotFound } = useCanvasContext();
+  const { provider, readonly, shareNotFound, shareLoading } = useCanvasContext();
 
   const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } =
     useCanvasStoreShallow((state) => ({
@@ -726,7 +726,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       className="w-full h-full"
       style={{ maxHeight: '100%' }}
       spinning={
-        !readonly && !hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout
+        (!readonly && !hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout) ||
+        (readonly && shareLoading)
       }
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >

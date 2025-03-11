@@ -21,23 +21,29 @@ interface CommonColorPickerProps {
   color: string;
   onChange?: (color: string) => void;
   className?: string;
+  disabledAlpha?: boolean;
 }
 
-const CommonColorPicker: FC<CommonColorPickerProps> = ({ color, onChange, className = '' }) => {
+const CommonColorPicker: FC<CommonColorPickerProps> = ({
+  color,
+  onChange,
+  className = '',
+  disabledAlpha = false,
+}) => {
   const { t } = useTranslation();
 
   const handleColorChange = (_color: Color, css: string) => {
-    console.log('css', css);
     onChange?.(css);
   };
 
   return (
     <AntdColorPicker
-      className={`memo-color-picker items-center border-none rounded-none hover:bg-gray-100 ${className}`}
+      className={`memo-color-picker items-center border-none rounded-lg hover:bg-gray-100 ${className}`}
       defaultValue={color}
       onChange={handleColorChange}
       showText={false}
       presets={[{ label: t('common.presetColors'), colors: presetColors }]}
+      disabledAlpha={disabledAlpha}
     />
   );
 };

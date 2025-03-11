@@ -23,6 +23,7 @@ export const useGroupNodes = () => {
     // Prepare the new group node
     const newGroupNode = prepareNodeData({
       ...groupNode,
+      zIndex: -1,
       data: {
         ...groupNode.data,
         entityId: genUniqueId(),

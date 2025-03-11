@@ -15,6 +15,7 @@ interface CanvasContextType {
   provider: HocuspocusProvider | null;
   localProvider: IndexeddbPersistence | null;
   readonly: boolean;
+  shareLoading: boolean;
   shareNotFound?: boolean;
   shareData?: RawCanvasData;
 }
@@ -78,9 +79,11 @@ export const CanvasProvider = ({
   }));
 
   // Use the hook to fetch canvas data when in readonly mode
-  const { data: canvasData, error: canvasError } = useFetchShareData<RawCanvasData>(
-    readonly ? canvasId : undefined,
-  );
+  const {
+    data: canvasData,
+    error: canvasError,
+    loading: shareLoading,
+  } = useFetchShareData<RawCanvasData>(readonly ? canvasId : undefined);
 
   // Check if it's a 404 error
   const shareNotFound = useMemo(() => {
@@ -288,10 +291,11 @@ export const CanvasProvider = ({
       provider,
       localProvider,
       readonly,
+      shareLoading,
       shareNotFound,
       shareData: canvasData,
     }),
-    [canvasId, provider, localProvider, readonly, shareNotFound, canvasData],
+    [canvasId, provider, localProvider, readonly, shareNotFound, canvasData, shareLoading],
   );
 
   return <CanvasContext.Provider value={canvasContext}>{children}</CanvasContext.Provider>;
