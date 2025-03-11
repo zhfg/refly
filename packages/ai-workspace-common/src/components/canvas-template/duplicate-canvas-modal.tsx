@@ -3,6 +3,12 @@ import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useNavigate } from 'react-router-dom';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+
+type FieldType = {
+  title: string;
+  duplicateEntities?: boolean;
+};
 
 interface DuplicateCanvasModalProps {
   canvasId: string;
@@ -21,6 +27,7 @@ export const DuplicateCanvasModal = ({
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { getCanvasList } = useHandleSiderData();
 
   const onSubmit = async () => {
     form.validateFields().then(async (values) => {
@@ -39,6 +46,7 @@ export const DuplicateCanvasModal = ({
       if (data?.success && data?.data?.canvasId) {
         message.success(t('canvas.action.duplicateSuccess'));
         setVisible(false);
+        getCanvasList();
         navigate(`/canvas/${data.data.canvasId}`);
       }
     });
@@ -46,6 +54,7 @@ export const DuplicateCanvasModal = ({
 
   useEffect(() => {
     if (visible) {
+      form.resetFields();
       form.setFieldValue('duplicateEntities', false);
       form.setFieldValue('title', canvasName);
     }
@@ -63,8 +72,8 @@ export const DuplicateCanvasModal = ({
       title={t('template.duplicateCanvas')}
     >
       <div className="w-full h-full overflow-y-auto">
-        <Form form={form}>
-          <Form.Item
+        <Form form={form} autoComplete="off">
+          <Form.Item<FieldType>
             required
             label={t('template.canvasTitle')}
             name="title"
@@ -77,6 +86,7 @@ export const DuplicateCanvasModal = ({
             className="ml-2.5"
             label={t('template.duplicateCanvasEntities')}
             name="duplicateEntities"
+            valuePropName="checked"
           >
             <Checkbox />
           </Form.Item>
