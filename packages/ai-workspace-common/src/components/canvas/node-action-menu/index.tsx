@@ -399,7 +399,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
       ];
 
       const operationItems: MenuItem[] = [
-        !clickToPreview && {
+        (!clickToPreview || nodeType === 'image') && {
           key: 'preview',
           icon: IconPreview,
           label: t('canvas.nodeActions.preview'),
