@@ -890,6 +890,7 @@ const translations = {
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
       rename: 'Rename',
+      duplicate: 'Duplicate Canvas',
       syncingChanges: 'Syncing Changes',
       synced: 'Last synced at {{time}}',
       mouse: 'Mouse Mode',
@@ -898,6 +899,7 @@ const translations = {
         undo: 'Undo',
         redo: 'Redo',
         zoom: 'Zoom Percentage',
+        zoomReset: 'Reset',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',
         fitView: 'Fit View',
@@ -932,6 +934,7 @@ const translations = {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
       addSuccess: 'Canvas added successfully, start creating!',
+      duplicateSuccess: 'Canvas duplicated successfully',
     },
     skill: {
       askAI: 'Ask AI',
@@ -993,6 +996,8 @@ const translations = {
       preview: 'Open Preview',
       previewDescription:
         'Display the complete content of the node in the preview panel on the right side of the canvas',
+      fullScreen: 'Full Screen Preview',
+      fullScreenDescription: 'Preview the node content in full screen mode',
       insertToDoc: 'Insert to Document',
       insertToDocDescription:
         'Integrate the node content into the document, supporting iterative writing',
@@ -1033,6 +1038,7 @@ const translations = {
       documentDeleteConfirm:
         'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
       downloadFile: 'Download File',
+      editGroupNamePlaceholder: 'Please enter the group name',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -2162,6 +2168,7 @@ const translations = {
     searchPlaceholder: 'Please enter keyword to search template',
     noRelatedTemplates: 'No related templates',
     hideTemplates: 'Hide Template',
+    duplicateCanvasEntities: 'Duplicate the canvas entities',
   },
 };
 

@@ -79,6 +79,7 @@ export default memo(
     onRequestFix,
     onChange,
     readOnly = false,
+    canvasReadOnly = false,
     type = 'text/html',
     onTypeChange,
   }: {
@@ -93,6 +94,7 @@ export default memo(
     onRequestFix: (e: string) => void;
     onChange?: (code: string) => void;
     readOnly?: boolean;
+    canvasReadOnly?: boolean;
     type?: CodeArtifactType;
     onTypeChange?: (type: CodeArtifactType) => void;
   }) {
@@ -333,15 +335,18 @@ export default memo(
           {renderTabs}
 
           <div className="flex items-center space-x-2">
-            <Tooltip title={t('codeArtifact.buttons.share')}>
-              <Button
-                type="text"
-                icon={<FiShare2 className="size-4 text-green-600" />}
-                onClick={handleShare}
-                size="small"
-                className="text-gray-600 hover:text-blue-600"
-              />
-            </Tooltip>
+            {!canvasReadOnly && (
+              <Tooltip title={t('codeArtifact.buttons.share')}>
+                <Button
+                  type="text"
+                  disabled={canvasReadOnly}
+                  icon={<FiShare2 className="size-4 text-green-600" />}
+                  onClick={handleShare}
+                  size="small"
+                  className="text-gray-600 hover:text-blue-600"
+                />
+              </Tooltip>
+            )}
 
             <Tooltip title={t('codeArtifact.buttons.refresh')}>
               <Button
@@ -438,7 +443,7 @@ export default memo(
                   fontSize: 14,
                   lineNumbers: 'on',
                   renderLineHighlight: 'all',
-                  readOnly: readOnly || isGenerating,
+                  readOnly: readOnly || isGenerating || canvasReadOnly,
                   scrollbar: {
                     vertical: 'visible',
                     horizontal: 'visible',

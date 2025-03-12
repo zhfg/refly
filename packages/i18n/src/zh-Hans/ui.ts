@@ -875,6 +875,7 @@ const translations = {
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
       rename: '重命名',
+      duplicate: '复制画布',
       syncingChanges: '同步中',
       synced: '上次同步于{{time}}',
       mouse: '鼠标模式',
@@ -883,6 +884,7 @@ const translations = {
         undo: '撤销',
         redo: '重做',
         zoom: '缩放百分比',
+        zoomReset: '重置',
         zoomIn: '放大',
         zoomOut: '缩小',
         fitView: '适应画布',
@@ -916,6 +918,7 @@ const translations = {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
       deleteSuccess: '删除画布成功',
       addSuccess: '画布添加好啦，开始创作吧~',
+      duplicateSuccess: '复制画布成功',
     },
     skill: {
       askAI: 'AI 提问',
@@ -973,6 +976,8 @@ const translations = {
       rerunDescription: '使用当前参数设置重新执行 AI 节点',
       preview: '打开预览',
       previewDescription: '在右侧预览面板中完整展示节点内容',
+      fullScreen: '全屏预览',
+      fullScreenDescription: '在全屏模式下预览节点内容',
       insertToDoc: '插入文档',
       insertToDocDescription: '将节点内容整合到文档中，支持迭代写作',
       askFollowUp: '继续提问',
@@ -1010,6 +1015,7 @@ const translations = {
       documentDeleteConfirm:
         '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
       downloadFile: '下载文件',
+      editGroupNamePlaceholder: '请输入分组名称',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -2100,6 +2106,7 @@ const translations = {
     searchPlaceholder: '请输入关键词搜索模板',
     noRelatedTemplates: '暂无相关模板',
     hideTemplates: '隐藏模板',
+    duplicateCanvasEntities: '复制该画布所包含的文档以及资源',
   },
 };
 

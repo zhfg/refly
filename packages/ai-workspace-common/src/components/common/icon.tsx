@@ -39,6 +39,7 @@ import {
   LuLink,
   LuShare2,
   LuCirclePlay,
+  LuPencilLine,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -56,7 +57,6 @@ import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
-import { PiNotePencil } from 'react-icons/pi';
 import { VscNotebookTemplate } from 'react-icons/vsc';
 
 import { TfiBlackboard } from 'react-icons/tfi';
@@ -119,7 +119,7 @@ export const IconReply = HiOutlineReply;
 export const IconMoreHorizontal = IoIosMore;
 export const IconPin = LuPin;
 export const IconUnpin = LuPinOff;
-export const IconEdit = PiNotePencil;
+export const IconEdit = LuPencilLine;
 export const IconDelete = LuTrash;
 export const IconSearch = LuSearch;
 export const IconError = RiErrorWarningLine;

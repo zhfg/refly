@@ -5,6 +5,7 @@ import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/ca
 import { ActionButtons } from './shared/action-buttons';
 import { CanvasNode, CommonNodeProps } from './shared/types';
 import { GroupActionButtons } from '../group-action-menu/group-action-buttons';
+import { GroupName } from '../group-action-menu/group-name';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import {
   createNodeEventName,
@@ -21,12 +22,16 @@ import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas
 import Moveable from 'react-moveable';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useThrottledCallback } from 'use-debounce';
+import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
 
 interface GroupMetadata {
   label?: string;
   width?: number;
   height?: number;
   isTemporary?: boolean;
+  bgColor?: string;
 }
 
 interface GroupData {
@@ -66,6 +71,8 @@ export const GroupNode = memo(
     const { addContextItems } = useAddToContext();
     const { addNode } = useAddNode();
     const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
+    const setNodeDataByEntity = useSetNodeDataByEntity();
+    const { setNodeStyle } = useNodeData();
 
     // Memoize node and its measurements
     const node = useMemo(() => getNode(id), [id, getNode]);
@@ -269,6 +276,41 @@ export const GroupNode = memo(
       });
     }, [id, data, getNodes, deleteNodes, deleteNode]);
 
+    const handleUpdateName = useThrottledCallback(
+      (name: string) => {
+        setNodeDataByEntity(
+          {
+            entityId: data.entityId,
+            type: 'group',
+          },
+          {
+            title: name,
+          },
+        );
+      },
+      500,
+      {
+        leading: true,
+        trailing: true,
+      },
+    );
+
+    const handleChangeBgColor = useCallback((color: string) => {
+      console.log('change bg color', color);
+      setNodeDataByEntity(
+        {
+          entityId: data.entityId,
+          type: 'group',
+        },
+        {
+          metadata: {
+            ...data.metadata,
+            bgColor: color,
+          },
+        },
+      );
+    }, []);
+
     useEffect(() => {
       const handleNodeDelete = () => handleDelete();
 
@@ -322,18 +364,33 @@ export const GroupNode = memo(
               </>
             )}
 
-            {!isPreview && !hideActions && !readonly && (
+            {!isPreview && !hideActions && !isDragging && !readonly && (
               <>
-                {!isDragging && (
-                  <ActionButtons type="group" nodeId={id} isNodeHovered={selected && isHovered} />
-                )}
+                <ActionButtons type="group" nodeId={id} isNodeHovered={selected && isHovered} />
                 <GroupActionButtons
                   nodeId={id}
                   isTemporary={data.metadata?.isTemporary}
-                  isNodeHovered={isHovered}
+                  isNodeHovered={selected && isHovered}
                 />
               </>
             )}
+
+            <GroupName
+              title={data.title}
+              onUpdateName={handleUpdateName}
+              selected={selected}
+              readonly={readonly}
+              bgColor={data.metadata?.bgColor || 'rgba(255, 255, 255, 0)'}
+              onChangeBgColor={handleChangeBgColor}
+            />
+
+            <div
+              className="absolute top-0 left-0 w-full h-full"
+              style={{
+                backgroundColor: data.metadata?.bgColor || 'transparent',
+                opacity: selected ? 0.5 : 1,
+              }}
+            />
           </div>
         </div>
 
@@ -374,6 +431,10 @@ export const GroupNode = memo(
               target.style.top = `${newTop}px`;
 
               setSize({ width: newWidth, height: newHeight });
+              setNodeStyle(id, {
+                width: `${newWidth}px`,
+                height: `${newHeight}px`,
+              });
             }}
             hideDefaultLines={true}
             className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}

@@ -10,6 +10,10 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { CodeArtifactNodePreview } from './code-artifact';
 import { WebsiteNodePreview } from './website';
 import { fullscreenEmitter } from '@refly-packages/ai-workspace-common/events/fullscreen';
+import {
+  nodeActionEmitter,
+  createNodeEventName,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
 
 const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
@@ -80,6 +84,19 @@ export const NodePreview = memo(
     const handleClose = useCallback(() => {
       removePinnedNode(canvasId, node.id);
     }, [node, removePinnedNode, canvasId]);
+
+    useEffect(() => {
+      const handleFullScreenPreview = () => {
+        setIsMaximized(true);
+      };
+
+      const eventName = createNodeEventName(node.id, 'fullScreenPreview');
+      nodeActionEmitter.on(eventName, handleFullScreenPreview);
+
+      return () => {
+        nodeActionEmitter.off(eventName, handleFullScreenPreview);
+      };
+    }, [node.id]);
 
     const previewStyles = useMemo(
       () => ({

@@ -11,7 +11,7 @@ import {
   SubscriptionUsageData,
   User,
 } from '@refly-packages/openapi-schema';
-import { genTokenUsageMeterID, genStorageUsageMeterID } from '@refly-packages/utils';
+import { genTokenUsageMeterID, genStorageUsageMeterID, safeParseJSON } from '@refly-packages/utils';
 import {
   CreateSubscriptionParam,
   SyncTokenUsageJobData,
@@ -22,6 +22,7 @@ import {
   CheckStorageUsageResult,
   SyncRequestUsageJobData,
   CheckFileParseUsageResult,
+  PlanQuota,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import {
@@ -254,7 +255,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { subscriptionId: param.subscriptionId, customerId: param.customerId },
       });
 
-      const plan = await this.prisma.subscriptionPlan.findFirst({
+      const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType: sub.planType },
       });
 
@@ -273,12 +274,8 @@ export class SubscriptionService implements OnModuleInit {
           endAt,
           t1CountQuota: plan?.t1CountQuota ?? this.config.get('quota.request.t1'),
           t1CountUsed: 0,
-          t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
-          t1TokenUsed: 0,
           t2CountQuota: plan?.t2CountQuota ?? this.config.get('quota.request.t2'),
           t2CountUsed: 0,
-          t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
-          t2TokenUsed: 0,
         },
       });
 
@@ -292,8 +289,6 @@ export class SubscriptionService implements OnModuleInit {
         data: {
           subscriptionId: sub.subscriptionId,
           fileCountQuota: plan?.fileCountQuota ?? this.config.get('quota.storage.file'),
-          objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
-          vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
 
@@ -341,7 +336,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      const freePlan = await this.prisma.subscriptionPlan.findFirst({
+      const freePlan = await this.prisma.subscriptionPlan.findFirstOrThrow({
         where: { planType: 'free' },
       });
 
@@ -355,10 +350,6 @@ export class SubscriptionService implements OnModuleInit {
         data: {
           subscriptionId: null,
           fileCountQuota: freePlan?.fileCountQuota ?? this.config.get('quota.storage.file'),
-          objectStorageQuota:
-            freePlan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
-          vectorStorageQuota:
-            freePlan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
     });
@@ -432,13 +423,9 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    const plan = await this.prisma.subscriptionPlan.findFirst({
+    const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
       where: { lookupKey: checkoutSession.lookupKey },
     });
-    if (!plan) {
-      this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
-      return;
-    }
 
     const { planType, interval } = plan;
 
@@ -474,11 +461,18 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const updates: Prisma.SubscriptionUpdateInput = {};
+
+    // Track status changes
     if (subscription.status !== sub.status) {
       updates.status = subscription.status;
     }
+
+    // Track cancellation changes
     if (subscription.cancel_at && !sub.cancelAt) {
       updates.cancelAt = new Date(subscription.cancel_at * 1000);
+    } else if (!subscription.cancel_at && sub.cancelAt) {
+      // Handle cancellation removal (user undid cancellation)
+      updates.cancelAt = null;
     }
 
     if (Object.keys(updates).length > 0) {
@@ -570,7 +564,7 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const planType = sub?.planType || 'free';
-    const plan = await this.prisma.subscriptionPlan.findFirst({
+    const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
       select: { fileParsePageLimit: true, fileUploadLimit: true },
       where: { planType },
     });
@@ -639,9 +633,15 @@ export class SubscriptionService implements OnModuleInit {
           ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate() + 1)
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
-      const plan = await this.prisma.subscriptionPlan.findFirst({
-        where: { planType },
-      });
+      let plan: PlanQuota | null = null;
+      if (sub?.overridePlan) {
+        plan = safeParseJSON(sub.overridePlan) as PlanQuota;
+      }
+      if (!plan) {
+        plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+          where: { planType },
+        });
+      }
 
       return prisma.tokenUsageMeter.create({
         data: {
@@ -652,12 +652,8 @@ export class SubscriptionService implements OnModuleInit {
           endAt,
           t1CountQuota: plan?.t1CountQuota ?? this.config.get('quota.request.t1'),
           t1CountUsed: 0,
-          t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
-          t1TokenUsed: 0,
           t2CountQuota: plan?.t2CountQuota ?? this.config.get('quota.request.t2'),
           t2CountUsed: 0,
-          t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
-          t2TokenUsed: 0,
         },
       });
     });
@@ -691,25 +687,38 @@ export class SubscriptionService implements OnModuleInit {
         },
       });
 
-      if (activeMeter) {
-        return activeMeter;
+      // Find the storage quota for the plan
+      let plan: PlanQuota | null = null;
+      if (sub?.overridePlan) {
+        plan = safeParseJSON(sub.overridePlan) as PlanQuota;
+      }
+      if (!plan) {
+        const planType = sub?.planType || 'free';
+        plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+          where: { planType },
+        });
       }
 
-      // Find the storage quota for the plan
-      const planType = sub?.planType || 'free';
-      const plan = await this.prisma.subscriptionPlan.findFirst({
-        where: { planType },
-      });
+      if (activeMeter) {
+        // If the plan has changed, update the quota
+        if (plan.fileCountQuota !== activeMeter.fileCountQuota) {
+          return prisma.storageUsageMeter.update({
+            where: { meterId: activeMeter.meterId },
+            data: {
+              fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
+            },
+          });
+        }
+        return activeMeter;
+      }
 
       return prisma.storageUsageMeter.create({
         data: {
           meterId: genStorageUsageMeterID(),
           uid,
           subscriptionId: sub?.subscriptionId,
-          fileCountQuota: plan?.fileCountQuota ?? this.config.get('quota.storage.file'),
+          fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
           fileCountUsed: 0,
-          objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
-          vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
     });

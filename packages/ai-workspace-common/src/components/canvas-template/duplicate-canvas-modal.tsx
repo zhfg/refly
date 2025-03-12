@@ -1,36 +1,62 @@
-import { useEffect } from 'react';
-import { Form, Input, Modal } from 'antd';
+import { useEffect, useState } from 'react';
+import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useNavigate } from 'react-router-dom';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+
+type FieldType = {
+  title: string;
+  duplicateEntities?: boolean;
+};
 
 interface DuplicateCanvasModalProps {
   canvasId: string;
+  canvasName?: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
 }
 
 export const DuplicateCanvasModal = ({
   canvasId,
+  canvasName,
   visible,
   setVisible,
 }: DuplicateCanvasModalProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
-  const { duplicateCanvas, loading } = useDuplicateCanvas();
+  const [loading, setLoading] = useState(false);
+  const { getCanvasList } = useHandleSiderData();
 
-  const onSubmit = () => {
-    form.validateFields().then((values) => {
-      const { title } = values;
-      console.log('title', title);
-      duplicateCanvas(canvasId, () => {
-        setVisible(false);
+  const onSubmit = async () => {
+    form.validateFields().then(async (values) => {
+      if (loading) return;
+      setLoading(true);
+      const { title, duplicateEntities } = values;
+      const { data } = await getClient().duplicateCanvas({
+        body: {
+          canvasId,
+          title,
+          duplicateEntities,
+        },
       });
+      setLoading(false);
+
+      if (data?.success && data?.data?.canvasId) {
+        message.success(t('canvas.action.duplicateSuccess'));
+        setVisible(false);
+        getCanvasList();
+        navigate(`/canvas/${data.data.canvasId}`);
+      }
     });
   };
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
+      form.setFieldValue('duplicateEntities', false);
+      form.setFieldValue('title', canvasName);
     }
   }, [visible]);
 
@@ -45,15 +71,22 @@ export const DuplicateCanvasModal = ({
       cancelText={t('common.cancel')}
       title={t('template.duplicateCanvas')}
     >
-      <div className="w-full h-full overflow-y-auto">
-        <Form form={form}>
-          <Form.Item
+      <div className="w-full h-full overflow-y-auto mt-3">
+        <Form form={form} autoComplete="off">
+          <Form.Item<FieldType>
             required
             label={t('template.canvasTitle')}
             name="title"
+            className="mb-3"
             rules={[{ required: true, message: t('common.required') }]}
           >
             <Input placeholder={t('template.duplicateCanvasTitlePlaceholder')} />
+          </Form.Item>
+
+          <Form.Item className="ml-2.5" name="duplicateEntities" valuePropName="checked">
+            <Checkbox>
+              <span className="text-sm">{t('template.duplicateCanvasEntities')}</span>
+            </Checkbox>
           </Form.Item>
         </Form>
       </div>

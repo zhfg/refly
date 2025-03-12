@@ -87,7 +87,7 @@ const ActionDropdown = ({
   const items: MenuProps['items'] = [
     !isShareCanvas && {
       label: (
-        <div className="flex items-center">
+        <div className="flex items-center flex-grow">
           <LuPlus size={16} className="mr-2" />
           {t('workspace.addToCanvas')}
         </div>
@@ -97,7 +97,7 @@ const ActionDropdown = ({
     },
     {
       label: (
-        <div className="flex items-center">
+        <div className="flex items-center flex-grow">
           <LuExternalLink size={16} className="mr-2" />
           {t('workspace.openWebpage')}
         </div>
@@ -109,7 +109,7 @@ const ActionDropdown = ({
     resource.downloadURL &&
       resource.resourceType === 'file' && {
         label: (
-          <div className="flex items-center">
+          <div className="flex items-center flex-grow">
             <IconDownloadFile size={16} className="mr-2" />
             {t('workspace.downloadFile')}
           </div>
@@ -133,7 +133,10 @@ const ActionDropdown = ({
           cancelText={t('common.cancel')}
           overlayStyle={{ maxWidth: '300px' }}
         >
-          <div className="flex items-center text-red-600" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex items-center text-red-600 flex-grow"
+            onClick={(e) => e.stopPropagation()}
+          >
             <IconDelete size={16} className="mr-2" />
             {t('workspace.deleteDropdownMenu.delete')}
           </div>
