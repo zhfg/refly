@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
-// import { TemplatesGuide } from './templates-guide';
+import { TemplatesGuide } from './templates-guide';
 
 export const EmptyGuide = ({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ export const EmptyGuide = ({ canvasId }: { canvasId: string }) => {
         </Button>
       </div>
 
-      {/* <TemplatesGuide canvasId={canvasId} /> */}
+      <TemplatesGuide canvasId={canvasId} />
     </div>
   );
 };

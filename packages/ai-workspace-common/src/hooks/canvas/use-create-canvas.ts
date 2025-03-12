@@ -9,6 +9,8 @@ import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider'
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
+const CANVAS_NUM = 6;
+
 export const useCreateCanvas = () => {
   const [isCreating, _setIsCreating] = useState(false);
   const { t } = useTranslation();
@@ -36,7 +38,7 @@ export const useCreateCanvas = () => {
             type: 'canvas' as const,
           },
           ...canvasList,
-        ].slice(0, 10),
+        ].slice(0, CANVAS_NUM),
       );
       setTitle(canvasId, canvasTitle);
 
