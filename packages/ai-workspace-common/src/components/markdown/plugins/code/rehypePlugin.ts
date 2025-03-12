@@ -4,9 +4,40 @@ import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/ar
 // Special handling for SVG blocks - make sure to recognize them properly
 const SVG_INDICATORS = ['<svg', '<circle', '<rect', '<line', '<text', '<path'];
 
+// Mermaid diagram pattern indicators
+const MERMAID_PATTERNS = [
+  /^graph\s+[A-Za-z0-9]/i,
+  /^flowchart\s+[A-Za-z0-9]/i,
+  /^sequenceDiagram/i,
+  /^classDiagram/i,
+  /^stateDiagram/i,
+  /^erDiagram/i,
+  /^gantt/i,
+  /^pie\s+/i,
+  /^mindmap/i,
+  /^journey/i,
+  /^gitGraph/i,
+  /^timeline/i,
+];
+
+// Helper function to check if content is a mermaid diagram
+const isMermaidContent = (content: string, className: string): boolean => {
+  // If class explicitly includes mermaid, return true
+  if (className?.includes('language-mermaid') || className?.includes('mermaid')) return true;
+
+  // Check if content matches known mermaid patterns
+  const trimmedContent = content.trim();
+  return MERMAID_PATTERNS.some((pattern) => pattern.test(trimmedContent));
+};
+
 // Helper function to determine the appropriate code artifact type
 const getCodeArtifactType = (className: string, content: string): CodeArtifactType => {
   if (!className && !content) return 'application/refly.artifacts.code';
+
+  // Check for Mermaid content
+  if (isMermaidContent(content, className)) {
+    return 'application/refly.artifacts.mermaid';
+  }
 
   // Check for SVG content even if not explicitly marked as svg
   if (
@@ -59,6 +90,11 @@ const getLanguageFromClassName = (className: string, content: string): string =>
     if (match) return match[1];
   }
 
+  // Check for mermaid content
+  if (isMermaidContent(content, className)) {
+    return 'mermaid';
+  }
+
   // Try to infer language from content if not explicitly set
   if (SVG_INDICATORS.some((indicator) => content.includes(indicator))) {
     return 'svg';
@@ -97,8 +133,8 @@ function rehypePlugin() {
           // Always set preview to true for previewable types
           const shouldPreview = isPreviewableType(codeType) && codeContent.trim().length > 0;
 
-          // Special case for mermaid
-          const isMermaid = languageClass?.includes('language-mermaid');
+          // Check if content is mermaid
+          const isMermaid = codeType === 'application/refly.artifacts.mermaid';
 
           // Add extracted information as properties to the pre node
           node.properties = {
@@ -111,12 +147,6 @@ function rehypePlugin() {
             'data-is-mermaid': isMermaid,
           };
 
-          // If it's mermaid, we might want to handle it differently
-          if (isMermaid) {
-            // Mark mermaid nodes for special handling
-            node.properties['data-is-mermaid'] = true;
-          }
-
           // Log debugging information
           if (process.env.NODE_ENV === 'development') {
             console.log(`Processing code block:
@@ -124,6 +154,7 @@ function rehypePlugin() {
             - Detected type: ${codeType}
             - Detected language: ${language}
             - Should preview: ${shouldPreview}
+            - Is mermaid: ${isMermaid}
             - Content length: ${codeContent.length}`);
           }
 
