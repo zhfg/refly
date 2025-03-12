@@ -821,7 +821,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             }}
             onScroll={(e) => updateIndicators(e.currentTarget)}
           >
-            <div className="relative h-full">
+            <div className="relative h-full overflow-y-hidden">
               <div className="flex gap-2 h-full">
                 {nodePreviews?.filter(Boolean)?.map((node) => (
                   <NodePreview key={node?.id} node={node} canvasId={canvasId} />
