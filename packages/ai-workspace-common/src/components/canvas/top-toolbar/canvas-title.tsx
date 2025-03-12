@@ -87,7 +87,7 @@ export const CanvasTitle = memo(
               {canvasTitle || t('common.untitled')}
             </Typography.Text>
           )}
-          <IconEdit />
+          <IconEdit className="text-gray-500 flex items-center justify-center" />
         </div>
 
         <CanvasRename

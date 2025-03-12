@@ -17,11 +17,14 @@ describe('Canvas Flow', () => {
   beforeEach(() => {
     cy.login('bob@example.com', 'testPassword123');
     // Add a small wait after login to ensure app is fully loaded
-    cy.wait(1000);
+    cy.wait(2000);
   });
 
   it('should create and interact with canvas', () => {
-    // Create new canvas from empty state - use multiple strategies for better stability
+    // Wait for the page to be fully loaded
+    cy.url().should('include', '/canvas');
+
+    // Create new canvas from empty state
     cy.get('[data-cy="empty-canvas-create-button"]')
       .should('be.visible')
       .and('exist')

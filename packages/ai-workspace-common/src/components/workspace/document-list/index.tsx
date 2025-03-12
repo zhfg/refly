@@ -61,7 +61,7 @@ const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () =
   const items: MenuProps['items'] = [
     !isShareCanvas && {
       label: (
-        <div className="flex items-center">
+        <div className="flex items-center flex-grow">
           <LuPlus size={16} className="mr-2" />
           {t('workspace.addToCanvas')}
         </div>
@@ -82,7 +82,7 @@ const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () =
           cancelText={t('common.cancel')}
           overlayStyle={{ maxWidth: '300px' }}
         >
-          <div className="flex items-center text-red-600">
+          <div className="flex items-center text-red-600 flex-grow">
             <IconDelete size={16} className="mr-2" />
             {t('workspace.deleteDropdownMenu.delete')}
           </div>

@@ -163,6 +163,7 @@ const translations = {
     getStarted: 'Get Started',
     login: 'Login',
     simplySlogan: 'Creation Engine',
+    slogan: 'The AI Native Creation Engine',
     description:
       'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
@@ -889,6 +890,7 @@ const translations = {
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
       rename: 'Rename',
+      duplicate: 'Duplicate Canvas',
       syncingChanges: 'Syncing Changes',
       synced: 'Last synced at {{time}}',
       mouse: 'Mouse Mode',
@@ -897,6 +899,7 @@ const translations = {
         undo: 'Undo',
         redo: 'Redo',
         zoom: 'Zoom Percentage',
+        zoomReset: 'Reset',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',
         fitView: 'Fit View',
@@ -931,6 +934,7 @@ const translations = {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
       addSuccess: 'Canvas added successfully, start creating!',
+      duplicateSuccess: 'Canvas duplicated successfully',
     },
     skill: {
       askAI: 'Ask AI',
@@ -2157,6 +2161,7 @@ const translations = {
     searchPlaceholder: 'Please enter keyword to search template',
     noRelatedTemplates: 'No related templates',
     hideTemplates: 'Hide Template',
+    duplicateCanvasEntities: 'Duplicate the canvas entities',
   },
 };
 

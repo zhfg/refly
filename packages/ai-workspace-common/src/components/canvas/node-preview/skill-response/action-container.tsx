@@ -20,7 +20,7 @@ interface ActionContainerProps {
 
 const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
   const { t } = useTranslation();
-  const { debouncedCreateDocument } = useCreateDocument();
+  const { debouncedCreateDocument, isCreating } = useCreateDocument();
   const { readonly } = useCanvasContext();
   const { hasEditorSelection, activeDocumentId } = useDocumentStoreShallow((state) => ({
     hasEditorSelection: state.hasEditorSelection,
@@ -155,6 +155,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
                 className="text-[#64645F] text-xs flex justify-center items-center h-6 px-1 rounded-lg hover:bg-[#f1f1f0] hover:text-[#00968f] transition-all duration-400 relative overflow-hidden group"
                 icon={item.icon}
                 disabled={!item.enabled}
+                loading={isCreating}
                 onClick={() => {
                   const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
                   handleEditorOperation(item.key as EditorOperation, parsedText || '');
