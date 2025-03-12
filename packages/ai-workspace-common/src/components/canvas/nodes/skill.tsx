@@ -391,8 +391,7 @@ export const SkillNode = memo(
       [entityId, setNodeDataByEntity],
     );
 
-    // listen to edges changes and automatically update contextItems
-    useEffect(() => {
+    const updateContextItemsByEdges = () => {
       if (readonly) return;
 
       const currentEdges = edges?.filter((edge) => edge.target === id) || [];
@@ -429,7 +428,16 @@ export const SkillNode = memo(
       if (JSON.stringify(updatedContextItems) !== JSON.stringify(contextItems)) {
         patchNodeData(id, { metadata: { contextItems: updatedContextItems } });
       }
-    }, [edges, id, contextItems, getNodes, patchNodeData, readonly]);
+    };
+
+    const debouncedUpdateContextItems = useDebouncedCallback(() => {
+      updateContextItemsByEdges();
+    }, 300);
+
+    // listen to edges changes and automatically update contextItems
+    useEffect(() => {
+      debouncedUpdateContextItems();
+    }, [edges?.length, id, contextItems, getNodes()?.length, debouncedUpdateContextItems]);
 
     return (
       <div className={classNames({ nowheel: isOperating && isHovered })}>
