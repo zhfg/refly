@@ -34,6 +34,8 @@ import {
   useDocumentStore,
   useDocumentStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/document';
+import UpdatedImage from '@refly-packages/ai-workspace-common/components/editor/core/extensions/updated-image';
+import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
@@ -62,7 +64,10 @@ export const CollaborativeEditor = memo(
       styleEl.innerHTML = `
         .ProseMirror-selectednode {
           outline: 2px solid #4299e1 !important;
-          cursor: zoom-in !important;
+          background-color: transparent !important;
+          .zoomin {
+            cursor: zoom-in !important;
+          }
         }
         .resizable-image {
           transition: all 0.2s ease;
@@ -167,9 +172,46 @@ export const CollaborativeEditor = memo(
       [docId],
     );
 
-    const extensions = useMemo(
-      () => [
-        ...defaultExtensions,
+    const extensions = useMemo(() => {
+      const centeredImage = UpdatedImage.extend({
+        addProseMirrorPlugins() {
+          return [
+            UploadImagesPlugin({
+              imageClass: 'opacity-40 rounded-lg border border-stone-200',
+            }),
+          ];
+        },
+        selectable: true,
+        draggable: true,
+        renderHTML({ HTMLAttributes }) {
+          const { width, height, style, ...rest } = HTMLAttributes;
+
+          const combinedStyle = [
+            width && !style?.includes('width') ? `width: ${width}px;` : '',
+            height && !style?.includes('height') ? `height: ${height}px;` : '',
+            style || '',
+          ]
+            .join(' ')
+            .trim();
+
+          const imgAttributes = {
+            ...rest,
+            style: combinedStyle || null,
+            class: 'border border-muted cursor-pointer max-w-full zoomin',
+          };
+
+          return ['div', { class: 'w-full flex justify-center my-2' }, ['img', imgAttributes]];
+        },
+      }).configure({
+        allowBase64: true,
+      });
+
+      // filter out the default image extension
+      const filteredExtensions = defaultExtensions.filter((ext) => ext.name !== 'image');
+
+      return [
+        ...filteredExtensions,
+        centeredImage,
         configureSlashCommand({
           entityId: docId,
           entityType: 'document',
@@ -184,9 +226,8 @@ export const CollaborativeEditor = memo(
             documentActions.updateTocItems(docId, content);
           },
         }),
-      ],
-      [ydoc, docId, documentActions, createPlaceholderExtension],
-    );
+      ];
+    }, [ydoc, docId, documentActions, createPlaceholderExtension]);
 
     const { addToContext, selectedText } = useSelectionContext({
       containerClass: 'ai-note-editor-content-container',
