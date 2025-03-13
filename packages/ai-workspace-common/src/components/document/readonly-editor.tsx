@@ -12,6 +12,7 @@ import { defaultExtensions } from '@refly-packages/ai-workspace-common/component
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { ImagePreview } from '@refly-packages/ai-workspace-common/components/common/image-preview';
+import UpdatedImage from '@refly-packages/ai-workspace-common/components/editor/core/extensions/updated-image';
 
 export const ReadonlyEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -43,14 +44,45 @@ export const ReadonlyEditor = memo(
       };
     }, [docId]);
 
-    const extensions = useMemo(
-      () => [
-        ...defaultExtensions,
+    const extensions = useMemo(() => {
+      // 创建自定义图片扩展，将图片用div包裹并水平居中对齐
+      const centeredImage = UpdatedImage.extend({
+        selectable: true,
+        draggable: true,
+        renderHTML({ HTMLAttributes }) {
+          const { width, height, style, ...rest } = HTMLAttributes;
+
+          const combinedStyle = [
+            width && !style?.includes('width') ? `width: ${width}px;` : '',
+            height && !style?.includes('height') ? `height: ${height}px;` : '',
+            style || '',
+          ]
+            .join(' ')
+            .trim();
+
+          const imgAttributes = {
+            ...rest,
+            style: combinedStyle || null,
+            class: 'border border-muted cursor-pointer max-w-full zoomin',
+          };
+
+          // 使用div包裹图片并设置水平居中样式
+          return ['div', { class: 'w-full flex justify-center my-2' }, ['img', imgAttributes]];
+        },
+      }).configure({
+        allowBase64: true,
+      });
+
+      // 过滤掉默认扩展中的图片扩展
+      const filteredExtensions = defaultExtensions.filter((ext) => ext.name !== 'image');
+
+      return [
+        ...filteredExtensions,
+        centeredImage,
         Markdown,
         TableOfContents.configure({ getIndex: getHierarchicalIndexes }),
-      ],
-      [docId],
-    );
+      ];
+    }, [docId]);
 
     useEffect(() => {
       if (document?.content && editorRef.current) {
