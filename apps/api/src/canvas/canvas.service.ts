@@ -293,7 +293,7 @@ export class CanvasService {
     }
 
     if (sourceCanvas.uid !== user.uid) {
-      await this.miscService.duplicateFilesByEntity(user, {
+      await this.miscService.duplicateFilesNoCopy(user, {
         sourceEntityId: sourceCanvasId,
         sourceEntityType: 'canvas',
         sourceUid: sourceCanvas.uid,

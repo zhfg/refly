@@ -17,7 +17,12 @@ import { ConfigService } from '@nestjs/config';
 import { RedisService } from '@/common/redis.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { PrismaService } from '@/common/prisma.service';
-import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
+import {
+  IDPrefix,
+  incrementalMarkdownUpdate,
+  state2Markdown,
+  ydoc2Markdown,
+} from '@refly-packages/utils';
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 import { Redis } from '@hocuspocus/extension-redis';
@@ -157,6 +162,10 @@ export class CollabService {
       const readable = await this.minio.client.getObject(stateStorageKey);
       const state = await streamToBuffer(readable);
       Y.applyUpdate(document, state);
+
+      if (documentName.startsWith(IDPrefix.DOCUMENT)) {
+        this.logger.log(`document ${documentName} loaded: ${ydoc2Markdown(document)}`);
+      }
 
       const title = document.getText('title')?.toJSON();
       if (!title) {

@@ -218,6 +218,12 @@ export class MiscService implements OnModuleInit {
     return `${endpoint}/${storageKey}`;
   }
 
+  async downloadFile(file: FileObject) {
+    const { storageKey, visibility } = file;
+    const stream = await this.minioClient(visibility).getObject(storageKey);
+    return streamToBuffer(stream);
+  }
+
   /**
    * Publish a private file to the public bucket
    * @param storageKey - The storage key of the file to publish
@@ -705,6 +711,37 @@ export class MiscService implements OnModuleInit {
     }
   }
 
+  async duplicateFile(param: {
+    sourceFile: FileObject;
+    targetFile: FileObject;
+  }) {
+    const { sourceFile, targetFile } = param;
+
+    if (!sourceFile) {
+      throw new NotFoundException(`File with key ${sourceFile?.storageKey} not found`);
+    }
+
+    if (!targetFile) {
+      throw new ParamsError('Target file information is required');
+    }
+
+    try {
+      // Use the appropriate Minio service based on visibility
+      const minioService =
+        sourceFile.visibility === 'public' ? this.externalMinio : this.internalMinio;
+
+      // Use the duplicateFile method from MinioService instead of copyObject
+      await minioService.duplicateFile(sourceFile.storageKey, targetFile.storageKey);
+
+      this.logger.log(
+        `Successfully duplicated file from ${sourceFile.storageKey} to ${targetFile.storageKey}`,
+      );
+    } catch (error) {
+      this.logger.error(`Duplicate file failed: ${error?.stack}`);
+      throw error; // Re-throw the error to properly handle it upstream
+    }
+  }
+
   /**
    * Duplicates all files associated with an entity for a different user
    * Only creates new database records, doesn't duplicate the actual files in storage
@@ -713,7 +750,7 @@ export class MiscService implements OnModuleInit {
    * @param param - Parameters specifying source entity and optional target entity
    * @returns Object containing counts of files processed and duplicated
    */
-  async duplicateFilesByEntity(
+  async duplicateFilesNoCopy(
     user: User,
     param: {
       sourceEntityId: string;

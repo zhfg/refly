@@ -477,6 +477,8 @@ model ShareRecord {
   entityId         String    @map("entity_id")
   /// Entity type
   entityType       String    @map("entity_type")
+  /// Extra data
+  extraData        String?   @map("extra_data")
   /// Create timestamp
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

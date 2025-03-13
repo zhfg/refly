@@ -402,7 +402,7 @@ export const DocumentSchema = {
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
-  enum: ['document', 'resource', 'canvas', 'user', 'skillResponse', 'codeArtifact'],
+  enum: ['document', 'resource', 'canvas', 'share', 'user', 'skillResponse', 'codeArtifact'],
 } as const;
 
 export const EntitySchema = {

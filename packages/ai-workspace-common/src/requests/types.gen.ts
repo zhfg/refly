@@ -345,6 +345,7 @@ export type EntityType =
   | 'document'
   | 'resource'
   | 'canvas'
+  | 'share'
   | 'user'
   | 'skillResponse'
   | 'codeArtifact';

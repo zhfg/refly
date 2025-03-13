@@ -55,6 +55,7 @@ import {
   genDocumentID,
 } from '@refly-packages/utils';
 import {
+  DocumentDetail,
   ExtendedReferenceModel,
   FinalizeResourceParam,
   ResourcePrepareResult,
@@ -793,7 +794,7 @@ export class KnowledgeService {
   async getDocumentDetail(
     user: User,
     params: GetDocumentDetailData['query'],
-  ): Promise<DocumentModel & { content?: string }> {
+  ): Promise<DocumentDetail> {
     const { docId } = params;
 
     if (!docId) {
@@ -1025,7 +1026,7 @@ export class KnowledgeService {
 
     if (sourceDoc.uid !== user.uid) {
       migrations.push(
-        this.miscService.duplicateFilesByEntity(user, {
+        this.miscService.duplicateFilesNoCopy(user, {
           sourceEntityId: sourceDoc.docId,
           sourceEntityType: 'document',
           sourceUid: sourceDoc.uid,
@@ -1105,7 +1106,7 @@ export class KnowledgeService {
       migrations.push(this.minio.duplicateFile(sourceResource.storageKey, newStorageKey));
     }
     if (sourceResource.uid !== user.uid) {
-      this.miscService.duplicateFilesByEntity(user, {
+      this.miscService.duplicateFilesNoCopy(user, {
         sourceEntityId: sourceResource.resourceId,
         sourceEntityType: 'resource',
         sourceUid: sourceResource.uid,

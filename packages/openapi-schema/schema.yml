@@ -2145,6 +2145,7 @@ components:
         - document
         - resource
         - canvas
+        - share
         - user
         - skillResponse
         - codeArtifact
