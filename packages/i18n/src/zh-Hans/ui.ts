@@ -81,6 +81,8 @@ const translations = {
     duplicate: '复制',
     shareSuccess: '分享链接已复制到剪贴板!',
     shareError: '分享失败，请重试！',
+    readonlyWarning: '只读模式',
+    readonlyDragDescription: '当前画布为只读模式，不支持修改',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',

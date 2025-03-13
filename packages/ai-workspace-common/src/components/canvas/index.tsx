@@ -51,6 +51,7 @@ import NotFoundOverlay from './NotFoundOverlay';
 import { getFreshNodePreviews } from '../../utils/canvas';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 import { useDragToCreateNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-drag-create-node';
+import { message } from 'antd';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -740,6 +741,37 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     );
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
 
+  const [readonlyDragWarningDebounce, setReadonlyDragWarningDebounce] =
+    useState<NodeJS.Timeout | null>(null);
+
+  const handleReadonlyDrag = useCallback(
+    (event: React.MouseEvent) => {
+      if (readonly) {
+        if (!readonlyDragWarningDebounce) {
+          message.warning(t('common.readonlyDragDescription'));
+
+          const debounceTimeout = setTimeout(() => {
+            setReadonlyDragWarningDebounce(null);
+          }, 3000);
+
+          setReadonlyDragWarningDebounce(debounceTimeout);
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    [readonly, readonlyDragWarningDebounce, t],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (readonlyDragWarningDebounce) {
+        clearTimeout(readonlyDragWarningDebounce);
+      }
+    };
+  }, [readonlyDragWarningDebounce]);
+
   return (
     <Spin
       className="w-full h-full"
@@ -757,6 +789,17 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         <TopToolbar canvasId={canvasId} />
         <div className="flex-grow relative">
           <style>{selectionStyles}</style>
+          {readonly && (
+            <style>{`
+              .react-flow__node {
+                cursor: not-allowed !important;
+                opacity: 0.9;
+              }
+              .react-flow__node:hover {
+                box-shadow: none !important;
+              }
+            `}</style>
+          )}
           <ReactFlow
             {...flowConfig}
             edgeTypes={edgeTypes}
@@ -778,7 +821,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onPaneClick={handlePanelClick}
             onPaneContextMenu={readonly ? undefined : onPaneContextMenu}
             onNodeContextMenu={readonly ? undefined : onNodeContextMenu}
-            onNodeDragStart={readonly ? undefined : onNodeDragStart}
+            onNodeDragStart={readonly ? handleReadonlyDrag : onNodeDragStart}
             onNodeDragStop={readonly ? undefined : onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId && !readonly}
