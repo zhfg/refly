@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, memo, useCallback } from 'react';
+import { useEffect, useMemo, useRef, memo, useCallback, useState } from 'react';
 import { useThrottledCallback } from 'use-debounce';
 import classNames from 'classnames';
 import wordsCount from 'words-count';
@@ -43,7 +43,7 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { Extension } from '@tiptap/core';
+import { ImagePreview } from '@refly-packages/ai-workspace-common/components/common/image-preview';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -53,6 +53,9 @@ export const CollaborativeEditor = memo(
     const editorRef = useRef<EditorInstance>();
     const { provider, ydoc } = useDocumentContext();
     const forceUpdateRef = useRef<number>(0);
+    const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string>('');
+    const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
 
     useEffect(() => {
       const styleEl = document.createElement('style');
@@ -179,66 +182,6 @@ export const CollaborativeEditor = memo(
           getIndex: getHierarchicalIndexes,
           onUpdate(content) {
             documentActions.updateTocItems(docId, content);
-          },
-        }),
-        Extension.create({
-          name: 'clickToSelectImage',
-          addNodeView() {
-            return ({ node, getPos, editor }) => {
-              if (node.type.name !== 'image') return {};
-
-              const dom = document.createElement('img');
-
-              // set the image attributes
-              for (const [attr, value] of Object.entries(node.attrs)) {
-                if (attr === 'src' && value) {
-                  dom.src = value as string;
-                } else if (attr === 'alt' && value) {
-                  dom.alt = value as string;
-                } else if (attr === 'width' && value) {
-                  dom.width = value as number;
-                  dom.style.width = `${value}px`;
-                } else if (attr === 'height' && value) {
-                  dom.height = value as number;
-                  dom.style.height = `${value}px`;
-                }
-              }
-
-              // add class
-              dom.classList.add('resizable-image');
-
-              // add click event
-              dom.addEventListener('click', () => {
-                if (typeof getPos === 'function') {
-                  const pos = getPos();
-                  editor.commands.setNodeSelection(pos);
-                }
-              });
-
-              return {
-                dom,
-                update: (updatedNode) => {
-                  if (updatedNode.type.name !== 'image') return false;
-
-                  // update the image attributes
-                  for (const [attr, value] of Object.entries(updatedNode.attrs)) {
-                    if (attr === 'src' && value) {
-                      dom.src = value as string;
-                    } else if (attr === 'alt' && value) {
-                      dom.alt = value as string;
-                    } else if (attr === 'width' && value) {
-                      dom.width = value as number;
-                      dom.style.width = `${value}px`;
-                    } else if (attr === 'height' && value) {
-                      dom.height = value as number;
-                      dom.style.height = `${value}px`;
-                    }
-                  }
-
-                  return true;
-                },
-              };
-            };
           },
         }),
       ],
@@ -457,6 +400,27 @@ export const CollaborativeEditor = memo(
       };
     }, [provider, handleEditorUpdate]);
 
+    // Add handleNodeClick function
+    const handleNodeClick = useCallback(
+      (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+
+        if (target?.nodeName === 'IMG') {
+          if (selectedImage && selectedImage === target) {
+            const imgSrc = selectedImage.getAttribute('src');
+            if (imgSrc) {
+              setImageUrl(imgSrc);
+              setIsPreviewModalVisible(true);
+            }
+          }
+          setSelectedImage(target as HTMLImageElement);
+        } else {
+          setSelectedImage(null);
+        }
+      },
+      [selectedImage, setSelectedImage, setIsPreviewModalVisible, setImageUrl],
+    );
+
     return (
       <div className={classNames('w-full', 'ai-note-editor-content-container')}>
         <div className="w-full h-full">
@@ -476,6 +440,7 @@ export const CollaborativeEditor = memo(
               editorProps={{
                 handleDOMEvents: {
                   keydown: (_view, event) => handleCommandNavigation(event),
+                  click: (_view, event) => handleNodeClick(event),
                 },
                 handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
                 handleDrop: (view, event, _slice, moved) =>
@@ -491,7 +456,13 @@ export const CollaborativeEditor = memo(
               onUpdate={({ editor }) => {
                 debouncedUpdates(editor);
               }}
-              slotAfter={<ImageResizer />}
+              slotAfter={
+                <ImageResizer
+                  readOnly={readOnly}
+                  selectedImage={selectedImage}
+                  setSelectedImage={setSelectedImage}
+                />
+              }
             >
               <CollabEditorCommand entityId={docId} entityType="document" />
               <CollabGenAIMenuSwitch
@@ -505,6 +476,12 @@ export const CollaborativeEditor = memo(
             </EditorContent>
           </EditorRoot>
         </div>
+        <ImagePreview
+          isPreviewModalVisible={isPreviewModalVisible}
+          setIsPreviewModalVisible={setIsPreviewModalVisible}
+          imageUrl={imageUrl}
+          imageTitle="image"
+        />
       </div>
     );
   },

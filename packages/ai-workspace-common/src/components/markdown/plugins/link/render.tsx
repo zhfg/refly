@@ -25,7 +25,7 @@ function ATag({ ...props }, sources: Source[]) {
         href={props.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="no-underline text-[#00968F]"
+        className="no-underline text-[#00968F] cursor-zoom-in"
       >
         {props.children}
       </a>
