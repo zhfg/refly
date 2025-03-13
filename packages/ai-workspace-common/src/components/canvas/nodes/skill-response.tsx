@@ -700,6 +700,7 @@ export const SkillResponseNode = memo(
                       sources={sources}
                       isOperating={isOperating}
                       stepStatus={status === 'executing' ? 'executing' : 'finish'}
+                      sizeMode={sizeMode}
                     />
                   )}
 
