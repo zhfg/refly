@@ -1220,6 +1220,13 @@ const translations = {
       copyErrorMessage: 'Copy error message',
       errorDismissed: 'Error message dismissed',
     },
+    editor: {
+      fontFamily: 'Font Family',
+      fontSize: 'Font Size',
+      fontLigatures: 'Font Ligatures',
+      theme: 'Theme',
+      loading: 'Loading editor...',
+    },
     copySuccess: 'Code copied to clipboard',
     copyError: 'Failed to copy code',
     downloadSuccess: 'Downloaded {{fileName}}',

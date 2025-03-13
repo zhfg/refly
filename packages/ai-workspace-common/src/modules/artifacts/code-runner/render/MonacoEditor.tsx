@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Editor, { Monaco, loader } from '@monaco-editor/react';
 import { CodeArtifactType } from '../types';
 import debounce from 'lodash.debounce';
+import { useTranslation } from 'react-i18next';
+import './monaco-editor.scss';
 
 // Function to map CodeArtifactType to appropriate Monaco editor language
 const getLanguageFromType = (type: CodeArtifactType, language: string): string => {
@@ -43,6 +45,7 @@ const MonacoEditor = ({
   canvasReadOnly = false,
   onChange,
 }: MonacoEditorProps) => {
+  const { t } = useTranslation();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
@@ -165,11 +168,12 @@ const MonacoEditor = ({
       <Editor
         height="100%"
         value={content}
+        className="refly-code-editor"
         onChange={handleEditorChange}
         language={getLanguageFromType(type, language)}
         beforeMount={handleEditorWillMount}
         onMount={handleEditorDidMount}
-        loading={<div className="text-gray-500">Loading editor...</div>}
+        loading={<div className="text-gray-500">{t('codeArtifact.editor.loading')}</div>}
         options={{
           automaticLayout: true,
           minimap: {
@@ -177,6 +181,9 @@ const MonacoEditor = ({
           },
           scrollBeyondLastLine: false,
           fontSize: 14,
+          fontFamily:
+            'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+          fontLigatures: true,
           lineNumbers: 'on',
           renderLineHighlight: 'none',
           readOnly: readOnly || isGenerating || canvasReadOnly,
