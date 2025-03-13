@@ -164,7 +164,7 @@ const PreCode = React.memo(
     // Render the code preview if in preview mode and the type is previewable
     if (viewMode === 'preview' && isPreviewable) {
       return (
-        <div className="relative group p-4 border rounded bg-white">
+        <div className="relative group p-4 border rounded bg-white overflow-auto">
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Space>
               <Tooltip title={t('copilot.message.copy', 'Copy code')}>
