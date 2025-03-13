@@ -73,6 +73,8 @@ const translations = {
     duplicate: 'Duplicate',
     shareSuccess: 'Share link copied to clipboard!',
     shareError: 'Share failed, please try again!',
+    readonlyWarning: 'Read-Only Mode',
+    readonlyDragDescription: 'Canvas is in read-only mode, modifications are not allowed.',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
