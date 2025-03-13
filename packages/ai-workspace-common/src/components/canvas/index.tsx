@@ -156,11 +156,18 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }));
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
-  const { onNodesChange } = useNodeOperations();
+  const { onNodesChange, truncateAllNodesContent } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
 
   const { onEdgesChange, onConnect } = useEdgeOperations();
   const edgeStyles = useEdgeStyles();
+
+  // Call truncateAllNodesContent when nodes are loaded
+  useEffect(() => {
+    if (nodes.length > 0) {
+      truncateAllNodesContent();
+    }
+  }, [canvasId, truncateAllNodesContent]);
 
   const { showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
     showPreview: state.showPreview,
