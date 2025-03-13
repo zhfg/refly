@@ -41,6 +41,8 @@ import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stor
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 import { SiderLoggedOut } from './sider-logged-out';
+import './layout.scss';
+
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -401,11 +403,8 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     <Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}
       className={cn(
-        'bg-white shadow-sm',
+        'border border-solid border-gray-100 bg-white shadow-sm',
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
-        {
-          'border border-solid border-gray-100': !collapse || source !== 'sider',
-        },
       )}
     >
       <div className="flex h-full flex-col overflow-y-auto">
