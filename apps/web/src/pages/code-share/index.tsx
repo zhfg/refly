@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
@@ -22,6 +22,10 @@ const ShareCodePage = () => {
 
   // Handle error reporting (no-op in read-only view)
   const handleRequestFix = useCallback(() => {}, []);
+
+  useEffect(() => {
+    setCollapse(true);
+  }, []);
 
   if (isLoading) {
     return (

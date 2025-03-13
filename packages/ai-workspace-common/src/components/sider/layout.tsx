@@ -401,8 +401,11 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     <Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}
       className={cn(
-        'border border-solid border-gray-100 bg-white shadow-sm',
+        'bg-white shadow-sm',
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
+        {
+          'border border-solid border-gray-100': !collapse || source !== 'sider',
+        },
       )}
     >
       <div className="flex h-full flex-col overflow-y-auto">
