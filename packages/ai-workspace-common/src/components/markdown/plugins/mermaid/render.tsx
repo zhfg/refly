@@ -5,6 +5,7 @@ import debounce from 'lodash.debounce';
 import { cn, BRANDING_NAME } from '@refly/utils';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { Tooltip, Button, Space, message } from 'antd';
+import { ImagePreview } from '@refly-packages/ai-workspace-common/components/common/image-preview';
 import { domToPng } from 'modern-screenshot';
 import copyToClipboard from 'copy-to-clipboard';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -42,6 +43,8 @@ const MermaidComponent = memo(
     const [showOriginalCode, setShowOriginalCode] = useState(false);
     const [rendered, setRendered] = useState(false);
     const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [zoomImageUrl, setZoomImageUrl] = useState<string>('');
     const { addNode } = useAddNode();
 
     // Generate a unique ID for this instance
@@ -311,6 +314,22 @@ const MermaidComponent = memo(
       }
     }, [mermaidCode, diagramTitle, addNode, id, t]);
 
+    // Handle opening zoom modal
+    const handleZoom = useCallback(async () => {
+      try {
+        const dataUrl = await generatePng();
+        if (dataUrl) {
+          setZoomImageUrl(dataUrl);
+          setIsModalVisible(true);
+        } else {
+          message.error('Failed to generate zoom image');
+        }
+      } catch (error) {
+        console.error('Error generating zoom image:', error);
+        message.error('Failed to generate zoom image');
+      }
+    }, [generatePng, t]);
+
     useEffect(() => {
       renderDiagram();
       return () => {
@@ -332,7 +351,8 @@ const MermaidComponent = memo(
       <div className={containerClassName}>
         <div
           ref={mermaidRef}
-          className={`w-full flex justify-center ${viewMode === 'code' ? 'hidden' : ''}`}
+          className={`w-full flex justify-center ${viewMode === 'code' ? 'hidden' : ''} cursor-zoom-in`}
+          onClick={viewMode === 'preview' ? handleZoom : undefined}
         />
 
         {viewMode === 'code' && (
@@ -407,6 +427,12 @@ const MermaidComponent = memo(
             </Space>
           </div>
         )}
+        <ImagePreview
+          isPreviewModalVisible={isModalVisible}
+          setIsPreviewModalVisible={setIsModalVisible}
+          imageUrl={zoomImageUrl}
+          imageTitle={`${BRANDING_NAME}_mermaid_${diagramTitle}`}
+        />
       </div>
     );
   },

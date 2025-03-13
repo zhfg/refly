@@ -1,9 +1,10 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Button, Space, Tooltip, message } from 'antd';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
 import { BRANDING_NAME } from '@refly/utils';
 import { useTranslation } from 'react-i18next';
 import { domToPng } from 'modern-screenshot';
+import { ImagePreview } from '@refly-packages/ai-workspace-common/components/common/image-preview';
 
 interface SVGRendererProps {
   content: string;
@@ -13,6 +14,8 @@ interface SVGRendererProps {
 const SVGRenderer = memo(({ content, title }: SVGRendererProps) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [zoomImageUrl, setZoomImageUrl] = useState<string>('');
 
   const generatePng = async () => {
     const container = containerRef.current;
@@ -106,13 +109,30 @@ const SVGRenderer = memo(({ content, title }: SVGRendererProps) => {
     }
   }, [t]);
 
+  // Handle opening zoom modal
+  const handleZoom = useCallback(async () => {
+    try {
+      const dataUrl = await generatePng();
+      if (dataUrl) {
+        setZoomImageUrl(dataUrl);
+        setIsModalVisible(true);
+      } else {
+        message.error('Failed to generate zoom image');
+      }
+    } catch (error) {
+      console.error('Error generating zoom image:', error);
+      message.error('Failed to generate zoom image');
+    }
+  }, [generatePng, t]);
+
   return (
     <div className="relative w-full h-full">
       {/* SVG Container */}
       <div className="w-full h-full flex items-center justify-center">
         <div
+          onClick={handleZoom}
           ref={containerRef}
-          className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
+          className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full cursor-zoom-in"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
           dangerouslySetInnerHTML={{ __html: content }}
         />
@@ -143,6 +163,13 @@ const SVGRenderer = memo(({ content, title }: SVGRendererProps) => {
           </Tooltip>
         </Space.Compact>
       </div>
+
+      <ImagePreview
+        isPreviewModalVisible={isModalVisible}
+        setIsPreviewModalVisible={setIsModalVisible}
+        imageUrl={zoomImageUrl}
+        imageTitle={title}
+      />
     </div>
   );
 });
