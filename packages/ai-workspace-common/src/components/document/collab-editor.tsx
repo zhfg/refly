@@ -59,6 +59,7 @@ export const CollaborativeEditor = memo(
       styleEl.innerHTML = `
         .ProseMirror-selectednode {
           outline: 2px solid #4299e1 !important;
+          cursor: zoom-in !important;
         }
         .resizable-image {
           transition: all 0.2s ease;

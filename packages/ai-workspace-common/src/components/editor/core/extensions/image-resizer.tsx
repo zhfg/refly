@@ -10,20 +10,20 @@ export const ImageResizer: FC = () => {
   const { editor } = useCurrentEditor();
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
 
+  const updateSelectedImage = () => {
+    const imageNode = document.querySelector(
+      '.ProseMirror-selectednode',
+    ) as HTMLImageElement | null;
+
+    if (imageNode && imageNode.tagName === 'IMG') {
+      setSelectedImage(imageNode);
+    } else {
+      setSelectedImage(null);
+    }
+  };
+
   useEffect(() => {
     if (!editor) return;
-
-    const updateSelectedImage = () => {
-      const imageNode = document.querySelector(
-        '.ProseMirror-selectednode',
-      ) as HTMLImageElement | null;
-
-      if (imageNode && imageNode.tagName === 'IMG') {
-        setSelectedImage(imageNode);
-      } else {
-        setSelectedImage(null);
-      }
-    };
 
     updateSelectedImage();
 
@@ -31,6 +31,7 @@ export const ImageResizer: FC = () => {
     editor.on('focus', updateSelectedImage);
 
     const handleClick = (event: MouseEvent) => {
+      console.log('click image');
       const target = event.target as HTMLElement;
       if (target.tagName === 'IMG' && editor) {
         const pos = editor.view.posAtDOM(target, 0);
@@ -70,15 +71,26 @@ export const ImageResizer: FC = () => {
         src: string;
         width: number;
         height: number;
+        alt?: string;
+        title?: string;
       }) => boolean;
 
+      const imagePos = editor?.state.selection.from;
+      const imageNode = imagePos ? editor?.state.doc.nodeAt(imagePos) : null;
+      const nodeAttrs = imageNode?.attrs ?? {};
+
       setImage({
+        ...nodeAttrs,
         src: selectedImage.src,
         width: width,
         height: height,
+        alt: selectedImage.alt ?? nodeAttrs.alt ?? '',
+        title: selectedImage.title ?? nodeAttrs.title ?? '',
       });
 
-      editor.commands.setNodeSelection(selection.from);
+      editor?.commands.setNodeSelection(selection.from);
+
+      updateSelectedImage();
     } catch (error) {
       console.error('Error updating image size:', error);
     }
@@ -87,6 +99,7 @@ export const ImageResizer: FC = () => {
   return (
     <Suspense fallback={<Spin />}>
       <Moveable
+        key={`moveable-${selectedImage?.src}-${selectedImage?.width}-${selectedImage?.height}`}
         target={selectedImage}
         container={null}
         origin={false}
@@ -102,6 +115,9 @@ export const ImageResizer: FC = () => {
         onResize={({ target, width, height, delta }) => {
           if (delta[0]) target.style.width = `${width}px`;
           if (delta[1]) target.style.height = `${height}px`;
+        }}
+        onResizeEnd={() => {
+          updateMediaSize();
         }}
         /* scalable */
         /* Only one of resizable, scalable, warpable can be used. */
