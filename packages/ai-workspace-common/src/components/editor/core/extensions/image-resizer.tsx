@@ -1,14 +1,17 @@
 import { useCurrentEditor } from '@tiptap/react';
 import type { FC } from 'react';
 import { Spin } from '@arco-design/web-react';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 // Dynamically import Moveable
 const Moveable = lazy(() => import('react-moveable'));
 
-export const ImageResizer: FC = () => {
+export const ImageResizer: FC<{
+  readOnly: boolean;
+  selectedImage: HTMLImageElement | null;
+  setSelectedImage: (image: HTMLImageElement | null) => void;
+}> = ({ readOnly, selectedImage, setSelectedImage }) => {
   const { editor } = useCurrentEditor();
-  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
 
   const updateSelectedImage = () => {
     const imageNode = document.querySelector(
@@ -21,41 +24,6 @@ export const ImageResizer: FC = () => {
       setSelectedImage(null);
     }
   };
-
-  useEffect(() => {
-    if (!editor) return;
-
-    updateSelectedImage();
-
-    editor.on('selectionUpdate', updateSelectedImage);
-    editor.on('focus', updateSelectedImage);
-
-    const handleClick = (event: MouseEvent) => {
-      console.log('click image');
-      const target = event.target as HTMLElement;
-      if (target.tagName === 'IMG' && editor) {
-        const pos = editor.view.posAtDOM(target, 0);
-        if (pos) {
-          editor.commands.setNodeSelection(pos);
-          updateSelectedImage();
-        }
-      }
-    };
-
-    const editorElement = document.querySelector('.ProseMirror');
-    if (editorElement) {
-      editorElement.addEventListener('click', handleClick);
-    }
-
-    return () => {
-      editor.off('selectionUpdate', updateSelectedImage);
-      editor.off('focus', updateSelectedImage);
-
-      if (editorElement) {
-        editorElement.removeEventListener('click', handleClick);
-      }
-    };
-  }, [editor]);
 
   if (!editor?.isActive('image') || !selectedImage) return null;
 
@@ -110,7 +78,7 @@ export const ImageResizer: FC = () => {
         keepRatio={true}
         /* resizable*/
         /* Only one of resizable, scalable, warpable can be used. */
-        resizable={true}
+        resizable={!readOnly}
         throttleResize={0}
         onResize={({ target, width, height, delta }) => {
           if (delta[0]) target.style.width = `${width}px`;
@@ -121,7 +89,7 @@ export const ImageResizer: FC = () => {
         }}
         /* scalable */
         /* Only one of resizable, scalable, warpable can be used. */
-        scalable={true}
+        scalable={!readOnly}
         throttleScale={0}
         /* Set the direction of resizable */
         renderDirections={['nw', 'ne', 'se', 'sw']}
