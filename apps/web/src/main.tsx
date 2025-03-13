@@ -33,6 +33,7 @@ import '@refly-packages/ai-workspace-common/i18n/config';
 import { getEnv, setRuntime } from '@refly/utils/env';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
+import { sentryEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 
 // styles
 import '@/styles/style.css';
@@ -111,8 +112,10 @@ const initSentry = async () => {
   }
 };
 
-// Call Sentry initialization
-initSentry();
+// Call Sentry initialization if enabled
+if (sentryEnabled) {
+  initSentry();
+}
 
 // Update App component to remove Suspense (moved to router definition)
 export const App = () => {
