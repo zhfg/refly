@@ -930,7 +930,7 @@ const translations = {
     },
     connectionTimeout: {
       title: 'Connection Timeout',
-      extra: 'The server seems to be busy, please try again.',
+      extra: 'We have some issues connecting to the Refly server, please refresh and try again.',
     },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',

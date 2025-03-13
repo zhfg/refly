@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
+import { Modal, Result } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
@@ -386,19 +387,50 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const [connectionTimeout, setConnectionTimeout] = useState(false);
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  // Track when provider first became unhealthy
+  const unhealthyStartTimeRef = useRef<number | null>(null);
 
-    if (provider?.status !== 'connected') {
-      timeoutId = setTimeout(() => {
-        setConnectionTimeout(true);
-      }, 10000);
+  useEffect(() => {
+    // Skip if no provider
+    if (!provider) return;
+
+    // Clear timeout state if provider becomes connected
+    if (provider.status === 'connected') {
+      setConnectionTimeout(false);
+      unhealthyStartTimeRef.current = null;
+      return;
     }
 
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+    // If provider is unhealthy and we haven't started tracking, start now
+    if (unhealthyStartTimeRef.current === null) {
+      unhealthyStartTimeRef.current = Date.now();
+    }
+
+    // Check status every two seconds after provider becomes unhealthy
+    const intervalId = setInterval(() => {
+      // Skip if provider is gone
+      if (!provider) return;
+
+      if (unhealthyStartTimeRef.current) {
+        const unhealthyDuration = Date.now() - unhealthyStartTimeRef.current;
+
+        // If provider has been unhealthy for more than 10 seconds, set timeout
+        if (unhealthyDuration > 10000) {
+          setConnectionTimeout(true);
+          clearInterval(intervalId);
+        }
       }
+
+      // Provider became healthy, reset everything
+      if (provider.status === 'connected') {
+        clearInterval(intervalId);
+        unhealthyStartTimeRef.current = null;
+        setConnectionTimeout(false);
+      }
+    }, 2000);
+
+    return () => {
+      clearInterval(intervalId);
     };
   }, [provider?.status]);
 
@@ -782,6 +814,20 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
+      <Modal
+        centered
+        open={connectionTimeout}
+        onOk={() => window.location.reload()}
+        onCancel={() => setConnectionTimeout(false)}
+        okText={t('common.retry')}
+        cancelText={t('common.cancel')}
+      >
+        <Result
+          status="warning"
+          title={t('canvas.connectionTimeout.title')}
+          extra={t('canvas.connectionTimeout.extra')}
+        />
+      </Modal>
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
         {!readonly && (
           <CanvasToolbar onToolSelect={handleToolSelect} nodeLength={nodes?.length || 0} />

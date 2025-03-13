@@ -914,7 +914,7 @@ const translations = {
     },
     connectionTimeout: {
       title: '连接超时',
-      extra: '服务器似乎繁忙，请稍后再试。',
+      extra: '似乎无法连接到 Refly 服务器，请刷新重试。',
     },
     action: {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
