@@ -5,7 +5,7 @@
 /**
  * Maximum number of characters allowed for node content preview
  */
-export const MAX_CONTENT_PREVIEW_LENGTH = 1000;
+export const MAX_CONTENT_PREVIEW_LENGTH = 100;
 
 /**
  * Truncates content to a maximum length
@@ -33,8 +33,9 @@ export const truncateContent = (
 export const processContentPreview = (
   contents: (string | undefined)[] = [],
   separator = '\n',
+  maxLength = MAX_CONTENT_PREVIEW_LENGTH,
 ): string => {
   const filteredContents = contents.filter(Boolean) as string[];
   const joinedContent = filteredContents.join(separator);
-  return joinedContent;
+  return truncateContent(joinedContent, maxLength);
 };

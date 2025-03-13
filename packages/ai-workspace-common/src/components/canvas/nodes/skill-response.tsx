@@ -380,12 +380,34 @@ export const SkillResponseNode = memo(
     const { debouncedCreateDocument } = useCreateDocument();
 
     const handleCreateDocument = useCallback(async () => {
-      await debouncedCreateDocument(title ?? '', content, {
-        sourceNodeId: entityId,
-        addToCanvas: true,
-        sourceType: 'skillResponse',
-      });
-    }, [content, debouncedCreateDocument, entityId, title]);
+      try {
+        // Fetch complete action result from server to get full content
+        const { data, error } = await getClient().getActionResult({
+          query: { resultId: entityId },
+        });
+
+        if (error || !data?.success) {
+          message.error(t('canvas.skillResponse.fetchContentFailed'));
+          return;
+        }
+
+        // Extract full content from all steps
+        const fullContent = data.data.steps
+          ?.map((step) => step?.content || '')
+          .filter(Boolean)
+          .join('\n\n');
+
+        // Create document with full content
+        await debouncedCreateDocument(title ?? '', fullContent || content, {
+          sourceNodeId: entityId,
+          addToCanvas: true,
+          sourceType: 'skillResponse',
+        });
+      } catch (err) {
+        console.error('Failed to create document:', err);
+        message.error(t('canvas.skillResponse.createDocumentFailed'));
+      }
+    }, [debouncedCreateDocument, entityId, title, content, t]);
 
     const { addToContext } = useAddToContext();
 
