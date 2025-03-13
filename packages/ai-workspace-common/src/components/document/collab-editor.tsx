@@ -43,6 +43,7 @@ import { useEditorPerformance } from '@refly-packages/ai-workspace-common/contex
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { Extension } from '@tiptap/core';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -52,6 +53,36 @@ export const CollaborativeEditor = memo(
     const editorRef = useRef<EditorInstance>();
     const { provider, ydoc } = useDocumentContext();
     const forceUpdateRef = useRef<number>(0);
+
+    useEffect(() => {
+      const styleEl = document.createElement('style');
+      styleEl.innerHTML = `
+        .ProseMirror-selectednode {
+          outline: 2px solid #4299e1 !important;
+        }
+        .resizable-image {
+          transition: all 0.2s ease;
+        }
+        .resizable-image:hover {
+          cursor: pointer;
+          box-shadow: 0 0 0 2px rgba(0, 150, 143, 0.5);
+        }
+        .moveable-control {
+          background-color: #00968F !important;
+          border-color: #fff !important;
+        }
+        .moveable-line {
+          background-color: #00968F !important;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      return () => {
+        if (styleEl && document.head.contains(styleEl)) {
+          document.head.removeChild(styleEl);
+        }
+      };
+    }, []);
 
     // Move hooks to top level
     const documentActions = useDocumentStoreShallow((state) => ({
@@ -147,6 +178,66 @@ export const CollaborativeEditor = memo(
           getIndex: getHierarchicalIndexes,
           onUpdate(content) {
             documentActions.updateTocItems(docId, content);
+          },
+        }),
+        Extension.create({
+          name: 'clickToSelectImage',
+          addNodeView() {
+            return ({ node, getPos, editor }) => {
+              if (node.type.name !== 'image') return {};
+
+              const dom = document.createElement('img');
+
+              // set the image attributes
+              for (const [attr, value] of Object.entries(node.attrs)) {
+                if (attr === 'src' && value) {
+                  dom.src = value as string;
+                } else if (attr === 'alt' && value) {
+                  dom.alt = value as string;
+                } else if (attr === 'width' && value) {
+                  dom.width = value as number;
+                  dom.style.width = `${value}px`;
+                } else if (attr === 'height' && value) {
+                  dom.height = value as number;
+                  dom.style.height = `${value}px`;
+                }
+              }
+
+              // add class
+              dom.classList.add('resizable-image');
+
+              // add click event
+              dom.addEventListener('click', () => {
+                if (typeof getPos === 'function') {
+                  const pos = getPos();
+                  editor.commands.setNodeSelection(pos);
+                }
+              });
+
+              return {
+                dom,
+                update: (updatedNode) => {
+                  if (updatedNode.type.name !== 'image') return false;
+
+                  // update the image attributes
+                  for (const [attr, value] of Object.entries(updatedNode.attrs)) {
+                    if (attr === 'src' && value) {
+                      dom.src = value as string;
+                    } else if (attr === 'alt' && value) {
+                      dom.alt = value as string;
+                    } else if (attr === 'width' && value) {
+                      dom.width = value as number;
+                      dom.style.width = `${value}px`;
+                    } else if (attr === 'height' && value) {
+                      dom.height = value as number;
+                      dom.style.height = `${value}px`;
+                    }
+                  }
+
+                  return true;
+                },
+              };
+            };
           },
         }),
       ],
@@ -390,7 +481,7 @@ export const CollaborativeEditor = memo(
                   handleImageDrop(view, event, moved, uploadFn),
                 attributes: {
                   class:
-                    'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
+                    'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full prose-img:cursor-pointer',
                   'data-doc-id': docId,
                 },
               }}
