@@ -15,7 +15,7 @@ export const ImageResizer: FC<{
 
   const updateSelectedImage = () => {
     const imageNode = document.querySelector(
-      '.ProseMirror-selectednode',
+      '.ProseMirror-selectednode img',
     ) as HTMLImageElement | null;
 
     if (imageNode && imageNode.tagName === 'IMG') {
