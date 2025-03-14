@@ -1,31 +1,10 @@
 import { useParams } from 'react-router-dom';
-import { useMemo, useCallback, useEffect, memo } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
-import Logo from '@/assets/logo.svg';
-
-// PoweredByRefly component to display when sidebar is collapsed
-const PoweredByRefly = memo(({ onClick }: { onClick: () => void }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      className="fixed bottom-4 left-4 flex items-center gap-2 rounded-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2 shadow-lg hover:shadow-md z-10 cursor-pointer transition-all border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-100 dark:hover:bg-gray-700/80"
-      style={{ borderWidth: '0.5px' }}
-      onClick={onClick}
-    >
-      <img src={Logo} alt={t('productName')} className="h-6 w-6" />
-      <div className="flex items-center gap-1">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{t('common.poweredBy')}</span>
-        <span className="text-sm font-bold text-gray-800 dark:text-white" translate="no">
-          {t('productName')}
-        </span>
-      </div>
-    </div>
-  );
-});
+import PoweredByRefly from '@/components/common/PoweredByRefly';
 
 const ShareCodePage = () => {
   const { shareId = '' } = useParams();

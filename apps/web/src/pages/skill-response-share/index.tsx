@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { getParsedReasoningContent } from '@refly/utils/content-parser';
 import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import Logo from '@/assets/logo.svg';
+import PoweredByRefly from '@/components/common/PoweredByRefly';
 
 // Simplified version of ReasoningContent
 const SimpleReasoningContent = memo(
@@ -146,27 +146,6 @@ const SimpleStepCard = memo(
     );
   },
 );
-
-// PoweredByRefly component to display when sidebar is collapsed
-const PoweredByRefly = memo(({ onClick }: { onClick: () => void }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      className="fixed bottom-4 left-4 flex items-center gap-2 rounded-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2 shadow-sm hover:shadow-lg z-10 cursor-pointer transition-all border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-100 dark:hover:bg-gray-700/80 border-solid"
-      style={{ borderWidth: '0.5px' }}
-      onClick={onClick}
-    >
-      <img src={Logo} alt={t('productName')} className="h-6 w-6" />
-      <div className="flex items-center gap-1">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{t('common.poweredBy')}</span>
-        <span className="text-sm font-bold text-gray-800 dark:text-white" translate="no">
-          {t('productName')}
-        </span>
-      </div>
-    </div>
-  );
-});
 
 const SkillResponseSharePage = () => {
   const { shareId = '' } = useParams();
