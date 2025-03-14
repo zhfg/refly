@@ -140,7 +140,7 @@ We're continuously improving Refly with exciting new features. For a detailed ro
 - 💻 Enhanced offline capabilities
 - 📚 Advanced knowledge organization and visualization tools
 - 📚 Collaborative knowledge base features
-- 🔌 Open standard for third-party plugin development
+- 🔌 Open standard for third-party plugin development based on MCP
 - 🔌 Plugin marketplace and developer SDK
 - 🤖 Autonomous task completion with minimal supervision
 - 🤖 Multi-agent collaboration systems
