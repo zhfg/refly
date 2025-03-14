@@ -124,6 +124,19 @@ const myTemp: CanvasTemplateCategory = {
   },
 };
 
+const AllTemplates: CanvasTemplateCategory = {
+  categoryId: '',
+  labelDict: {
+    en: 'All Templates',
+    'zh-CN': '所有模板',
+  },
+  name: 'All Templates',
+  descriptionDict: {
+    en: 'All Templates',
+    'zh-CN': '所有模板',
+  },
+};
+
 export const CanvasTemplateModal = () => {
   const { visible, setVisible } = useCanvasTemplateModal((state) => ({
     visible: state.visible,
@@ -159,7 +172,7 @@ export const CanvasTemplateModal = () => {
       <div className="canvas-template-modal flex h-[80vh] overflow-hidden">
         <TemplateCategoryList
           uiLocale={currentUiLocale}
-          categories={[myTemp, ...(data?.data ?? [])]}
+          categories={[myTemp, AllTemplates, ...(data?.data ?? [])]}
           currentCategory={currentCategory}
           setCurrentCategory={setCurrentCategory}
         />

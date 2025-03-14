@@ -21,7 +21,7 @@ const Canvas = lazy(() => import('@/pages/canvas'));
 const Pricing = lazy(() => import('@/pages/pricing'));
 const ShareCanvasPage = lazy(() => import('@/pages/share'));
 const ShareCodePage = lazy(() => import('@/pages/code-share'));
-
+const TemplatePreviewPage = lazy(() => import('@/pages/template-preview'));
 const prefetchRoutes = () => {
   // Prefetch common routes
   import('@refly-packages/ai-workspace-common/components/request-access');
@@ -88,6 +88,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
           <Route path="/share/code/:shareId" element={<ShareCodePage />} />
+          <Route path="/preview/canvas/:shareId" element={<TemplatePreviewPage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}

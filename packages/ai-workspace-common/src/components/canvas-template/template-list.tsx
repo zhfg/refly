@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Spin, Empty, Avatar, Button, Typography } from 'antd';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,8 @@ import { CanvasTemplate } from '@refly/openapi-schema';
 import { IoPersonOutline } from 'react-icons/io5';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { useDebouncedCallback } from 'use-debounce';
-import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
+import { useNavigate } from 'react-router-dom';
+import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
 
 export const TemplateCard = ({
   template,
@@ -16,16 +17,25 @@ export const TemplateCard = ({
   showUser = true,
 }: { template: CanvasTemplate; className?: string; showUser?: boolean }) => {
   const { t } = useTranslation();
-  const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
+  const { setVisible: setModalVisible } = useCanvasTemplateModal((state) => ({
+    setVisible: state.setVisible,
+  }));
+  const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
 
   const handlePreview = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    console.log('preview');
+    if (template.shareId) {
+      setModalVisible(false);
+      navigate(`/preview/canvas/${template.shareId}`);
+    }
   };
 
   const handleUse = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    setVisible(true);
+    if (template.shareId) {
+      duplicateCanvas(template.shareId);
+    }
   };
 
   return (
@@ -69,6 +79,7 @@ export const TemplateCard = ({
           {t('template.preview')}
         </Button>
         <Button
+          loading={duplicating}
           size="large"
           type="primary"
           className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100"
@@ -77,12 +88,6 @@ export const TemplateCard = ({
           {t('template.use')}
         </Button>
       </div>
-
-      <DuplicateCanvasModal
-        canvasId={template.originCanvasId}
-        visible={visible}
-        setVisible={setVisible}
-      />
     </div>
   );
 };
