@@ -119,7 +119,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
           <IconCanvas /> {t('common.canvas')}
         </span>
       }
-      width={1000}
+      width={1200}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}

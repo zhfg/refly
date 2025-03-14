@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { IconTemplate } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { Modal, Input, Divider, Select } from 'antd';
+import { Modal, Divider, Select } from 'antd';
 import { CanvasTemplateCategory } from '@refly/openapi-schema';
 
 import { cn } from '@refly-packages/utils/cn';
@@ -19,11 +19,11 @@ const dict = {
 };
 
 const TitleRender = ({
-  searchQuery,
   uiLocale,
   language,
   setLanguage,
-  setSearchQuery,
+  // searchQuery,
+  // setSearchQuery,
 }: {
   uiLocale: Language;
   language: Language;
@@ -48,12 +48,12 @@ const TitleRender = ({
         <div className="flex items-center gap-2 text-lg font-medium">
           <IconTemplate /> {t('template.templateLibrary')}
         </div>
-        <Input
+        {/* <Input
           className="w-80"
           placeholder={t('template.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        /> */}
         <div className="flex items-center">
           <LuFilter className="text-lg flex items-center -mr-2" />
           <Select
@@ -163,13 +163,13 @@ export const CanvasTemplateModal = () => {
           setSearchQuery={setSearchQuery}
         />
       }
-      width="80%"
+      width={1200}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
       focusTriggerAfterClose={false}
     >
-      <div className="canvas-template-modal flex h-[80vh] overflow-hidden">
+      <div className="canvas-template-modal flex h-[60vh] overflow-hidden">
         <TemplateCategoryList
           uiLocale={currentUiLocale}
           categories={[myTemp, AllTemplates, ...(data?.data ?? [])]}
