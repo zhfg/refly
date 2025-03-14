@@ -90,8 +90,8 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
           <Route path="/share/code/:shareId" element={<ShareCodePage />} />
-          <Route path="/share/skill-response/:shareId" element={<SkillResponseSharePage />} />
-          <Route path="/share/document/:shareId" element={<DocumentSharePage />} />
+          <Route path="/share/answer/:shareId" element={<SkillResponseSharePage />} />
+          <Route path="/share/doc/:shareId" element={<DocumentSharePage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}

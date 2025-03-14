@@ -5,9 +5,9 @@ export const getShareLink = (entityType: string, shareId: string) => {
   } else if (entityType === 'codeArtifact') {
     entity = 'code';
   } else if (entityType === 'skillResponse') {
-    entity = 'skill-response';
+    entity = 'answer';
   } else if (entityType === 'document') {
-    entity = 'document';
+    entity = 'doc';
   }
   return `${window.location.origin}/share/${entity}/${shareId}`;
 };
