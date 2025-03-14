@@ -84,6 +84,7 @@ const translations = {
     shareError: '分享失败，请重试！',
     readonlyWarning: '只读模式',
     readonlyDragDescription: '当前画布为只读模式，不支持修改',
+    preview: '预览',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
@@ -787,7 +788,6 @@ const translations = {
       copyStarted: '开始复制...',
       copySuccess: '已复制到剪贴板',
       copyError: '复制失败',
-      preview: '预览',
     },
   },
   resourceType: {

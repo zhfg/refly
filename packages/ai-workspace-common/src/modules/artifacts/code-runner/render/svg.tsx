@@ -1,8 +1,7 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { Button, Space, Tooltip, message } from 'antd';
 import { CopyIcon, DownloadIcon } from 'lucide-react';
-import { PiMagnifyingGlassBold } from 'react-icons/pi';
-
+import { PiMagnifyingGlassPlusBold } from 'react-icons/pi';
 import { BRANDING_NAME } from '@refly/utils';
 import { useTranslation } from 'react-i18next';
 import { domToPng } from 'modern-screenshot';
@@ -22,8 +21,12 @@ const SVGRenderer = memo(
     const { t } = useTranslation();
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [iframeHeight, setIframeHeight] = useState<number | null>(null);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [iframeWidth, setIframeWidth] = useState<number | null>(null);
+    const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+    const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const [zoomImageUrl, setZoomImageUrl] = useState<string>('');
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     // Set up the iframe content when the component mounts or content changes
     useEffect(() => {
@@ -49,119 +52,139 @@ const SVGRenderer = memo(
               margin: 0;
               padding: 0;
               width: 100%;
-              height: auto;
-              overflow: visible;
+              height: 100%;
+              overflow: hidden;
               display: flex;
               align-items: center;
               justify-content: center;
               background-color: transparent;
             }
             svg {
-              width: 100%;
-              height: auto;
               max-width: 100%;
+              max-height: 100%;
+              width: auto !important;
+              height: auto !important;
               display: block;
+              object-fit: contain;
             }
             #container {
               width: 100%;
-              height: auto;
-              overflow: visible;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              overflow: hidden;
+            }
+            /* Override any fixed dimensions on SVG to ensure proper scaling */
+            #${SVG_ID} {
+              width: auto !important;
+              height: auto !important;
+              max-width: 100% !important;
+              max-height: 100% !important;
+              object-fit: contain !important;
             }
           </style>
           <script>
-            // Function to calculate SVG height based on multiple methods
-            function getSvgHeight(svg) {
-              if (!svg) return 0;
+            // Function to calculate SVG dimensions based on multiple methods
+            function getSvgDimensions(svg) {
+              if (!svg) return { width: 0, height: 0 };
               
-              // Method 1: Check explicit height attribute (might be in px, em, %, etc.)
+              // Method 1: Check explicit width/height attributes
+              const widthAttr = svg.getAttribute('width');
               const heightAttr = svg.getAttribute('height');
               
               // Method 2: Check computed style
               const computedStyle = window.getComputedStyle(svg);
+              const styleWidth = computedStyle.width;
               const styleHeight = computedStyle.height;
               
               // Method 3: Check viewBox attribute
               const viewBox = svg.getAttribute('viewBox');
+              let viewBoxWidth = 0;
               let viewBoxHeight = 0;
+              let viewBoxRatio = 1;
+              
               if (viewBox) {
                 const viewBoxValues = viewBox.split(' ').map(Number);
                 if (viewBoxValues.length === 4) {
                   // viewBox format: min-x min-y width height
+                  viewBoxWidth = viewBoxValues[2];
                   viewBoxHeight = viewBoxValues[3];
+                  viewBoxRatio = viewBoxWidth / viewBoxHeight;
                 }
               }
               
               // Method 4: Get bounding client rect (actual rendered size)
               const rect = svg.getBoundingClientRect();
+              const boundingWidth = rect.width;
               const boundingHeight = rect.height;
               
-              // Method 5: Check all child elements and get the max height
+              // Method 5: Check all child elements and get the max dimensions
+              let maxChildWidth = 0;
               let maxChildHeight = 0;
               if (svg.children && svg.children.length > 0) {
                 for (let i = 0; i < svg.children.length; i++) {
                   const childRect = svg.children[i].getBoundingClientRect();
+                  maxChildWidth = Math.max(maxChildWidth, childRect.width);
                   maxChildHeight = Math.max(maxChildHeight, childRect.height);
                 }
               }
               
-              // Use the most accurate measurement available
-              // NEW PRIORITY: height attribute > Calculated style > Bounding rect > viewBox > Children
-              
-              console.log('SVG height measurements:', {
+              console.log('SVG dimensions measurements:', {
+                widthAttr,
                 heightAttr,
+                styleWidth,
                 styleHeight,
+                viewBoxWidth,
                 viewBoxHeight,
+                boundingWidth,
                 boundingHeight,
+                maxChildWidth,
                 maxChildHeight
               });
               
-              // If height attribute is available and not percentage, use it as highest priority
-              if (heightAttr && !heightAttr.includes('%')) {
-                const numericHeight = parseFloat(heightAttr);
-                if (!isNaN(numericHeight) && numericHeight > 0) {
-                  return Math.ceil(numericHeight);
-                }
+              // Determine the original dimensions (before any scaling)
+              let originalWidth = 0;
+              let originalHeight = 0;
+              
+              // Use viewBox dimensions as priority if available
+              if (viewBoxWidth > 0 && viewBoxHeight > 0) {
+                originalWidth = viewBoxWidth;
+                originalHeight = viewBoxHeight;
+              } 
+              // Next try explicit width/height attributes that aren't percentage-based
+              else if (widthAttr && !widthAttr.includes('%') && heightAttr && !heightAttr.includes('%')) {
+                originalWidth = parseFloat(widthAttr);
+                originalHeight = parseFloat(heightAttr);
+              } 
+              // Fall back to bounding dimensions
+              else {
+                originalWidth = boundingWidth || maxChildWidth || 300;
+                originalHeight = boundingHeight || maxChildHeight || 300;
               }
               
-              // If computed style height is available and not 'auto', use it
-              if (styleHeight && styleHeight !== 'auto' && styleHeight !== '0px') {
-                const numericHeight = parseFloat(styleHeight);
-                if (!isNaN(numericHeight) && numericHeight > 0) {
-                  return Math.ceil(numericHeight);
-                }
-              }
+              // Add a small padding
+              originalWidth += 20;
+              originalHeight += 20;
               
-              // Then use bounding height
-              if (boundingHeight && boundingHeight > 10) {
-                return Math.ceil(boundingHeight);
-              }
-              
-              // Use viewBox height if other methods failed
-              if (viewBoxHeight > 0) {
-                return Math.ceil(viewBoxHeight);
-              }
-              
-              // Fall back to max child height
-              if (maxChildHeight > 0) {
-                return Math.ceil(maxChildHeight);
-              }
-              
-              // Last resort: arbitrary minimum height
-              return 300;
+              return { 
+                width: Math.ceil(originalWidth), 
+                height: Math.ceil(originalHeight),
+                aspectRatio: originalWidth / originalHeight 
+              };
             }
             
             // Function to send SVG dimensions to parent
             function reportSize() {
               const svg = document.querySelector('#${SVG_ID}');
               if (svg) {
-                const height = getSvgHeight(svg);
-                
-                // Add a padding to ensure there's a little extra space
-                const paddedHeight = height + 20;
+                const { width, height, aspectRatio } = getSvgDimensions(svg);
                 
                 window.parent.postMessage({
                   type: 'svg-resize',
-                  height: paddedHeight
+                  width: width,
+                  height: height,
+                  aspectRatio: aspectRatio
                 }, '*');
               }
             }
@@ -169,8 +192,27 @@ const SVGRenderer = memo(
             // Function to ensure SVG preserves aspect ratio
             function ensureSvgAspectRatio() {
               const svg = document.querySelector('#${SVG_ID}');
-              if (svg && !svg.hasAttribute('preserveAspectRatio')) {
+              if (svg) {
+                // Always set preserveAspectRatio to ensure content is not stretched
                 svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                
+                // Override any fixed dimensions
+                svg.style.width = 'auto';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.maxHeight = '100%';
+                svg.style.objectFit = 'contain';
+                
+                // Store original viewBox if not present
+                if (!svg.hasAttribute('viewBox') && 
+                    svg.hasAttribute('width') && 
+                    svg.hasAttribute('height')) {
+                  const width = parseFloat(svg.getAttribute('width'));
+                  const height = parseFloat(svg.getAttribute('height'));
+                  if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+                    svg.setAttribute('viewBox', \`0 0 \${width} \${height}\`);
+                  }
+                }
               }
             }
             
@@ -211,6 +253,8 @@ const SVGRenderer = memo(
       const handleMessage = (event: MessageEvent) => {
         if (event.data && event.data.type === 'svg-resize') {
           setIframeHeight(event.data.height);
+          setIframeWidth(event.data.width);
+          setAspectRatio(event.data.aspectRatio);
         }
       };
 
@@ -219,6 +263,25 @@ const SVGRenderer = memo(
         window.removeEventListener('message', handleMessage);
       };
     }, [content]);
+
+    // Monitor container size for responsive adjustments
+    useEffect(() => {
+      if (!containerRef) return;
+
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.target === containerRef) {
+            setContainerDimensions({
+              width: entry.contentRect.width,
+              height: entry.contentRect.height,
+            });
+          }
+        }
+      });
+
+      resizeObserver.observe(containerRef);
+      return () => resizeObserver.disconnect();
+    }, [containerRef]);
 
     const generatePng = async () => {
       const iframe = iframeRef.current;
@@ -250,22 +313,6 @@ const SVGRenderer = memo(
         return null;
       }
     };
-
-    // Handle opening zoom modal
-    const handleZoom = useCallback(async () => {
-      try {
-        const dataUrl = await generatePng();
-        if (dataUrl) {
-          setZoomImageUrl(dataUrl);
-          setIsModalVisible(true);
-        } else {
-          message.error('Failed to generate zoom image');
-        }
-      } catch (error) {
-        console.error('Error generating zoom image:', error);
-        message.error('Failed to generate zoom image');
-      }
-    }, [generatePng, t]);
 
     const downloadImage = useCallback(
       async (type: 'png' | 'svg') => {
@@ -336,30 +383,98 @@ const SVGRenderer = memo(
       }
     }, [t]);
 
+    // Handle opening zoom modal
+    const handleZoom = useCallback(async () => {
+      try {
+        const dataUrl = await generatePng();
+        if (dataUrl) {
+          setZoomImageUrl(dataUrl);
+          setIsModalVisible(true);
+        } else {
+          message.error('Failed to generate zoom image');
+        }
+      } catch (error) {
+        console.error('Error generating zoom image:', error);
+        message.error('Failed to generate zoom image');
+      }
+    }, [generatePng, t]);
+
     // Calculate the style for the iframe
-    const iframeStyle = {
-      border: 'none',
-      width,
-      // Use calculated height if available, otherwise use default
-      height: iframeHeight ? `${iframeHeight}px` : height,
-      minHeight: iframeHeight ? `${iframeHeight}px` : '300px',
-    };
+    const iframeStyle = useMemo(() => {
+      if (!containerDimensions.width || !containerDimensions.height || !aspectRatio) {
+        // Default style when we don't have enough information
+        return {
+          border: 'none',
+          width: width,
+          height: height,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          minHeight: '300px',
+          objectFit: 'contain',
+        } as React.CSSProperties;
+      }
+
+      // Calculate dimensions that fit within the container while maintaining aspect ratio
+      let finalWidth: number;
+      let finalHeight: number;
+
+      const containerRatio = containerDimensions.width / containerDimensions.height;
+
+      if (aspectRatio > containerRatio) {
+        // SVG is wider than container (relative to height)
+        finalWidth = Math.min(containerDimensions.width, iframeWidth ?? 0);
+        finalHeight = finalWidth / aspectRatio;
+      } else {
+        // SVG is taller than container (relative to width)
+        finalHeight = Math.min(containerDimensions.height, iframeHeight ?? 0);
+        finalWidth = finalHeight * aspectRatio;
+      }
+
+      // Ensure we have sensible minimums and don't exceed container dimensions
+      finalWidth = Math.min(Math.max(finalWidth, 50), containerDimensions.width);
+      finalHeight = Math.min(Math.max(finalHeight, 50), containerDimensions.height);
+
+      return {
+        border: 'none',
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`,
+        maxWidth: '100%',
+        maxHeight: '100%',
+        objectFit: 'contain',
+      } as React.CSSProperties;
+    }, [width, height, iframeWidth, iframeHeight, aspectRatio, containerDimensions]);
 
     return (
       <div className="relative w-full h-full">
         {/* SVG Container */}
-        <div className="w-full h-full flex items-center justify-center">
-          <iframe
-            ref={iframeRef}
-            style={iframeStyle}
-            title="svg-renderer"
-            sandbox="allow-same-origin allow-scripts"
-          />
+        <div
+          ref={setContainerRef}
+          className="w-full h-full flex items-center justify-center overflow-hidden bg-transparent"
+        >
+          <div className="relative max-w-full max-h-full flex items-center justify-center">
+            <iframe
+              ref={iframeRef}
+              style={iframeStyle}
+              title="svg-renderer"
+              sandbox="allow-same-origin allow-scripts"
+              className="flex-shrink-0"
+            />
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="absolute bottom-2 right-2 z-10">
           <Space.Compact className="shadow-sm rounded-md overflow-hidden">
+            <Tooltip title={t('common.preview')}>
+              <Button
+                type="default"
+                className="flex items-center justify-center bg-white hover:bg-gray-50 hover:text-purple-600 hover:border-purple-600 border border-gray-200"
+                icon={<PiMagnifyingGlassPlusBold className="w-4 h-4" />}
+                onClick={handleZoom}
+              >
+                <span className="sr-only">Preview</span>
+              </Button>
+            </Tooltip>
             <Tooltip title={t('artifact.svg.downloadAsPng')}>
               <Button
                 type="default"
@@ -378,16 +493,6 @@ const SVGRenderer = memo(
                 onClick={copyImage}
               >
                 <span className="sr-only">Copy</span>
-              </Button>
-            </Tooltip>
-            <Tooltip title={t('artifact.svg.preview')}>
-              <Button
-                type="default"
-                className="flex items-center justify-center bg-white hover:bg-gray-50 hover:text-purple-600 hover:border-purple-600 border border-gray-200"
-                icon={<PiMagnifyingGlassBold className="w-4 h-4" />}
-                onClick={handleZoom}
-              >
-                <span className="sr-only">Preview</span>
               </Button>
             </Tooltip>
           </Space.Compact>
