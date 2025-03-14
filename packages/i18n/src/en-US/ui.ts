@@ -9,6 +9,7 @@ const translations = {
     title: 'Terms of Service',
   },
   common: {
+    poweredBy: 'Powered by',
     confirm: 'Confirm',
     cancel: 'Cancel',
     delete: 'Delete',

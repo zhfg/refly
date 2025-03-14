@@ -17,6 +17,7 @@ const translations = {
     title: '服务条款',
   },
   common: {
+    poweredBy: 'Powered by',
     confirm: '确认',
     cancel: '取消',
     delete: '删除',
