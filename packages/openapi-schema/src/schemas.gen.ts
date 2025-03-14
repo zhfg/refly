@@ -166,17 +166,17 @@ export const CanvasTemplateCategorySchema = {
 
 export const CanvasTemplateSchema = {
   type: 'object',
-  required: ['templateId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
+  required: ['templateId', 'shareId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
   properties: {
     templateId: {
       type: 'string',
       description: 'Canvas template ID',
       example: 'ct-g30e1b80b5g1itbemc0g5jj3',
     },
-    originCanvasId: {
+    shareId: {
       type: 'string',
-      description: 'Origin canvas ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Share ID',
+      example: 'can-g30e1b80b5g1itbemc0g5jj3',
     },
     shareUser: {
       description: 'Share user',

@@ -280,35 +280,35 @@ model Canvas {
 
 model CanvasTemplate {
   /// Primary key
-  pk             BigInt                  @id @default(autoincrement())
+  pk          BigInt                  @id @default(autoincrement())
   /// Canvas template id
-  templateId     String                  @unique @map("template_id")
+  templateId  String                  @unique @map("template_id")
   /// Category id
-  categoryId     String?                 @map("category_id")
-  /// Origin canvas id
-  originCanvasId String                  @map("origin_canvas_id")
+  categoryId  String?                 @map("category_id")
+  /// Share id
+  shareId     String                  @map("share_id")
   /// Version
-  version        Int                     @default(0) @map("version")
+  version     Int                     @default(0) @map("version")
   /// UID
-  uid            String                  @map("uid")
+  uid         String                  @map("uid")
   /// Share user (JSON of `ShareUser`)
-  shareUser      String                  @map("share_user")
+  shareUser   String                  @map("share_user")
   /// Canvas template title
-  title          String                  @map("title")
+  title       String                  @map("title")
   /// Canvas template description
-  description    String                  @map("description")
+  description String                  @map("description")
   /// Whether this canvas template is public
-  isPublic       Boolean                 @default(false) @map("is_public")
+  isPublic    Boolean                 @default(false) @map("is_public")
   /// Language code
-  language       String                  @map("language")
+  language    String                  @map("language")
   /// Create timestamp
-  createdAt      DateTime                @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt      DateTime?               @map("deleted_at") @db.Timestamptz()
+  deletedAt   DateTime?               @map("deleted_at") @db.Timestamptz()
   /// Category
-  category       CanvasTemplateCategory? @relation(fields: [categoryId], references: [categoryId])
+  category    CanvasTemplateCategory? @relation(fields: [categoryId], references: [categoryId])
 
   @@index([uid, updatedAt])
   @@map("canvas_templates")

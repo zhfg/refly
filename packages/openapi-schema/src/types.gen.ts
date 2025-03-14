@@ -146,9 +146,9 @@ export type CanvasTemplate = {
    */
   templateId: string;
   /**
-   * Origin canvas ID
+   * Share ID
    */
-  originCanvasId?: string;
+  shareId: string;
   /**
    * Share user
    */
