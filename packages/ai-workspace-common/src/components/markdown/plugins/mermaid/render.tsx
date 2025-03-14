@@ -343,16 +343,20 @@ const MermaidComponent = memo(
 
         {/* Action Buttons - Only show when successfully rendered or in code view */}
         {(rendered || viewMode === 'code') && (
-          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="absolute top-2 right-2 z-50 flex transition-all duration-200 ease-in-out bg-white/80 backdrop-blur-sm rounded-md shadow-sm border border-gray-100">
             <Space>
               {viewMode === 'preview' && (
                 <Tooltip title={t('components.markdown.mermaid.downloadAsPng', 'Download as PNG')}>
                   <Button
-                    type="default"
+                    type="text"
                     size="small"
-                    className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                    className="flex items-center justify-center hover:bg-gray-100"
                     icon={<DownloadIcon className="w-4 h-4" />}
-                    onClick={downloadImage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      downloadImage();
+                    }}
                   />
                 </Tooltip>
               )}
@@ -361,21 +365,29 @@ const MermaidComponent = memo(
                   title={t('components.markdown.mermaid.copyToClipboard', 'Copy to clipboard')}
                 >
                   <Button
-                    type="default"
+                    type="text"
                     size="small"
-                    className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                    className="flex items-center justify-center hover:bg-gray-100"
                     icon={<CopyIcon className="w-4 h-4" />}
-                    onClick={copyImage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      copyImage();
+                    }}
                   />
                 </Tooltip>
               )}
               <Tooltip title={t('components.markdown.mermaid.copySourceCode', 'Copy source code')}>
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
-                  className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                  className="flex items-center justify-center hover:bg-gray-100"
                   icon={<IconCopy className="w-4 h-4" />}
-                  onClick={copySourceCode}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copySourceCode();
+                  }}
                 />
               </Tooltip>
               <Tooltip
@@ -386,22 +398,30 @@ const MermaidComponent = memo(
                 }
               >
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
-                  className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                  className="flex items-center justify-center hover:bg-gray-100"
                   icon={viewMode === 'code' ? <IconEye /> : <IconCode />}
-                  onClick={toggleViewMode}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleViewMode();
+                  }}
                 />
               </Tooltip>
               <Tooltip
                 title={t('components.markdown.mermaid.createArtifact', 'Create diagram artifact')}
               >
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
-                  className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                  className="flex items-center justify-center hover:bg-gray-100"
                   icon={<IconCodeArtifact className="w-4 h-4" />}
-                  onClick={handleCreateMermaidArtifact}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCreateMermaidArtifact();
+                  }}
                 />
               </Tooltip>
             </Space>

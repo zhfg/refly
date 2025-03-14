@@ -164,7 +164,7 @@ const PreCode = React.memo(
     // Render the code preview if in preview mode and the type is previewable
     if (viewMode === 'preview' && isPreviewable) {
       return (
-        <div className="relative group p-4 border rounded bg-white">
+        <div className="relative group p-4 border rounded bg-white overflow-auto">
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Space>
               <Tooltip title={t('copilot.message.copy', 'Copy code')}>
@@ -209,35 +209,47 @@ const PreCode = React.memo(
     // Otherwise render normal code block with improved buttons
     return (
       <pre className={cn('relative group')}>
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-2 right-2 z-50 flex transition-all duration-200 ease-in-out bg-white/80 backdrop-blur-sm rounded-md shadow-sm border border-gray-100">
           <Space>
             <Tooltip title={t('copilot.message.copy', 'Copy code')}>
               <Button
-                type="default"
+                type="text"
                 size="small"
-                className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                className="flex items-center justify-center hover:bg-gray-100"
                 icon={<IconCopy />}
-                onClick={handleCopy}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCopy();
+                }}
               />
             </Tooltip>
             {isPreviewable && (
               <Tooltip title={t('components.markdown.viewPreview', 'View preview')}>
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
-                  className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                  className="flex items-center justify-center hover:bg-gray-100"
                   icon={<IconEye />}
-                  onClick={toggleViewMode}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleViewMode();
+                  }}
                 />
               </Tooltip>
             )}
             <Tooltip title={t('components.markdown.createCodeArtifact', 'Create code artifact')}>
               <Button
-                type="default"
+                type="text"
                 size="small"
-                className="flex items-center justify-center bg-white/80 hover:bg-white border border-gray-200"
+                className="flex items-center justify-center hover:bg-gray-100"
                 icon={<IconCodeArtifact />}
-                onClick={handleCreateCodeArtifact}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCreateCodeArtifact();
+                }}
               />
             </Tooltip>
           </Space>

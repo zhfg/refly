@@ -1196,6 +1196,13 @@ const translations = {
       copyErrorMessage: '复制错误信息',
       errorDismissed: '已关闭错误信息',
     },
+    editor: {
+      fontFamily: '字体',
+      fontSize: '字号',
+      fontLigatures: '连字',
+      theme: '主题',
+      loading: '编辑器加载中...',
+    },
     copySuccess: '代码已复制到剪贴板',
     copyError: '复制代码失败',
     downloadSuccess: '已下载 {{fileName}}',
