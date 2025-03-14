@@ -759,11 +759,11 @@ export class ShareService {
         stateStorageKey: newStateStorageKey,
       },
     });
-    const ydoc = markdown2StateUpdate(documentDetail.content ?? '');
+    const state = markdown2StateUpdate(documentDetail.content ?? '');
 
     const jobs: Promise<any>[] = [
       this.minio.client.putObject(newStorageKey, documentDetail.content),
-      this.minio.client.putObject(newStateStorageKey, Buffer.from(ydoc)),
+      this.minio.client.putObject(newStateStorageKey, Buffer.from(state)),
       this.elasticsearch.upsertDocument({
         id: newDocId,
         ...pick(newDoc, ['title', 'uid']),

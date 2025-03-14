@@ -1,11 +1,4 @@
 import { Schema, MarkSpec } from '@tiptap/pm/model';
-import { getSchema } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Highlight from '@tiptap/extension-highlight';
-import TaskItem from '@tiptap/extension-task-item';
-import TaskList from '@tiptap/extension-task-list';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
 
 /// Document schema for the data model used by CommonMark.
 export const schema = new Schema({
@@ -262,7 +255,3 @@ export const schema = new Schema({
     },
   },
 });
-
-export const defaultExtensions = [StarterKit, Highlight, TaskList, TaskItem, Link, Image];
-
-export const defaultSchema: Schema = getSchema(defaultExtensions);

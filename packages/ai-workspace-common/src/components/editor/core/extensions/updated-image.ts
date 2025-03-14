@@ -2,6 +2,9 @@ import Image from '@tiptap/extension-image';
 
 const UpdatedImage = Image.extend({
   name: 'image',
+  inline: true,
+  group: 'inline',
+  draggable: true,
   addAttributes() {
     return {
       ...this.parent?.(),

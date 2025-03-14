@@ -168,12 +168,6 @@ const tiptapImage = UpdatedImage.extend({
   },
 });
 
-const _updatedImage = UpdatedImage.configure({
-  HTMLAttributes: {
-    class: cx('rounded-lg border border-muted'),
-  },
-});
-
 const taskList = TaskList.configure({
   HTMLAttributes: {
     class: cx('not-prose pl-2 '),
