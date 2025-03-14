@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Spin, Empty, Avatar, Button, Typography } from 'antd';
+import { Empty, Avatar, Button, Typography } from 'antd';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
@@ -10,6 +11,7 @@ import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stor
 import { useDebouncedCallback } from 'use-debounce';
 import { useNavigate } from 'react-router-dom';
 import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+import { staticPublicEndpoint } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const TemplateCard = ({
   template,
@@ -46,7 +48,11 @@ export const TemplateCard = ({
         <div className="text-sm font-medium truncate">{template.title || 'common.untitled'}</div>
       </div>
       <div className="mx-2 h-36 rounded-md bg-gray-100 flex items-center justify-center">
-        <div className="">mini map</div>
+        <img
+          src={`${staticPublicEndpoint}/share-cover/${template.shareId}.png`}
+          alt={`${template.title} cover`}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {showUser && (

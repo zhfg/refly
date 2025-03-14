@@ -14,6 +14,7 @@ import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/compone
 import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
 import { MdOutlinePublish } from 'react-icons/md';
+import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -94,6 +95,28 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     [shareRecord],
   );
 
+  const { getCanvasElement } = useExportCanvasAsImage();
+
+  const uploadShareCover = useCallback(
+    async (shareId: string) => {
+      const canvas = await getCanvasElement({ scale: 1 });
+      canvas.toBlob((blob) => {
+        if (blob) {
+          getClient().upload({
+            body: {
+              file: blob,
+              storageKey: `share-cover/${shareId}.png`,
+              entityId: canvasId,
+              entityType: 'canvas',
+              visibility: 'public',
+            },
+          });
+        }
+      });
+    },
+    [canvasId, getCanvasElement],
+  );
+
   // Memoized function to re-share latest content before copying link
   const reshareAndCopyLink = useCallback(async () => {
     if (access === 'off') return;
@@ -115,6 +138,10 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         });
 
         if (data?.success && !error) {
+          const shareId = data?.data?.shareId;
+          if (shareId) {
+            await uploadShareCover(shareId);
+          }
           await refetchShares();
         }
       } catch (error) {
@@ -148,7 +175,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
 
   useEffect(() => {
     setAccess(shareRecord ? 'anyone' : 'off');
-    setTitle(''); // TODO: set title from shareRecord
+    setTitle(shareRecord?.title ?? '');
   }, [shareRecord]);
 
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -170,7 +197,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
             const { data, error } = await getClient().deleteShare({
               body: { shareId: latestShareRecord.shareId },
             });
-            success = data.success && !error;
+            success = data?.success && !error;
           } else {
             // No share to delete
             success = true;
@@ -183,7 +210,12 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
               allowDuplication: true,
             },
           });
-          success = data.success && !error;
+          success = data?.success && !error;
+          const shareId = data?.data?.shareId;
+
+          if (success && shareId) {
+            await uploadShareCover(shareId);
+          }
         }
 
         if (success) {
@@ -268,6 +300,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         title={title}
         visible={createTemplateModalVisible}
         setVisible={setCreateTemplateModalVisible}
+        uploadShareCover={uploadShareCover}
       />
       <Popover
         className="canvas-share-setting-popover"

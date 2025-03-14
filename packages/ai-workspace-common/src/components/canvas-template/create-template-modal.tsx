@@ -10,6 +10,7 @@ interface CreateTemplateModalProps {
   canvasId: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
+  uploadShareCover: (shareId: string) => Promise<void>;
 }
 export const CreateTemplateModal = ({
   canvasId,
@@ -18,6 +19,7 @@ export const CreateTemplateModal = ({
   categoryId,
   visible,
   setVisible,
+  uploadShareCover,
 }: CreateTemplateModalProps) => {
   const { t, i18n } = useTranslation();
   const [form] = Form.useForm();
@@ -40,6 +42,10 @@ export const CreateTemplateModal = ({
     if (data.success) {
       setVisible(false);
       message.success(t('template.createSuccess'));
+
+      if (data?.data?.shareId) {
+        await uploadShareCover(data.data.shareId);
+      }
     }
   };
 
