@@ -20,6 +20,7 @@ type ShareAccess = 'off' | 'anyone';
 
 interface ShareSettingsProps {
   canvasId: string;
+  canvasTitle: string;
 }
 
 const labelRender = (props: any) => {
@@ -60,13 +61,12 @@ const optionRender = (props: any) => {
 };
 
 // Memoized ShareSettings component for better performance
-const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
+const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [access, setAccess] = useState<ShareAccess>('off');
 
-  const [title, setTitle] = useState('');
   const accessOptions = useMemo(
     () => [
       {
@@ -175,7 +175,6 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
 
   useEffect(() => {
     setAccess(shareRecord ? 'anyone' : 'off');
-    setTitle(shareRecord?.title ?? '');
   }, [shareRecord]);
 
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -297,7 +296,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     <div>
       <CreateTemplateModal
         canvasId={canvasId}
-        title={title}
+        title={canvasTitle}
         visible={createTemplateModalVisible}
         setVisible={setCreateTemplateModalVisible}
         uploadShareCover={uploadShareCover}

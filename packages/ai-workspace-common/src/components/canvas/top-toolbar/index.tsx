@@ -162,7 +162,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             </>
           ) : (
             <>
-              <ShareSettings canvasId={canvasId} />
+              <ShareSettings canvasId={canvasId} canvasTitle={canvasTitle} />
               <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
             </>
           )}

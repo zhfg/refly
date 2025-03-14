@@ -2178,6 +2178,7 @@ const translations = {
     noRelatedTemplates: 'No related templates',
     hideTemplates: 'Hide Template',
     duplicateCanvasEntities: 'Duplicate the canvas entities',
+    noDescription: 'No description',
   },
 };
 

@@ -5,7 +5,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 interface CreateTemplateModalProps {
   title: string;
-  description?: string;
   categoryId?: string;
   canvasId: string;
   visible: boolean;
@@ -15,7 +14,6 @@ interface CreateTemplateModalProps {
 export const CreateTemplateModal = ({
   canvasId,
   title,
-  description,
   categoryId,
   visible,
   setVisible,
@@ -60,7 +58,6 @@ export const CreateTemplateModal = ({
     if (visible) {
       form.setFieldsValue({
         title,
-        description,
       });
     }
   }, [visible]);
@@ -86,11 +83,7 @@ export const CreateTemplateModal = ({
           >
             <Input placeholder={t('template.templateTitlePlaceholder')} />
           </Form.Item>
-          <Form.Item
-            label={t('template.templateDescription')}
-            name="description"
-            rules={[{ required: true, message: t('common.required') }]}
-          >
+          <Form.Item label={t('template.templateDescription')} name="description">
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               placeholder={t('template.templateDescriptionPlaceholder')}

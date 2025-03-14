@@ -2116,6 +2116,7 @@ const translations = {
     noRelatedTemplates: '暂无相关模板',
     hideTemplates: '隐藏模板',
     duplicateCanvasEntities: '复制该画布所包含的文档以及资源',
+    noDescription: '暂无描述',
   },
 };
 
