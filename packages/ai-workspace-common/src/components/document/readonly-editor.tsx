@@ -53,8 +53,9 @@ export const ReadonlyEditor = memo(
           const { width, height, style, ...rest } = HTMLAttributes;
 
           const combinedStyle = [
-            width && !style?.includes('width') ? `width: ${width}px;` : '',
-            height && !style?.includes('height') ? `height: ${height}px;` : '',
+            width ? `width: ${width}px;` : 'max-width: 100%;',
+            height ? `height: ${height}px;` : 'height: auto;',
+            'object-fit: contain;',
             style || '',
           ]
             .join(' ')
@@ -62,18 +63,20 @@ export const ReadonlyEditor = memo(
 
           const imgAttributes = {
             ...rest,
+            width: width ?? undefined,
+            height: height ?? undefined,
             style: combinedStyle || null,
-            class: 'border border-muted cursor-pointer max-w-full zoomin',
+            class:
+              'border border-muted cursor-pointer rounded-lg hover:opacity-90 transition-opacity',
           };
 
-          // 使用div包裹图片并设置水平居中样式
-          return ['div', { class: 'w-full flex justify-center my-2' }, ['img', imgAttributes]];
+          return ['div', { class: 'w-full flex justify-center my-4' }, ['img', imgAttributes]];
         },
       }).configure({
         allowBase64: true,
+        inline: false,
       });
 
-      // 过滤掉默认扩展中的图片扩展
       const filteredExtensions = defaultExtensions.filter((ext) => ext.name !== 'image');
 
       return [
