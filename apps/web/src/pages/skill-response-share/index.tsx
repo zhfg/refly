@@ -7,7 +7,7 @@ import { PreviewChatInput } from '@refly-packages/ai-workspace-common/components
 import { ActionStep, Source } from '@refly/openapi-schema';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { memo, useMemo, useEffect, useCallback } from 'react';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/preview-markdown';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import {
   IconThinking,
   IconCheck,
@@ -68,7 +68,11 @@ const SimpleReasoningContent = memo(
                 />
               </div>
               <div>
-                <Markdown content={getParsedReasoningContent(reasoningContent)} sources={sources} />
+                <Markdown
+                  content={getParsedReasoningContent(reasoningContent)}
+                  sources={sources}
+                  mode="readonly"
+                />
               </div>
             </div>
           )}
@@ -91,7 +95,7 @@ const SimpleActualContent = memo(
 
     return (
       <div className="my-3 text-gray-600 text-base">
-        <Markdown content={content} sources={sources} />
+        <Markdown content={content} sources={sources} mode="readonly" />
       </div>
     );
   },

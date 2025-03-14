@@ -5,7 +5,7 @@ import { Result } from 'antd';
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { memo, useEffect, useCallback } from 'react';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/preview-markdown';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import Logo from '@/assets/logo.svg';
 
 // PoweredByRefly component to display when sidebar is collapsed
@@ -86,7 +86,7 @@ const DocumentSharePage = () => {
             {title && <h1 className="text-3xl font-bold text-gray-800 mt-6 mb-4">{title}</h1>}
 
             <div className="flex-grow prose prose-lg max-w-full">
-              {content && <Markdown content={content} />}
+              {content && <Markdown content={content} mode="readonly" />}
             </div>
           </div>
         </div>
