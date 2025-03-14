@@ -286,7 +286,7 @@ model CanvasTemplate {
   /// Category id
   categoryId  String?                 @map("category_id")
   /// Share id
-  shareId     String                  @map("share_id")
+  shareId     String                  @default("") @map("share_id")
   /// Version
   version     Int                     @default(0) @map("version")
   /// UID
