@@ -45,12 +45,12 @@ export const ReadonlyEditor = memo(
     }, [docId]);
 
     const extensions = useMemo(() => {
-      // 创建自定义图片扩展，将图片用div包裹并水平居中对齐
       const centeredImage = UpdatedImage.extend({
         selectable: true,
         draggable: true,
         renderHTML({ HTMLAttributes }) {
           const { width, height, style, ...rest } = HTMLAttributes;
+          console.log('HTMLAttributes', HTMLAttributes);
 
           const combinedStyle = [
             width ? `width: ${width}px;` : 'max-width: 100%;',
@@ -70,7 +70,11 @@ export const ReadonlyEditor = memo(
               'border border-muted cursor-pointer rounded-lg hover:opacity-90 transition-opacity',
           };
 
-          return ['div', { class: 'w-full flex justify-center my-4' }, ['img', imgAttributes]];
+          return [
+            'div',
+            { class: 'w-full flex justify-center my-0 !bg-transparent' },
+            ['img', imgAttributes],
+          ];
         },
       }).configure({
         allowBase64: true,

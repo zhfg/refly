@@ -64,7 +64,6 @@ export const CollaborativeEditor = memo(
       styleEl.innerHTML = `
         .ProseMirror-selectednode {
           outline: 2px solid #4299e1 !important;
-          background-color: transparent !important;
           .zoomin {
             cursor: zoom-in !important;
           }
@@ -200,7 +199,11 @@ export const CollaborativeEditor = memo(
             class: 'border border-muted cursor-pointer max-w-full zoomin',
           };
 
-          return ['div', { class: 'w-full flex justify-center my-2' }, ['img', imgAttributes]];
+          return [
+            'div',
+            { class: 'w-full flex justify-center my-0 !bg-transparent' },
+            ['img', imgAttributes],
+          ];
         },
       }).configure({
         allowBase64: true,
