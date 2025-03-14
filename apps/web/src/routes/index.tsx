@@ -21,6 +21,7 @@ const Canvas = lazy(() => import('@/pages/canvas'));
 const Pricing = lazy(() => import('@/pages/pricing'));
 const ShareCanvasPage = lazy(() => import('@/pages/share'));
 const ShareCodePage = lazy(() => import('@/pages/code-share'));
+const SkillResponseSharePage = lazy(() => import('@/pages/skill-response-share'));
 
 const prefetchRoutes = () => {
   // Prefetch common routes
@@ -88,6 +89,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/share/canvas/:canvasId" element={<ShareCanvasPage />} />
           <Route path="/share/code/:shareId" element={<ShareCodePage />} />
+          <Route path="/share/skill-response/:shareId" element={<SkillResponseSharePage />} />
           <Route
             path="/canvas/:canvasId"
             element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}
