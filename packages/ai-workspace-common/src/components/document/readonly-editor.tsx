@@ -46,11 +46,10 @@ export const ReadonlyEditor = memo(
 
     const extensions = useMemo(() => {
       const centeredImage = UpdatedImage.extend({
-        selectable: true,
-        draggable: true,
+        selectable: false,
+        draggable: false,
         renderHTML({ HTMLAttributes }) {
           const { width, height, style, ...rest } = HTMLAttributes;
-          console.log('HTMLAttributes', HTMLAttributes);
 
           const combinedStyle = [
             width ? `width: ${width}px;` : 'max-width: 100%;',
