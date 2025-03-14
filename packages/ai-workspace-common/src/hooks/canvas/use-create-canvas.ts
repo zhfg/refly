@@ -30,7 +30,7 @@ export const useCreateCanvas = () => {
       });
       setIsCreating(false);
 
-      if (!data.success || error) {
+      if (!data?.success || error) {
         return;
       }
 

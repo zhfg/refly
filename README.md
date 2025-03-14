@@ -9,7 +9,7 @@
     ⭐️  The AI Native Creation Engine ⭐️ <br>
 </h1>
 
-Refly is an open-source AI-native creation engine powered by 13+ leading AI models. Its intuitive free-form canvas interface integrates multi-threaded conversations, multimodal inputs (text/images/files), RAG retrieval process, browser extension web clipper, contextual memory, and AI document editing capabilities, empowering you to effortlessly transform ideas into complete works.
+Refly is an open-source AI-native creation engine powered by 13+ leading AI models. Its intuitive free-form canvas interface integrates multi-threaded conversations, multimodal inputs (text/images/files), RAG retrieval process, browser extension web clipper, contextual memory, AI document editing capabilities, code artifact generation (HTML/SVG/Mermaid/React), and website visualization engine, empowering you to effortlessly transform ideas into complete works with interactive visualizations and web applications.
 
 [🚀 v0.3.0 Released! Now Supporting Multimodal Images and File Uploads ⚡️](https://docs.refly.ai/changelog/v0.3.0)
 
@@ -115,6 +115,39 @@ Integrating advanced capabilities from Perplexity AI, Stanford Storm, and more:
 - AI-assisted content optimization
 - Intelligent content analysis
 - Notion-like editing experience
+
+### `10` 🎨 Code Artifact Generation
+- Generate HTML, SVG, Mermaid diagrams, and React applications
+- Smart code structure optimization
+- Component-based architecture support
+- Real-time code preview and debugging
+
+### `11` 🌐 Website Visualization Engine
+- Interactive web page rendering and preview
+- Complex concept visualization support
+- Dynamic SVG and diagram generation
+- Responsive design templates
+- Real-time website prototyping
+- Integration with modern web frameworks
+
+## 🛣️ Roadmap
+
+We're continuously improving Refly with exciting new features. For a detailed roadmap, visit our [complete roadmap documentation](https://docs.refly.ai/roadmap).
+
+- 🎨 Advanced image, audio, and video generation capabilities
+- 🎨 Cross-modal content transformation tools
+- 💻 High-performance desktop client with improved resource management
+- 💻 Enhanced offline capabilities
+- 📚 Advanced knowledge organization and visualization tools
+- 📚 Collaborative knowledge base features
+- 🔌 Open standard for third-party plugin development based on MCP
+- 🔌 Plugin marketplace and developer SDK
+- 🤖 Autonomous task completion with minimal supervision
+- 🤖 Multi-agent collaboration systems
+- ⚡️ Visual workflow builder for complex AI-powered processes
+- ⚡️ Advanced integration capabilities with external systems and API support
+- 🔒 Enhanced security and compliance tools
+- 🔒 Advanced team management and analytics
 
 ## How to Use?
 
