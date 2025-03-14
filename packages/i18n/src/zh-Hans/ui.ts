@@ -17,6 +17,7 @@ const translations = {
     title: '服务条款',
   },
   common: {
+    poweredBy: 'Powered by',
     confirm: '确认',
     cancel: '取消',
     delete: '删除',
@@ -765,6 +766,9 @@ const translations = {
   document: {
     setReadOnly: '设置为只读',
     enableEdit: '启用编辑',
+    shareLoading: '正在加载共享文档...',
+    notFound: '文档未找到',
+    notFoundDesc: '您查找的文档不存在或已被删除。',
   },
   artifact: {
     generating: '生成中',
@@ -783,6 +787,7 @@ const translations = {
       copyStarted: '开始复制...',
       copySuccess: '已复制到剪贴板',
       copyError: '复制失败',
+      preview: '预览',
     },
   },
   resourceType: {
@@ -927,16 +932,19 @@ const translations = {
     },
     skillResponse: {
       executionFailed: '执行失败，点击重试',
-      skillCompleted: '技能执行完成',
-      stepCompleted: '步骤执行完成',
+      skillCompleted: '技能已完成',
+      stepCompleted: '步骤已完成',
       stepTitle: '步骤 {{index}}',
-      aiThinking: 'AI 正在思考中...',
+      aiThinking: 'AI 正在思考...',
       sourcesCnt: '共找到 {{count}} 个来源',
-      executing: '技能正在执行中，请稍等...',
-      startRunning: '技能开始执行...',
-      startRerun: '技能开始重新执行...',
-      resultNotFound: '抱歉，执行结果似乎丢失了。',
+      executing: '技能正在执行，请稍候...',
+      startRunning: '技能正在运行...',
+      startRerun: '技能正在重新运行...',
+      resultNotFound: '抱歉，执行结果似乎已丢失。',
       reasoningContent: 'AI 思考过程',
+      shareLoading: '正在加载共享技能响应...',
+      notFound: '技能响应未找到',
+      notFoundDesc: '您查找的技能响应不存在或已被删除。',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',

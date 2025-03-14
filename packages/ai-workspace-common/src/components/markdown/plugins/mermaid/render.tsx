@@ -12,6 +12,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genUniqueId } from '@refly-packages/utils/id';
 import { IconCodeArtifact } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IconCode, IconEye, IconCopy } from '@arco-design/web-react/icon';
+import { MarkdownMode } from '../../types';
 
 // Initialize mermaid config
 mermaid.initialize({
@@ -24,6 +25,7 @@ mermaid.initialize({
 interface MermaidProps {
   children: ReactNode;
   id?: string; // resultId for connecting to skill response node
+  mode?: MarkdownMode;
 }
 
 // Generate unique ID for each mermaid diagram
@@ -36,7 +38,7 @@ const generateUniqueId = (() => {
 const diagramCache = new Map<string, string>();
 
 const MermaidComponent = memo(
-  ({ children, id }: MermaidProps) => {
+  ({ children, id, mode = 'interactive' }: MermaidProps) => {
     const mermaidRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<string>('');
     const { t } = useTranslation();
@@ -45,7 +47,11 @@ const MermaidComponent = memo(
     const [viewMode, setViewMode] = useState<'code' | 'preview'>('preview');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [zoomImageUrl, setZoomImageUrl] = useState<string>('');
-    const { addNode } = useAddNode();
+
+    const isInteractive = mode === 'interactive';
+
+    // Only use addNode if in interactive mode and not readonly
+    const { addNode } = isInteractive ? useAddNode() : { addNode: undefined };
 
     // Generate a unique ID for this instance
     const diagramId = useMemo(() => generateUniqueId(), []);
@@ -276,6 +282,10 @@ const MermaidComponent = memo(
         return;
       }
 
+      if (!addNode || !isInteractive) {
+        return;
+      }
+
       try {
         const nodeId = `mermaid-artifact-${genUniqueId()}`;
 
@@ -312,7 +322,7 @@ const MermaidComponent = memo(
           t('components.markdown.mermaid.artifactError', 'Error creating Mermaid artifact'),
         );
       }
-    }, [mermaidCode, diagramTitle, addNode, id, t]);
+    }, [mermaidCode, diagramTitle, addNode, id, t, isInteractive]);
 
     // Handle opening zoom modal
     const handleZoom = useCallback(async () => {
@@ -429,21 +439,23 @@ const MermaidComponent = memo(
                   }}
                 />
               </Tooltip>
-              <Tooltip
-                title={t('components.markdown.mermaid.createArtifact', 'Create diagram artifact')}
-              >
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center hover:bg-gray-100"
-                  icon={<IconCodeArtifact className="w-4 h-4" />}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleCreateMermaidArtifact();
-                  }}
-                />
-              </Tooltip>
+              {isInteractive && (
+                <Tooltip
+                  title={t('components.markdown.mermaid.createArtifact', 'Create diagram artifact')}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex items-center justify-center hover:bg-gray-100"
+                    icon={<IconCodeArtifact className="w-4 h-4" />}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCreateMermaidArtifact();
+                    }}
+                  />
+                </Tooltip>
+              )}
             </Space>
           </div>
         )}
@@ -457,7 +469,10 @@ const MermaidComponent = memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.children?.toString() === nextProps.children?.toString();
+    return (
+      prevProps.children?.toString() === nextProps.children?.toString() &&
+      prevProps.mode === nextProps.mode
+    );
   },
 );
 
