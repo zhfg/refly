@@ -59,7 +59,7 @@ export const TemplateCard = ({
         <>
           <div className="mx-2 mt-2 text-sm text-gray-500">
             <Typography.Paragraph ellipsis={{ tooltip: true, rows: 2 }}>
-              {template.description}
+              {template.description || t('template.noDescription')}
             </Typography.Paragraph>
           </div>
 

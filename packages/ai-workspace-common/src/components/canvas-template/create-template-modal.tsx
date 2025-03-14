@@ -58,6 +58,7 @@ export const CreateTemplateModal = ({
     if (visible) {
       form.setFieldsValue({
         title,
+        description: '',
       });
     }
   }, [visible]);
