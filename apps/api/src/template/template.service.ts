@@ -23,7 +23,9 @@ export class TemplateService {
   async listCanvasTemplates(user: User, param: ListCanvasTemplatesData['query']) {
     const { categoryId, scope, language, page, pageSize } = param;
 
-    const where: Prisma.CanvasTemplateWhereInput = {};
+    const where: Prisma.CanvasTemplateWhereInput = {
+      deletedAt: null,
+    };
     if (categoryId) {
       where.categoryId = categoryId;
     }

@@ -42,12 +42,9 @@ export const TemplateCard = ({
 
   return (
     <div
-      className={`${className} m-2 group relative p-2 bg-white rounded-lg overflow-hidden cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.12)] transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out`}
+      className={`${className} m-2 group relative bg-white rounded-lg overflow-hidden cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.12)] transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out`}
     >
-      <div className="p-2 flex justify-between items-center gap-2">
-        <div className="text-sm font-medium truncate">{template.title || 'common.untitled'}</div>
-      </div>
-      <div className="mx-2 h-36 rounded-md bg-gray-100 flex items-center justify-center">
+      <div className="h-40 bg-gray-100 flex items-center justify-center">
         <img
           src={`${staticPublicEndpoint}/share-cover/${template.shareId}.png`}
           alt={`${template.title} cover`}
@@ -55,25 +52,31 @@ export const TemplateCard = ({
         />
       </div>
 
-      {showUser && (
-        <>
-          <div className="mx-2 mt-2 text-sm text-gray-500">
-            <Typography.Paragraph ellipsis={{ tooltip: true, rows: 2 }}>
-              {template.description || t('template.noDescription')}
-            </Typography.Paragraph>
-          </div>
+      <div className="mx-2 mt-1 p-2 flex justify-between items-center gap-2">
+        <div className="text-sm font-medium truncate">{template.title || 'common.untitled'}</div>
+      </div>
 
-          <div className="p-2 flex justify-between items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Avatar
-                src={template.shareUser?.avatar}
-                icon={!template.shareUser?.avatar && <IoPersonOutline />}
-              />
-              <div className="truncate">{template.shareUser?.name}</div>
-            </div>
+      {showUser && (
+        <div className="mx-2 mb-2 px-2 flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Avatar
+              size={18}
+              src={template.shareUser?.avatar}
+              icon={!template.shareUser?.avatar && <IoPersonOutline />}
+            />
+            <div className="font-light truncate text-xs text-gray-500">{`@${template.shareUser?.name}`}</div>
           </div>
-        </>
+        </div>
       )}
+
+      <div className="mx-2 px-2">
+        <Typography.Paragraph
+          className="text-gray-500 text-xs"
+          ellipsis={{ tooltip: true, rows: 2 }}
+        >
+          {template.description || t('template.noDescription')}
+        </Typography.Paragraph>
+      </div>
 
       <div className="absolute left-0 bottom-0 w-full h-20 py-2 px-4 bg-gradient-to-b from-transparent to-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-3">
         <Button

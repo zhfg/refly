@@ -7,6 +7,7 @@ import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stor
 import { VscNotebookTemplate } from 'react-icons/vsc';
 import { useDebouncedCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+
 export const TemplatesGuide = ({ canvasId }: { canvasId: string }) => {
   const { setVisible } = useCanvasTemplateModal((state) => ({
     setVisible: state.setVisible,

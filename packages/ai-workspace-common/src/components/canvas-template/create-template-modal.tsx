@@ -11,6 +11,7 @@ interface CreateTemplateModalProps {
   setVisible: (visible: boolean) => void;
   uploadShareCover: (shareId: string) => Promise<void>;
 }
+
 export const CreateTemplateModal = ({
   canvasId,
   title,
@@ -74,8 +75,8 @@ export const CreateTemplateModal = ({
       cancelText={t('common.cancel')}
       title={t('template.createTemplate')}
     >
-      <div className="w-full h-full overflow-y-auto">
-        <Form form={form}>
+      <div className="w-full h-full pt-4 overflow-y-auto">
+        <Form form={form} labelCol={{ span: 5 }}>
           <Form.Item
             required
             label={t('template.templateTitle')}

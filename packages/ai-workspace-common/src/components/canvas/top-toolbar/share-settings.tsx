@@ -5,6 +5,7 @@ import {
   IconShare,
   IconClose,
   IconLink,
+  IconTemplate,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { RiUserForbidLine } from 'react-icons/ri';
 import { GrLanguage } from 'react-icons/gr';
@@ -13,7 +14,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
 import { useListShares } from '@refly-packages/ai-workspace-common/queries';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
-import { MdOutlinePublish } from 'react-icons/md';
 import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
 
 type ShareAccess = 'off' | 'anyone';
@@ -161,7 +161,7 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
       },
       {
         label: 'publishTemplate',
-        icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
+        icon: <IconTemplate className="w-3 h-3 flex items-center justify-center" />,
         onClick: () => {
           setCreateTemplateModalVisible(true);
           setOpen(false);
@@ -242,7 +242,7 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
   // Memoize content to prevent unnecessary re-renders
   const content = useMemo(
     () => (
-      <div className="w-[300px]">
+      <div className="w-[320px]">
         <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-2">
             <IconShare className="w-4 h-4 flex items-center justify-center" />
