@@ -19,7 +19,13 @@ const HTMLRenderer = memo<HTMLRendererProps>(({ htmlContent, width = '100%', hei
     doc.close();
   }, [htmlContent]);
 
-  return <iframe ref={iframeRef} style={{ border: 'none', height, width }} title="html-renderer" />;
+  return (
+    <iframe
+      ref={iframeRef}
+      style={{ border: 'none', height, width, minHeight: 500 }}
+      title="html-renderer"
+    />
+  );
 });
 
 export default HTMLRenderer;
