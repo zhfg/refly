@@ -16,7 +16,7 @@ const PoweredByRefly = memo(({ onClick, className = '' }: PoweredByReflyProps) =
 
   return (
     <div
-      className={`fixed bottom-4 left-4 flex items-center gap-2 rounded-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2 shadow-sm hover:shadow-lg z-10 cursor-pointer transition-all border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-100 dark:hover:bg-gray-700/80 ${className}`}
+      className={`fixed bottom-4 left-4 flex items-center gap-2 rounded-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2 shadow-sm hover:shadow-lg z-10 cursor-pointer transition-all border border-gray-200/80 dark:border-gray-700/80 hover:bg-gray-100 dark:hover:bg-gray-700/80 ${className} border-solid`}
       style={{ borderWidth: '0.5px' }}
       onClick={onClick}
     >
