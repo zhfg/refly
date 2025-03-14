@@ -190,16 +190,9 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
           message.success(t('shareContent.updateCanvasPermissionSuccess'));
           setAccess(value);
           await refetchShares();
-        } else {
-          message.error(
-            t('shareContent.updateCanvasPermissionError') || 'Failed to update sharing settings',
-          );
         }
       } catch (err) {
         console.error('Error updating canvas permission:', err);
-        message.error(
-          t('shareContent.updateCanvasPermissionError') || 'Failed to update sharing settings',
-        );
         success = false;
       } finally {
         setUpdateLoading(false);
