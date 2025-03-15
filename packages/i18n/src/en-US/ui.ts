@@ -2162,6 +2162,7 @@ const translations = {
   template: {
     templateLibrary: 'Template Library',
     myTemplates: 'My Templates',
+    allTemplates: 'All',
     createTemplate: 'Create Template',
     templateTitle: 'Name',
     templateTitlePlaceholder: 'Please enter template name',

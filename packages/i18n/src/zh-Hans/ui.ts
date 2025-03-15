@@ -2100,6 +2100,7 @@ const translations = {
   template: {
     templateLibrary: '模板库',
     myTemplates: '我的模板',
+    allTemplates: '全部',
     createTemplate: '发布模板',
     templateTitle: '名称',
     templateTitlePlaceholder: '请输入模板名称',
