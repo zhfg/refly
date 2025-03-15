@@ -1581,7 +1581,7 @@ const translations = {
       currentPlan: 'Current Plan',
       t1Requests: 'Pro Requests',
       t1RequestsDescription:
-        'Pro models include Claude 3.7 Sonnet, DeepSeek R1, GPT-4o, o3 Mini and others. Each successful skill call to pro models counts as one request.',
+        'Pro models include Claude 3.7 Sonnet (Thinking), DeepSeek R1, o3 Mini, GPT-4o and others. Each successful skill call to pro models counts as one request.',
       t2Requests: 'Standard Requests',
       t2RequestsDescription:
         'Standard models include Gemini Flash 2.0, DeepSeek V3, Claude 3.5 Haiku and others. Each successful skill call to standard models counts as one request.',
