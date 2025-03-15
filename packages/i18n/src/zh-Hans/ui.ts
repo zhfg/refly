@@ -426,13 +426,17 @@ const translations = {
     faq: {
       title: '常见问题',
       Q1: 'Refly 可以免费使用吗？',
-      A1: '为了更多用户快速上手体验 Refly，我们为所有注册用户提供10个知识库文件存储额度，以及每天3次高级模型调用和30次基础模型调用。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
+      A1: 'Refly 作为开源项目，对于个人用户，您可以通过自行部署社区版使用其所有功能。为了更多用户快速上手体验 Refly，我们为所有注册用户提供 10 个知识库文件存储额度，以及每天3次高级模型调用和30次基础模型调用。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
       Q2: '你们支持哪些付款方式？',
       A2: '我们支持银行卡、支付宝、Amazon Pay 和 Cash App Pay。支持的付款方式可能随时有变，请以 Stripe 收银台显示的付款方式为准。',
       Q3: '如何更改或取消订阅方案？',
-      A3: '目前不支持更改订阅方案。如果您需要取消订阅方案，请点击「设置-订阅-管理账单及订阅」按钮后前往 Stripe 管理订阅计划。取消订阅成功后，在当前方案到期时将自动降级为免费版。',
+      A3: '如需升级或降级订阅方案，请联系 Refly 团队为您处理。如果需要取消订阅方案，请点击「设置-订阅-管理账单及订阅」按钮后前往 Stripe 管理订阅计划。取消订阅成功后，在当前方案到期时将自动降级为免费版。',
       Q4: '是否支持退款？',
       A4: '目前暂不开放退款入口，如果您有强烈的退款需求，请联系 Refly 团队为您解决。',
+      Q5: '作为 Refly 的用户，我的数据存储在哪里？',
+      A5: '如果您使用的是 Refly Cloud 服务，数据均安全存储在美国。如果您选择自行部署，则数据存储于您部署 Refly 的机器。我们不会收集任何自行部署 Refly 服务的数据。',
+      Q6: '我能否在企业内部私有化部署 Refly？',
+      A6: '在企业内部私有化部署 Refly 需要购买商业许可证，请电函 support@refly.ai 联系我们进行沟通。',
     },
     testimonials: {
       tag: '用户评价',
@@ -1540,10 +1544,10 @@ const translations = {
       currentPlan: '当前套餐',
       t1Requests: '高级模型请求',
       t1RequestsDescription:
-        '高级模型包括 DeepSeek R1, GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
+        '高级模型包括 Claude 3.7 Sonnet, DeepSeek R1, GPT-4o, o3 Mini 等模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
       t2RequestsDescription:
-        '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
+        '标准模型包括 Gemini Flash 2.0, DeepSeek V3, Claude 3.5 Haiku 等模型。每个成功的技能调用计为一次请求。',
       requestsRefresh: '免费用户每天会重置次数。',
       libraryStorage: '知识库文件数',
       libraryStorageDescription: '知识库中每个资源和文档计为一个文件。',
@@ -1619,7 +1623,7 @@ const translations = {
           },
         },
         max: {
-          description: '尽情释放无限创意',
+          description: '自由创作的巅峰体验',
           serviceSupport: {
             name: '服务支持',
             details: '专属微信/ Discord 群聊',

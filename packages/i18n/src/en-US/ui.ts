@@ -482,13 +482,17 @@ const translations = {
     faq: {
       title: 'Frequently Asked Questions',
       Q1: 'Can Refly be used for free?',
-      A1: 'To enable more users to quickly start and experience Refly, we provide all registered users with knowledge base quota of 10 files and daily access to 3 pro model requests and 30 standard model requests. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
+      A1: 'As an open-source project, for individual users, you can self-deploy the community version to use all our  features. To enable more users to quickly start and experience Refly, we provide all registered users with knowledge base quota of 10 files and daily access to 3 pro model requests and 30 standard model requests. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
       Q2: 'What payment methods do you support?',
       A2: 'We support bank cards, Alipay, Amazon Pay, and Cash App Pay. The supported payment methods may be subject to change at any time. Please refer to the payment methods displayed in the Stripe checkout page for the most accurate information.',
       Q3: 'How can I change or cancel my subscription plan?',
-      A3: 'Changing the subscription plan is not supported at present. If you need to cancel your subscription, please click the "Settings - Subscription - Manage Billing and Subscription" button and then proceed to the Stripe platform to manage your subscription. Once the cancellation is successful, your account will be automatically downgraded to the free version upon the expiration of the current plan.',
+      A3: `To upgrade or downgrade your subscription plan, please contact the Refly team for assistance. If you need to cancel your subscription, please click the 'Settings - Subscription - Manage Billing and Subscription' button and then proceed to the Stripe platform to manage your subscription. Once the cancellation is successful, your account will be automatically downgraded to the free version upon the expiration of the current plan.`,
       Q4: 'Is a refund available?',
       A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
+      Q5: 'As a Refly user, where is my data stored?',
+      A5: 'If you are using the Refly Cloud service, your data is securely stored in the United States. If you choose to self-deploy, the data is stored on the machine where you deploy Refly. We do not collect any data from self-deployed Refly services.',
+      Q6: 'Can I deploy Refly privately within enterprises?',
+      A6: 'To deploy Refly privately within your enterprise, a commercial license is required. Please contact us at support@refly.ai for further discussion.',
     },
     testimonials: {
       tag: 'User Testimonials',
@@ -1577,10 +1581,10 @@ const translations = {
       currentPlan: 'Current Plan',
       t1Requests: 'Pro Requests',
       t1RequestsDescription:
-        'Pro models include DeepSeek R1, GPT-4o, Claude 3.5 Sonnet and others. Each successful skill call to pro models counts as one request.',
+        'Pro models include Claude 3.7 Sonnet, DeepSeek R1, GPT-4o, o3 Mini and others. Each successful skill call to pro models counts as one request.',
       t2Requests: 'Standard Requests',
       t2RequestsDescription:
-        'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
+        'Standard models include Gemini Flash 2.0, DeepSeek V3, Claude 3.5 Haiku and others. Each successful skill call to standard models counts as one request.',
       requestsRefresh: 'Request count will be reset every day for users on free plan.',
       libraryStorage: 'Library Storage',
       libraryStorageDescription: 'Each resource and document in your library counts as one file.',
@@ -1658,7 +1662,7 @@ const translations = {
           },
         },
         max: {
-          description: 'Unlimited creativity without boundaries',
+          description: 'The pinnacle of creative freedom',
           serviceSupport: {
             name: 'Service Support',
             details: 'Exclusive WeChat/Discord Group',
