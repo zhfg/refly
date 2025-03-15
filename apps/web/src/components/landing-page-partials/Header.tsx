@@ -1,5 +1,5 @@
 import Logo from '@/assets/logo.svg';
-import { Button, Badge, Dropdown } from 'antd';
+import { Button, Dropdown } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 import { useState, useEffect, useMemo } from 'react';
@@ -64,20 +64,7 @@ function Header() {
       value: 'product',
     },
     {
-      label: (
-        <Badge
-          count={t('landingPage.tab.priceTag')}
-          style={{
-            fontSize: '10px',
-            padding: '0 4px',
-            opacity: 0.8,
-            boxShadow: 'none',
-          }}
-          offset={[0, -4]}
-        >
-          <span className="mr-3">{t('landingPage.tab.price')}</span>
-        </Badge>
-      ),
+      label: t('landingPage.tab.price'),
       value: 'pricing',
     },
     {
