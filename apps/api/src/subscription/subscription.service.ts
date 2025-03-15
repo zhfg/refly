@@ -772,6 +772,10 @@ export class SubscriptionService implements OnModuleInit {
   async syncRequestUsage(data: SyncRequestUsageJobData) {
     const { uid, tier } = data;
 
+    if (tier === 'free') {
+      return;
+    }
+
     const user = await this.prisma.user.findUnique({ where: { uid } });
     if (!user) {
       this.logger.warn(`No user found for uid ${uid}`);
