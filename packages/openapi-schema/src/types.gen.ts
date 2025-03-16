@@ -3184,6 +3184,10 @@ export type ModelCapabilities = {
    * Whether this model includes reasoning content
    */
   reasoning?: boolean;
+  /**
+   * Whether this model supports context caching
+   */
+  contextCaching?: boolean;
 };
 
 export type ModelInfo = {

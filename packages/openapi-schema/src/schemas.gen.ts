@@ -4535,6 +4535,10 @@ export const ModelCapabilitiesSchema = {
       type: 'boolean',
       description: 'Whether this model includes reasoning content',
     },
+    contextCaching: {
+      type: 'boolean',
+      description: 'Whether this model supports context caching',
+    },
   },
 } as const;
 

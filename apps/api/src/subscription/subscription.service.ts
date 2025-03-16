@@ -255,7 +255,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { subscriptionId: param.subscriptionId, customerId: param.customerId },
       });
 
-      const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+      const plan = await this.prisma.subscriptionPlan.findFirst({
         where: { planType: sub.planType },
       });
 
@@ -336,7 +336,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      const freePlan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+      const freePlan = await this.prisma.subscriptionPlan.findFirst({
         where: { planType: 'free' },
       });
 
@@ -564,7 +564,7 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     const planType = sub?.planType || 'free';
-    const plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+    const plan = await this.prisma.subscriptionPlan.findFirst({
       select: { fileParsePageLimit: true, fileUploadLimit: true },
       where: { planType },
     });
@@ -638,7 +638,7 @@ export class SubscriptionService implements OnModuleInit {
         plan = safeParseJSON(sub.overridePlan) as PlanQuota;
       }
       if (!plan) {
-        plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+        plan = await this.prisma.subscriptionPlan.findFirst({
           where: { planType },
         });
       }
@@ -694,7 +694,7 @@ export class SubscriptionService implements OnModuleInit {
       }
       if (!plan) {
         const planType = sub?.planType || 'free';
-        plan = await this.prisma.subscriptionPlan.findFirstOrThrow({
+        plan = await this.prisma.subscriptionPlan.findFirst({
           where: { planType },
         });
       }
@@ -772,6 +772,10 @@ export class SubscriptionService implements OnModuleInit {
   async syncRequestUsage(data: SyncRequestUsageJobData) {
     const { uid, tier } = data;
 
+    if (tier === 'free') {
+      return;
+    }
+
     const user = await this.prisma.user.findUnique({ where: { uid } });
     if (!user) {
       this.logger.warn(`No user found for uid ${uid}`);
@@ -795,6 +799,7 @@ export class SubscriptionService implements OnModuleInit {
         status: {
           in: ['waiting', 'executing', 'finish'],
         },
+        duplicateFrom: null,
       },
     });
 
