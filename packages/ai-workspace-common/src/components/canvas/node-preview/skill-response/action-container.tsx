@@ -136,7 +136,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
         },
       });
 
-      if (!data.success || error) {
+      if (!data?.success || error) {
         throw new Error(error ? String(error) : 'Failed to share skill response');
       }
 

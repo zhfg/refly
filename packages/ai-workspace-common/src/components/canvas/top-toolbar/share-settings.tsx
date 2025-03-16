@@ -167,7 +167,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
             const { data, error } = await getClient().deleteShare({
               body: { shareId: latestShareRecord.shareId },
             });
-            success = data.success && !error;
+            success = data?.success && !error;
           } else {
             // No share to delete
             success = true;
@@ -180,7 +180,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
               allowDuplication: true,
             },
           });
-          success = data.success && !error;
+          success = data?.success && !error;
         }
 
         if (success) {

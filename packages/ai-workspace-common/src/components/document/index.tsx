@@ -135,7 +135,7 @@ const StatusBar = memo(
           },
         });
 
-        if (!data.success || error) {
+        if (!data?.success || error) {
           throw new Error(error ? String(error) : 'Failed to share document');
         }
 

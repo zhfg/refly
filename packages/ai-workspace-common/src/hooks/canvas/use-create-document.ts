@@ -63,7 +63,7 @@ export const useCreateDocument = () => {
       });
       setIsCreating(false);
 
-      if (!data.success || error) {
+      if (!data?.success || error) {
         return;
       }
 
@@ -137,7 +137,7 @@ export const useCreateDocument = () => {
       });
       setIsCreating(false);
 
-      if (!data.success || error) {
+      if (!data?.success || error) {
         return;
       }
 
@@ -187,7 +187,7 @@ export const useCreateDocument = () => {
       });
       setIsCreating(false);
 
-      if (!data.success || error) {
+      if (!data?.success || error) {
         return;
       }
 

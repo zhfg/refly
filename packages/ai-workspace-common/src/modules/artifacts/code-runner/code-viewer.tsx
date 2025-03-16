@@ -205,7 +205,7 @@ export default memo(
           },
         });
 
-        if (!data.success || error) {
+        if (!data?.success || error) {
           loadingMessage();
           console.error('Failed to share code:', error);
           message.error(t('codeArtifact.shareError'));

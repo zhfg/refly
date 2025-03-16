@@ -799,6 +799,7 @@ export class SubscriptionService implements OnModuleInit {
         status: {
           in: ['waiting', 'executing', 'finish'],
         },
+        duplicateFrom: null,
       },
     });
 

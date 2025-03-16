@@ -37,7 +37,7 @@ export const CreateTemplateModal = ({
       },
     });
     setConfirmLoading(false);
-    if (data.success) {
+    if (data?.success) {
       setVisible(false);
       message.success(t('template.createSuccess'));
     }
