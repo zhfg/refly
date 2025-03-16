@@ -163,6 +163,7 @@ export class CodeArtifacts extends BaseSkill {
       originalQuery: query,
       optimizedQuery,
       rewrittenQueries,
+      modelInfo: config.configurable.modelInfo,
     });
 
     return { requestMessages, sources, context, query };
