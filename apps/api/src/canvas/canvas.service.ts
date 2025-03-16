@@ -243,8 +243,12 @@ export class CanvasService {
       `Duplicating ${nodes.length} nodes from canvas ${sourceCanvasId} to ${targetCanvasId}`,
     );
 
+    // This is used to trace the replacement of entities
+    // Key is the original entity id, value is the duplicated entity id
+    const replaceEntityMap: Record<string, string> = {};
+
+    // Duplicate resources and documents if needed
     if (duplicateEntities) {
-      // Duplicate each entity
       const limit = pLimit(5); // Limit concurrent operations
 
       await Promise.all(
@@ -262,6 +266,7 @@ export class CanvasService {
                 });
                 if (doc) {
                   node.data.entityId = doc.docId;
+                  replaceEntityMap[entityId] = doc.docId;
                 }
                 break;
               }
@@ -272,17 +277,7 @@ export class CanvasService {
                 });
                 if (resource) {
                   node.data.entityId = resource.resourceId;
-                }
-                break;
-              }
-              case 'skillResponse': {
-                const result = await this.actionService.duplicateActionResult(user, {
-                  sourceResultId: entityId,
-                  targetId: targetCanvasId,
-                  targetType: 'canvas',
-                });
-                if (result) {
-                  node.data.entityId = result.resultId;
+                  replaceEntityMap[entityId] = resource.resourceId;
                 }
                 break;
               }
@@ -290,6 +285,36 @@ export class CanvasService {
           }),
         ),
       );
+    }
+
+    // Action results must be duplicated
+    const actionResultIds = nodes
+      .filter((node) => node.type === 'skillResponse')
+      .map((node) => node.data.entityId);
+    await this.actionService.duplicateActionResults(user, {
+      sourceResultIds: actionResultIds,
+      targetId: targetCanvasId,
+      targetType: 'canvas',
+      replaceEntityMap,
+    });
+
+    for (const node of nodes) {
+      if (node.type !== 'skillResponse') {
+        continue;
+      }
+
+      const { entityId, metadata } = node.data;
+      if (entityId) {
+        node.data.entityId = replaceEntityMap[entityId];
+      }
+      if (Array.isArray(metadata.contextItems)) {
+        metadata.contextItems = metadata.contextItems.map((item) => {
+          if (item.entityId) {
+            item.entityId = replaceEntityMap[item.entityId];
+          }
+          return item;
+        });
+      }
     }
 
     if (sourceCanvas.uid !== user.uid) {
