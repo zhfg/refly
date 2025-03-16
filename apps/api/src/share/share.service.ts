@@ -786,6 +786,17 @@ export class ShareService {
     // Duplicate the files and index
     await Promise.all(jobs);
 
+    await this.prisma.duplicateRecord.create({
+      data: {
+        sourceId: record.entityId,
+        targetId: newDocId,
+        entityType: 'document',
+        uid: user.uid,
+        shareId,
+        status: 'finish',
+      },
+    });
+
     await this.knowledgeService.syncStorageUsage(user);
 
     return { entityId: newDocId, entityType: 'document' };
@@ -871,6 +882,17 @@ export class ShareService {
     // Duplicate the files and index
     await Promise.all(jobs);
 
+    await this.prisma.duplicateRecord.create({
+      data: {
+        sourceId: record.entityId,
+        targetId: newResourceId,
+        entityType: 'resource',
+        uid: user.uid,
+        shareId,
+        status: 'finish',
+      },
+    });
+
     await this.knowledgeService.syncStorageUsage(user);
 
     return { entityId: newResourceId, entityType: 'resource' };
@@ -926,6 +948,17 @@ export class ShareService {
         })),
       }),
     ]);
+
+    await this.prisma.duplicateRecord.create({
+      data: {
+        sourceId: record.entityId,
+        targetId: newResultId,
+        entityType: 'skillResponse',
+        uid: user.uid,
+        shareId,
+        status: 'finish',
+      },
+    });
 
     return { entityId: newResultId, entityType: 'skillResponse' };
   }
@@ -1021,6 +1054,17 @@ export class ShareService {
     await this.prisma.canvas.update({
       where: { canvasId: newCanvasId },
       data: { status: 'ready' },
+    });
+
+    await this.prisma.duplicateRecord.create({
+      data: {
+        sourceId: record.entityId,
+        targetId: newCanvasId,
+        entityType: 'canvas',
+        uid: user.uid,
+        shareId,
+        status: 'finish',
+      },
     });
 
     return { entityId: newCanvasId, entityType: 'canvas' };
