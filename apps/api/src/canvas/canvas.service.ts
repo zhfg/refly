@@ -309,7 +309,7 @@ export class CanvasService {
       }
       if (Array.isArray(metadata.contextItems)) {
         metadata.contextItems = metadata.contextItems.map((item) => {
-          if (item.entityId) {
+          if (item.entityId && replaceEntityMap[item.entityId]) {
             item.entityId = replaceEntityMap[item.entityId];
           }
           return item;
