@@ -124,6 +124,7 @@ export class ActionService {
         uid: user.uid,
         targetId,
         targetType,
+        duplicateFrom: originalResult.resultId,
       },
     });
 
