@@ -462,7 +462,7 @@ export class SkillService {
 
     const purgeResultHistory = (resultHistory: ActionResult[] = []) => {
       // remove extra unnecessary fields from result history to save storage
-      return resultHistory?.map((r) => pick(r, ['resultId', 'title', 'steps']));
+      return resultHistory?.map((r) => pick(r, ['resultId', 'title']));
     };
 
     const data: InvokeSkillJobData = {
