@@ -407,6 +407,8 @@ export const SkillResponseNode = memo(
       } catch (err) {
         console.error('Failed to create document:', err);
         message.error(t('canvas.skillResponse.createDocumentFailed'));
+      } finally {
+        nodeActionEmitter.emit(createNodeEventName(id, 'createDocument.completed'));
       }
     }, [debouncedCreateDocument, entityId, title, content, t]);
 

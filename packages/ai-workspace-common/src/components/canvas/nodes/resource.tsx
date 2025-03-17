@@ -237,6 +237,8 @@ export const ResourceNode = memo(
       } catch (error) {
         console.error(error);
         message.error(t('knowledgeBase.context.noContent'));
+      } finally {
+        nodeActionEmitter.emit(createNodeEventName(id, 'createDocument.completed'));
       }
     }, [data.title, data.entityId, remoteResult?.content, debouncedCreateDocument, t]);
 
