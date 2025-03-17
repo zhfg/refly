@@ -118,6 +118,8 @@ const translations = {
       codeDescription: '代码片段',
       image: '图片',
       imageDescription: '上传图片',
+      table: '表格',
+      tableDescription: '创建一个表格',
     },
     nodeSelector: {
       text: '文本',

@@ -151,8 +151,8 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       },
     },
     {
-      title: 'Table',
-      description: 'Insert a table.',
+      title: t('editor.command.table'),
+      description: t('editor.command.tableDescription'),
       searchTerms: ['table'],
       icon: <IconTable size={18} />,
       command: ({ editor, range }) => {

@@ -110,6 +110,8 @@ const translations = {
       codeDescription: 'Capture a code snippet',
       image: 'Image',
       imageDescription: 'Upload an image from your computer',
+      table: 'Table',
+      tableDescription: 'Create a table',
     },
     nodeSelector: {
       text: 'Text',
