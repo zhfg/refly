@@ -6,8 +6,10 @@ import { Toolbar } from '../../ui/Toolbar';
 import { isColumnGripSelected } from './utils';
 import { Icon } from '../../ui/Icon';
 import { MenuProps, ShouldShowProps } from '../../menus/types';
+import { useTranslation } from 'react-i18next';
 
 export const TableColumnMenu = React.memo(({ editor, appendTo }: MenuProps): JSX.Element => {
+  const { t } = useTranslation();
   const shouldShow = useCallback(
     ({ view, state, from }: ShouldShowProps) => {
       if (!state) {
@@ -40,7 +42,7 @@ export const TableColumnMenu = React.memo(({ editor, appendTo }: MenuProps): JSX
         appendTo: () => {
           return appendTo?.current;
         },
-        offset: [0, 15],
+        offset: [0, 0],
         popperOptions: {
           modifiers: [{ name: 'flip', enabled: false }],
         },
@@ -50,17 +52,19 @@ export const TableColumnMenu = React.memo(({ editor, appendTo }: MenuProps): JSX
       <Toolbar.Wrapper isVertical>
         <PopoverMenu.Item
           iconComponent={<Icon name="ArrowLeftToLine" />}
-          close={false}
-          label="Add column before"
+          label={t('editor.table.addColumnBefore')}
           onClick={onAddColumnBefore}
         />
         <PopoverMenu.Item
           iconComponent={<Icon name="ArrowRightToLine" />}
-          close={false}
-          label="Add column after"
+          label={t('editor.table.addColumnAfter')}
           onClick={onAddColumnAfter}
         />
-        <PopoverMenu.Item icon="Trash" close={false} label="Delete column" onClick={onDeleteColumn} />
+        <PopoverMenu.Item
+          icon="Trash"
+          label={t('editor.table.deleteColumn')}
+          onClick={onDeleteColumn}
+        />
       </Toolbar.Wrapper>
     </BaseBubbleMenu>
   );

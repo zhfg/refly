@@ -260,7 +260,7 @@ const tableExtensions = [Table, TableRow, TableHeader, TableCell];
 
 export const defaultExtensions = [
   starterKit,
-  // ...tableExtensions,
+  ...tableExtensions,
   tiptapLink,
   tiptapImage,
   taskList,

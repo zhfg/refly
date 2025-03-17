@@ -6,8 +6,10 @@ import { Toolbar } from '../../ui/Toolbar';
 import { isRowGripSelected } from './utils';
 import { Icon } from '../../ui/Icon';
 import { MenuProps, ShouldShowProps } from '../../menus/types';
+import { useTranslation } from 'react-i18next';
 
 export const TableRowMenu = React.memo(({ editor, appendTo }: MenuProps): JSX.Element => {
+  const { t } = useTranslation();
   const shouldShow = useCallback(
     ({ view, state, from }: ShouldShowProps) => {
       if (!state || !from) {
@@ -51,17 +53,15 @@ export const TableRowMenu = React.memo(({ editor, appendTo }: MenuProps): JSX.El
       <Toolbar.Wrapper isVertical>
         <PopoverMenu.Item
           iconComponent={<Icon name="ArrowUpToLine" />}
-          close={false}
-          label="Add row before"
+          label={t('editor.table.addRowBefore')}
           onClick={onAddRowBefore}
         />
         <PopoverMenu.Item
           iconComponent={<Icon name="ArrowDownToLine" />}
-          close={false}
-          label="Add row after"
+          label={t('editor.table.addRowAfter')}
           onClick={onAddRowAfter}
         />
-        <PopoverMenu.Item icon="Trash" close={false} label="Delete row" onClick={onDeleteRow} />
+        <PopoverMenu.Item icon="Trash" label={t('editor.table.deleteRow')} onClick={onDeleteRow} />
       </Toolbar.Wrapper>
     </BaseBubbleMenu>
   );

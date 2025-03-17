@@ -36,10 +36,10 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/document';
 import UpdatedImage from '@refly-packages/ai-workspace-common/components/editor/core/extensions/updated-image';
 import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
-// import {
-//   TableColumnMenu,
-//   TableRowMenu,
-// } from '@refly-packages/ai-workspace-common/components/editor/extensions/Table/menus';
+import {
+  TableColumnMenu,
+  TableRowMenu,
+} from '@refly-packages/ai-workspace-common/components/editor/extensions/Table/menus';
 
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
@@ -63,6 +63,7 @@ export const CollaborativeEditor = memo(
     const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+    const menuContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       const styleEl = document.createElement('style');
@@ -491,7 +492,7 @@ export const CollaborativeEditor = memo(
               }}
               editable={!readOnly}
               className="w-full h-full border-muted sm:rounded-lg"
-              // ref={menuContainerRef}
+              ref={menuContainerRef}
               editorProps={{
                 handleDOMEvents: {
                   keydown: (_view, event) => handleCommandNavigation(event),
@@ -528,8 +529,8 @@ export const CollaborativeEditor = memo(
                 }}
               />
               <CollabGenAIBlockMenu />
-              {/* <TableRowMenu editor={editorRef.current} appendTo={menuContainerRef} /> */}
-              {/* <TableColumnMenu editor={editorRef.current} appendTo={menuContainerRef} /> */}
+              <TableRowMenu editor={editorRef.current} appendTo={menuContainerRef} />
+              <TableColumnMenu editor={editorRef.current} appendTo={menuContainerRef} />
             </EditorContent>
           </EditorRoot>
         </div>
