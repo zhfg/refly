@@ -83,7 +83,7 @@ export class ShareService {
   }
 
   async createShareForCanvas(user: User, param: CreateShareRequest) {
-    const { entityId: canvasId, parentShareId, allowDuplication } = param;
+    const { entityId: canvasId, title, parentShareId, allowDuplication } = param;
 
     // Check if shareRecord already exists
     const existingShareRecord = await this.prisma.shareRecord.findFirst({
@@ -107,6 +107,11 @@ export class ShareService {
     }
 
     const canvasData = await this.canvasService.getCanvasRawData(user, canvasId);
+
+    // If title is provided, use it as the title of the canvas
+    if (title) {
+      canvasData.title = title;
+    }
 
     // Set up concurrency limit for image processing
     const limit = pLimit(5); // Limit to 5 concurrent operations
@@ -210,7 +215,7 @@ export class ShareService {
           pk: existingShareRecord.pk,
         },
         data: {
-          title: canvas.title,
+          title: canvasData.title,
           storageKey,
           parentShareId,
           allowDuplication,
@@ -225,7 +230,7 @@ export class ShareService {
       shareRecord = await this.prisma.shareRecord.create({
         data: {
           shareId,
-          title: canvas.title,
+          title: canvasData.title,
           uid: user.uid,
           entityId: canvasId,
           entityType: 'canvas',

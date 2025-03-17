@@ -78,7 +78,6 @@ export class TemplateService {
         title,
         description,
         language,
-        isPublic: true, // TODO: remove this in production
       },
     });
 
