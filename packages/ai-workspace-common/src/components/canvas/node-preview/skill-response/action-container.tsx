@@ -205,7 +205,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
                   onClick={handleShare}
                 >
                   <span className="opacity-0 max-w-0 transform -translate-x-0.5 transition-all duration-400 whitespace-nowrap group-hover:opacity-100 group-hover:max-w-[200px] group-hover:translate-x-0 group-hover:ml-1">
-                    {t('canvas.skillResponse.share', 'Share')}
+                    {t('common.share')}
                   </span>
                 </Button>
               </>

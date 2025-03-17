@@ -778,6 +778,7 @@ const translations = {
     },
   },
   document: {
+    share: '分享文档',
     setReadOnly: '设置为只读',
     enableEdit: '启用编辑',
     shareLoading: '正在加载共享文档...',

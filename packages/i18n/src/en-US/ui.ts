@@ -788,6 +788,7 @@ const translations = {
     },
   },
   document: {
+    share: 'Share Document',
     setReadOnly: 'Set to Read-Only',
     enableEdit: 'Enable Edit',
     shareLoading: 'Loading shared document...',
