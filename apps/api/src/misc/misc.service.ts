@@ -219,7 +219,7 @@ export class MiscService implements OnModuleInit {
   }
 
   async downloadFile(file: FileObject) {
-    const { storageKey, visibility } = file;
+    const { storageKey, visibility = 'private' } = file;
     const stream = await this.minioClient(visibility).getObject(storageKey);
     return streamToBuffer(stream);
   }
@@ -669,7 +669,7 @@ export class MiscService implements OnModuleInit {
     this.logger.log(`Found ${orphanedFiles.length} orphaned files to clean up`);
 
     // Collect all storage keys to delete (including processed images)
-    const storageKeysToDelete = orphanedFiles.reduce<
+    const objectsToDelete = orphanedFiles.reduce<
       { storageKey: string; visibility: FileVisibility }[]
     >((acc, file) => {
       acc.push({ storageKey: file.storageKey, visibility: file.visibility as FileVisibility });
@@ -683,7 +683,7 @@ export class MiscService implements OnModuleInit {
     }, []);
 
     // Delete files from storage
-    await this.batchRemoveObjects(null, storageKeysToDelete);
+    await this.batchRemoveObjects(null, objectsToDelete);
 
     // Mark files as deleted in database
     await this.prisma.staticFile.updateMany({

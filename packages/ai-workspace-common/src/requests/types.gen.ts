@@ -2107,6 +2107,10 @@ export type CreateShareRequest = {
    * Raw share data (JSON string)
    */
   shareData?: string;
+  /**
+   * Share data storage key
+   */
+  shareDataStorageKey?: string;
 };
 
 export type CreateShareResponse = BaseResponse & {
