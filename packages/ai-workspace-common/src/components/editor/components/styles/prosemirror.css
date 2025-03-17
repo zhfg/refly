@@ -17,14 +17,17 @@
   height: 0;
   font-weight: 400 !important;
 }
+
 .ProseMirror .is-empty::before {
   content: attr(data-placeholder);
-  float: left;
+  position: absolute;
   color: rgba(0, 0, 0, 0.3) !important;
   pointer-events: none;
-  height: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
   font-weight: 400 !important;
-  font-size: 12px;
 }
 
 /* Custom image styles */
