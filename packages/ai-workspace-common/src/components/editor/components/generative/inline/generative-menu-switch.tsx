@@ -1,6 +1,6 @@
 import { EditorBubble, useEditor } from '../../../core/components';
 import { removeAIHighlight } from '../../../core/extensions';
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef } from 'react';
 import type { Instance } from 'tippy.js';
 
 import { AISelector } from '../common/ai-selector';
@@ -16,6 +16,11 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
   const { editor } = useEditor();
   const containerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<Instance | null>(null);
+
+  const isTableCellOrHeader = useMemo(() => {
+    if (!editor) return false;
+    return editor.isActive('tableCell') || editor.isActive('tableHeader');
+  }, [editor, editor?.state.selection]);
 
   const handleBubbleClose = () => {
     if (bubbleRef.current) {
@@ -76,7 +81,8 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
             inPlaceEditType="inline"
           />
         )}
-        {!open && children}
+        {/* TODO: fix this dont show menu when table is selected */}
+        {!open && !isTableCellOrHeader && children}
       </EditorBubble>
     </div>
   );

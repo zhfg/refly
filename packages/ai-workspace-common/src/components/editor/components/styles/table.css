@@ -43,7 +43,7 @@
     }
 
     .selectedCell {
-      @apply bg-black/5 border-black/20 border-double;
+      @apply bg-black/10 border-black/20 border-double;
     }
 
     .grip-column,

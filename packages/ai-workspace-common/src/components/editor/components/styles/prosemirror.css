@@ -24,6 +24,7 @@
   pointer-events: none;
   height: 0;
   font-weight: 400 !important;
+  font-size: 12px;
 }
 
 /* Custom image styles */

@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { IContextItem, useContextPanelStoreShallow } from '../../stores/context-panel';
 import { getSelectionNodesMarkdown } from '@refly/utils/html2md';
+import { Editor } from '@tiptap/react';
 
 interface UseSelectionContextProps {
   containerClass?: string;
   containerRef?: React.RefObject<HTMLElement>;
   enabled?: boolean;
+  editor?: Editor;
 }
 
 export const useSelectionContext = ({
   containerClass,
   containerRef,
   enabled = true,
+  editor,
 }: UseSelectionContextProps) => {
   const [selectedText, setSelectedText] = useState<string>('');
   const [isSelecting, setIsSelecting] = useState(false);
@@ -21,6 +24,11 @@ export const useSelectionContext = ({
 
   const handleSelection = useCallback(() => {
     if (!enabled) return;
+
+    // TODO: fix this dont show menu when table is selected
+    if (editor?.isActive('tableCell') || editor?.isActive('tableHeader')) {
+      return;
+    }
 
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) {

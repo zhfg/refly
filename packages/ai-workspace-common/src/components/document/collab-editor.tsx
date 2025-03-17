@@ -244,6 +244,7 @@ export const CollaborativeEditor = memo(
 
     const { addToContext, selectedText } = useSelectionContext({
       containerClass: 'ai-note-editor-content-container',
+      editor: editorRef.current,
     });
 
     const buildContextItem = (text: string): IContextItem => {

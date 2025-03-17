@@ -42,7 +42,7 @@ export const TableColumnMenu = React.memo(({ editor, appendTo }: MenuProps): JSX
         appendTo: () => {
           return appendTo?.current;
         },
-        offset: [0, 0],
+        offset: [0, 15],
         popperOptions: {
           modifiers: [{ name: 'flip', enabled: false }],
         },
