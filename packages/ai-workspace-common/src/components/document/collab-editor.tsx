@@ -244,29 +244,37 @@ export const CollaborativeEditor = memo(
 
     const { addToContext, selectedText } = useSelectionContext({
       containerClass: 'ai-note-editor-content-container',
+      enabled: !!editorRef.current,
       editor: editorRef.current,
     });
 
-    const buildContextItem = (text: string): IContextItem => {
-      const { document } = useDocumentStore.getState()?.data?.[docId] ?? {};
+    // Get document data once at component level
+    const documentData = useDocumentStore((state) => state.data?.[docId]?.document);
 
-      return {
-        title: text.slice(0, 50),
-        entityId: genUniqueId(),
-        type: 'documentSelection',
-        selection: {
-          content: text,
-          sourceTitle: document?.title ?? 'Selected Content',
-          sourceEntityId: document?.docId ?? '',
-          sourceEntityType: 'document',
-        },
-      };
-    };
+    const buildContextItem = useCallback(
+      (text: string): IContextItem => {
+        return {
+          title: text.slice(0, 50),
+          entityId: genUniqueId(),
+          type: 'documentSelection',
+          selection: {
+            content: text,
+            sourceTitle: documentData?.title ?? 'Selected Content',
+            sourceEntityId: documentData?.docId ?? '',
+            sourceEntityType: 'document',
+          },
+        };
+      },
+      [documentData],
+    );
 
-    const handleAddToContext = (text: string) => {
-      const item = buildContextItem(text);
-      addToContext(item);
-    };
+    const handleAddToContext = useCallback(
+      (text: string) => {
+        const item = buildContextItem(text);
+        addToContext(item);
+      },
+      [addToContext, buildContextItem],
+    );
 
     const { createMemo } = useCreateMemo();
     const handleCreateMemo = useCallback(
@@ -279,7 +287,7 @@ export const CollaborativeEditor = memo(
           },
         });
       },
-      [docId],
+      [docId, createMemo],
     );
 
     useEffect(() => {
@@ -315,7 +323,7 @@ export const CollaborativeEditor = memo(
         editor.off('blur', updateSelection);
         editor.off('focus', updateSelection);
       };
-    }, [editorRef.current, documentActions.setHasEditorSelection]);
+    }, [documentActions]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {

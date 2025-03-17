@@ -20,7 +20,7 @@ export const isRowGripSelected = ({
   const nodeDOM = view.nodeDOM(from) as HTMLElement;
   const node = nodeDOM || domAtPos;
 
-  if (!editor.isActive(Table.name) || !node || isTableSelected(state.selection)) {
+  if (!editor?.isActive(Table.name) || !node || isTableSelected(state?.selection)) {
     return false;
   }
 
