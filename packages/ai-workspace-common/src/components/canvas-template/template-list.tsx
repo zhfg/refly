@@ -78,24 +78,28 @@ export const TemplateCard = ({
         </Typography.Paragraph>
       </div>
 
-      <div className="absolute left-0 bottom-0 w-full h-20 py-2 px-4 bg-gradient-to-b from-transparent to-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-3">
-        <Button
-          size="large"
-          type="default"
-          className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-white hover:bg-gray-100"
-          onClick={handlePreview}
-        >
-          {t('template.preview')}
-        </Button>
-        <Button
-          loading={duplicating}
-          size="large"
-          type="primary"
-          className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100"
-          onClick={handleUse}
-        >
-          {t('template.use')}
-        </Button>
+      <div className="absolute left-0 bottom-0 w-full">
+        <div className="absolute left-0 -top-8 w-full h-8 bg-gradient-to-b from-transparent to-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+        <div className="relative w-full h-16 py-2 px-4 bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-3">
+          <Button
+            size="large"
+            type="default"
+            className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-white hover:bg-gray-100"
+            onClick={handlePreview}
+          >
+            {t('template.preview')}
+          </Button>
+          <Button
+            loading={duplicating}
+            size="large"
+            type="primary"
+            className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100"
+            onClick={handleUse}
+          >
+            {t('template.use')}
+          </Button>
+        </div>
       </div>
     </div>
   );
