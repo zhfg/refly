@@ -14,7 +14,16 @@ export type ButtonProps = {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { active, buttonSize = 'medium', children, disabled, variant = 'primary', className, activeClassname, ...rest },
+    {
+      active,
+      buttonSize = 'medium',
+      children,
+      disabled,
+      variant = 'primary',
+      className,
+      activeClassname,
+      ...rest
+    },
     ref,
   ) => {
     const buttonClassName = cn(
@@ -53,7 +62,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           !disabled &&
             !active &&
             'hover:bg-black/5 hover:text-neutral-700 active:bg-black/10 active:text-neutral-800 dark:hover:bg-white/10 dark:hover:text-neutral-300 dark:active:text-neutral-200',
-          active && cn('bg-black/10 text-neutral-800 dark:bg-white/20 dark:text-neutral-200', activeClassname),
+          active &&
+            cn(
+              'bg-black/10 text-neutral-800 dark:bg-white/20 dark:text-neutral-200',
+              activeClassname,
+            ),
         ),
 
       buttonSize === 'medium' && 'py-2 px-3',

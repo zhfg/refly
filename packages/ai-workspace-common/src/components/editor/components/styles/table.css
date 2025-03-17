@@ -7,9 +7,8 @@
     @apply border-collapse border-black/10 rounded box-border w-full;
 
     tr:nth-child(2n) {
-        @apply bg-black/5;
-      }
-    
+      @apply bg-black/5;
+    }
 
     td,
     th {
