@@ -3,6 +3,7 @@ import { PrismaService } from '@/common/prisma.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { Injectable } from '@nestjs/common';
 import { ActionResultNotFoundError } from '@refly-packages/errors';
+import { ActionResult } from '@prisma/client';
 import { EntityType, GetActionResultData, User } from '@refly-packages/openapi-schema';
 import { genActionResultID, pick } from '@refly-packages/utils';
 import pLimit from 'p-limit';
@@ -72,15 +73,32 @@ export class ActionService {
   ) {
     const { sourceResultIds, targetId, targetType, replaceEntityMap } = param;
 
-    // Get the latest version of the action results
-    const originalResults = await this.prisma.actionResult.findMany({
+    // Get all action results for the given resultIds
+    const allResults = await this.prisma.actionResult.findMany({
       where: {
         resultId: { in: sourceResultIds },
       },
       orderBy: { version: 'desc' },
     });
 
-    if (!originalResults?.length) {
+    if (!allResults?.length) {
+      return [];
+    }
+
+    // Filter to keep only the latest version of each resultId
+    const latestResultsMap = new Map<string, ActionResult>();
+    for (const result of allResults) {
+      if (
+        !latestResultsMap.has(result.resultId) ||
+        latestResultsMap.get(result.resultId).version < result.version
+      ) {
+        latestResultsMap.set(result.resultId, result);
+      }
+    }
+
+    const filteredOriginalResults = Array.from(latestResultsMap.values());
+
+    if (!filteredOriginalResults.length) {
       return [];
     }
 
@@ -92,7 +110,7 @@ export class ActionService {
     const limit = pLimit(5);
 
     // Process each original result in parallel
-    const newResultsPromises = originalResults.map((originalResult) =>
+    const newResultsPromises = filteredOriginalResults.map((originalResult) =>
       limit(async () => {
         // Check if the user has access to the result
         if (options?.checkOwnership && user.uid !== originalResult.uid) {
