@@ -49,7 +49,7 @@ const TitleRender = ({
         /> */}
         <div className="flex items-center">
           <Select
-            className="flex-1 w-24"
+            className="flex-1 w-24 hidden"
             options={languageOptions}
             value={language}
             onChange={handleLanguageChange}
