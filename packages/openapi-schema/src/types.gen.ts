@@ -2073,6 +2073,10 @@ export type ShareRecord = {
    */
   parentShareId?: string;
   /**
+   * Canvas template ID
+   */
+  templateId?: string;
+  /**
    * Create timestamp
    */
   createdAt?: string;

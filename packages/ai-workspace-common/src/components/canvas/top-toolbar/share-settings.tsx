@@ -89,7 +89,12 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
   } = useListShares({
     query: { entityId: canvasId, entityType: 'canvas' },
   });
-  const shareRecord = useMemo(() => data?.data?.[0], [data]);
+
+  // Get the latest share record that is not a template
+  const shareRecord = useMemo(
+    () => data?.data?.filter((shareRecord) => !shareRecord.templateId)[0],
+    [data],
+  );
   const shareLink = useMemo(
     () => getShareLink('canvas', shareRecord?.shareId ?? ''),
     [shareRecord],
@@ -189,7 +194,8 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
         const latestSharesData = await getClient().listShares({
           query: { entityId: canvasId, entityType: 'canvas' },
         });
-        const latestShareRecord = latestSharesData?.data?.data?.[0];
+        const shareRecords = latestSharesData?.data?.data;
+        const latestShareRecord = shareRecords?.filter((shareRecord) => !shareRecord.templateId)[0];
 
         if (value === 'off') {
           if (latestShareRecord?.shareId) {

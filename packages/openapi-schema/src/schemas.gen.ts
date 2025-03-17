@@ -2803,6 +2803,10 @@ export const ShareRecordSchema = {
       type: 'string',
       description: 'Parent share ID',
     },
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+    },
     createdAt: {
       type: 'string',
       description: 'Create timestamp',

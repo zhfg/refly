@@ -80,6 +80,10 @@ export class TemplateService {
         language,
       },
     });
+    await this.prisma.shareRecord.update({
+      where: { shareId: shareRecord.shareId },
+      data: { templateId: template.templateId },
+    });
 
     return template;
   }
