@@ -1,4 +1,4 @@
-import { Canvas as CanvasModel, DuplicateRecord } from '@prisma/client';
+import { Canvas as CanvasModel } from '@prisma/client';
 import { Canvas, Entity } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
@@ -13,15 +13,6 @@ export interface DeleteCanvasNodesJobData {
 export interface AutoNameCanvasJobData {
   uid: string;
   canvasId: string;
-}
-
-export interface DuplicateCanvasJobData {
-  uid: string;
-  sourceCanvasId: string;
-  targetCanvasId: string;
-  title?: string;
-  duplicateEntities?: boolean;
-  dupRecord?: DuplicateRecord;
 }
 
 export function canvasPO2DTO(canvas: CanvasModel & { minimapUrl?: string }): Canvas {

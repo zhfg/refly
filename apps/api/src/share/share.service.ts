@@ -1035,6 +1035,18 @@ export class ShareService {
     const newCanvasId = genCanvasID();
     const stateStorageKey = `state/${newCanvasId}`;
 
+    const { nodes, edges } = canvasData;
+
+    const libEntityNodes = nodes.filter(
+      (node) => node.type === 'document' || node.type === 'resource',
+    );
+
+    // Check storage quota before creating a new canvas
+    const { available } = await this.subscriptionService.checkStorageUsage(user);
+    if (available < libEntityNodes.length) {
+      throw new StorageQuotaExceeded();
+    }
+
     await this.prisma.canvas.create({
       data: {
         uid: user.uid,
@@ -1044,14 +1056,13 @@ export class ShareService {
         stateStorageKey,
       },
     });
-    const { nodes, edges } = canvasData;
 
-    // Duplicate each entity
+    // Duplicate library entities
     const limit = pLimit(5); // Limit concurrent operations
     const replaceEntityMap: Record<string, string> = {};
 
     await Promise.all(
-      nodes.map((node) =>
+      libEntityNodes.map((node) =>
         limit(async () => {
           const entityType = node.type;
           const { entityId, metadata } = node.data;
