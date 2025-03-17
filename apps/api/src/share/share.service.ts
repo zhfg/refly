@@ -920,7 +920,11 @@ export class ShareService {
     return { entityId: newResourceId, entityType: 'resource' };
   }
 
-  async duplicateSharedSkillResponse(user: User, shareId: string): Promise<Entity> {
+  async duplicateSharedSkillResponse(
+    user: User,
+    shareId: string,
+    replaceEntityMap?: Record<string, string>,
+  ): Promise<Entity> {
     // Find the source record
     const record = await this.prisma.shareRecord.findFirst({
       where: { shareId, deletedAt: null },
@@ -928,9 +932,10 @@ export class ShareService {
     if (!record) {
       throw new ShareNotFoundError();
     }
+    const originalResultId = record.entityId;
 
     // Generate a new result ID for the skill response
-    const newResultId = genActionResultID();
+    const newResultId = replaceEntityMap?.[originalResultId] || genActionResultID();
 
     // Download the shared skill response data
     const result: ActionResult = JSON.parse(
@@ -942,6 +947,25 @@ export class ShareService {
       ).toString(),
     );
 
+    // Replace entities in context and history
+    let processedContext = JSON.stringify(result.context);
+    let processedHistory = JSON.stringify(result.history);
+
+    if (replaceEntityMap && Object.keys(replaceEntityMap).length > 0) {
+      try {
+        for (const [oldId, newId] of Object.entries(replaceEntityMap)) {
+          if (processedContext) {
+            processedContext = processedContext.replace(new RegExp(oldId, 'g'), newId);
+          }
+          if (processedHistory) {
+            processedHistory = processedHistory.replace(new RegExp(oldId, 'g'), newId);
+          }
+        }
+      } catch (error) {
+        this.logger.error(`Failed to replace entityId in context and history: ${error}`);
+      }
+    }
+
     // Create a new action result record
     await this.prisma.$transaction([
       this.prisma.actionResult.create({
@@ -952,23 +976,29 @@ export class ShareService {
           type: result.type,
           input: JSON.stringify(result.input),
           actionMeta: JSON.stringify(result.actionMeta),
-          context: JSON.stringify(result.context),
+          context: processedContext,
+          history: processedHistory,
           tplConfig: JSON.stringify(result.tplConfig),
           runtimeConfig: JSON.stringify(result.runtimeConfig),
           errors: JSON.stringify(result.errors),
         },
       }),
-      this.prisma.actionStep.createMany({
-        data: result.steps.map((step) => ({
-          ...pick(step, ['name', 'reasoningContent']),
-          content: step.content ?? '',
-          resultId: newResultId,
-          artifacts: JSON.stringify(step.artifacts),
-          structuredData: JSON.stringify(step.structuredData),
-          logs: JSON.stringify(step.logs),
-          tokenUsage: JSON.stringify(step.tokenUsage),
-        })),
-      }),
+      ...(result.steps?.length > 0
+        ? [
+            this.prisma.actionStep.createMany({
+              data: result.steps.map((step, index) => ({
+                ...pick(step, ['name', 'reasoningContent']),
+                order: index,
+                content: step.content ?? '',
+                resultId: newResultId,
+                artifacts: JSON.stringify(step.artifacts),
+                structuredData: JSON.stringify(step.structuredData),
+                logs: JSON.stringify(step.logs),
+                tokenUsage: JSON.stringify(step.tokenUsage),
+              })),
+            }),
+          ]
+        : []),
     ]);
 
     await this.prisma.duplicateRecord.create({
@@ -1018,12 +1048,16 @@ export class ShareService {
 
     // Duplicate each entity
     const limit = pLimit(5); // Limit concurrent operations
+    const replaceEntityMap: Record<string, string> = {};
 
     await Promise.all(
       nodes.map((node) =>
         limit(async () => {
           const entityType = node.type;
-          const shareId = node?.data?.metadata?.shareId as string;
+          const { entityId, metadata } = node.data;
+          const shareId = metadata?.shareId as string;
+
+          if (!shareId) return;
 
           // Create new entity based on type
           switch (entityType) {
@@ -1031,6 +1065,7 @@ export class ShareService {
               const doc = await this.duplicateSharedDocument(user, shareId);
               if (doc) {
                 node.data.entityId = doc.entityId;
+                replaceEntityMap[entityId] = doc.entityId;
               }
               break;
             }
@@ -1038,13 +1073,7 @@ export class ShareService {
               const resource = await this.duplicateSharedResource(user, shareId);
               if (resource) {
                 node.data.entityId = resource.entityId;
-              }
-              break;
-            }
-            case 'skillResponse': {
-              const result = await this.duplicateSharedSkillResponse(user, shareId);
-              if (result) {
-                node.data.entityId = result.entityId;
+                replaceEntityMap[entityId] = resource.entityId;
               }
               break;
             }
@@ -1054,6 +1083,30 @@ export class ShareService {
           node.data.metadata.shareId = undefined;
         }),
       ),
+    );
+
+    const resultIds = nodes
+      .filter((node) => node.type === 'skillResponse')
+      .map((node) => node.data.entityId);
+
+    for (const resultId of resultIds) {
+      replaceEntityMap[resultId] = genActionResultID();
+    }
+
+    await Promise.all(
+      nodes
+        .filter((node) => node.type === 'skillResponse')
+        .map((node) =>
+          limit(async () => {
+            const shareId = node.data.metadata.shareId as string;
+            if (!shareId) return;
+
+            const result = await this.duplicateSharedSkillResponse(user, shareId, replaceEntityMap);
+            if (result) {
+              node.data.entityId = result.entityId;
+            }
+          }),
+        ),
     );
 
     const doc = new Y.Doc();
