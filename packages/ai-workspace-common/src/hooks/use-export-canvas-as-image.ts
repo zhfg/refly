@@ -2,7 +2,7 @@ import { useReactFlow } from '@xyflow/react';
 import { useCallback, useState } from 'react';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import html2canvas from 'html2canvas';
+import html2canvas, { Options } from 'html2canvas';
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { staticPrivateEndpoint } from '@refly-packages/ai-workspace-common/utils/env';
 
@@ -33,8 +33,8 @@ export const useExportCanvasAsImage = () => {
     }
   }, []);
 
-  const exportCanvasAsImage = useCallback(
-    async (canvasName = 'canvas') => {
+  const getCanvasElement = useCallback(
+    async (options?: Partial<Options>) => {
       if (isLoading) return;
       setIsLoading(true);
       try {
@@ -70,6 +70,7 @@ export const useExportCanvasAsImage = () => {
           logging: false, // disable logging
           imageTimeout: 0, // do not timeout
           foreignObjectRendering: true,
+          ...options,
           onclone: async (clonedDoc) => {
             // handle the cloned document, ensure all styles are applied correctly
             const clonedContainer = clonedDoc.querySelector('.react-flow');
@@ -113,6 +114,22 @@ export const useExportCanvasAsImage = () => {
             }
           },
         });
+        return canvas;
+      } catch (error) {
+        console.error('Error exporting canvas as image:', error);
+        message.error(t('canvas.export.error'));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [reactFlowInstance],
+  );
+
+  const exportCanvasAsImage = useCallback(
+    async (canvasName = 'canvas', options?: Partial<Options>) => {
+      try {
+        // use html2canvas to create an image
+        const canvas = await getCanvasElement(options);
 
         // convert the canvas to an image
         const dataUrl = canvas.toDataURL('image/png');
@@ -129,8 +146,6 @@ export const useExportCanvasAsImage = () => {
       } catch (error) {
         console.error('Error exporting canvas as image:', error);
         message.error(t('canvas.export.error'));
-      } finally {
-        setIsLoading(false);
       }
     },
     [reactFlowInstance, t, imageToBase64],
@@ -365,5 +380,12 @@ export const useExportCanvasAsImage = () => {
     [],
   );
 
-  return { exportCanvasAsImage, isLoading, getMinimap, isMinimapLoading, svgBlobToPngBlob };
+  return {
+    getCanvasElement,
+    exportCanvasAsImage,
+    isLoading,
+    getMinimap,
+    isMinimapLoading,
+    svgBlobToPngBlob,
+  };
 };

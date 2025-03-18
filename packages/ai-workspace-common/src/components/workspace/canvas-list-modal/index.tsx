@@ -119,7 +119,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
           <IconCanvas /> {t('common.canvas')}
         </span>
       }
-      width={1000}
+      width={1200}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
@@ -128,7 +128,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
       <Spin className="spin" spinning={isRequesting}>
         {isRequesting || dataList.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {dataList.map((item) => (
                 <CanvasItem
                   key={item.canvasId}

@@ -166,17 +166,17 @@ export const CanvasTemplateCategorySchema = {
 
 export const CanvasTemplateSchema = {
   type: 'object',
-  required: ['templateId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
+  required: ['templateId', 'shareId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
   properties: {
     templateId: {
       type: 'string',
       description: 'Canvas template ID',
       example: 'ct-g30e1b80b5g1itbemc0g5jj3',
     },
-    originCanvasId: {
+    shareId: {
       type: 'string',
-      description: 'Origin canvas ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Share ID',
+      example: 'can-g30e1b80b5g1itbemc0g5jj3',
     },
     shareUser: {
       description: 'Share user',
@@ -402,7 +402,7 @@ export const DocumentSchema = {
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
-  enum: ['document', 'resource', 'canvas', 'user', 'skillResponse', 'codeArtifact'],
+  enum: ['document', 'resource', 'canvas', 'share', 'user', 'skillResponse', 'codeArtifact'],
 } as const;
 
 export const EntitySchema = {
@@ -2803,6 +2803,10 @@ export const ShareRecordSchema = {
       type: 'string',
       description: 'Parent share ID',
     },
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+    },
     createdAt: {
       type: 'string',
       description: 'Create timestamp',
@@ -2842,6 +2846,10 @@ export const CreateShareRequestSchema = {
     shareData: {
       type: 'string',
       description: 'Raw share data (JSON string)',
+    },
+    shareDataStorageKey: {
+      type: 'string',
+      description: 'Share data storage key',
     },
   },
 } as const;
@@ -4534,6 +4542,10 @@ export const ModelCapabilitiesSchema = {
     reasoning: {
       type: 'boolean',
       description: 'Whether this model includes reasoning content',
+    },
+    contextCaching: {
+      type: 'boolean',
+      description: 'Whether this model supports context caching',
     },
   },
 } as const;

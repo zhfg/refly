@@ -6,9 +6,19 @@ import { CommonModule } from '@/common/common.module';
 import { KnowledgeModule } from '@/knowledge/knowledge.module';
 import { MiscModule } from '@/misc/misc.module';
 import { ActionModule } from '@/action/action.module';
+import { RAGModule } from '@/rag/rag.module';
+import { SubscriptionModule } from '@/subscription/subscription.module';
 
 @Module({
-  imports: [CommonModule, CanvasModule, KnowledgeModule, MiscModule, ActionModule],
+  imports: [
+    CommonModule,
+    CanvasModule,
+    KnowledgeModule,
+    RAGModule,
+    MiscModule,
+    ActionModule,
+    SubscriptionModule,
+  ],
   providers: [ShareService],
   controllers: [ShareController],
   exports: [ShareService],

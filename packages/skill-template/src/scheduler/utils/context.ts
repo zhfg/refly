@@ -49,9 +49,6 @@ export async function prepareContext(
   ctx.ctxThis.engine.logger.log(`URL Sources Count: ${urlSources?.length || 0}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
-  // TODO: think remainingTokens may out of range
-  let remainingTokens = maxContextTokens;
-  ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
 
   // Process URL sources with similarity search
   const MAX_URL_SOURCES_TOKENS = Math.floor(maxContextTokens * MAX_URL_SOURCES_RATIO);
@@ -68,7 +65,7 @@ export async function prepareContext(
 
   // Calculate tokens used by processed URL sources
   const urlSourcesTokens = countSourcesTokens(processedUrlSources);
-  remainingTokens -= urlSourcesTokens;
+  let remainingTokens = maxContextTokens - urlSourcesTokens;
   ctx.ctxThis.engine.logger.log(`URL Sources Tokens: ${urlSourcesTokens}`);
 
   const { modelInfo } = ctx.config.configurable;
@@ -93,7 +90,9 @@ export async function prepareContext(
     processedWebSearchContext = preparedRes.processedWebSearchContext;
   }
   const webSearchContextTokens = countSourcesTokens(processedWebSearchContext.webSearchSources);
-  remainingTokens = maxContextTokens - webSearchContextTokens - urlSourcesTokens;
+  remainingTokens -= webSearchContextTokens;
+  ctx.ctxThis.engine.logger.log(`Web Search Context Tokens: ${webSearchContextTokens}`);
+  ctx.ctxThis.engine.logger.log(`Remaining Tokens after web search: ${remainingTokens}`);
 
   // 2. library search context
   let processedLibrarySearchContext: IContext = {
@@ -118,6 +117,8 @@ export async function prepareContext(
       processedLibrarySearchContext.librarySearchSources,
     );
     remainingTokens -= librarySearchContextTokens;
+    ctx.ctxThis.engine.logger.log(`Library Search Context Tokens: ${librarySearchContextTokens}`);
+    ctx.ctxThis.engine.logger.log(`Remaining Tokens after library search: ${remainingTokens}`);
   }
 
   // 3. mentioned context
@@ -138,6 +139,10 @@ export async function prepareContext(
 
     processedMentionedContext = mentionContextRes.processedMentionedContext;
     remainingTokens -= mentionContextRes.mentionedContextTokens || 0;
+    ctx.ctxThis.engine.logger.log(
+      `Mentioned Context Tokens: ${mentionContextRes.mentionedContextTokens || 0}`,
+    );
+    ctx.ctxThis.engine.logger.log(`Remaining Tokens after mentioned context: ${remainingTokens}`);
   }
 
   // 4. relevant context from user-provided content (if there are tokens remaining)
@@ -170,10 +175,25 @@ export async function prepareContext(
       ctx,
     );
 
+    // Calculate tokens before truncation
+    const relevantContextTokensBeforeTruncation = countContextTokens(relevantContext);
+    ctx.ctxThis.engine.logger.log(
+      `Relevant Context Tokens Before Truncation: ${relevantContextTokensBeforeTruncation}`,
+    );
+
     // Truncate to fit within token limits
-    if (countContextTokens(relevantContext) > remainingTokens) {
+    if (relevantContextTokensBeforeTruncation > remainingTokens) {
       relevantContext = truncateContext(relevantContext, remainingTokens);
+      const relevantContextTokensAfterTruncation = countContextTokens(relevantContext);
+      ctx.ctxThis.engine.logger.log(
+        `Relevant Context Tokens After Truncation: ${relevantContextTokensAfterTruncation}`,
+      );
+      remainingTokens -= relevantContextTokensAfterTruncation;
+    } else {
+      remainingTokens -= relevantContextTokensBeforeTruncation;
     }
+
+    ctx.ctxThis.engine.logger.log(`Remaining Tokens after relevant context: ${remainingTokens}`);
   }
 
   ctx.ctxThis.engine.logger.log(`Prepared Relevant Context: ${safeStringifyJSON(relevantContext)}`);

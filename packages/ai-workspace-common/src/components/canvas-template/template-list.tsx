@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Spin, Empty, Avatar, Button, Typography } from 'antd';
+import { useEffect } from 'react';
+import { Empty, Avatar, Button, Typography } from 'antd';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
@@ -8,7 +9,9 @@ import { CanvasTemplate } from '@refly/openapi-schema';
 import { IoPersonOutline } from 'react-icons/io5';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { useDebouncedCallback } from 'use-debounce';
-import { DuplicateCanvasModal } from '@refly-packages/ai-workspace-common/components/canvas-template/duplicate-canvas-modal';
+import { useNavigate } from 'react-router-dom';
+import { useDuplicateCanvas } from '@refly-packages/ai-workspace-common/hooks/use-duplicate-canvas';
+import { staticPublicEndpoint } from '@refly-packages/ai-workspace-common/utils/env';
 
 export const TemplateCard = ({
   template,
@@ -16,73 +19,88 @@ export const TemplateCard = ({
   showUser = true,
 }: { template: CanvasTemplate; className?: string; showUser?: boolean }) => {
   const { t } = useTranslation();
-  const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
+  const { setVisible: setModalVisible } = useCanvasTemplateModal((state) => ({
+    setVisible: state.setVisible,
+  }));
+  const { duplicateCanvas, loading: duplicating } = useDuplicateCanvas();
 
   const handlePreview = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    console.log('preview');
+    if (template.shareId) {
+      setModalVisible(false);
+      navigate(`/preview/canvas/${template.shareId}`);
+    }
   };
 
   const handleUse = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    setVisible(true);
+    if (template.shareId) {
+      duplicateCanvas(template.shareId);
+    }
   };
 
   return (
     <div
-      className={`${className} m-2 group relative p-2 bg-white rounded-lg overflow-hidden cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.12)] transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out`}
+      className={`${className} m-2 group relative bg-white rounded-lg overflow-hidden cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_0_rgba(0,0,0,0.12)] transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out`}
     >
-      <div className="p-2 flex justify-between items-center gap-2">
-        <div className="text-sm font-medium truncate">{template.title || 'common.untitled'}</div>
+      <div className="h-40 bg-gray-100 flex items-center justify-center">
+        <img
+          src={`${staticPublicEndpoint}/share-cover/${template.shareId}.png`}
+          alt={`${template.title} cover`}
+          className="w-full h-full object-cover"
+        />
       </div>
-      <div className="mx-2 h-36 rounded-md bg-gray-100 flex items-center justify-center">
-        <div className="">mini map</div>
+
+      <div className="mx-2 mt-1 p-2 flex justify-between items-center gap-2">
+        <div className="text-sm font-medium truncate">{template.title || 'common.untitled'}</div>
       </div>
 
       {showUser && (
-        <>
-          <div className="mx-2 mt-2 text-sm text-gray-500">
-            <Typography.Paragraph ellipsis={{ tooltip: true, rows: 2 }}>
-              {template.description}
-            </Typography.Paragraph>
+        <div className="mx-2 mb-2 px-2 flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Avatar
+              size={18}
+              src={template.shareUser?.avatar}
+              icon={!template.shareUser?.avatar && <IoPersonOutline />}
+            />
+            <div className="font-light truncate text-xs text-gray-500">{`@${template.shareUser?.name}`}</div>
           </div>
-
-          <div className="p-2 flex justify-between items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Avatar
-                src={template.shareUser?.avatar}
-                icon={!template.shareUser?.avatar && <IoPersonOutline />}
-              />
-              <div className="truncate">{template.shareUser?.name}</div>
-            </div>
-          </div>
-        </>
+        </div>
       )}
 
-      <div className="absolute left-0 bottom-0 w-full h-20 py-2 px-4 bg-gradient-to-b from-transparent to-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-3">
-        <Button
-          size="large"
-          type="default"
-          className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-white hover:bg-gray-100"
-          onClick={handlePreview}
+      <div className="mx-2 px-2">
+        <Typography.Paragraph
+          className="text-gray-500 text-xs"
+          ellipsis={{ tooltip: true, rows: 2 }}
         >
-          {t('template.preview')}
-        </Button>
-        <Button
-          size="large"
-          type="primary"
-          className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100"
-          onClick={handleUse}
-        >
-          {t('template.use')}
-        </Button>
+          {template.description || t('template.noDescription')}
+        </Typography.Paragraph>
       </div>
 
-      <DuplicateCanvasModal
-        canvasId={template.originCanvasId}
-        visible={visible}
-        setVisible={setVisible}
-      />
+      <div className="absolute left-0 bottom-0 w-full">
+        <div className="absolute left-0 -top-8 w-full h-8 bg-gradient-to-b from-transparent to-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+        <div className="relative w-full h-16 py-2 px-4 bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-3">
+          <Button
+            size="large"
+            type="default"
+            className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 bg-white hover:bg-gray-100"
+            onClick={handlePreview}
+          >
+            {t('template.preview')}
+          </Button>
+          <Button
+            loading={duplicating}
+            size="large"
+            type="primary"
+            className="flex-1 p-1 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100"
+            onClick={handleUse}
+          >
+            {t('template.use')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

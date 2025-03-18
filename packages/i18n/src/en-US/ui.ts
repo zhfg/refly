@@ -76,6 +76,7 @@ const translations = {
     shareError: 'Share failed, please try again!',
     readonlyWarning: 'Read-Only Mode',
     readonlyDragDescription: 'Canvas is in read-only mode, modifications are not allowed.',
+    preview: 'Preview',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -809,7 +810,7 @@ const translations = {
     file: 'File',
   },
   canvas: {
-    emptyText: 'Double-click to ask AI, or',
+    emptyText: 'Double-click to ask AI, or select ',
     shareNotFound: 'Canvas Not Found',
     shareNotFoundHint:
       "The shared canvas you're trying to access could not be found. It might have been deleted or the link may be incorrect.",
@@ -2173,14 +2174,15 @@ const translations = {
   template: {
     templateLibrary: 'Template Library',
     myTemplates: 'My Templates',
+    allTemplates: 'All',
     createTemplate: 'Create Template',
-    templateTitle: 'Template Name',
+    templateTitle: 'Name',
     templateTitlePlaceholder: 'Please enter template name',
-    templateDescription: 'Template Description',
+    templateDescription: 'Description',
     templateDescriptionPlaceholder: 'Please enter template description',
     createSuccess: 'Template created successfully, please view in template library',
     preview: 'Preview',
-    use: 'Use',
+    use: 'Use Template',
     duplicateCanvas: 'Duplicate Canvas',
     canvasTitle: 'Canvas Name',
     duplicateCanvasTitlePlaceholder: 'Please enter canvas name',
@@ -2189,6 +2191,7 @@ const translations = {
     noRelatedTemplates: 'No related templates',
     hideTemplates: 'Hide Template',
     duplicateCanvasEntities: 'Duplicate the canvas entities',
+    noDescription: 'No description',
   },
 };
 

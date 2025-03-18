@@ -161,16 +161,12 @@ const tiptapImage = UpdatedImage.extend({
       }),
     ];
   },
+  selectable: true,
+  draggable: true,
 }).configure({
   allowBase64: true,
   HTMLAttributes: {
-    class: cx('rounded-lg border border-muted'),
-  },
-});
-
-const _updatedImage = UpdatedImage.configure({
-  HTMLAttributes: {
-    class: cx('rounded-lg border border-muted'),
+    class: cx('rounded-lg border border-muted cursor-pointer'),
   },
 });
 
