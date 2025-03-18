@@ -28,6 +28,7 @@ export const MAX_MESSAGE_TOKENS = 4000;
 export const MAX_MESSAGES_TOTAL_TOKENS = 30000;
 
 // max tokens for single message
+export const MAX_OUTPUT_TOKENS_LEVEL0 = 1024;
 export const MAX_OUTPUT_TOKENS_LEVEL1 = 4096;
 export const MAX_OUTPUT_TOKENS_LEVEL2 = 8192;
 export const MAX_OUTPUT_TOKENS_LEVEL3 = 16384;
