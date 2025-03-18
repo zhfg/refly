@@ -38,15 +38,25 @@ export const useSelectionContext = ({
         // Get text directly from the editor
         const { view, state } = editor;
         const { from, to } = view.state.selection;
-        const text = state.doc.textBetween(from, to, '');
 
-        if (!text) {
+        // use markdown serializer to get formatted text
+        const selectedFragment = state.doc.slice(from, to).content;
+
+        let markdownText = '';
+        if (editor.storage?.markdown?.serializer) {
+          const tempDoc = state.doc.copy(selectedFragment);
+          markdownText = editor.storage.markdown.serializer.serialize(tempDoc);
+        } else {
+          markdownText = state.doc.textBetween(from, to, '');
+        }
+
+        if (!markdownText) {
           setIsSelecting(false);
           // setSelectedText(''); // I still don't know why this must be commented out :)
           return;
         }
 
-        setSelectedText(text);
+        setSelectedText(markdownText);
         setIsSelecting(true);
       } catch (error) {
         console.error('Tiptap selection error:', error);
@@ -100,18 +110,6 @@ export const useSelectionContext = ({
       if (!selectedText) return;
 
       addContextItem(item);
-
-      // Clear selection
-      if (editor) {
-        // Use Tiptap to clear selection
-        editor.commands.clearContent();
-      } else {
-        // Fallback to browser API
-        window.getSelection()?.removeAllRanges();
-      }
-
-      setSelectedText('');
-      setIsSelecting(false);
     },
     [selectedText, addContextItem, editor],
   );
