@@ -646,8 +646,8 @@ export async function processUrlSourcesWithSimilarity(
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<Source[]> {
-  // 设置合适的最大令牌比例，类似于 contentList 的处理方式
-  const MAX_RAG_RELEVANT_URLS_RATIO = 0.7; // 70% 的令牌用于高相关的 URL 内容
+  // set the appropriate maximum token ratio, similar to the processing of contentList
+  const MAX_RAG_RELEVANT_URLS_RATIO = 0.7; // 70% of tokens used for high-related URL content
   const MAX_RAG_RELEVANT_URLS_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_URLS_RATIO);
 
   if (urlSources.length === 0) {
@@ -658,12 +658,12 @@ export async function processUrlSourcesWithSimilarity(
   let usedTokens = 0;
   const sortedSources = urlSources;
 
-  // 2. 按相关度顺序处理 URL sources
+  // 2. process URL sources in order of relevance
   for (const source of sortedSources) {
     const sourceTokens = countToken(source.pageContent || '');
 
     if (sourceTokens > MAX_NEED_RECALL_TOKEN) {
-      // 2.1 大内容，走 inMemoryGetRelevantChunks 召回
+      // 2.1 large content, use inMemoryGetRelevantChunks for recall
       const relevantChunks = await inMemoryGetRelevantChunks(
         query,
         source.pageContent || '',
@@ -681,28 +681,28 @@ export async function processUrlSourcesWithSimilarity(
       });
       usedTokens += countToken(relevantContent);
     } else if (usedTokens + sourceTokens <= MAX_RAG_RELEVANT_URLS_MAX_TOKENS) {
-      // 2.2 小内容，直接添加
+      // 2.2 small content, add directly
       result.push(source);
       usedTokens += sourceTokens;
     } else {
-      // 2.3 达到 MAX_RAG_RELEVANT_URLS_MAX_TOKENS，处理剩余内容
+      // 2.3 reach MAX_RAG_RELEVANT_URLS_MAX_TOKENS, process the remaining content
       break;
     }
 
     if (usedTokens >= MAX_RAG_RELEVANT_URLS_MAX_TOKENS) break;
   }
 
-  // 3. 处理剩余的 URL sources
+  // 3. process the remaining URL sources
   for (let i = result.length; i < sortedSources.length; i++) {
     const remainingSource = sortedSources[i];
     const sourceTokens = countToken(remainingSource.pageContent || '');
 
-    // 所有短内容直接添加
+    // all short content added directly
     if (sourceTokens < SHORT_CONTENT_THRESHOLD) {
       result.push(remainingSource);
       usedTokens += sourceTokens;
     } else {
-      // 剩余长内容走召回
+      // remaining long content use inMemoryGetRelevantChunks for recall
       const remainingTokens = maxTokens - usedTokens;
       let relevantChunks = await inMemoryGetRelevantChunks(
         query,
