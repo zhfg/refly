@@ -24,7 +24,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from '@refly-packages/ai-workspace-common/components/editor/extensions';
+  ParagraphAfterTable,
+} from '@refly-packages/ai-workspace-common/components/editor/extensions/Table';
 
 const PasteRuleExtension = Extension.create({
   name: 'pasteRule',
@@ -256,7 +257,7 @@ const youtube = Youtube.configure({
 
 const characterCount = CharacterCount.configure();
 
-const tableExtensions = [Table, TableRow, TableHeader, TableCell];
+const tableExtensions = [Table, TableRow, TableHeader, TableCell, ParagraphAfterTable];
 
 export const defaultExtensions = [
   starterKit,
