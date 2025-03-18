@@ -5,19 +5,20 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 interface CreateTemplateModalProps {
   title: string;
-  description?: string;
   categoryId?: string;
   canvasId: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
+  uploadShareCover: (shareId: string) => Promise<void>;
 }
+
 export const CreateTemplateModal = ({
   canvasId,
   title,
-  description,
   categoryId,
   visible,
   setVisible,
+  uploadShareCover,
 }: CreateTemplateModalProps) => {
   const { t, i18n } = useTranslation();
   const [form] = Form.useForm();
@@ -40,6 +41,10 @@ export const CreateTemplateModal = ({
     if (data?.success) {
       setVisible(false);
       message.success(t('template.createSuccess'));
+
+      if (data?.data?.shareId) {
+        await uploadShareCover(data.data.shareId);
+      }
     }
   };
 
@@ -54,7 +59,7 @@ export const CreateTemplateModal = ({
     if (visible) {
       form.setFieldsValue({
         title,
-        description,
+        description: '',
       });
     }
   }, [visible]);
@@ -70,8 +75,8 @@ export const CreateTemplateModal = ({
       cancelText={t('common.cancel')}
       title={t('template.createTemplate')}
     >
-      <div className="w-full h-full overflow-y-auto">
-        <Form form={form}>
+      <div className="w-full h-full pt-4 overflow-y-auto">
+        <Form form={form} labelCol={{ span: 5 }}>
           <Form.Item
             required
             label={t('template.templateTitle')}
@@ -80,11 +85,7 @@ export const CreateTemplateModal = ({
           >
             <Input placeholder={t('template.templateTitlePlaceholder')} />
           </Form.Item>
-          <Form.Item
-            label={t('template.templateDescription')}
-            name="description"
-            rules={[{ required: true, message: t('common.required') }]}
-          >
+          <Form.Item label={t('template.templateDescription')} name="description">
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               placeholder={t('template.templateDescriptionPlaceholder')}

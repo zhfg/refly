@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Input, Divider } from 'antd';
+import { Button, Divider } from 'antd';
 import { useListCanvasTemplates } from '@refly-packages/ai-workspace-common/queries';
 import { TemplateCard } from '@refly-packages/ai-workspace-common/components/canvas-template/template-list';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { VscNotebookTemplate } from 'react-icons/vsc';
 import { useDebouncedCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+
 export const TemplatesGuide = ({ canvasId }: { canvasId: string }) => {
   const { setVisible } = useCanvasTemplateModal((state) => ({
     setVisible: state.setVisible,
@@ -26,9 +27,9 @@ export const TemplatesGuide = ({ canvasId }: { canvasId: string }) => {
 
   const debouncedRefetch = useDebouncedCallback(() => refetch(), 300);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  };
+  // const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSearch(e.target.value);
+  // };
 
   useEffect(() => {
     debouncedRefetch();
@@ -43,12 +44,12 @@ export const TemplatesGuide = ({ canvasId }: { canvasId: string }) => {
       <div className="mt-20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Input
+            {/* <Input
               placeholder={t('template.searchPlaceholder')}
               value={search}
               onChange={handleSearchChange}
               className="w-80"
-            />
+            /> */}
             {data?.data?.length === 0 && (
               <div className="text-gray-500 text-[14px]">{t('template.noRelatedTemplates')}</div>
             )}

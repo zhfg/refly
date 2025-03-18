@@ -146,9 +146,9 @@ export type CanvasTemplate = {
    */
   templateId: string;
   /**
-   * Origin canvas ID
+   * Share ID
    */
-  originCanvasId?: string;
+  shareId: string;
   /**
    * Share user
    */
@@ -345,6 +345,7 @@ export type EntityType =
   | 'document'
   | 'resource'
   | 'canvas'
+  | 'share'
   | 'user'
   | 'skillResponse'
   | 'codeArtifact';
@@ -2072,6 +2073,10 @@ export type ShareRecord = {
    */
   parentShareId?: string;
   /**
+   * Canvas template ID
+   */
+  templateId?: string;
+  /**
    * Create timestamp
    */
   createdAt?: string;
@@ -2106,6 +2111,10 @@ export type CreateShareRequest = {
    * Raw share data (JSON string)
    */
   shareData?: string;
+  /**
+   * Share data storage key
+   */
+  shareDataStorageKey?: string;
 };
 
 export type CreateShareResponse = BaseResponse & {

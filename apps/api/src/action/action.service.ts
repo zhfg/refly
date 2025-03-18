@@ -1,3 +1,4 @@
+import { ActionDetail } from '@/action/action.dto';
 import { PrismaService } from '@/common/prisma.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { Injectable } from '@nestjs/common';
@@ -14,7 +15,7 @@ export class ActionService {
     private subscriptionService: SubscriptionService,
   ) {}
 
-  async getActionResult(user: User, param: GetActionResultData['query']) {
+  async getActionResult(user: User, param: GetActionResultData['query']): Promise<ActionDetail> {
     const { resultId, version } = param;
 
     const result = await this.prisma.actionResult.findFirst({

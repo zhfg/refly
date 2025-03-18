@@ -49,8 +49,6 @@ const useToolbarConfig = (nodeLength: number) => {
   );
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
-  // TODO: remove this after the template feature is ready
-  const showTemplateButton = false;
 
   const showTemplateConfig = {
     icon: IconTemplate,
@@ -188,7 +186,7 @@ const useToolbarConfig = (nodeLength: number) => {
         //       'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
         //   },
         // },
-        ...(nodeLength === 0 && showTemplateButton ? [showTemplateConfig] : []),
+        ...(nodeLength === 0 ? [showTemplateConfig] : []),
       ] as ToolbarItem[],
       modals: {
         sourceList: sourceListDrawerVisible && isWeb,

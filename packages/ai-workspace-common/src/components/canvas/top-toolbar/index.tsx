@@ -39,6 +39,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
     setLoginModalOpen: state.setLoginModalOpen,
   }));
   const isShareCanvas = useMatch('/share/canvas/:canvasId');
+  const isPreviewCanvas = useMatch('/preview/canvas/:shareId');
 
   const { provider, readonly, shareData } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
@@ -130,14 +131,16 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          {!isShareCanvas && (
-            <>
-              <ShareSettings canvasId={canvasId} />
-              <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
-            </>
-          )}
-
-          {isShareCanvas && (
+          {isPreviewCanvas ? (
+            <Button
+              loading={duplicating}
+              type="primary"
+              icon={<LuBookCopy className="flex items-center" />}
+              onClick={handleDuplicate}
+            >
+              {t('template.use')}
+            </Button>
+          ) : isShareCanvas ? (
             <>
               <Button
                 loading={duplicating}
@@ -156,6 +159,11 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
               >
                 {t('canvas.toolbar.copyLink')}
               </Button>
+            </>
+          ) : (
+            <>
+              <ShareSettings canvasId={canvasId} canvasTitle={canvasTitle} />
+              <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
             </>
           )}
         </div>

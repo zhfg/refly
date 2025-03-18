@@ -529,7 +529,7 @@ export const listCanvasTemplates = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: '/canvas/template/list',
+    url: '/template/list',
   });
 };
 
@@ -546,7 +546,7 @@ export const createCanvasTemplate = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: '/canvas/template/create',
+    url: '/template/create',
   });
 };
 
@@ -563,7 +563,7 @@ export const updateCanvasTemplate = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: '/canvas/template/update',
+    url: '/template/update',
   });
 };
 
@@ -580,7 +580,7 @@ export const listCanvasTemplateCategories = <ThrowOnError extends boolean = fals
     ThrowOnError
   >({
     ...options,
-    url: '/canvas/template/category/list',
+    url: '/template/category/list',
   });
 };
 

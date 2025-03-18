@@ -174,7 +174,7 @@ export const DocumentList = () => {
 
   return (
     <Spin className="w-full h-full" spinning={isRequesting}>
-      <div className="w-full h-[calc(50vh-60px)] overflow-y-auto">
+      <div className="w-full h-[calc(60vh-60px)] overflow-y-auto">
         {isRequesting || dataList.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">

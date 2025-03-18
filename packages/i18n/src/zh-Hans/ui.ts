@@ -800,7 +800,7 @@ const translations = {
     file: '文件',
   },
   canvas: {
-    emptyText: '双击向 AI 提问, 或',
+    emptyText: '双击向 AI 提问, 或选择',
     shareNotFound: '画布不存在',
     shareNotFoundHint: '你尝试访问的共享画布无法找到。它可能已被删除，或者链接可能有误。',
     nodeTypes: {
@@ -1328,7 +1328,7 @@ const translations = {
       viewMore: '查看更多',
       viewTutorial: '查看文档',
       tour: '查看教程',
-      template: '案例',
+      template: '模板',
     },
   },
   knowledgeLibrary: {
@@ -2112,14 +2112,15 @@ const translations = {
   template: {
     templateLibrary: '模板库',
     myTemplates: '我的模板',
+    allTemplates: '全部',
     createTemplate: '发布模板',
-    templateTitle: '模板名称',
+    templateTitle: '名称',
     templateTitlePlaceholder: '请输入模板名称',
-    templateDescription: '模板描述',
+    templateDescription: '描述',
     templateDescriptionPlaceholder: '请输入模板描述',
     createSuccess: '模板创建成功, 请在模板库中查看',
     preview: '预览',
-    use: '使用',
+    use: '使用模板',
     duplicateCanvas: '复制画布',
     canvasTitle: '画布名称',
     duplicateCanvasTitlePlaceholder: '请输入新画布名称',
@@ -2128,6 +2129,7 @@ const translations = {
     noRelatedTemplates: '暂无相关模板',
     hideTemplates: '隐藏模板',
     duplicateCanvasEntities: '复制该画布所包含的文档以及资源',
+    noDescription: '暂无描述',
   },
 };
 

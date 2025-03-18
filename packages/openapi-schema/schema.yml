@@ -397,7 +397,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoNameCanvasResponse'
-  /canvas/template/list:
+  /template/list:
     get:
       tags:
         - canvas
@@ -444,7 +444,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListCanvasTemplateResponse'
-  /canvas/template/create:
+  /template/create:
     post:
       tags:
         - canvas
@@ -464,7 +464,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
-  /canvas/template/update:
+  /template/update:
     post:
       tags:
         - canvas
@@ -484,7 +484,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
-  /canvas/template/category/list:
+  /template/category/list:
     get:
       tags:
         - canvas
@@ -1954,6 +1954,7 @@ components:
       type: object
       required:
         - templateId
+        - shareId
         - title
         - description
         - language
@@ -1964,10 +1965,10 @@ components:
           type: string
           description: Canvas template ID
           example: ct-g30e1b80b5g1itbemc0g5jj3
-        originCanvasId:
+        shareId:
           type: string
-          description: Origin canvas ID
-          example: c-g30e1b80b5g1itbemc0g5jj3
+          description: Share ID
+          example: can-g30e1b80b5g1itbemc0g5jj3
         shareUser:
           description: Share user
           $ref: '#/components/schemas/ShareUser'
@@ -2145,6 +2146,7 @@ components:
         - document
         - resource
         - canvas
+        - share
         - user
         - skillResponse
         - codeArtifact
@@ -3898,6 +3900,9 @@ components:
         parentShareId:
           type: string
           description: Parent share ID
+        templateId:
+          type: string
+          description: Canvas template ID
         createdAt:
           type: string
           description: Create timestamp
@@ -3929,6 +3934,9 @@ components:
         shareData:
           type: string
           description: Raw share data (JSON string)
+        shareDataStorageKey:
+          type: string
+          description: Share data storage key
     CreateShareResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
