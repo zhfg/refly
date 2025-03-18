@@ -10,7 +10,7 @@ import { buildCommonQnAExamples, buildCommonQnAChatHistoryExamples } from './exa
 import { buildCitationRules } from '../common/citationRules';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
-import { buildFormatDisplayInstruction } from '../common/format';
+import { buildFormatDisplayInstruction, buildVisualExamplesInstruction } from '../common/format';
 import { buildSimpleDetailedExplanationInstruction } from '../common/personalization';
 
 export const buildNoContextCommonQnASystemPrompt = () => {
@@ -136,6 +136,7 @@ export const buildCommonQnAUserPrompt = ({
     ${buildLocaleFollowInstruction(locale)}
 
     ${buildFormatDisplayInstruction()}
+    ${buildVisualExamplesInstruction()}
     ${buildSimpleDetailedExplanationInstruction()}
     `;
   }

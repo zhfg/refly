@@ -28,7 +28,9 @@ export const MAX_MESSAGE_TOKENS = 2000;
 export const MAX_MESSAGES_TOTAL_TOKENS = 10000;
 
 // max tokens for single message
-export const MAX_OUTPUT_TOKENS = 4000;
+export const MAX_OUTPUT_TOKENS_LEVEL1 = 4096;
+export const MAX_OUTPUT_TOKENS_LEVEL2 = 8192;
+export const MAX_OUTPUT_TOKENS_LEVEL3 = 16384;
 
 // url
 export const MAX_URL_SOURCES_RATIO = 0.3;

@@ -19,6 +19,7 @@ import * as librarySearch from '../scheduler/module/librarySearch';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 import { processContextUrls } from '../utils/url-processing';
+import { MAX_OUTPUT_TOKENS_LEVEL2 } from '../scheduler/utils/constants';
 
 export class LibrarySearch extends BaseSkill {
   name = 'librarySearch';
@@ -165,7 +166,7 @@ export class LibrarySearch extends BaseSkill {
     });
 
     // Generate answer using the model
-    const model = this.engine.chatModel({ temperature: 0.1 });
+    const model = this.engine.chatModel({ temperature: 0.1, maxTokens: MAX_OUTPUT_TOKENS_LEVEL2 });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {
