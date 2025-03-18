@@ -89,7 +89,6 @@ const PreCode = React.memo(
       () =>
         dataCodeType &&
         [
-          'application/refly.artifacts.react',
           'image/svg+xml',
           'application/refly.artifacts.mermaid',
           'text/markdown',

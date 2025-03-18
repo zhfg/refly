@@ -19,6 +19,7 @@ import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 import { processContextUrls } from '../utils/url-processing';
 // prompts
 import * as customPrompt from '../scheduler/module/customPrompt/index';
+import { MAX_OUTPUT_TOKENS_LEVEL2 } from '../scheduler/utils/constants';
 
 export class CustomPrompt extends BaseSkill {
   name = 'customPrompt';
@@ -76,24 +77,6 @@ export class CustomPrompt extends BaseSkill {
           max: 1,
           step: 0.1,
           precision: 2,
-        },
-      },
-      {
-        key: 'maxTokens',
-        inputMode: 'inputNumber',
-        defaultValue: 2000,
-        labelDict: {
-          en: 'Max Output Tokens',
-          'zh-CN': '最大输出令牌数',
-        },
-        descriptionDict: {
-          en: 'Maximum number of tokens to generate',
-          'zh-CN': '生成的最大令牌数',
-        },
-        inputProps: {
-          min: 1,
-          step: 1,
-          precision: 0,
         },
       },
     ],
@@ -253,7 +236,7 @@ export class CustomPrompt extends BaseSkill {
     const model = this.engine.chatModel({
       temperature: Number(tplConfig?.temperature?.value ?? 0.1),
       topP: Number(tplConfig?.topP?.value ?? 1),
-      maxTokens: Number(tplConfig?.maxTokens?.value ?? 2000),
+      maxTokens: MAX_OUTPUT_TOKENS_LEVEL2,
     });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,

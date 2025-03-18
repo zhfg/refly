@@ -30,7 +30,7 @@ import {
   buildArtifactsContextUserPrompt,
   buildArtifactsFullSystemPrompt,
 } from '../scheduler/module/artifacts';
-
+import { MAX_OUTPUT_TOKENS_LEVEL3 } from '../scheduler/utils/constants';
 /**
  * Code Artifacts Skill
  *
@@ -220,7 +220,7 @@ export class CodeArtifacts extends BaseSkill {
     }
 
     // Use a slightly higher temperature for more creative code generation
-    const model = this.engine.chatModel({ temperature: 0.7 });
+    const model = this.engine.chatModel({ temperature: 0.1, maxTokens: MAX_OUTPUT_TOKENS_LEVEL3 });
 
     // Let the front-end know we're generating an artifact
     this.emitEvent(

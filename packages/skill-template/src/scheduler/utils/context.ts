@@ -7,16 +7,17 @@ import {
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { truncateContext, truncateSourcesByTokenLimit } from './truncator';
+import { truncateContext } from './truncator';
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import { SkillTemplateConfig, Source } from '@refly-packages/openapi-schema';
 import { uniqBy } from 'lodash';
-import { MAX_CONTEXT_RATIO } from './constants';
+import { MAX_CONTEXT_RATIO, MAX_URL_SOURCES_RATIO } from './constants';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { callMultiLingualWebSearch } from '../module/multiLingualSearch';
 import { callMultiLingualLibrarySearch } from '../module/multiLingualLibrarySearch';
 import { checkIsSupportedModel, checkModelContextLenSupport } from './model';
 import { SkillContextContentItemMetadata } from '../types';
+import { processUrlSourcesWithSimilarity } from './semanticSearch';
 
 export async function prepareContext(
   {
@@ -49,29 +50,23 @@ export async function prepareContext(
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
 
-  // Limit urlSources to at most 50% of maxContextTokens
-  const maxUrlSourcesTokens = Math.floor(maxContextTokens * 0.5);
-  const urlSourcesTokens = countSourcesTokens(urlSources || []);
-  ctx.ctxThis.engine.logger.log(`Original URL Sources Tokens: ${urlSourcesTokens}`);
+  // Process URL sources with similarity search
+  const MAX_URL_SOURCES_TOKENS = Math.floor(maxContextTokens * MAX_URL_SOURCES_RATIO);
 
-  let processedUrlSources = urlSources;
-  if (urlSourcesTokens > maxUrlSourcesTokens) {
-    ctx.ctxThis.engine.logger.log(
-      `URL Sources tokens exceed limit (${maxUrlSourcesTokens}), truncating...`,
+  let processedUrlSources: Source[] = [];
+  if (urlSources?.length > 0) {
+    processedUrlSources = await processUrlSourcesWithSimilarity(
+      query,
+      urlSources,
+      MAX_URL_SOURCES_TOKENS,
+      ctx,
     );
-    processedUrlSources = truncateSourcesByTokenLimit(urlSources, maxUrlSourcesTokens);
-    const newUrlSourcesTokens = countSourcesTokens(processedUrlSources);
-    ctx.ctxThis.engine.logger.log(`Truncated URL Sources Count: ${processedUrlSources.length}`);
-    ctx.ctxThis.engine.logger.log(`Truncated URL Sources Tokens: ${newUrlSourcesTokens}`);
   }
 
-  // Calculate tokens used by URL sources after truncation
-  const finalUrlSourcesTokens = countSourcesTokens(processedUrlSources || []);
-  // TODO: think remainingTokens may out of range
-  let remainingTokens = maxContextTokens - finalUrlSourcesTokens;
-  ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
-  ctx.ctxThis.engine.logger.log(`Final URL Sources Tokens: ${finalUrlSourcesTokens}`);
-  ctx.ctxThis.engine.logger.log(`Remaining Tokens for other contexts: ${remainingTokens}`);
+  // Calculate tokens used by processed URL sources
+  const urlSourcesTokens = countSourcesTokens(processedUrlSources);
+  let remainingTokens = maxContextTokens - urlSourcesTokens;
+  ctx.ctxThis.engine.logger.log(`URL Sources Tokens: ${urlSourcesTokens}`);
 
   const { modelInfo } = ctx.config.configurable;
   const isSupportedModel = checkIsSupportedModel(modelInfo);
@@ -95,7 +90,7 @@ export async function prepareContext(
     processedWebSearchContext = preparedRes.processedWebSearchContext;
   }
   const webSearchContextTokens = countSourcesTokens(processedWebSearchContext.webSearchSources);
-  remainingTokens = maxContextTokens - webSearchContextTokens - finalUrlSourcesTokens;
+  remainingTokens -= webSearchContextTokens;
   ctx.ctxThis.engine.logger.log(`Web Search Context Tokens: ${webSearchContextTokens}`);
   ctx.ctxThis.engine.logger.log(`Remaining Tokens after web search: ${remainingTokens}`);
 
@@ -206,7 +201,7 @@ export async function prepareContext(
   // Merge all contexts with proper deduplication
   const deduplicatedRelevantContext = deduplicateContexts(relevantContext);
   const mergedContext = {
-    urlSources: processedUrlSources || [],
+    urlSources: processedUrlSources,
     mentionedContext: processedMentionedContext,
     relevantContext: deduplicatedRelevantContext,
     webSearchSources: processedWebSearchContext.webSearchSources,
