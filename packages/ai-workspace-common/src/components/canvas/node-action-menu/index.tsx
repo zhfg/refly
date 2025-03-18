@@ -166,9 +166,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const handleCreateDocument = useCallback(() => {
     setIsCreatingDocument(true);
+    const closeLoading = message.loading(t('canvas.nodeStatus.isCreatingDocument'));
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'createDocument'));
     nodeActionEmitter.on(createNodeEventName(nodeId, 'createDocument.completed'), () => {
       setIsCreatingDocument(false);
+      closeLoading();
     });
     onClose?.();
   }, [nodeId, onClose]);
