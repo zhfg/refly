@@ -70,20 +70,22 @@ export const Item = ({
   iconComponent,
   onClick,
   disabled,
+  className,
 }: {
   label: string | React.ReactNode;
   icon?: keyof typeof icons;
   iconComponent?: React.ReactNode;
   disabled?: boolean;
   onClick: () => void;
+  className?: string;
 }) => {
-  const className = cn('text-xs');
+  const buttonClassName = cn('text-xs !justify-start', className);
 
   const IconComponent = icon ? icons[icon] : null;
   const IconCustomComponent = iconComponent || null;
 
   return (
-    <Button className={className} type="text" onClick={onClick} disabled={disabled}>
+    <Button className={buttonClassName} type="text" onClick={onClick} disabled={disabled}>
       {IconComponent && <IconComponent className="w-4 h-4" />}
       {IconCustomComponent}
       {label}

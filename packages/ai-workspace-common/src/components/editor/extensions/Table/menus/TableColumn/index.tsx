@@ -63,6 +63,7 @@ export const TableColumnMenu = React.memo(({ editor, appendTo }: MenuProps): JSX
         <PopoverMenu.Item
           icon="Trash"
           label={t('editor.table.deleteColumn')}
+          className="!text-red-500"
           onClick={onDeleteColumn}
         />
       </Toolbar.Wrapper>

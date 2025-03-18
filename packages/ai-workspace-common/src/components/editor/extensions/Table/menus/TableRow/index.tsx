@@ -61,7 +61,12 @@ export const TableRowMenu = React.memo(({ editor, appendTo }: MenuProps): JSX.El
           label={t('editor.table.addRowAfter')}
           onClick={onAddRowAfter}
         />
-        <PopoverMenu.Item icon="Trash" label={t('editor.table.deleteRow')} onClick={onDeleteRow} />
+        <PopoverMenu.Item
+          icon="Trash"
+          label={t('editor.table.deleteRow')}
+          className="text-red-500"
+          onClick={onDeleteRow}
+        />
       </Toolbar.Wrapper>
     </BaseBubbleMenu>
   );
