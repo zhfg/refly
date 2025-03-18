@@ -441,6 +441,7 @@ export class ChatDeepSeek extends ChatOpenAI<ChatDeepSeekCallOptions> {
       },
       modelKwargs: {
         include_reasoning: fields?.include_reasoning || undefined,
+        reasoning: fields?.include_reasoning ? { max_tokens: 1024 } : undefined,
       },
     });
   }
