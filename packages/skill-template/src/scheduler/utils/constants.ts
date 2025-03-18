@@ -24,8 +24,8 @@ export const DEFAULT_MODEL_CONTEXT_LIMIT = 128 * 1024;
 
 // chat history params
 export const MAX_MESSAGES = 20;
-export const MAX_MESSAGE_TOKENS = 2000;
-export const MAX_MESSAGES_TOTAL_TOKENS = 10000;
+export const MAX_MESSAGE_TOKENS = 4000;
+export const MAX_MESSAGES_TOTAL_TOKENS = 30000;
 
 // max tokens for single message
 export const MAX_OUTPUT_TOKENS_LEVEL1 = 4096;
