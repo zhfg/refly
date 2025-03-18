@@ -11,12 +11,13 @@ import { truncateContext } from './truncator';
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import { SkillTemplateConfig, Source } from '@refly-packages/openapi-schema';
 import { uniqBy } from 'lodash';
-import { MAX_CONTEXT_RATIO } from './constants';
+import { MAX_CONTEXT_RATIO, MAX_URL_SOURCES_RATIO } from './constants';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { callMultiLingualWebSearch } from '../module/multiLingualSearch';
 import { callMultiLingualLibrarySearch } from '../module/multiLingualLibrarySearch';
 import { checkIsSupportedModel, checkModelContextLenSupport } from './model';
 import { SkillContextContentItemMetadata } from '../types';
+import { processUrlSourcesWithSimilarity } from './semanticSearch';
 
 export async function prepareContext(
   {
@@ -52,8 +53,21 @@ export async function prepareContext(
   let remainingTokens = maxContextTokens;
   ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
 
-  // Calculate tokens used by URL sources
-  const urlSourcesTokens = countSourcesTokens(urlSources || []);
+  // Process URL sources with similarity search
+  const MAX_URL_SOURCES_TOKENS = Math.floor(maxContextTokens * MAX_URL_SOURCES_RATIO);
+
+  let processedUrlSources: Source[] = [];
+  if (urlSources?.length > 0) {
+    processedUrlSources = await processUrlSourcesWithSimilarity(
+      query,
+      urlSources,
+      MAX_URL_SOURCES_TOKENS,
+      ctx,
+    );
+  }
+
+  // Calculate tokens used by processed URL sources
+  const urlSourcesTokens = countSourcesTokens(processedUrlSources);
   remainingTokens -= urlSourcesTokens;
   ctx.ctxThis.engine.logger.log(`URL Sources Tokens: ${urlSourcesTokens}`);
 
@@ -167,7 +181,7 @@ export async function prepareContext(
   // Merge all contexts with proper deduplication
   const deduplicatedRelevantContext = deduplicateContexts(relevantContext);
   const mergedContext = {
-    urlSources: urlSources || [],
+    urlSources: processedUrlSources,
     mentionedContext: processedMentionedContext,
     relevantContext: deduplicatedRelevantContext,
     webSearchSources: processedWebSearchContext.webSearchSources,

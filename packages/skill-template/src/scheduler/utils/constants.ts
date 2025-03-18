@@ -1,4 +1,4 @@
-export const MAX_NEED_RECALL_TOKEN = 4000; // > 4000 need use recall for similar chunks other than use whole content
+export const MAX_NEED_RECALL_TOKEN = 2000; // > 2000 need use recall for similar chunks other than use whole content
 export const MAX_NEED_RECALL_CONTENT_TOKEN = 2000; // > 10000 need use recall for similar chunks other than use whole content
 export const SHORT_CONTENT_THRESHOLD = 500; // < 500 tokens is a short content, can contains 39321.6 / 500 = 78.64 short content
 export const MIN_RELEVANCE_SCORE = 0.7; // Minimum relevance score, used to filter out unrelated Chunks
@@ -24,5 +24,11 @@ export const DEFAULT_MODEL_CONTEXT_LIMIT = 128 * 1024;
 
 // chat history params
 export const MAX_MESSAGES = 20;
-export const MAX_MESSAGE_TOKENS = 4000;
-export const MAX_MESSAGES_TOTAL_TOKENS = 20000;
+export const MAX_MESSAGE_TOKENS = 2000;
+export const MAX_MESSAGES_TOTAL_TOKENS = 10000;
+
+// max tokens for single message
+export const MAX_OUTPUT_TOKENS = 4000;
+
+// url
+export const MAX_URL_SOURCES_RATIO = 0.3;

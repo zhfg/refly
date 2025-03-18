@@ -24,6 +24,7 @@ import {
   MAX_RAG_RELEVANT_RESOURCES_RATIO,
   MAX_SHORT_RESOURCES_RATIO,
 } from './constants';
+import { Source } from '@refly-packages/openapi-schema';
 
 // TODO:替换成实际的 Chunk 定义，然后进行拼接，拼接时包含元数据和分隔符
 export function assembleChunks(chunks: DocumentInterface[] = []): string {
@@ -636,5 +637,95 @@ export function truncateChunks(
     }
   }
 
+  return result;
+}
+
+export async function processUrlSourcesWithSimilarity(
+  query: string,
+  urlSources: Source[],
+  maxTokens: number,
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+): Promise<Source[]> {
+  // 设置合适的最大令牌比例，类似于 contentList 的处理方式
+  const MAX_RAG_RELEVANT_URLS_RATIO = 0.7; // 70% 的令牌用于高相关的 URL 内容
+  const MAX_RAG_RELEVANT_URLS_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_URLS_RATIO);
+
+  if (urlSources.length === 0) {
+    return [];
+  }
+
+  const result: Source[] = [];
+  let usedTokens = 0;
+  const sortedSources = urlSources;
+
+  // 2. 按相关度顺序处理 URL sources
+  for (const source of sortedSources) {
+    const sourceTokens = countToken(source.pageContent || '');
+
+    if (sourceTokens > MAX_NEED_RECALL_TOKEN) {
+      // 2.1 大内容，走 inMemoryGetRelevantChunks 召回
+      const relevantChunks = await inMemoryGetRelevantChunks(
+        query,
+        source.pageContent || '',
+        {
+          entityId: source.url || '',
+          title: source.title || '',
+          entityType: 'urlSource' as ContentNodeType,
+        },
+        ctx,
+      );
+      const relevantContent = assembleChunks(relevantChunks);
+      result.push({
+        ...source,
+        pageContent: relevantContent,
+      });
+      usedTokens += countToken(relevantContent);
+    } else if (usedTokens + sourceTokens <= MAX_RAG_RELEVANT_URLS_MAX_TOKENS) {
+      // 2.2 小内容，直接添加
+      result.push(source);
+      usedTokens += sourceTokens;
+    } else {
+      // 2.3 达到 MAX_RAG_RELEVANT_URLS_MAX_TOKENS，处理剩余内容
+      break;
+    }
+
+    if (usedTokens >= MAX_RAG_RELEVANT_URLS_MAX_TOKENS) break;
+  }
+
+  // 3. 处理剩余的 URL sources
+  for (let i = result.length; i < sortedSources.length; i++) {
+    const remainingSource = sortedSources[i];
+    const sourceTokens = countToken(remainingSource.pageContent || '');
+
+    // 所有短内容直接添加
+    if (sourceTokens < SHORT_CONTENT_THRESHOLD) {
+      result.push(remainingSource);
+      usedTokens += sourceTokens;
+    } else {
+      // 剩余长内容走召回
+      const remainingTokens = maxTokens - usedTokens;
+      let relevantChunks = await inMemoryGetRelevantChunks(
+        query,
+        remainingSource.pageContent || '',
+        {
+          entityId: remainingSource.url || '',
+          title: remainingSource.title || '',
+          entityType: 'urlSource' as ContentNodeType,
+        },
+        ctx,
+      );
+      relevantChunks = truncateChunks(relevantChunks, remainingTokens);
+      const relevantContent = assembleChunks(relevantChunks);
+      result.push({
+        ...remainingSource,
+        pageContent: relevantContent,
+      });
+      usedTokens += countToken(relevantContent);
+    }
+
+    if (usedTokens >= maxTokens) break;
+  }
+
+  ctx.ctxThis.engine.logger.log(`Processed URL sources: ${result.length} of ${urlSources.length}`);
   return result;
 }
