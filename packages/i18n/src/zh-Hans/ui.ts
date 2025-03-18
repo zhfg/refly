@@ -118,6 +118,8 @@ const translations = {
       codeDescription: '代码片段',
       image: '图片',
       imageDescription: '上传图片',
+      table: '表格',
+      tableDescription: '创建一个表格',
     },
     nodeSelector: {
       text: '文本',
@@ -145,6 +147,15 @@ const translations = {
       orange: '橙色',
       pink: '粉色',
       gray: '灰色',
+    },
+    table: {
+      addRowBefore: '在上方插入行',
+      addRowAfter: '在下方插入行',
+      deleteRow: '删除行',
+      addColumnBefore: '在左侧插入列',
+      addColumnAfter: '在右侧插入列',
+      deleteColumn: '删除列',
+      deleteTable: '删除表格',
     },
   },
   systemMaintenanceShutdown: {
@@ -769,6 +780,7 @@ const translations = {
     },
   },
   document: {
+    share: '分享文档',
     setReadOnly: '设置为只读',
     enableEdit: '启用编辑',
     shareLoading: '正在加载共享文档...',

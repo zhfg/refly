@@ -19,6 +19,13 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { DOMParser } from '@tiptap/pm/model';
 import { cx } from 'class-variance-authority';
 import { common, createLowlight } from 'lowlight';
+import {
+  Table,
+  TableCell,
+  TableHeader,
+  TableRow,
+  ParagraphAfterTable,
+} from '@refly-packages/ai-workspace-common/components/editor/extensions/Table';
 
 const PasteRuleExtension = Extension.create({
   name: 'pasteRule',
@@ -244,8 +251,11 @@ const youtube = Youtube.configure({
 
 const characterCount = CharacterCount.configure();
 
+const tableExtensions = [Table, TableRow, TableHeader, TableCell, ParagraphAfterTable];
+
 export const defaultExtensions = [
   starterKit,
+  ...tableExtensions,
   tiptapLink,
   tiptapImage,
   taskList,

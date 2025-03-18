@@ -110,6 +110,8 @@ const translations = {
       codeDescription: 'Capture a code snippet',
       image: 'Image',
       imageDescription: 'Upload an image from your computer',
+      table: 'Table',
+      tableDescription: 'Create a table',
     },
     nodeSelector: {
       text: 'Text',
@@ -137,6 +139,15 @@ const translations = {
       orange: 'Orange',
       pink: 'Pink',
       gray: 'Gray',
+    },
+    table: {
+      addRowBefore: 'Add Row Before',
+      addRowAfter: 'Add Row After',
+      deleteRow: 'Delete Row',
+      addColumnBefore: 'Add Column Before',
+      addColumnAfter: 'Add Column After',
+      deleteColumn: 'Delete Column',
+      deleteTable: 'Delete Table',
     },
   },
   systemMaintenanceShutdown: {
@@ -779,6 +790,7 @@ const translations = {
     },
   },
   document: {
+    share: 'Share Document',
     setReadOnly: 'Set to Read-Only',
     enableEdit: 'Enable Edit',
     shareLoading: 'Loading shared document...',

@@ -93,6 +93,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     () => nodeData?.metadata?.sizeMode || 'adaptive',
   );
 
+  const [isCreatingDocument, setIsCreatingDocument] = useState(false);
   const [cloneAskAIRunning, setCloneAskAIRunning] = useState(false);
 
   useEffect(() => {
@@ -164,7 +165,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, onClose]);
 
   const handleCreateDocument = useCallback(() => {
+    setIsCreatingDocument(true);
+    const closeLoading = message.loading(t('canvas.nodeStatus.isCreatingDocument'));
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'createDocument'));
+    nodeActionEmitter.on(createNodeEventName(nodeId, 'createDocument.completed'), () => {
+      setIsCreatingDocument(false);
+      closeLoading();
+    });
     onClose?.();
   }, [nodeId, onClose]);
 
@@ -455,6 +462,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             icon: FilePlus,
             label: t('canvas.nodeStatus.createDocument'),
             onClick: handleCreateDocument,
+            loading: isCreatingDocument,
             type: 'button' as const,
             hoverContent: {
               title: t('canvas.nodeStatus.createDocument'),
@@ -548,6 +556,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                 icon: FilePlus,
                 label: t('canvas.nodeStatus.createDocument'),
                 onClick: handleCreateDocument,
+                loading: isCreatingDocument,
                 type: 'button' as const,
                 hoverContent: {
                   title: t('canvas.nodeStatus.createDocument'),
@@ -716,6 +725,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     },
     [
       cloneAskAIRunning,
+      isCreatingDocument,
       nodeType,
       nodeData?.contentPreview,
       handleRerun,

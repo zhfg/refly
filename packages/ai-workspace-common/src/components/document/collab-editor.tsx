@@ -36,6 +36,10 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/document';
 import UpdatedImage from '@refly-packages/ai-workspace-common/components/editor/core/extensions/updated-image';
 import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
+import {
+  TableColumnMenu,
+  TableRowMenu,
+} from '@refly-packages/ai-workspace-common/components/editor/extensions/Table/menus';
 
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
@@ -53,11 +57,13 @@ export const CollaborativeEditor = memo(
     const lastCursorPosRef = useRef<number>();
     const { isNodeDragging } = useEditorPerformance();
     const editorRef = useRef<EditorInstance>();
+    // const [editor, setEditor] = useState<EditorInstance | null>(null);
     const { provider, ydoc } = useDocumentContext();
     const forceUpdateRef = useRef<number>(0);
     const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+    const menuContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       const styleEl = document.createElement('style');
@@ -157,6 +163,10 @@ export const CollaborativeEditor = memo(
             case 'taskList':
             case 'taskItem':
               return '';
+            case 'table':
+            case 'tableRow':
+            case 'tableCell':
+              return '';
             default:
               return defaultPlaceholder;
           }
@@ -234,28 +244,37 @@ export const CollaborativeEditor = memo(
 
     const { addToContext, selectedText } = useSelectionContext({
       containerClass: 'ai-note-editor-content-container',
+      enabled: !!editorRef.current,
+      editor: editorRef.current,
     });
 
-    const buildContextItem = (text: string): IContextItem => {
-      const { document } = useDocumentStore.getState()?.data?.[docId] ?? {};
+    // Get document data once at component level
+    const documentData = useDocumentStore((state) => state.data?.[docId]?.document);
 
-      return {
-        title: text.slice(0, 50),
-        entityId: genUniqueId(),
-        type: 'documentSelection',
-        selection: {
-          content: text,
-          sourceTitle: document?.title ?? 'Selected Content',
-          sourceEntityId: document?.docId ?? '',
-          sourceEntityType: 'document',
-        },
-      };
-    };
+    const buildContextItem = useCallback(
+      (text: string): IContextItem => {
+        return {
+          title: text.slice(0, 50),
+          entityId: genUniqueId(),
+          type: 'documentSelection',
+          selection: {
+            content: text,
+            sourceTitle: documentData?.title ?? 'Selected Content',
+            sourceEntityId: documentData?.docId ?? '',
+            sourceEntityType: 'document',
+          },
+        };
+      },
+      [documentData],
+    );
 
-    const handleAddToContext = (text: string) => {
-      const item = buildContextItem(text);
-      addToContext(item);
-    };
+    const handleAddToContext = useCallback(
+      (text: string) => {
+        const item = buildContextItem(text);
+        addToContext(item);
+      },
+      [addToContext, buildContextItem],
+    );
 
     const { createMemo } = useCreateMemo();
     const handleCreateMemo = useCallback(
@@ -268,7 +287,7 @@ export const CollaborativeEditor = memo(
           },
         });
       },
-      [docId],
+      [docId, createMemo],
     );
 
     useEffect(() => {
@@ -304,7 +323,7 @@ export const CollaborativeEditor = memo(
         editor.off('blur', updateSelection);
         editor.off('focus', updateSelection);
       };
-    }, [editorRef.current, documentActions.setHasEditorSelection]);
+    }, [documentActions]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {
@@ -473,6 +492,7 @@ export const CollaborativeEditor = memo(
               extensions={extensions}
               onCreate={({ editor }) => {
                 editorRef.current = editor;
+                // setEditor(editor);
                 documentActions.setActiveDocumentId(docId);
                 // Force initial sync
                 if (provider?.status === 'connected') {
@@ -481,6 +501,7 @@ export const CollaborativeEditor = memo(
               }}
               editable={!readOnly}
               className="w-full h-full border-muted sm:rounded-lg"
+              ref={menuContainerRef}
               editorProps={{
                 handleDOMEvents: {
                   keydown: (_view, event) => handleCommandNavigation(event),
@@ -517,6 +538,8 @@ export const CollaborativeEditor = memo(
                 }}
               />
               <CollabGenAIBlockMenu />
+              <TableRowMenu editor={editorRef.current} appendTo={menuContainerRef} />
+              <TableColumnMenu editor={editorRef.current} appendTo={menuContainerRef} />
             </EditorContent>
           </EditorRoot>
         </div>
