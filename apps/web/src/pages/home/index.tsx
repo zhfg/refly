@@ -2,6 +2,7 @@ import Header from '@/components/landing-page-partials/Header';
 import HeroHome from '@/components/landing-page-partials/HeroHome';
 import WorkflowBlocks from '@/components/landing-page-partials/workflow-blocks';
 import FeatureBlocks from '@/components/landing-page-partials/feature-blocks';
+import UseCasesGallery from '@/components/landing-page-partials/use-cases-gallery';
 import Testimonials from '@/components/landing-page-partials/Testimonials';
 import Footer from '@/components/landing-page-partials/Footer';
 import AOS from 'aos';
@@ -48,6 +49,7 @@ function Home() {
       <main className="grow">
         <HeroHome />
         <FeatureBlocks />
+        <UseCasesGallery />
         <WorkflowBlocks />
         <Testimonials />
       </main>
