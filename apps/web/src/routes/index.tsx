@@ -13,7 +13,7 @@ import {
 import { useHandleUrlParamsCallback } from '@refly-packages/ai-workspace-common/hooks/use-handle-url-params-callback';
 import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
 import { HomeRedirect } from '@refly-packages/ai-workspace-common/components/home-redirect';
-import { useIsSharePage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
+import { usePublicAccessPage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 
 // Lazy load components
 const Home = lazy(() => import('@/pages/home'));
@@ -24,10 +24,12 @@ const ShareCodePage = lazy(() => import('@/pages/code-share'));
 const TemplatePreviewPage = lazy(() => import('@/pages/template-preview'));
 const SkillResponseSharePage = lazy(() => import('@/pages/skill-response-share'));
 const DocumentSharePage = lazy(() => import('@/pages/document-share'));
+const ArtifactGalleryPage = lazy(() => import('@/pages/artifact-gallery'));
 
 const prefetchRoutes = () => {
   // Prefetch common routes
   import('@refly-packages/ai-workspace-common/components/request-access');
+  import('@/pages/artifact-gallery');
 };
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -68,10 +70,10 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch('/');
 
-  const isSharePage = useIsSharePage();
+  const isPublicAccessPage = usePublicAccessPage();
   const isPricing = useMatch('/pricing');
 
-  if (!isSharePage && !isPricing) {
+  if (!isPublicAccessPage && !isPricing) {
     if (!userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
       return <SuspenseLoading />;
     }
@@ -93,6 +95,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/share/code/:shareId" element={<ShareCodePage />} />
           <Route path="/share/answer/:shareId" element={<SkillResponseSharePage />} />
           <Route path="/share/doc/:shareId" element={<DocumentSharePage />} />
+          <Route path="/artifact-gallery" element={<ArtifactGalleryPage />} />
           <Route path="/preview/canvas/:shareId" element={<TemplatePreviewPage />} />
           <Route
             path="/canvas/:canvasId"
