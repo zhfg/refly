@@ -20,9 +20,8 @@ export const TemplatesGuide = ({ canvasId }: { canvasId: string }) => {
     setShowTemplates: state.setShowTemplates,
   }));
   const { data, refetch } = useListCanvasTemplates({
-    // TODO: scope = private for testing
     // TODO: add search
-    query: { scope: 'private', page: 1, pageSize: 3 },
+    query: { page: 1, pageSize: 3 },
   });
 
   const debouncedRefetch = useDebouncedCallback(() => refetch(), 300);
