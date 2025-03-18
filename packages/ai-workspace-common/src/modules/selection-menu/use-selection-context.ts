@@ -100,18 +100,6 @@ export const useSelectionContext = ({
       if (!selectedText) return;
 
       addContextItem(item);
-
-      // Clear selection
-      if (editor) {
-        // Use Tiptap to clear selection
-        editor.commands.clearContent();
-      } else {
-        // Fallback to browser API
-        window.getSelection()?.removeAllRanges();
-      }
-
-      setSelectedText('');
-      setIsSelecting(false);
     },
     [selectedText, addContextItem, editor],
   );

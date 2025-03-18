@@ -24,7 +24,6 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-  ParagraphAfterTable,
 } from '@refly-packages/ai-workspace-common/components/editor/extensions/Table';
 
 const PasteRuleExtension = Extension.create({
@@ -149,6 +148,41 @@ const PasteRuleExtension = Extension.create({
   },
 });
 
+// Create a custom extension to ensure there's always an empty line at the end
+const TrailingEmptyLine = Extension.create({
+  name: 'trailingEmptyLine',
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('trailingEmptyLine'),
+        appendTransaction: (transactions, _oldState, newState) => {
+          // Skip if no changes or if it's not from the client
+          if (!transactions.some((tr) => tr.docChanged)) {
+            return null;
+          }
+
+          const { doc, schema } = newState;
+          const lastNode = doc.lastChild;
+
+          // Check if the last node is a paragraph and is empty
+          const hasEmptyLastParagraph =
+            lastNode?.type === schema.nodes.paragraph && lastNode.content.size === 0;
+
+          // If the document is empty or already has a trailing empty paragraph, do nothing
+          if (doc.childCount === 0 || hasEmptyLastParagraph) {
+            return null;
+          }
+
+          // Otherwise, append an empty paragraph
+          const tr = newState.tr;
+          tr.insert(doc.content.size, schema.nodes.paragraph.create());
+          return tr;
+        },
+      }),
+    ];
+  },
+});
+
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 const aiHighlight = AIHighlight;
 //You can overwrite the placeholder with your own configuration
@@ -257,7 +291,7 @@ const youtube = Youtube.configure({
 
 const characterCount = CharacterCount.configure();
 
-const tableExtensions = [Table, TableRow, TableHeader, TableCell, ParagraphAfterTable];
+const tableExtensions = [Table, TableRow, TableHeader, TableCell];
 
 export const defaultExtensions = [
   starterKit,
@@ -273,6 +307,7 @@ export const defaultExtensions = [
   SpaceAICommand,
   DoublePlusAICommand,
   PasteRuleExtension,
+  TrailingEmptyLine,
 ];
 
 export { Placeholder };
