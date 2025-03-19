@@ -800,7 +800,7 @@ export class ShareService {
       }),
     ];
 
-    if (extraData.vectorStorageKey) {
+    if (extraData?.vectorStorageKey) {
       jobs.push(
         this.restoreVector(user, {
           entityId: newDocId,
@@ -858,7 +858,7 @@ export class ShareService {
       ).toString(),
     );
 
-    const extraData: ShareExtraData = JSON.parse(record.extraData);
+    const extraData: ShareExtraData = safeParseJSON(record.extraData);
 
     const newResource = await this.prisma.resource.create({
       data: {
@@ -896,7 +896,7 @@ export class ShareService {
       }),
     ];
 
-    if (extraData.vectorStorageKey) {
+    if (extraData?.vectorStorageKey) {
       jobs.push(
         this.restoreVector(user, {
           entityId: newResourceId,
