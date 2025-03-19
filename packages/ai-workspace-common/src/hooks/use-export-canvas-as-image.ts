@@ -389,7 +389,7 @@ export const useExportCanvasAsImage = () => {
         if (blob) {
           getClient()
             .upload({
-              body: { file: blob },
+              body: { file: blob, visibility: 'public' },
             })
             .then(({ data }) => {
               if (!data?.success) {
