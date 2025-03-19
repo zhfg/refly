@@ -17,6 +17,7 @@ import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/componen
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { DOMParser } from '@tiptap/pm/model';
+import MarkdownIt from 'markdown-it';
 import { cx } from 'class-variance-authority';
 import { common, createLowlight } from 'lowlight';
 import {
@@ -25,6 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from '@refly-packages/ai-workspace-common/components/editor/extensions/Table';
+
+const md = new MarkdownIt();
 
 const PasteRuleExtension = Extension.create({
   name: 'pasteRule',
@@ -41,8 +44,30 @@ const PasteRuleExtension = Extension.create({
             // Try to get HTML content first
             const html = clipboardData.getData('text/html');
             const text = clipboardData.getData('text/plain');
+            const containsMarkdown = (text: string): boolean => {
+              // Check for common Markdown patterns
+              const markdownPatterns = [
+                /^#{1,6}\s.+$/m, // Headers
+                /^[*-]\s.+$/m, // Unordered lists
+                /^>\s.+$/m, // Blockquotes
+                /^```[\s\S]*?```$/m, // Code blocks
+                /^\d+\.\s.+$/m, // Ordered lists
+                /\*\*[\s\S]*?\*\*/, // Bold
+                /\*[\s\S]*?\*/, // Italic
+                /`[\s\S]*?`/, // Inline code
+                /\[.*?\]\(.*?\)/, // Links
+                /!\[.*?\]\(.*?\)/, // Images
+                /^(?:\*\s*){3,}$|^(?:-\s*){3,}$|^(?:_\s*){3,}$/m, // Horizontal rule
+                /^(.+)\n[=]{2,}$/m, // Alternative H1
+                /^(.+)\n[-]{2,}$/m, // Alternative H2
+                /\|\s*[^|]+\s*\|/, // Tables
+              ];
 
-            if (html) {
+              return markdownPatterns.some((pattern) => pattern.test(text));
+            };
+            const isMarkdown = containsMarkdown(text ?? '');
+
+            if (html && !isMarkdown) {
               // Create a temporary div to parse HTML
               const div = document.createElement('div');
               div.innerHTML = html;
@@ -127,6 +152,63 @@ const PasteRuleExtension = Extension.create({
               return true;
             }
             if (text) {
+              // Handle Markdown if detected
+              if (isMarkdown) {
+                try {
+                  // Get current selection
+                  const { from, to } = view.state.selection;
+                  const { tr } = view.state;
+                  const $from = view.state.doc.resolve(from);
+                  const currentNode = $from.parent;
+
+                  // Delete selected text if there's a selection
+                  if (from !== to) {
+                    tr.delete(from, to);
+                  }
+
+                  // Since we can't directly access the editor or commands here,
+                  // we'll create a temporary element and use DOMParser to convert markdown-like text
+                  const tempDiv = document.createElement('div');
+
+                  // Convert markdown-like syntax to HTML
+                  let markdownContent = md.render(text);
+
+                  // Wrap unordered list items
+                  if (markdownContent.includes('<li>')) {
+                    markdownContent = markdownContent.replace(
+                      /(<li>.*?<\/li>[\r\n]*)+/g,
+                      (match) => `<ul>${match}</ul>`,
+                    );
+                  }
+
+                  tempDiv.innerHTML = markdownContent;
+
+                  // Use ProseMirror's DOMParser to convert the HTML to a document
+                  const parser = DOMParser.fromSchema(view.state.schema);
+                  const parsedContent = parser.parse(tempDiv);
+
+                  // Check if current node is an empty paragraph
+                  if (currentNode.type.name === 'paragraph' && currentNode.content.size === 0) {
+                    // Replace the empty paragraph with the pasted content
+                    tr.replaceWith(
+                      $from.before($from.depth),
+                      $from.after($from.depth),
+                      parsedContent,
+                    );
+                    view.dispatch(tr);
+                    return true;
+                  }
+
+                  // Insert the parsed content at cursor position
+                  tr.insert(from, parsedContent);
+                  view.dispatch(tr);
+                  return true;
+                } catch (error) {
+                  console.error('Error processing markdown:', error);
+                  // Fall through to normal text handling if markdown processing fails
+                }
+              }
+
               // Fallback to plain text handling
               const { tr } = view.state;
               const { from, to } = view.state.selection;
