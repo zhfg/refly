@@ -2283,6 +2283,10 @@ export const CreateCanvasTemplateRequestSchema = {
       type: 'string',
       description: 'Canvas template language code',
     },
+    coverStorageKey: {
+      type: 'string',
+      description: 'Cover storage key',
+    },
   },
 } as const;
 
@@ -2850,6 +2854,10 @@ export const CreateShareRequestSchema = {
     shareDataStorageKey: {
       type: 'string',
       description: 'Share data storage key',
+    },
+    coverStorageKey: {
+      type: 'string',
+      description: 'Cover storage key',
     },
   },
 } as const;

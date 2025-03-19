@@ -1,4 +1,11 @@
-import { Inject, Injectable, Logger, OnModuleInit, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Queue } from 'bullmq';
 import sharp from 'sharp';
 import mime from 'mime';
@@ -302,10 +309,13 @@ export class MiscService implements OnModuleInit {
       existingFile = await this.prisma.staticFile.findFirst({
         where: {
           storageKey: param.storageKey,
-          uid: user.uid,
           deletedAt: null,
         },
       });
+    }
+    if (existingFile && existingFile.uid !== user.uid) {
+      this.logger.warn(`User ${user.uid} is not allowed to upload file with ${param.storageKey}`);
+      throw new ForbiddenException();
     }
 
     const objectKey = randomUUID();

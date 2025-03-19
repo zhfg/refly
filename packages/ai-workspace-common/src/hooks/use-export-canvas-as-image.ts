@@ -3,8 +3,10 @@ import { useCallback, useState } from 'react';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import html2canvas, { Options } from 'html2canvas';
+import { UploadResponse } from '@refly/openapi-schema';
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import { staticPrivateEndpoint } from '@refly-packages/ai-workspace-common/utils/env';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export const useExportCanvasAsImage = () => {
   const { t } = useTranslation();
@@ -380,6 +382,27 @@ export const useExportCanvasAsImage = () => {
     [],
   );
 
+  const uploadCanvasCover = useCallback(async () => {
+    const canvas = await getCanvasElement({ scale: 1 });
+    return new Promise<UploadResponse['data']>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          getClient()
+            .upload({
+              body: { file: blob },
+            })
+            .then(({ data }) => {
+              if (!data?.success) {
+                reject(new Error('Failed to upload canvas cover'));
+              }
+              resolve(data?.data);
+            })
+            .catch(reject);
+        }
+      });
+    });
+  }, [getCanvasElement]);
+
   return {
     getCanvasElement,
     exportCanvasAsImage,
@@ -387,5 +410,6 @@ export const useExportCanvasAsImage = () => {
     getMinimap,
     isMinimapLoading,
     svgBlobToPngBlob,
+    uploadCanvasCover,
   };
 };

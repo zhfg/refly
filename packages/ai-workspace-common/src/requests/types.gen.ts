@@ -1769,6 +1769,10 @@ export type CreateCanvasTemplateRequest = {
    * Canvas template language code
    */
   language: string;
+  /**
+   * Cover storage key
+   */
+  coverStorageKey?: string;
 };
 
 export type UpdateCanvasTemplateRequest = {
@@ -2115,6 +2119,10 @@ export type CreateShareRequest = {
    * Share data storage key
    */
   shareDataStorageKey?: string;
+  /**
+   * Cover storage key
+   */
+  coverStorageKey?: string;
 };
 
 export type CreateShareResponse = BaseResponse & {

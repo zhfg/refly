@@ -92,6 +92,7 @@ export class ShareService {
         entityType: 'canvas',
         uid: user.uid,
         deletedAt: null,
+        templateId: null, // ignore canvas templates
       },
     });
 
@@ -475,7 +476,7 @@ export class ShareService {
   }
 
   async createShareForSkillResponse(user: User, param: CreateShareRequest) {
-    const { entityId: resultId, parentShareId, allowDuplication } = param;
+    const { entityId: resultId, parentShareId, allowDuplication, coverStorageKey } = param;
 
     // Check if shareRecord already exists
     const existingShareRecord = await this.prisma.shareRecord.findFirst({
@@ -503,6 +504,19 @@ export class ShareService {
       visibility: 'public',
       storageKey: `share/${shareId}.json`,
     });
+
+    if (coverStorageKey) {
+      await this.miscService.duplicateFile({
+        sourceFile: {
+          storageKey: coverStorageKey,
+          visibility: 'public',
+        },
+        targetFile: {
+          storageKey: `share-cover/${shareId}.png`,
+          visibility: 'public',
+        },
+      });
+    }
 
     let shareRecord: ShareRecord;
 

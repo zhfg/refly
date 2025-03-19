@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Form, Input, message, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
 
 interface CreateTemplateModalProps {
   title: string;
@@ -9,7 +10,6 @@ interface CreateTemplateModalProps {
   canvasId: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  uploadShareCover: (shareId: string) => Promise<void>;
 }
 
 export const CreateTemplateModal = ({
@@ -18,16 +18,17 @@ export const CreateTemplateModal = ({
   categoryId,
   visible,
   setVisible,
-  uploadShareCover,
 }: CreateTemplateModalProps) => {
   const { t, i18n } = useTranslation();
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const { uploadCanvasCover } = useExportCanvasAsImage();
 
   const createTemplate = async ({ title, description }: { title: string; description: string }) => {
     if (confirmLoading) return;
 
     setConfirmLoading(true);
+    const { storageKey } = await uploadCanvasCover();
     const { data } = await getClient().createCanvasTemplate({
       body: {
         title,
@@ -35,16 +36,13 @@ export const CreateTemplateModal = ({
         language: i18n.language,
         categoryId,
         canvasId,
+        coverStorageKey: storageKey,
       },
     });
     setConfirmLoading(false);
     if (data?.success) {
       setVisible(false);
       message.success(t('template.createSuccess'));
-
-      if (data?.data?.shareId) {
-        await uploadShareCover(data.data.shareId);
-      }
     }
   };
 
