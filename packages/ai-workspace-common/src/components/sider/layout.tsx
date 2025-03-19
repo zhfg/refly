@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Menu } from '@arco-design/web-react';
-import { Avatar, Button, Layout, Skeleton, Divider } from 'antd';
+import { Avatar, Button, Layout, Skeleton, Divider, Tag } from 'antd';
 import {
   useLocation,
   useNavigate,
@@ -485,9 +485,28 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
             </div>
 
             <div className="mt-auto">
-              <div className="mb-2 flex flex-col gap-2">
-                {subscriptionEnabled && planType === 'free' && <SubscriptionHint />}
-              </div>
+              <Divider style={{ margin: '8px 0' }} />
+
+              {subscriptionEnabled && planType === 'free' && (
+                <div className="mb-2 flex flex-col gap-2">
+                  <SubscriptionHint />
+                </div>
+              )}
+
+              <span
+                onClick={() => window.open('https://docs.refly.ai/changelog/v0.4.2', '_blank')}
+                className="mb-2 flex items-start text-[#00968F] hover:bg-gray-50 whitespace-normal h-auto cursor-pointer"
+              >
+                <span className="flex items-start gap-2 leading-6 w-full ">
+                  <Tag
+                    color="green"
+                    className="w-full whitespace-normal !h-auto !py-1 !mr-0 text-center"
+                  >
+                    {t('landingPage.simpleMessageText')}
+                  </Tag>
+                </span>
+              </span>
+
               {!!userProfile?.uid && (
                 <MenuItem
                   key="Settings"

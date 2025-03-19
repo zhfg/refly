@@ -58,6 +58,30 @@ function Header() {
     [t],
   );
 
+  const galleryItems = useMemo(
+    () => [
+      {
+        key: 'use-cases',
+        label: (
+          <div className="flex items-center gap-2">
+            <span>{t('landingPage.tab.useCases')}</span>
+          </div>
+        ),
+        onClick: () => navigate('/use-cases-gallery'),
+      },
+      {
+        key: 'artifacts',
+        label: (
+          <div className="flex items-center gap-2">
+            <span>{t('landingPage.tab.artifacts')}</span>
+          </div>
+        ),
+        onClick: () => navigate('/artifact-gallery'),
+      },
+    ],
+    [t, navigate],
+  );
+
   const tabOptions = [
     {
       label: t('landingPage.tab.product'),
@@ -70,6 +94,17 @@ function Header() {
     {
       label: t('landingPage.tab.docs'),
       value: 'docs',
+    },
+    {
+      label: (
+        <Dropdown menu={{ items: galleryItems }} placement="bottom">
+          <div className="flex cursor-pointer items-center gap-1">
+            <span>{t('landingPage.tab.gallery')}</span>
+            <FaCaretDown className="text-xs" />
+          </div>
+        </Dropdown>
+      ),
+      value: 'gallery',
     },
     {
       label: (

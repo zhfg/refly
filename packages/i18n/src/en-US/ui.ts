@@ -182,13 +182,14 @@ const translations = {
     description:
       'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
-      'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
+      'A free-form canvas creation platform powered by multi-threaded dialogue, artifacts, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
       first:
-        'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
+        'Powered by multi-threaded dialogue, artifacts, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'v0.4.0 Released: Code Artifact, Canvas Sharing & Subscription Price Update 🚀',
+    messageText: 'v0.4.2 Released: Canvas template, document table, and more 🚀',
+    simpleMessageText: 'v0.4.2: Canvas template 🚀',
     tryForFree: 'Get Started',
     tryItNow: 'Try It Now',
     creationEngine: 'Creation Engine',
@@ -490,6 +491,9 @@ const translations = {
       priceTag: '-50%',
       community: 'Community',
       wechat: 'WeChat',
+      gallery: 'Use Cases',
+      useCases: 'Canvas Use Cases',
+      artifacts: 'Artifacts Use Cases',
     },
     faq: {
       title: 'Frequently Asked Questions',
@@ -535,6 +539,11 @@ const translations = {
         highlight: 'standard models',
         after: '',
       },
+      {
+        before: 'Create PPT, SVG, visual web pages, tables, and Mermaid charts with ',
+        highlight: 'standard models',
+        after: '',
+      },
     ],
     premiumCapabilities: [
       {
@@ -555,6 +564,11 @@ const translations = {
       },
       {
         before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'pro models',
+        after: '',
+      },
+      {
+        before: 'Create PPT, SVG, visual web pages, tables, and Mermaid charts with ',
         highlight: 'pro models',
         after: '',
       },

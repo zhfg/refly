@@ -187,14 +187,15 @@ const translations = {
     slogan: 'AI Native 创作引擎',
     simplySlogan: '创作引擎',
     description:
-      '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
+      '基于自由画布的创作平台，通过多线程对话、代码组件、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
     anotherDescription:
-      '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
+      '基于自由画布的创作平台，通过多线程对话、代码组件、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
     simplyDescription: {
-      first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
+      first: '由多线程对话、代码组件、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: 'v0.4.0 发布：代码组件、画布分享 & 订阅价格调整 🚀',
+    messageText: 'v0.4.2 发布：画布模板、文档表格和更多 🚀',
+    simpleMessageText: 'v0.4.2: 画布模板 🚀',
     tryForFree: '开始使用',
     tryItNow: '立即体验',
     creationEngine: '创作引擎',
@@ -434,6 +435,9 @@ const translations = {
       priceTag: '五折',
       community: '用户交流群',
       wechat: '微信',
+      gallery: '用例',
+      useCases: '画布用例',
+      artifacts: '作品用例',
     },
     faq: {
       title: '常见问题',
@@ -528,6 +532,11 @@ const translations = {
         highlight: '基础模型',
         after: '驱动的 AI Markdown 编辑器',
       },
+      {
+        before: '借助',
+        highlight: '基础模型',
+        after: '驱动的 PPT，SVG，可视化网页、表格和 Mermaid 图表生成',
+      },
     ],
     premiumCapabilities: [
       {
@@ -549,6 +558,11 @@ const translations = {
         before: '借助',
         highlight: '高级模型',
         after: '驱动的 AI Markdown 编辑器',
+      },
+      {
+        before: '借助',
+        highlight: '高级模型',
+        after: '驱动的 PPT，SVG，可视化网页、表格和 Mermaid 图表生成',
       },
     ],
   },
