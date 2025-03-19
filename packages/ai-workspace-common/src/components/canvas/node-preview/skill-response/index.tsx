@@ -28,9 +28,9 @@ import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
-
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { processContentPreview } from '@refly-packages/ai-workspace-common/utils/content';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -93,6 +93,11 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   }, [shareData, result, resultId, updateActionResult]);
 
   const fetchActionResult = async (resultId: string) => {
+    const { isLogin } = useUserStore.getState();
+    if (!isLogin) {
+      return;
+    }
+
     setLoading(true);
     const { data, error } = await getClient().getActionResult({
       query: { resultId },
