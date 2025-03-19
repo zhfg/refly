@@ -31,8 +31,9 @@ import {
   Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { ParamsError } from '@refly-packages/errors';
+import { OperationTooFrequent, ParamsError } from '@refly-packages/errors';
 import { QUEUE_CHECK_CANCELED_SUBSCRIPTIONS } from '@/utils/const';
+import { RedisService } from '@/common/redis.service';
 
 @Injectable()
 export class SubscriptionService implements OnModuleInit {
@@ -45,6 +46,7 @@ export class SubscriptionService implements OnModuleInit {
 
   constructor(
     protected readonly prisma: PrismaService,
+    private readonly redis: RedisService,
     private readonly config: ConfigService,
     @InjectStripeClient() private readonly stripeClient: Stripe,
     @InjectQueue(QUEUE_CHECK_CANCELED_SUBSCRIPTIONS)
@@ -515,12 +517,22 @@ export class SubscriptionService implements OnModuleInit {
       return result;
     }
 
-    const meter = await this.getOrCreateTokenUsageMeter(userModel);
+    try {
+      const meter = await this.getOrCreateTokenUsageMeter(userModel);
 
-    result.t1 = meter.t1CountQuota < 0 || meter.t1CountUsed < meter.t1CountQuota;
-    result.t2 = meter.t2CountQuota < 0 || meter.t2CountUsed < meter.t2CountQuota;
+      if (!meter) {
+        this.logger.error(`Failed to get token usage meter for user ${user.uid}`);
+        return result;
+      }
 
-    return result;
+      result.t1 = meter.t1CountQuota < 0 || meter.t1CountUsed < meter.t1CountQuota;
+      result.t2 = meter.t2CountQuota < 0 || meter.t2CountUsed < meter.t2CountQuota;
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Error checking request usage for user ${user.uid}: ${error.message}`);
+      return result;
+    }
   }
 
   async checkStorageUsage(user: User): Promise<CheckStorageUsageResult> {
@@ -530,14 +542,24 @@ export class SubscriptionService implements OnModuleInit {
       return { available: 0 };
     }
 
-    const meter = await this.getOrCreateStorageUsageMeter(userModel);
+    try {
+      const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
-    return {
-      available:
-        meter.fileCountQuota < 0
-          ? Number.POSITIVE_INFINITY
-          : meter.fileCountQuota - meter.fileCountUsed,
-    };
+      if (!meter) {
+        this.logger.error(`Failed to get storage meter for user ${user.uid}`);
+        return { available: 0 };
+      }
+
+      return {
+        available:
+          meter.fileCountQuota < 0
+            ? Number.POSITIVE_INFINITY
+            : meter.fileCountQuota - meter.fileCountUsed,
+      };
+    } catch (error) {
+      this.logger.error(`Error checking storage usage for user ${user.uid}: ${error.message}`);
+      return { available: 0 };
+    }
   }
 
   async checkFileParseUsage(user: User): Promise<CheckFileParseUsageResult> {
@@ -598,24 +620,38 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      const now = new Date();
+    const now = new Date();
 
-      const lastMeter = await prisma.tokenUsageMeter.findFirst({
-        where: {
-          uid,
-          subscriptionId: sub?.subscriptionId || null,
-          deletedAt: null,
-        },
-        orderBy: {
-          startAt: 'desc',
-        },
-      });
+    // Find existing active meter
+    const lastMeter = await this.prisma.tokenUsageMeter.findFirst({
+      where: {
+        uid,
+        subscriptionId: sub?.subscriptionId || null,
+        deletedAt: null,
+      },
+      orderBy: {
+        startAt: 'desc',
+      },
+    });
 
-      // If the last meter is still active, return it
-      if (lastMeter?.startAt < now && (!lastMeter.endAt || lastMeter.endAt > now)) {
-        return lastMeter;
-      }
+    // If the last meter is still active, return it
+    if (lastMeter?.startAt < now && (!lastMeter.endAt || lastMeter.endAt > now)) {
+      return lastMeter;
+    }
+
+    // Only allow one instance to create a new meter
+    const lockKey = `token_meter_creation:${uid}`;
+
+    // Try to acquire a lock
+    const releaseLock = await this.redis.acquireLock(lockKey);
+
+    if (!releaseLock) {
+      throw new OperationTooFrequent();
+    }
+
+    try {
+      // This instance got the lock, proceed with creation
+      this.logger.log(`Creating new token usage meter for user ${uid}`);
 
       // Otherwise, create a new meter
       let startAt: Date;
@@ -633,6 +669,7 @@ export class SubscriptionService implements OnModuleInit {
           ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate() + 1)
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
+      // Find plan quota
       let plan: PlanQuota | null = null;
       if (sub?.overridePlan) {
         plan = safeParseJSON(sub.overridePlan) as PlanQuota;
@@ -643,7 +680,8 @@ export class SubscriptionService implements OnModuleInit {
         });
       }
 
-      return prisma.tokenUsageMeter.create({
+      // Create new meter
+      const newMeter = await this.prisma.tokenUsageMeter.create({
         data: {
           meterId: genTokenUsageMeterID(),
           uid,
@@ -656,7 +694,12 @@ export class SubscriptionService implements OnModuleInit {
           t2CountUsed: 0,
         },
       });
-    });
+
+      return newMeter;
+    } finally {
+      // Always release the lock when done
+      await releaseLock();
+    }
   }
 
   async getOrCreateStorageUsageMeter(user: User, _sub?: SubscriptionModel) {
@@ -679,48 +722,48 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      const activeMeter = await prisma.storageUsageMeter.findFirst({
-        where: {
-          uid,
-          deletedAt: null,
-        },
+    const activeMeter = await this.prisma.storageUsageMeter.findFirst({
+      where: {
+        uid,
+        deletedAt: null,
+      },
+    });
+    if (activeMeter) {
+      return activeMeter;
+    }
+
+    // Only allow one instance to create a new meter
+    const lockKey = `storage_meter_creation:${uid}`;
+
+    // Try to acquire a lock
+    const releaseLock = await this.redis.acquireLock(lockKey);
+
+    if (!releaseLock) {
+      throw new OperationTooFrequent();
+    }
+
+    let plan: PlanQuota | null = null;
+    if (sub?.overridePlan) {
+      plan = safeParseJSON(sub.overridePlan) as PlanQuota;
+    }
+    if (!plan) {
+      const planType = sub?.planType || 'free';
+      plan = await this.prisma.subscriptionPlan.findFirst({
+        where: { planType },
       });
+    }
 
-      // Find the storage quota for the plan
-      let plan: PlanQuota | null = null;
-      if (sub?.overridePlan) {
-        plan = safeParseJSON(sub.overridePlan) as PlanQuota;
-      }
-      if (!plan) {
-        const planType = sub?.planType || 'free';
-        plan = await this.prisma.subscriptionPlan.findFirst({
-          where: { planType },
-        });
-      }
+    const fileCountQuota = plan?.fileCountQuota ?? this.config.get('quota.storage.file');
 
-      if (activeMeter) {
-        // If the plan has changed, update the quota
-        if (plan.fileCountQuota !== activeMeter.fileCountQuota) {
-          return prisma.storageUsageMeter.update({
-            where: { meterId: activeMeter.meterId },
-            data: {
-              fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
-            },
-          });
-        }
-        return activeMeter;
-      }
-
-      return prisma.storageUsageMeter.create({
-        data: {
-          meterId: genStorageUsageMeterID(),
-          uid,
-          subscriptionId: sub?.subscriptionId,
-          fileCountQuota: plan.fileCountQuota ?? this.config.get('quota.storage.file'),
-          fileCountUsed: 0,
-        },
-      });
+    // Create new meter if none exists
+    return this.prisma.storageUsageMeter.create({
+      data: {
+        meterId: genStorageUsageMeterID(),
+        uid,
+        subscriptionId: sub?.subscriptionId,
+        fileCountQuota,
+        fileCountUsed: 0,
+      },
     });
   }
 
@@ -850,52 +893,55 @@ export class SubscriptionService implements OnModuleInit {
   async syncStorageUsage(data: SyncStorageUsageJobData) {
     const { uid, timestamp } = data;
 
-    const user = await this.prisma.user.findUnique({ where: { uid } });
-    if (!user) {
-      this.logger.error(`No user found for uid ${uid}`);
-      return;
-    }
+    try {
+      const user = await this.prisma.user.findUnique({ where: { uid } });
+      if (!user) {
+        this.logger.error(`No user found for uid ${uid}`);
+        return;
+      }
 
-    // this.logger.log(`Syncing storage usage for user ${uid}`);
+      const activeMeter = await this.getOrCreateStorageUsageMeter(user);
+      if (!activeMeter) {
+        this.logger.error(`Failed to get storage meter for user ${uid}`);
+        return;
+      }
 
-    const activeMeter = await this.getOrCreateStorageUsageMeter(user);
+      // If the meter has been synced at a time after the timestamp, skip it
+      if (activeMeter.syncedAt && activeMeter.syncedAt > timestamp) {
+        this.logger.log(`Storage usage for user ${uid} already synced at ${activeMeter.syncedAt}`);
+        return;
+      }
 
-    // If the meter has been synced at a time after the timestamp, skip it
-    if (activeMeter.syncedAt && activeMeter.syncedAt > timestamp) {
-      this.logger.log(`Storage usage for user ${uid} already synced at ${activeMeter.syncedAt}`);
-      return;
-    }
+      // Perform aggregate operations outside transaction
+      const [resourceSizeSum, docSizeSum, fileSizeSum, resourceCount, docCount] = await Promise.all(
+        [
+          this.prisma.resource.aggregate({
+            _sum: {
+              storageSize: true,
+              vectorSize: true,
+            },
+            where: { uid, deletedAt: null },
+          }),
+          this.prisma.document.aggregate({
+            _sum: {
+              storageSize: true,
+              vectorSize: true,
+            },
+            where: { uid, deletedAt: null },
+          }),
+          this.prisma.staticFile.aggregate({
+            _sum: {
+              storageSize: true,
+            },
+            where: { uid, deletedAt: null },
+          }),
+          this.prisma.resource.count({ where: { uid, deletedAt: null } }),
+          this.prisma.document.count({ where: { uid, deletedAt: null } }),
+        ],
+      );
 
-    await this.prisma.$transaction(async (prisma) => {
-      const [resourceSizeSum, docSizeSum, fileSizeSum] = await Promise.all([
-        prisma.resource.aggregate({
-          _sum: {
-            storageSize: true,
-            vectorSize: true,
-          },
-          where: { uid, deletedAt: null },
-        }),
-        prisma.document.aggregate({
-          _sum: {
-            storageSize: true,
-            vectorSize: true,
-          },
-          where: { uid, deletedAt: null },
-        }),
-        prisma.staticFile.aggregate({
-          _sum: {
-            storageSize: true,
-          },
-          where: { uid, deletedAt: null },
-        }),
-      ]);
-
-      const [resourceCount, docCount] = await Promise.all([
-        prisma.resource.count({ where: { uid, deletedAt: null } }),
-        prisma.document.count({ where: { uid, deletedAt: null } }),
-      ]);
-
-      await prisma.storageUsageMeter.update({
+      // Update meter with calculated values
+      await this.prisma.storageUsageMeter.update({
         where: { meterId: activeMeter.meterId },
         data: {
           fileCountUsed: resourceCount + docCount,
@@ -908,9 +954,11 @@ export class SubscriptionService implements OnModuleInit {
           syncedAt: timestamp,
         },
       });
-    });
 
-    // this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
+      this.logger.debug(`Storage usage for user ${uid} synced at ${timestamp}`);
+    } catch (error) {
+      this.logger.error(`Error syncing storage usage for user ${uid}: ${error.message}`);
+    }
   }
 
   async getSubscriptionPlans() {
