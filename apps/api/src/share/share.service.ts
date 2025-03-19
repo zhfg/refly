@@ -92,6 +92,7 @@ export class ShareService {
         entityType: 'canvas',
         uid: user.uid,
         deletedAt: null,
+        templateId: null, // ignore canvas templates
       },
     });
 
