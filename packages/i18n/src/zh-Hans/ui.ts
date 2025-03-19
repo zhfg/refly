@@ -517,6 +517,11 @@ const translations = {
         highlight: '基础模型',
         after: '驱动的 AI Markdown 编辑器',
       },
+      {
+        before: '借助',
+        highlight: '基础模型',
+        after: '驱动的 PPT，SVG，可视化网页、表格和 Mermaid 图表生成',
+      },
     ],
     premiumCapabilities: [
       {
@@ -538,6 +543,11 @@ const translations = {
         before: '借助',
         highlight: '高级模型',
         after: '驱动的 AI Markdown 编辑器',
+      },
+      {
+        before: '借助',
+        highlight: '高级模型',
+        after: '驱动的 PPT，SVG，可视化网页、表格和 Mermaid 图表生成',
       },
     ],
   },

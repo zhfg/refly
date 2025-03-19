@@ -524,6 +524,11 @@ const translations = {
         highlight: 'standard models',
         after: '',
       },
+      {
+        before: 'Create PPT, SVG, visual web pages, tables, and Mermaid charts with ',
+        highlight: 'standard models',
+        after: '',
+      },
     ],
     premiumCapabilities: [
       {
@@ -544,6 +549,11 @@ const translations = {
       },
       {
         before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'pro models',
+        after: '',
+      },
+      {
+        before: 'Create PPT, SVG, visual web pages, tables, and Mermaid charts with ',
         highlight: 'pro models',
         after: '',
       },
