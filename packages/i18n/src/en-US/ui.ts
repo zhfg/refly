@@ -171,10 +171,10 @@ const translations = {
     description:
       'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
-      'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
+      'A free-form canvas creation platform powered by multi-threaded dialogue, artifacts, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
       first:
-        'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
+        'Powered by multi-threaded dialogue, artifacts, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
     messageText: 'v0.4.2 Released: Canvas template, document table, and more 🚀',
