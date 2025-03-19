@@ -229,6 +229,7 @@ const translations = {
           'Customize your writing environment with flexible context selection',
           'N+ professional writing tools to enhance academic/technical writing efficiency',
           'AI editing assistant for quality professional output',
+          'Support for multiple artifact types, including documents, PPTs, SVGs, HTML, React and more',
         ],
       },
       workflowFive: {
