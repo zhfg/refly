@@ -177,7 +177,7 @@ const translations = {
         'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'v0.4.0 Released: Code Artifact, Canvas Sharing & Subscription Price Update 🚀',
+    messageText: 'v0.4.2 Released: Canvas template, document table, and more 🚀',
     tryForFree: 'Get Started',
     tryItNow: 'Try It Now',
     creationEngine: 'Creation Engine',

@@ -183,7 +183,7 @@ const translations = {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: 'v0.4.0 发布：代码组件、画布分享 & 订阅价格调整 🚀',
+    messageText: 'v0.4.2 发布：画布模板、文档表格和更多 🚀',
     tryForFree: '开始使用',
     tryItNow: '立即体验',
     creationEngine: '创作引擎',
