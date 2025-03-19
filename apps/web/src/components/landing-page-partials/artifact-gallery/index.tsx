@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Card, Typography, Button } from 'antd';
 import { AiOutlineAppstore } from 'react-icons/ai';
-import { memo, useEffect } from 'react';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { memo } from 'react';
 import { artifactGalleryData } from './data';
 
 const { Title, Paragraph } = Typography;
@@ -24,16 +23,6 @@ const ArtifactGallery = memo(
     showHeader = true,
   }: ArtifactGalleryProps) => {
     const { i18n } = useTranslation();
-
-    const { setCollapse } = useSiderStoreShallow((state) => ({
-      collapse: state.collapse,
-      setCollapse: state.setCollapse,
-    }));
-
-    // Force collapse by default
-    useEffect(() => {
-      setCollapse(true);
-    }, [setCollapse]);
 
     // Default header configuration
     const defaultHeader = {

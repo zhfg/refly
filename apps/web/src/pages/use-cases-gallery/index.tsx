@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
-import ArtifactGallery from '@/components/landing-page-partials/artifact-gallery';
+import UseCasesGallery from '@/components/landing-page-partials/use-cases-gallery';
 import Header from '@/components/landing-page-partials/Header';
 import Footer from '@/components/landing-page-partials/Footer';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useEffect } from 'react';
 
-function ArtifactGallary() {
+function UseCasesGalleryPage() {
   const { i18n } = useTranslation();
   const currentLang = i18n.language as 'zh-CN' | 'en';
   const { setCollapse } = useSiderStoreShallow((state) => ({
@@ -21,20 +21,20 @@ function ArtifactGallary() {
 
   const pageContent = {
     title: {
-      'zh-CN': 'Refly 生成作品展示',
-      en: 'Refly Artifacts Gallery',
+      'zh-CN': 'Refly 使用案例展示',
+      en: 'Refly Use Cases Gallery',
     },
     description: {
-      'zh-CN': '探索和发现使用 Refly 生成式画布创作的精彩作品',
-      en: 'Discover and explore incredible spaces created with Refly generative canvas',
+      'zh-CN': '探索和发现使用 Refly 生成式画布创作的精彩案例',
+      en: 'Discover and explore incredible use cases created with Refly generative canvas',
     },
     metaTitle: {
-      'zh-CN': 'Refly Spaces 展示 - 生成式画布创作展',
-      en: 'Refly Spaces Gallery - Generative Canvas Creations',
+      'zh-CN': 'Refly 使用案例展示 - 生成式画布创作展',
+      en: 'Refly Use Cases Gallery - Generative Canvas Creations',
     },
     metaDescription: {
-      'zh-CN': '探索由 Refly 生成式画布创作的精彩作品，发现无限创意可能',
-      en: 'Explore amazing creations made with Refly generative canvas, discover unlimited creative possibilities',
+      'zh-CN': '探索由 Refly 生成式画布创作的精彩案例，发现无限创意可能',
+      en: 'Explore amazing use cases made with Refly generative canvas, discover unlimited creative possibilities',
     },
   };
 
@@ -68,7 +68,7 @@ function ArtifactGallary() {
         </section>
 
         {/* Gallery with all items and no view more button */}
-        <ArtifactGallery
+        <UseCasesGallery
           maxItems={24}
           showViewMore={false}
           title={pageContent.title[currentLang]}
@@ -83,4 +83,4 @@ function ArtifactGallary() {
   );
 }
 
-export default ArtifactGallary;
+export default UseCasesGalleryPage;

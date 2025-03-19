@@ -16,7 +16,13 @@ interface UseCasesGalleryProps {
 }
 
 const UseCasesGallery = memo(
-  ({ maxItems = 4, title, description, showHeader = true }: UseCasesGalleryProps) => {
+  ({
+    maxItems = 4,
+    title,
+    description,
+    showViewMore = true,
+    showHeader = true,
+  }: UseCasesGalleryProps) => {
     const { i18n } = useTranslation();
     const currentLang = i18n.language as 'zh-CN' | 'en';
 
@@ -200,6 +206,21 @@ const UseCasesGallery = memo(
             </a>
           ))}
         </div>
+        {/* View More Button */}
+        {showViewMore && (
+          <div className="mt-12 text-center">
+            <Button
+              type="primary"
+              shape="round"
+              size="large"
+              className="px-8 py-2 no-underline"
+              style={{ backgroundColor: '#333333' }}
+              href="/use-cases-gallery"
+            >
+              {currentLang === 'zh-CN' ? '探索更多画布' : 'Explore more canvas'} 👉
+            </Button>
+          </div>
+        )}
       </section>
     );
   },

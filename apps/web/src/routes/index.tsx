@@ -25,11 +25,13 @@ const TemplatePreviewPage = lazy(() => import('@/pages/template-preview'));
 const SkillResponseSharePage = lazy(() => import('@/pages/skill-response-share'));
 const DocumentSharePage = lazy(() => import('@/pages/document-share'));
 const ArtifactGalleryPage = lazy(() => import('@/pages/artifact-gallery'));
+const UseCasesGalleryPage = lazy(() => import('@/pages/use-cases-gallery'));
 
 const prefetchRoutes = () => {
   // Prefetch common routes
   import('@refly-packages/ai-workspace-common/components/request-access');
   import('@/pages/artifact-gallery');
+  import('@/pages/use-cases-gallery');
 };
 
 export const AppRouter = (props: { layout?: any }) => {
@@ -96,6 +98,7 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route path="/share/answer/:shareId" element={<SkillResponseSharePage />} />
           <Route path="/share/doc/:shareId" element={<DocumentSharePage />} />
           <Route path="/artifact-gallery" element={<ArtifactGalleryPage />} />
+          <Route path="/use-cases-gallery" element={<UseCasesGalleryPage />} />
           <Route path="/preview/canvas/:shareId" element={<TemplatePreviewPage />} />
           <Route
             path="/canvas/:canvasId"
