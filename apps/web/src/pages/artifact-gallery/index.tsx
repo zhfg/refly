@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet';
-import ArtifactGallery from '@/components/landing-page-partials/artifact-gallery';
+import ArtifactGallery from '@/components/landing-page-partials/artifact-gallary';
 import Header from '@/components/landing-page-partials/Header';
 import Footer from '@/components/landing-page-partials/Footer';
 

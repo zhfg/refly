@@ -3,7 +3,7 @@ import HeroHome from '@/components/landing-page-partials/HeroHome';
 import WorkflowBlocks from '@/components/landing-page-partials/workflow-blocks';
 import FeatureBlocks from '@/components/landing-page-partials/feature-blocks';
 import UseCasesGallery from '@/components/landing-page-partials/use-cases-gallery';
-import ArtifactGallery from '@/components/landing-page-partials/artifact-gallery';
+import ArtifactGallery from '@/components/landing-page-partials/artifact-gallary';
 import Testimonials from '@/components/landing-page-partials/Testimonials';
 import Footer from '@/components/landing-page-partials/Footer';
 import AOS from 'aos';

@@ -3,20 +3,9 @@ import { Card, Typography, Button } from 'antd';
 import { AiOutlineAppstore } from 'react-icons/ai';
 import { memo, useEffect } from 'react';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { artifactGalleryData } from './data';
 
 const { Title, Paragraph } = Typography;
-
-// Define TypeScript interfaces for our data structure
-interface Artifact {
-  id: string;
-  title: string;
-  description?: string;
-  coverImage: string;
-  type: 'canvas' | 'code' | 'answer' | 'doc';
-  author?: string;
-  authorEmail?: string;
-  url: string;
-}
 
 interface ArtifactGalleryProps {
   maxItems?: number;
@@ -25,98 +14,6 @@ interface ArtifactGalleryProps {
   description?: string;
   showHeader?: boolean;
 }
-
-// Sample artifacts data
-const sampleArtifacts: Artifact[] = [
-  {
-    id: '1',
-    title: 'JAPAN LBO QUEST',
-    description:
-      'An interactive quest game with a Japanese theme, featuring leaderboards and battle stats tracking.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'canvas',
-    author: 'kavan',
-    authorEmail: 'kavan****rick@gmail.com',
-    url: '/share/canvas/japenese-quest',
-  },
-  {
-    id: '2',
-    title: 'Quantum Computing Learning Hub',
-    description:
-      'Explore the fascinating world of quantum computing through interactive visualizations and learning experiences.',
-    coverImage: 'https://static.refly.ai/share-cover/can-io39kq9tiaoey5tkm4gngbfj.png',
-    type: 'canvas',
-    author: 'roxa',
-    authorEmail: 'roxa****g@gmail.com',
-    url: '/share/canvas/quantum-computing',
-  },
-  {
-    id: '3',
-    title: 'Stock Pattern Matcher',
-    description:
-      'Advanced tool for identifying stock patterns and market trends with visual comparisons.',
-    coverImage: 'https://static.refly.ai/share-cover/can-nnz3d3ly5115zxyx5ufy0yj2.png',
-    type: 'code',
-    author: '142',
-    authorEmail: '142****@g****.com',
-    url: '/share/code/stock-pattern',
-  },
-  {
-    id: '4',
-    title: 'Discover the Wonder of Physics',
-    description:
-      'Comprehensive physics modules designed to make learning engaging and interactive for middle school students.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'doc',
-    author: 'tin',
-    authorEmail: 'tin****206@gmail.com',
-    url: '/share/doc/physics-wonder',
-  },
-  {
-    id: '5',
-    title: 'IBIT ETF Dashboard',
-    description:
-      'Financial dashboard for tracking and analyzing IBIT ETF performance with price history and market comparison.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'canvas',
-    author: 'je',
-    authorEmail: 'je****001@gmail.com',
-    url: '/share/canvas/ibit-dashboard',
-  },
-  {
-    id: '6',
-    title: 'Super Mario Minecraft Style',
-    description:
-      'A creative fusion of Super Mario and Minecraft game elements in an interactive environment.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'code',
-    author: 'eric',
-    authorEmail: 'eric****@s***.com',
-    url: '/share/code/mario-minecraft',
-  },
-  {
-    id: '7',
-    title: 'Room with Calm Pop Culture Vibe',
-    description:
-      'Interior design concepts featuring calm aesthetics with pop culture influences and custom styling.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'canvas',
-    author: 'eric',
-    authorEmail: 'eric****lab@gmail.com',
-    url: '/share/canvas/calm-room',
-  },
-  {
-    id: '8',
-    title: 'Zinc Oxide Growth on Nickel Foam',
-    description:
-      'Scientific research on hydrothermal synthesis process for growing ZnO crystals on nickel foam substrates.',
-    coverImage: 'https://static.refly.ai/share-cover/can-zxoztlncdztm6wtvc893dvkt.png',
-    type: 'doc',
-    author: 'kate',
-    authorEmail: 'kate****sci@gmail.com',
-    url: '/share/doc/zinc-oxide-growth',
-  },
-];
 
 const ArtifactGallery = memo(
   ({
@@ -149,7 +46,7 @@ const ArtifactGallery = memo(
     };
 
     // Limit the number of artifacts to display
-    const displayedArtifacts = sampleArtifacts.slice(0, maxItems);
+    const displayedArtifacts = artifactGalleryData.slice(0, maxItems);
 
     return (
       <section

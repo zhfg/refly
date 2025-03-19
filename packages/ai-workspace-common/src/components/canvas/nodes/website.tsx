@@ -35,6 +35,7 @@ import Moveable from 'react-moveable';
 
 const DEFAULT_WIDTH = 288;
 const DEFAULT_MIN_HEIGHT = 100;
+const MAX_WIDTH = 3000;
 
 /**
  * Website node content component that displays either a form for URL input or an iframe preview
@@ -429,7 +430,7 @@ export const WebsiteNode = memo(
       sizeMode,
       isOperating,
       minWidth: DEFAULT_WIDTH,
-      maxWidth: 1200,
+      maxWidth: MAX_WIDTH,
       minHeight: DEFAULT_MIN_HEIGHT,
       defaultWidth: DEFAULT_WIDTH,
       defaultHeight: 'auto',
