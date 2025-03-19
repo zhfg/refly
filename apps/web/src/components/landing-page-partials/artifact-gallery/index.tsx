@@ -37,7 +37,10 @@ const ArtifactGallery = memo(
 
     // Default header configuration
     const defaultHeader = {
-      tag: 'Refly Artifacts Gallery',
+      tag: {
+        'zh-CN': 'Refly 作品',
+        en: 'Refly Artifacts',
+      },
       tagIcon: <AiOutlineAppstore />,
       title: {
         'zh-CN': 'Refly 生成作品展示',
@@ -78,7 +81,7 @@ const ArtifactGallery = memo(
               <span className="mr-2 flex items-center" style={{ color: defaultHeader.color }}>
                 {defaultHeader.tagIcon}
               </span>
-              <span>{defaultHeader.tag}</span>
+              <span>{defaultHeader.tag[currentLang]}</span>
             </span>
             <section className="text-center">
               <Title
@@ -136,7 +139,12 @@ const ArtifactGallery = memo(
                     </Paragraph>
                   )}
                   <div className="text-sm text-gray-400 mt-auto">
-                    From {artifact.authorEmail || 'Anonymous'}
+                    {currentLang === 'zh-CN' ? '来自' : 'From'}{' '}
+                    {artifact.authorEmail ||
+                      {
+                        'zh-CN': '匿名',
+                        en: 'Anonymous',
+                      }[currentLang]}
                   </div>
                 </div>
                 {/* Hover Overlay - Moved outside of cover */}

@@ -29,7 +29,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/mcp-ppt.webp',
     type: 'canvas',
     author: 'kavan',
-    authorEmail: 'alex****dev@gmail.com',
+    authorEmail: 'alex****dev',
     url: 'https://refly.ai/share/code/cod-flv5cjcmzftvrkqvicokfpu5',
   },
   {
@@ -45,7 +45,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/mcp-website.webp',
     type: 'canvas',
     author: 'roxa',
-    authorEmail: 'sara****web@outlook.com',
+    authorEmail: 'sara****web',
     url: 'https://refly.ai/share/code/cod-f2xpysxkpb8ovn5751koanxo',
   },
   {
@@ -61,7 +61,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/course-outline.webp',
     type: 'code',
     author: '142',
-    authorEmail: 'mike****pro@yahoo.com',
+    authorEmail: 'mike****pro',
     url: 'https://refly.ai/share/code/cod-eiuua6fou3aci24dn0ljxzme',
   },
   {
@@ -77,7 +77,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/math-qa.webp',
     type: 'doc',
     author: 'tin',
-    authorEmail: 'john****edu@gmail.com',
+    authorEmail: 'john****edu',
     url: 'https://refly.ai/share/code/cod-i2nti1w421d7akwlyjgmyh2y',
   },
   {
@@ -93,7 +93,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/copy-web.webp',
     type: 'canvas',
     author: 'je',
-    authorEmail: 'emma****dev@hotmail.com',
+    authorEmail: 'emma****dev',
     url: 'https://refly.ai/share/code/cod-e2ufkvekg6ixndnombwamn9w',
   },
   {
@@ -109,7 +109,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/daily-report.webp',
     type: 'code',
     author: 'eric',
-    authorEmail: 'ryan****tech@gmail.com',
+    authorEmail: 'ryan****tech',
     url: 'https://refly.ai/share/code/cod-mr4j3yq81l5g7sckv2l99nzt',
   },
   {
@@ -125,7 +125,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/tr-pass.webp',
     type: 'canvas',
     author: 'eric',
-    authorEmail: 'lisa****art@163.com',
+    authorEmail: 'lisa****art',
     url: 'https://refly.ai/share/code/cod-g1vr8mdj0bzrec6zd6kgbqta',
   },
   {
@@ -141,7 +141,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ph-vis.webp',
     type: 'doc',
     author: 'kate',
-    authorEmail: 'mark****sci@outlook.com',
+    authorEmail: 'mark****sci',
     url: 'https://refly.ai/share/code/cod-qfzt3v72625gvchj7py4y5d6',
   },
   {
@@ -157,7 +157,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/product-analyais.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'dave****pm@gmail.com',
+    authorEmail: 'dave****pm',
     url: 'https://refly.ai/share/code/cod-hobauraakn8v2ah3xbxlrdlq',
   },
   {
@@ -173,7 +173,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/use-ai-model.webp',
     type: 'code',
     author: 'kate',
-    authorEmail: 'jack****ai@qq.com',
+    authorEmail: 'jack****ai',
     url: 'https://refly.ai/share/code/cod-wbip3mto5ogaffg0scwjm4iy',
   },
   {
@@ -189,7 +189,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/nn-vis.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'nina****ml@gmail.com',
+    authorEmail: 'nina****ml',
     url: 'https://refly.ai/share/code/cod-hqkwth5o86zdnr71hq85q7i2',
   },
   {
@@ -205,7 +205,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ai-tutorial-rl.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'paul****rl@yahoo.com',
+    authorEmail: 'paul****rl',
     url: 'https://refly.ai/share/code/cod-l05zo0udoaptkav6shh4bstx',
   },
   {
@@ -221,7 +221,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/doc-write.webp',
     type: 'code',
     author: 'kate',
-    authorEmail: 'tony****py@gmail.com',
+    authorEmail: 'tony****py',
     url: 'https://refly.ai/share/code/cod-gtpds4grjof4ysb3z3cmghd9',
   },
   {
@@ -237,7 +237,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ai-game.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'zack****game@outlook.com',
+    authorEmail: 'zack****game',
     url: 'https://refly.ai/share/code/cod-q1wutasube20hy6zczchql8e',
   },
   {
@@ -253,7 +253,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/embedding-tutorial.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'lucy****viz@gmail.com',
+    authorEmail: 'lucy****viz',
     url: 'https://refly.ai/share/code/cod-rbunlh24m7x9g1s0uid3eddv',
   },
   {
@@ -269,7 +269,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ai-comics.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'iris****art@126.com',
+    authorEmail: 'iris****art',
     url: 'https://refly.ai/share/code/cod-a440c46g6xxrwikr39v1iw33',
   },
   {
@@ -285,7 +285,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ai-tutorial-agent.webp',
     type: 'doc',
     author: 'kate',
-    authorEmail: 'owen****doc@gmail.com',
+    authorEmail: 'owen****doc',
     url: 'https://refly.ai/share/code/cod-hoxaeo0dbqpsw8skn4say0hi',
   },
   {
@@ -301,7 +301,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/swot.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'adam****biz@yahoo.com',
+    authorEmail: 'adam****biz',
     url: 'https://refly.ai/share/code/cod-ylb450vj90kz7tdtw0q6jntb',
   },
   {
@@ -317,7 +317,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/ai-tutorial-os.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'hugo****sys@gmail.com',
+    authorEmail: 'hugo****sys',
     url: 'https://refly.ai/share/code/cod-p42ssfnmqdqebth4v14ypr0r',
   },
   {
@@ -333,7 +333,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/music-pass.webp',
     type: 'canvas',
     author: 'kate',
-    authorEmail: 'jazz****pro@163.com',
+    authorEmail: 'jazz****pro',
     url: 'https://refly.ai/share/code/cod-rvu9hnxoiclghwrw9k02hcs8',
   },
   {
@@ -349,7 +349,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/cors-qna.webp',
     type: 'code',
     author: 'kate',
-    authorEmail: 'dean****dev@outlook.com',
+    authorEmail: 'dean****dev',
     url: 'https://refly.ai/share/code/cod-g8i2x9gg21eeyblpozhynq1r',
   },
   {
@@ -365,7 +365,7 @@ export const artifactGalleryData: Artifact[] = [
     coverImage: 'https://static.refly.ai/artifact-cover/book.webp',
     type: 'doc',
     author: 'kate',
-    authorEmail: 'rick****rag@gmail.com',
+    authorEmail: 'rick****rag',
     url: 'https://refly.ai/share/code/cod-zx610tter978d93et5qf1br2',
   },
 ];
