@@ -155,6 +155,8 @@ const PasteRuleExtension = Extension.create({
                   // Get current selection
                   const { from, to } = view.state.selection;
                   const { tr } = view.state;
+                  const $from = view.state.doc.resolve(from);
+                  const currentNode = $from.parent;
 
                   // Delete selected text if there's a selection
                   if (from !== to) {
@@ -203,7 +205,19 @@ const PasteRuleExtension = Extension.create({
                   const parser = DOMParser.fromSchema(view.state.schema);
                   const parsedContent = parser.parse(tempDiv);
 
-                  // Insert the parsed content
+                  // Check if current node is an empty paragraph
+                  if (currentNode.type.name === 'paragraph' && currentNode.content.size === 0) {
+                    // Replace the empty paragraph with the pasted content
+                    tr.replaceWith(
+                      $from.before($from.depth),
+                      $from.after($from.depth),
+                      parsedContent,
+                    );
+                    view.dispatch(tr);
+                    return true;
+                  }
+
+                  // Insert the parsed content at cursor position
                   tr.insert(from, parsedContent);
                   view.dispatch(tr);
                   return true;
