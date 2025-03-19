@@ -110,7 +110,7 @@ const ArtifactGallery = memo(
               className="no-underline text-inherit"
             >
               <Card
-                className="group overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer h-full"
+                className="group overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer h-full relative"
                 bodyStyle={{ padding: 0 }}
                 cover={
                   <div className="relative h-48 w-full overflow-hidden">
@@ -137,6 +137,23 @@ const ArtifactGallery = memo(
                   )}
                   <div className="text-sm text-gray-400 mt-auto">
                     From {artifact.authorEmail || 'Anonymous'}
+                  </div>
+                </div>
+                {/* Hover Overlay - Moved outside of cover */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                    <Button
+                      type="primary"
+                      shape="round"
+                      size="large"
+                      className="bg-white text-black hover:bg-white/90 border-none shadow-[0_4px_12px_rgba(255,255,255,0.4)]"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open(artifact.url, '_blank', 'noopener,noreferrer');
+                      }}
+                    >
+                      {currentLang === 'zh-CN' ? '访问作品' : 'Visit Artifact'}
+                    </Button>
                   </div>
                 </div>
               </Card>
