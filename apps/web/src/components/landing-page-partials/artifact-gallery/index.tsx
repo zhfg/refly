@@ -155,7 +155,7 @@ const ArtifactGallery = memo(
               style={{ backgroundColor: '#333333' }}
               href="/artifact-gallery"
             >
-              {currentLang === 'zh-CN' ? '探索更多 Spaces' : 'Explore more Spaces'}
+              {currentLang === 'zh-CN' ? '探索更多 Spaces' : 'Explore more Spaces'} 👉
             </Button>
           </div>
         )}
