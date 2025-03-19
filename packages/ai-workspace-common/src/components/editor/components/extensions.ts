@@ -171,17 +171,17 @@ const PasteRuleExtension = Extension.create({
                   const tempDiv = document.createElement('div');
 
                   // Convert markdown-like syntax to HTML
-                  let htmlContent = md.render(text);
+                  let markdownContent = md.render(text);
 
                   // Wrap unordered list items
-                  if (htmlContent.includes('<li>')) {
-                    htmlContent = htmlContent.replace(
+                  if (markdownContent.includes('<li>')) {
+                    markdownContent = markdownContent.replace(
                       /(<li>.*?<\/li>[\r\n]*)+/g,
                       (match) => `<ul>${match}</ul>`,
                     );
                   }
 
-                  tempDiv.innerHTML = htmlContent;
+                  tempDiv.innerHTML = markdownContent;
 
                   // Use ProseMirror's DOMParser to convert the HTML to a document
                   const parser = DOMParser.fromSchema(view.state.schema);
