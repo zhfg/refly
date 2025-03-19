@@ -178,6 +178,7 @@ const translations = {
       second: 'Refly is the best way to transform ideas into quality content.',
     },
     messageText: 'v0.4.2 Released: Canvas template, document table, and more 🚀',
+    simpleMessageText: 'v0.4.2: Canvas template 🚀',
     tryForFree: 'Get Started',
     tryItNow: 'Try It Now',
     creationEngine: 'Creation Engine',

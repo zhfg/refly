@@ -184,6 +184,7 @@ const translations = {
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
     messageText: 'v0.4.2 发布：画布模板、文档表格和更多 🚀',
+    simpleMessageText: 'v0.4.2: 画布模板 🚀',
     tryForFree: '开始使用',
     tryItNow: '立即体验',
     creationEngine: '创作引擎',
