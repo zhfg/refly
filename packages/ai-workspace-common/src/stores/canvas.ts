@@ -82,7 +82,7 @@ const defaultCanvasState = () => ({
   currentCanvasId: null,
   showPreview: true,
   showMaxRatio: true,
-  showLaunchpad: true,
+  showLaunchpad: false,
   operatingNodeId: null,
   showEdges: true,
   clickToPreview: true,

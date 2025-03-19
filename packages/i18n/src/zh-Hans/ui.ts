@@ -337,12 +337,13 @@ const translations = {
         ],
       },
       featureFive: {
-        tag: '可见即可得的 AI 文档编辑器',
-        title: '智能的 AI 辅助编辑器',
+        tag: '可见即可得的 AI 代码小组件',
+        title: '智能的 AI 辅助编辑器， 包括文档、PPT、SVG、HTML、React 等',
         bulletPoints: [
           '实时的 AI 写作建议和润色优化',
           '支持多种写作风格和格式调整',
           '智能的文本分析和改进建议',
+          '支持多种代码小组件类型，包括文档、PPT、SVG、HTML、React 等',
         ],
       },
     },
@@ -496,6 +497,7 @@ const translations = {
           '自由选择上下文，打造个性化写作环境',
           'N+ 专业写作辅助工具，提升学术/技术写作效率',
           'AI 编辑助手，确保专业输出质量',
+          '支持多种代码小组件类型，包括文档、PPT、SVG、HTML、React 等',
         ],
       },
       workflowFive: {

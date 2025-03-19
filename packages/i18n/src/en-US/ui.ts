@@ -240,6 +240,7 @@ const translations = {
           'Customize your writing environment with flexible context selection',
           'N+ professional writing tools to enhance academic/technical writing efficiency',
           'AI editing assistant for quality professional output',
+          'Support for multiple artifact types, including documents, PPTs, SVGs, HTML, React and more',
         ],
       },
       workflowFive: {
@@ -384,12 +385,14 @@ const translations = {
         ],
       },
       featureFive: {
-        tag: 'WYSIWYG AI Document Editor',
-        title: 'Intelligent AI-Assisted Editor',
+        tag: 'WYSIWYG AI Artifacts',
+        title:
+          'Intelligent AI-Assisted Artifact Editor, including documents, PPTs, SVGs, HTML, React and more',
         bulletPoints: [
           'Real-time AI writing suggestions and refinements',
           'Support for multiple writing styles and format adjustments',
           'Intelligent text analysis and improvement recommendations',
+          'Support for multiple artifact types, including documents, PPTs, SVGs, HTML, React and more',
         ],
       },
     },
