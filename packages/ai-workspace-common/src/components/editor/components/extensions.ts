@@ -41,8 +41,30 @@ const PasteRuleExtension = Extension.create({
             // Try to get HTML content first
             const html = clipboardData.getData('text/html');
             const text = clipboardData.getData('text/plain');
+            const containsMarkdown = (text: string): boolean => {
+              // Check for common Markdown patterns
+              const markdownPatterns = [
+                /^#{1,6}\s.+$/m, // Headers
+                /^[*-]\s.+$/m, // Unordered lists
+                /^>\s.+$/m, // Blockquotes
+                /^```[\s\S]*?```$/m, // Code blocks
+                /^\d+\.\s.+$/m, // Ordered lists
+                /\*\*[\s\S]*?\*\*/, // Bold
+                /\*[\s\S]*?\*/, // Italic
+                /`[\s\S]*?`/, // Inline code
+                /\[.*?\]\(.*?\)/, // Links
+                /!\[.*?\]\(.*?\)/, // Images
+                /^(?:\*\s*){3,}$|^(?:-\s*){3,}$|^(?:_\s*){3,}$/m, // Horizontal rule
+                /^(.+)\n[=]{2,}$/m, // Alternative H1
+                /^(.+)\n[-]{2,}$/m, // Alternative H2
+                /\|\s*[^|]+\s*\|/, // Tables
+              ];
 
-            if (html) {
+              return markdownPatterns.some((pattern) => pattern.test(text));
+            };
+            const isMarkdown = containsMarkdown(text ?? '');
+
+            if (html && !isMarkdown) {
               // Create a temporary div to parse HTML
               const div = document.createElement('div');
               div.innerHTML = html;
@@ -127,6 +149,70 @@ const PasteRuleExtension = Extension.create({
               return true;
             }
             if (text) {
+              // Handle Markdown if detected
+              if (isMarkdown) {
+                try {
+                  // Get current selection
+                  const { from, to } = view.state.selection;
+                  const { tr } = view.state;
+
+                  // Delete selected text if there's a selection
+                  if (from !== to) {
+                    tr.delete(from, to);
+                  }
+
+                  // Since we can't directly access the editor or commands here,
+                  // we'll create a temporary element and use DOMParser to convert markdown-like text
+                  const tempDiv = document.createElement('div');
+
+                  // Convert markdown-like syntax to HTML
+                  let htmlContent = text
+                    // Headers
+                    .replace(
+                      /^(#{1,6})\s+(.+)$/gm,
+                      (_, level, content) => `<h${level.length}>${content}</h${level.length}>`,
+                    )
+                    // Bold
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    // Italic
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    // Code blocks
+                    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                    // Inline code
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    // Unordered list items
+                    .replace(/^[*-]\s+(.+)$/gm, '<li>$1</li>')
+                    // Blockquotes
+                    .replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
+                    // Links
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+                    // Images
+                    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2" />');
+
+                  // Wrap unordered list items
+                  if (htmlContent.includes('<li>')) {
+                    htmlContent = htmlContent.replace(
+                      /(<li>.*?<\/li>[\r\n]*)+/g,
+                      (match) => `<ul>${match}</ul>`,
+                    );
+                  }
+
+                  tempDiv.innerHTML = htmlContent;
+
+                  // Use ProseMirror's DOMParser to convert the HTML to a document
+                  const parser = DOMParser.fromSchema(view.state.schema);
+                  const parsedContent = parser.parse(tempDiv);
+
+                  // Insert the parsed content
+                  tr.insert(from, parsedContent);
+                  view.dispatch(tr);
+                  return true;
+                } catch (error) {
+                  console.error('Error processing markdown:', error);
+                  // Fall through to normal text handling if markdown processing fails
+                }
+              }
+
               // Fallback to plain text handling
               const { tr } = view.state;
               const { from, to } = view.state.selection;
