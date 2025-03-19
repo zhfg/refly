@@ -17,6 +17,7 @@ import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/componen
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { DOMParser } from '@tiptap/pm/model';
+import MarkdownIt from 'markdown-it';
 import { cx } from 'class-variance-authority';
 import { common, createLowlight } from 'lowlight';
 import {
@@ -25,6 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from '@refly-packages/ai-workspace-common/components/editor/extensions/Table';
+
+const md = new MarkdownIt();
 
 const PasteRuleExtension = Extension.create({
   name: 'pasteRule',
@@ -168,28 +171,7 @@ const PasteRuleExtension = Extension.create({
                   const tempDiv = document.createElement('div');
 
                   // Convert markdown-like syntax to HTML
-                  let htmlContent = text
-                    // Headers
-                    .replace(
-                      /^(#{1,6})\s+(.+)$/gm,
-                      (_, level, content) => `<h${level.length}>${content}</h${level.length}>`,
-                    )
-                    // Bold
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    // Italic
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    // Code blocks
-                    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                    // Inline code
-                    .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    // Unordered list items
-                    .replace(/^[*-]\s+(.+)$/gm, '<li>$1</li>')
-                    // Blockquotes
-                    .replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
-                    // Links
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-                    // Images
-                    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2" />');
+                  let htmlContent = md.render(text);
 
                   // Wrap unordered list items
                   if (htmlContent.includes('<li>')) {
