@@ -64,25 +64,8 @@ export const logout = async ({
       await getClient().logout();
     }
 
-    // Check if this is an auth-triggered logout with potential for loop
-    const isAuthFailureLogout = !callRemoteLogout && !skipReload;
-
     // Clear IndexedDB
     await deleteIndexedDB();
-
-    // Check for valid auth reload flag
-    const reloadFlagExists = hasValidAuthReloadFlag();
-
-    if (isAuthFailureLogout && reloadFlagExists) {
-      // We've already tried reloading once after auth failure, don't reload again
-      console.log('Preventing reload loop after authentication failure');
-      return;
-    }
-
-    if (isAuthFailureLogout) {
-      // Set flag with expiration before clearing localStorage
-      setAuthReloadFlag();
-    }
 
     // Clear rest of localStorage (except our flags if we just set them)
     const itemsToKeep = [AUTH_RELOAD_FLAG];
@@ -95,6 +78,13 @@ export const logout = async ({
 
     // Reload page only if not explicitly skipped
     if (!skipReload) {
+      // Check for valid auth reload flag
+      if (hasValidAuthReloadFlag()) {
+        // We've already tried reloading once after auth failure, don't reload again
+        console.log('Preventing reload loop after authentication failure');
+        return;
+      }
+
       setAuthReloadFlag();
       window.location.reload();
     }
