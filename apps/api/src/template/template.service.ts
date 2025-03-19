@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/common/prisma.service';
 import { genCanvasTemplateID } from '@refly-packages/utils';
 import { ShareService } from '@/share/share.service';
+import { MiscService } from '@/misc/misc.service';
 
 @Injectable()
 export class TemplateService {
@@ -18,6 +19,7 @@ export class TemplateService {
   constructor(
     private prisma: PrismaService,
     private shareService: ShareService,
+    private miscService: MiscService,
   ) {}
 
   async listCanvasTemplates(user: User, param: ListCanvasTemplatesData['query']) {
@@ -50,7 +52,7 @@ export class TemplateService {
   }
 
   async createCanvasTemplate(user: User, param: CreateCanvasTemplateRequest) {
-    const { categoryId, canvasId, title, description, language } = param;
+    const { categoryId, canvasId, title, description, language, coverStorageKey } = param;
     const userPo = await this.prisma.user.findFirst({ where: { uid: user.uid } });
     if (!userPo) {
       this.logger.warn(`user not found for uid ${user.uid} when creating canvas template`);
@@ -85,6 +87,16 @@ export class TemplateService {
       where: { shareId: shareRecord.shareId },
       data: { templateId: template.templateId },
     });
+
+    if (coverStorageKey) {
+      await this.miscService.duplicateFile({
+        sourceFile: { storageKey: coverStorageKey, visibility: 'public' },
+        targetFile: {
+          storageKey: `share-cover/${shareRecord.shareId}.png`,
+          visibility: 'public',
+        },
+      });
+    }
 
     return template;
   }

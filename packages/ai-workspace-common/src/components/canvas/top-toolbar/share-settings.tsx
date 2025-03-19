@@ -100,27 +100,7 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
     [shareRecord],
   );
 
-  const { getCanvasElement } = useExportCanvasAsImage();
-
-  const uploadShareCover = useCallback(
-    async (shareId: string) => {
-      const canvas = await getCanvasElement({ scale: 1 });
-      canvas.toBlob((blob) => {
-        if (blob) {
-          getClient().upload({
-            body: {
-              file: blob,
-              storageKey: `share-cover/${shareId}.png`,
-              entityId: canvasId,
-              entityType: 'canvas',
-              visibility: 'public',
-            },
-          });
-        }
-      });
-    },
-    [canvasId, getCanvasElement],
-  );
+  const { uploadCanvasCover } = useExportCanvasAsImage();
 
   // Memoized function to re-share latest content before copying link
   const reshareAndCopyLink = useCallback(async () => {
@@ -134,19 +114,17 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
     // Asynchronously create new share with latest content
     (async () => {
       try {
+        const { storageKey } = await uploadCanvasCover();
         const { data, error } = await getClient().createShare({
           body: {
             entityId: canvasId,
             entityType: 'canvas',
             allowDuplication: true,
+            coverStorageKey: storageKey,
           },
         });
 
         if (data?.success && !error) {
-          const shareId = data?.data?.shareId;
-          if (shareId) {
-            await uploadShareCover(shareId);
-          }
           await refetchShares();
         }
       } catch (error) {
@@ -208,19 +186,16 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
             success = true;
           }
         } else {
+          const { storageKey } = await uploadCanvasCover();
           const { data, error } = await getClient().createShare({
             body: {
               entityId: canvasId,
               entityType: 'canvas',
               allowDuplication: true,
+              coverStorageKey: storageKey,
             },
           });
           success = data?.success && !error;
-          const shareId = data?.data?.shareId;
-
-          if (success && shareId) {
-            await uploadShareCover(shareId);
-          }
         }
 
         if (success) {
@@ -305,7 +280,6 @@ const ShareSettings = React.memo(({ canvasId, canvasTitle }: ShareSettingsProps)
         title={canvasTitle}
         visible={createTemplateModalVisible}
         setVisible={setCreateTemplateModalVisible}
-        uploadShareCover={uploadShareCover}
       />
       <Popover
         className="canvas-share-setting-popover"

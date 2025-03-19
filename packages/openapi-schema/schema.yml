@@ -3574,6 +3574,9 @@ components:
         language:
           type: string
           description: Canvas template language code
+        coverStorageKey:
+          type: string
+          description: Cover storage key
     UpdateCanvasTemplateRequest:
       type: object
       required:
@@ -3937,6 +3940,9 @@ components:
         shareDataStorageKey:
           type: string
           description: Share data storage key
+        coverStorageKey:
+          type: string
+          description: Cover storage key
     CreateShareResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
