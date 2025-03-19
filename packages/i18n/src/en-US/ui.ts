@@ -479,6 +479,9 @@ const translations = {
       priceTag: '-50%',
       community: 'Community',
       wechat: 'WeChat',
+      gallery: 'Use Cases',
+      useCases: 'Canvas Use Cases',
+      artifacts: 'Artifacts Use Cases',
     },
     faq: {
       title: 'Frequently Asked Questions',

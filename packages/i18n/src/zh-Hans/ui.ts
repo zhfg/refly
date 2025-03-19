@@ -423,6 +423,9 @@ const translations = {
       priceTag: '五折',
       community: '用户交流群',
       wechat: '微信',
+      gallery: '用例',
+      useCases: '画布用例',
+      artifacts: '作品用例',
     },
     faq: {
       title: '常见问题',
