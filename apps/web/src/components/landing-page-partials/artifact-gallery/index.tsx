@@ -39,11 +39,22 @@ const ArtifactGallery = memo(
     const defaultHeader = {
       tag: 'Refly Artifacts Gallery',
       tagIcon: <AiOutlineAppstore />,
-      title: 'Discover and explore incredible artifacts created with Refly.',
+      title: {
+        'zh-CN': 'Refly 生成作品展示',
+        en: 'Refly Artifacts Gallery',
+      },
+      description: {
+        'zh-CN': '探索和发现 Refly 生成式画布生成的精彩作品',
+        en: 'Discover and explore incredible artifacts created with Refly Genertive Canvas',
+      },
       color: '#333333',
       tagShadow:
         '0 3px 20px 0 rgba(0,0,0,0.10), 0 2px 4px 0 rgba(0,0,0,0.10), inset 0 -4px 0 0 rgba(227,227,227,0.50)',
     };
+
+    // Get current language
+    const currentLang = i18n.language as 'zh-CN' | 'en';
+    console.log('currentLang', currentLang);
 
     // Limit the number of artifacts to display
     const displayedArtifacts = artifactGalleryData.slice(0, maxItems);
@@ -74,24 +85,15 @@ const ArtifactGallery = memo(
                 level={2}
                 className="font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]"
               >
-                {i18n.language === 'zh-CN' ? (
-                  <div className="mt-2">
-                    <span className="relative text-[#333333]">
-                      {title || 'Refly Spaces 展示'}
-                      <span className="absolute bottom-0 left-0 h-1 w-full bg-[#333333]" />
-                    </span>
-                  </div>
-                ) : (
-                  <div className="mt-2">
-                    <span className="relative text-[#333333]">
-                      {title || 'Refly Spaces gallery'}
-                      <span className="absolute bottom-0 left-0 h-1 w-full bg-[#333333]" />
-                    </span>
-                  </div>
-                )}
+                <div className="mt-2">
+                  <span className="relative text-[#333333]">
+                    {title || defaultHeader.title[currentLang]}
+                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#333333]" />
+                  </span>
+                </div>
               </Title>
               <Paragraph className="mx-auto mt-4 max-w-3xl text-center text-gray-500">
-                {description || defaultHeader.title}
+                {description || defaultHeader.description[currentLang]}
               </Paragraph>
             </section>
           </div>
@@ -114,7 +116,7 @@ const ArtifactGallery = memo(
                   <div className="relative h-48 w-full overflow-hidden">
                     <img
                       src={artifact.coverImage}
-                      alt={artifact.title}
+                      alt={artifact.title[currentLang]}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
@@ -126,11 +128,11 @@ const ArtifactGallery = memo(
                     className="!mb-2 !mt-0 line-clamp-2"
                     style={{ color: '#333333' }}
                   >
-                    {artifact.title}
+                    {artifact.title[currentLang]}
                   </Title>
                   {artifact.description && (
                     <Paragraph className="!mb-4 text-gray-600 line-clamp-2 flex-grow">
-                      {artifact.description}
+                      {artifact.description[currentLang]}
                     </Paragraph>
                   )}
                   <div className="text-sm text-gray-400 mt-auto">
@@ -153,7 +155,7 @@ const ArtifactGallery = memo(
               style={{ backgroundColor: '#333333' }}
               href="/artifact-gallery"
             >
-              Explore more Spaces
+              {currentLang === 'zh-CN' ? '探索更多 Spaces' : 'Explore more Spaces'}
             </Button>
           </div>
         )}
