@@ -47,6 +47,7 @@ export const useCasesData: UseCase[] = [
     category: 'research',
     coverImage: 'https://static.refly.ai/share-cover/can-yewsypawximvg5nn66a419iy.png',
     authorEmail: 'kavan****pro',
+    url: 'https://refly.ai/share/canvas/can-yu1t20ajt5adt7238i7aax0x',
   },
   {
     id: '2',
@@ -61,6 +62,7 @@ export const useCasesData: UseCase[] = [
     category: 'visualization',
     coverImage: 'https://static.refly.ai/share-cover/can-nnz3d3ly5115zxyx5ufy0yj2.png',
     authorEmail: 'design****pro',
+    url: 'https://refly.ai/share/canvas/can-wy8pdxxme2v3b6f0vydpnagb',
   },
   {
     id: '3',
@@ -75,6 +77,7 @@ export const useCasesData: UseCase[] = [
     category: 'research',
     coverImage: 'https://static.refly.ai/share-cover/can-kedetsr6fsogqh8x9xc3222p.png',
     authorEmail: 'prompt****ai',
+    url: 'https://refly.ai/share/canvas/can-wwoa35mdgw16adebmrhfqu3w',
   },
   {
     id: '4',
@@ -89,6 +92,7 @@ export const useCasesData: UseCase[] = [
     category: 'education',
     coverImage: 'https://static.refly.ai/share-cover/can-io39kq9tiaoey5tkm4gngbfj.png',
     authorEmail: 'sandbox****edu',
+    url: 'https://refly.ai/share/canvas/can-sa6vabdmvnxmdy14fleikadv',
   },
   {
     id: '5',
@@ -103,6 +107,7 @@ export const useCasesData: UseCase[] = [
     category: 'education',
     coverImage: 'https://static.refly.ai/share-cover/can-xg0itlyqlugkmzull99fbkw4.png',
     authorEmail: 'cli****dev',
+    url: 'https://refly.ai/share/canvas/can-xg0itlyqlugkmzull99fbkw4',
   },
   {
     id: '6',
@@ -117,6 +122,7 @@ export const useCasesData: UseCase[] = [
     category: 'productivity',
     coverImage: 'https://static.refly.ai/share-cover/can-e7bgew0hrgsa3tg2m9k6vmgb.png',
     authorEmail: 'reflect****dev',
+    url: 'https://refly.ai/share/canvas/can-atcrzek4zmzbiidxi4py38tq',
   },
   {
     id: '7',
@@ -131,6 +137,7 @@ export const useCasesData: UseCase[] = [
     category: 'research',
     coverImage: 'https://static.refly.ai/share-cover/can-dr9aze5mweefng4mqkw7u8rm.png',
     authorEmail: 'news****ai',
+    url: 'https://refly.ai/share/canvas/can-nos3bixj1o7b56eypgvcnmka',
   },
   {
     id: '8',
@@ -145,6 +152,7 @@ export const useCasesData: UseCase[] = [
     category: 'research',
     coverImage: 'https://static.refly.ai/share-cover/can-ephkt33azjuiw2jo3h1v0drt.png',
     authorEmail: 'art****dev',
+    url: 'https://refly.ai/share/canvas/can-l5glcma651k8gwrxbeejejdu',
   },
   {
     id: '9',
@@ -159,6 +167,7 @@ export const useCasesData: UseCase[] = [
     category: 'visualization',
     coverImage: 'https://static.refly.ai/share-cover/can-yevuumd9spmqv7wvyvb1bl6x.png',
     authorEmail: 'vis****ai',
+    url: 'https://refly.ai/share/canvas/can-qnn6vcnvt9o1go7px9axv7ea',
   },
   {
     id: '10',
@@ -173,6 +182,7 @@ export const useCasesData: UseCase[] = [
     category: 'productivity',
     coverImage: 'https://static.refly.ai/share-cover/can-wj7kocv092e0cq7wqsbco99x.png',
     authorEmail: 'research****pro',
+    url: 'https://refly.ai/share/canvas/can-yhh7nn7pts1znvo746ulohko',
   },
   {
     id: '11',
@@ -187,6 +197,7 @@ export const useCasesData: UseCase[] = [
     category: 'education',
     coverImage: 'https://static.refly.ai/share-cover/can-xi6qm4afrbhr6w9qt7yr4swy.png',
     authorEmail: 'edu****pro',
+    url: 'https://refly.ai/share/canvas/can-sbjeqqovdztecuyce0e9swq3',
   },
   {
     id: '12',
@@ -201,6 +212,7 @@ export const useCasesData: UseCase[] = [
     category: 'productivity',
     coverImage: 'https://static.refly.ai/share-cover/can-iffblxq12invsh5fhv35acyy.png',
     authorEmail: 'script****ai',
+    url: 'https://refly.ai/share/canvas/can-v78ikqh7rvu6oc8b293e9b1c',
   },
   {
     id: '13',
@@ -215,20 +227,22 @@ export const useCasesData: UseCase[] = [
     category: 'education',
     coverImage: 'https://static.refly.ai/use-cases/math-game.webp',
     authorEmail: 'math****edu',
+    url: 'https://refly.ai/share/canvas/can-m9ulmwy4mjouijj3b0wxhazr',
   },
   {
     id: '15',
     title: {
-      'zh-CN': '打造《Python 基础语法》学习课程',
-      en: 'Build Python Basic Grammar Learning Course',
+      'zh-CN': 'Cursor 新特性编程教学',
+      en: 'Cursor New Features Programming Tutorial',
     },
     description: {
-      'zh-CN': '揭秘 Python 编程核心功能，10个实战案例提升开发效率',
-      en: 'Unveiling Python programming core features, 10 practical cases to improve development efficiency',
+      'zh-CN': '揭秘 Cursor 使用技巧，10个实战案例提升开发效率',
+      en: 'Unveiling Cursor usage skills, 10 practical cases to improve development efficiency',
     },
     category: 'education',
     coverImage: 'https://static.refly.ai/share-cover/can-bgm7fthqng7cld17508z8pxi.png',
     authorEmail: 'cursor****dev',
+    url: 'https://refly.ai/share/canvas/can-xzg7s31bgrardcq7fxxawr58',
   },
   {
     id: '16',
@@ -243,6 +257,7 @@ export const useCasesData: UseCase[] = [
     category: 'productivity',
     coverImage: 'https://static.refly.ai/share-cover/can-ewyscqsw0k85p3b58jhz9uen.png',
     authorEmail: 'voice****ai',
+    url: 'https://refly.ai/share/canvas/can-o0k3r3hcebtedlaxsv3lx4xi',
   },
   {
     id: '17',
@@ -257,6 +272,7 @@ export const useCasesData: UseCase[] = [
     category: 'document',
     coverImage: 'https://static.refly.ai/share-cover/can-kkzzq9zmi4cpzvad6t6xr9bj.png',
     authorEmail: 'lang****ai',
+    url: 'https://refly.ai/share/canvas/can-y95crco5z9tq33s2n79ejn8e',
   },
   {
     id: '18',
@@ -271,6 +287,7 @@ export const useCasesData: UseCase[] = [
     category: 'visualization',
     coverImage: 'https://static.refly.ai/share-cover/can-yevuumd9spmqv7wvyvb1bl6x.png',
     authorEmail: 'vis****edu',
+    url: 'https://refly.ai/share/canvas/can-jwlr9swyholsrhjibzov4174',
   },
   {
     id: '19',
@@ -285,6 +302,7 @@ export const useCasesData: UseCase[] = [
     category: 'Life',
     coverImage: 'https://static.refly.ai/share-cover/can-psbtfzxppg0qzjpc4ih12e77.png',
     authorEmail: 'sticker****ai',
+    url: 'https://staging.refly.ai/canvas/c-lrs0lb4o2e4286haabeinbt1',
   },
   {
     id: '20',
@@ -299,6 +317,7 @@ export const useCasesData: UseCase[] = [
     category: 'education',
     coverImage: 'https://static.refly.ai/share-cover/can-az6hziom08gmlagctjo3hj8b.png',
     authorEmail: 'game****edu',
+    url: 'https://refly.ai/share/canvas/can-m9ulmwy4mjouijj3b0wxhazr',
   },
   {
     id: '21',
@@ -313,6 +332,7 @@ export const useCasesData: UseCase[] = [
     category: 'life',
     coverImage: 'https://static.refly.ai/share-cover/can-hy0xte6siqet1hswz9nmxf5t.png',
     authorEmail: 'voice****ai',
+    url: 'https://refly.ai/share/canvas/can-w8z6okyeq1srxd42fug3my2e',
   },
   {
     id: '21',
@@ -327,20 +347,7 @@ export const useCasesData: UseCase[] = [
     category: 'document',
     coverImage: 'https://static.refly.ai/share-cover/can-r8gsjmvcv6bkqovrz709unuq.png',
     authorEmail: 'vis****ai',
-  },
-  {
-    id: '22',
-    title: {
-      'zh-CN': 'CORS 跨域问题排查方案可视化',
-      en: 'CORS Cross-domain Problem Visualization',
-    },
-    description: {
-      'zh-CN': '支持CORS跨域问题排查方案可视化，支持多种浏览器与服务器环境',
-      en: 'Support CORS cross-domain problem visualization, supporting multiple browser and server environments',
-    },
-    category: 'document',
-    coverImage: 'https://static.refly.ai/share-cover/can-n5pyaji47fbs9h971xi5iqj7.png',
-    authorEmail: 'vis****ai',
+    url: 'https://refly.ai/share/canvas/can-jwlr9swyholsrhjibzov4174',
   },
   {
     id: '23',
@@ -355,6 +362,7 @@ export const useCasesData: UseCase[] = [
     category: 'life',
     coverImage: 'https://static.refly.ai/share-cover/can-iffblxq12invsh5fhv35acyy.png',
     authorEmail: 'voice****ai',
+    url: 'https://refly.ai/share/canvas/can-v78ikqh7rvu6oc8b293e9b1c',
   },
   {
     id: '24',
@@ -369,34 +377,7 @@ export const useCasesData: UseCase[] = [
     category: 'life',
     coverImage: 'https://static.refly.ai/share-cover/can-uckw5jn0uhf5obojjs4abvh4.png',
     authorEmail: 'voice****ai',
-  },
-  {
-    id: '24',
-    title: {
-      'zh-CN': '信息获取工作流',
-      en: 'Information Retrieval Workflow',
-    },
-    description: {
-      'zh-CN': '支持多源信息自动抓取+AI摘要生成系统，构建企业级信息中枢解决方案',
-      en: 'Multi-source information auto-crawling + AI summary generation system, building enterprise information hub solution',
-    },
-    category: 'research',
-    coverImage: 'https://static.refly.ai/share-cover/can-dr9aze5mweefng4mqkw7u8rm.png',
-    authorEmail: 'voice****ai',
-  },
-  {
-    id: '25',
-    title: {
-      'zh-CN': '构建可视化 SVG 或落地页',
-      en: 'Build Visual SVG or Landing Page',
-    },
-    description: {
-      'zh-CN': '支持SVG或落地页生成，支持多种风格与主题创作',
-      en: 'Support SVG or landing page generation, supporting various styles and themes',
-    },
-    category: 'visualization',
-    coverImage: 'https://static.refly.ai/share-cover/can-l5glcma651k8gwrxbeejejdu.png',
-    authorEmail: 'voice****ai',
+    url: 'https://refly.ai/share/canvas/can-uppnymdbmhdkgf0pkttud21a',
   },
   {
     id: '26',
@@ -411,5 +392,6 @@ export const useCasesData: UseCase[] = [
     category: 'document',
     coverImage: 'https://static.refly.ai/share-cover/can-ephkt33azjuiw2jo3h1v0drt.png',
     authorEmail: 'voice****ai',
+    url: 'https://refly.ai/share/canvas/can-dktwhjalufui8kx95y2b2r4k',
   },
 ];
