@@ -303,6 +303,12 @@ export const CodeArtifactNode = memo(
       [handleResize],
     );
 
+    const handleResizeEnd = useCallback(() => {
+      if (codeViewerRef.current) {
+        codeViewerRef.current.style.pointerEvents = '';
+      }
+    }, []);
+
     // Check if node has any connections
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
@@ -515,6 +521,7 @@ export const CodeArtifactNode = memo(
             isPreview={isPreview}
             sizeMode={sizeMode}
             onResize={handleEnhancedResize}
+            onResizeEnd={handleResizeEnd}
           />
         )}
       </div>
