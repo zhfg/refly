@@ -63,6 +63,28 @@ For core deployment tutorials, environment variable configuration, and FAQs, ple
 
 View details in [CONTRIBUTING](./CONTRIBUTING.md).
 
+## 🌟 Featured Showcases
+
+### 🎨 Creative Canvas 
+
+| Project | Description | Preview |
+|---------|-------------|----------|
+| [🧠 Build Card Library CATxPAPA in 3 Days](https://refly.ai/share/canvas/can-yu1t20ajt5adt7238i7aax0x) | Complete high-precision card visual asset library in 72 hours, creating industry benchmark with PAPA Lab | ![CATxPAPA](https://static.refly.ai/share-cover/can-yewsypawximvg5nn66a419iy.png) |
+| [🎮 Smart Math Game Engine](https://refly.ai/share/canvas/can-m9ulmwy4mjouijj3b0wxhazr) | Dynamic difficulty adjustment system based on knowledge graph, covering 200+ core K12 knowledge points | ![Math Game](https://static.refly.ai/use-cases/math-game.webp) |
+| [🔍 Understanding Large Models with 3D Visualization](https://refly.ai/share/canvas/can-qnn6vcnvt9o1go7px9axv7ea) | Interactive visualization analysis supporting architectures like Transformer, parameter-level neuron activity tracking | ![3D Vis](https://static.refly.ai/share-cover/can-yevuumd9spmqv7wvyvb1bl6x.png) |
+
+[👉 Explore More Use Cases](https://refly.ai/use-cases)
+
+### 🚀 Featured Artifacts
+
+| Project | Description | Preview |
+|---------|-------------|----------|
+| [📊 AI Teaching Assistant](https://refly.ai/share/code/cod-eiuua6fou3aci24dn0ljxzme) | Say goodbye to tedious manual organization, AI intelligently builds course knowledge framework to improve teaching efficiency | ![Course Outline](https://static.refly.ai/artifact-cover/course-outline.webp) |
+| [🎯 Interactive Math Tutoring](https://refly.ai/share/code/cod-i2nti1w421d7akwlyjgmyh2y) | Learning through play, AI-driven interactive Q&A helps children love math through games and improve grades | ![Math QA](https://static.refly.ai/artifact-cover/math-qa.webp) |
+| [🌐 One-Click Webpage Clone](https://refly.ai/share/code/cod-e2ufkvekg6ixndnombwamn9w) | No coding needed, quickly clone webpages by entering links, efficiently build event landing pages | ![Copy Web](https://static.refly.ai/artifact-cover/copy-web.webp) |
+
+[👉 Explore More Artifacts](https://refly.ai/artifacts)
+
 ## ✨ Key Features
 
 ### `1` 🧵 Multi-threaded Conversation System
