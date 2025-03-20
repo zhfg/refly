@@ -208,6 +208,7 @@ export default memo(
           const { data: uploadData, error: uploadError } = await getClient().upload({
             body: {
               file: jsonBlob,
+              visibility: 'public',
             },
           });
 
