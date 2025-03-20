@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { Empty, Avatar, Button, Typography } from 'antd';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
-import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import {
+  Spinner,
+  EndMessage,
+} from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -116,7 +120,7 @@ export const TemplateList = ({ language, categoryId, searchQuery }: TemplateList
   const { visible } = useCanvasTemplateModal((state) => ({
     visible: state.visible,
   }));
-  const { dataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCanvasTemplates({
         query: {
@@ -136,6 +140,12 @@ export const TemplateList = ({ language, categoryId, searchQuery }: TemplateList
     reload();
   }, [language, categoryId, visible]);
 
+  useEffect(() => {
+    if (!visible) {
+      setDataList([]);
+    }
+  }, [visible]);
+
   const debounced = useDebouncedCallback(() => {
     reload();
   }, 300);
@@ -144,22 +154,42 @@ export const TemplateList = ({ language, categoryId, searchQuery }: TemplateList
     debounced();
   }, [searchQuery]);
 
+  const templateCards = useMemo(() => {
+    return dataList?.map((item) => <TemplateCard key={item.templateId} template={item} />);
+  }, [dataList]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isRequesting && hasMore) {
+      loadMore();
+    }
+  }, [isRequesting, hasMore, loadMore]);
+
+  const emptyState = (
+    <div className="h-full flex items-center justify-center">
+      <Empty description={t('common.empty')} />
+    </div>
+  );
+
   return (
     <div className="w-full h-full overflow-y-auto bg-[#F8F9FA] p-4">
-      <Spin className="spin" spinning={isRequesting}>
-        {isRequesting || dataList.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
-              {dataList.map((item) => (
-                <TemplateCard key={item.templateId} template={item} />
-              ))}
-            </div>
-            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
-          </>
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            <Empty description={t('common.empty')} />
+      <Spin className="spin" spinning={isRequesting && dataList.length === 0}>
+        {dataList.length > 0 ? (
+          <div id="templateScrollableDiv" className="w-full h-full overflow-y-auto">
+            <InfiniteScroll
+              dataLength={dataList.length}
+              next={handleLoadMore}
+              hasMore={hasMore}
+              loader={<Spinner />}
+              endMessage={<EndMessage />}
+              scrollableTarget="templateScrollableDiv"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+                {templateCards}
+              </div>
+            </InfiniteScroll>
           </div>
+        ) : (
+          !isRequesting && emptyState
         )}
       </Spin>
     </div>
