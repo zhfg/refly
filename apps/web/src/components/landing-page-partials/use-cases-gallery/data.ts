@@ -225,7 +225,7 @@ export const useCasesData: UseCase[] = [
       en: 'Dynamic difficulty adjustment system based on knowledge graph, covering 200+ core K12 knowledge points',
     },
     category: 'education',
-    coverImage: 'https://static.refly.ai/use-cases/math-game.webp',
+    coverImage: 'https://static.refly.ai/share-cover/can-az6hziom08gmlagctjo3hj8b.png',
     authorEmail: 'math****edu',
     url: 'https://refly.ai/share/canvas/can-m9ulmwy4mjouijj3b0wxhazr',
   },
