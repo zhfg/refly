@@ -302,7 +302,7 @@ export const useCasesData: UseCase[] = [
     category: 'life',
     coverImage: 'https://static.refly.ai/share-cover/can-oxz3pataybig25ghrsqhivk6.png',
     authorEmail: 'sticker****ai',
-    url: 'https://refly.ai/canvas/c-lrs0lb4o2e4286haabeinbt1',
+    url: 'https://refly.ai/share/canvas/can-vxupf35f4d0lc1c5ujh1apfa',
   },
   {
     id: '20',
