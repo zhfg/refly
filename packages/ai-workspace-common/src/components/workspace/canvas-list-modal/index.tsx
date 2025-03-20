@@ -7,7 +7,8 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 import { Canvas } from '@refly/openapi-schema';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { Modal, Empty, Spin, Divider, Typography } from 'antd';
+import { Modal, Empty, Divider, Typography } from 'antd';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   Spinner,
@@ -138,6 +139,12 @@ export const CanvasListModal = (props: CanvasListProps) => {
     </div>
   );
 
+  useEffect(() => {
+    if (!visible) {
+      setDataList([]);
+    }
+  }, [visible]);
+
   return (
     <Modal
       className="canvas-list"
@@ -153,9 +160,9 @@ export const CanvasListModal = (props: CanvasListProps) => {
       onCancel={() => setVisible(false)}
       focusTriggerAfterClose={false}
     >
-      <Spin className="spin" spinning={isRequesting && dataList.length === 0}>
-        {dataList.length > 0 ? (
-          <div id="canvasScrollableDiv" className="w-full h-[60vh] overflow-y-auto">
+      <Spin className="w-full h-full" spinning={isRequesting && dataList.length === 0}>
+        <div id="canvasScrollableDiv" className="w-full h-[60vh] overflow-y-auto">
+          {dataList.length > 0 ? (
             <InfiniteScroll
               dataLength={dataList.length}
               next={handleLoadMore}
@@ -168,10 +175,10 @@ export const CanvasListModal = (props: CanvasListProps) => {
                 {canvasItems}
               </div>
             </InfiniteScroll>
-          </div>
-        ) : (
-          !isRequesting && emptyState
-        )}
+          ) : (
+            !isRequesting && emptyState
+          )}
+        </div>
       </Spin>
     </Modal>
   );

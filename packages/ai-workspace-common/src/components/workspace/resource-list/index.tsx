@@ -276,6 +276,8 @@ const ResourceList = () => {
   useEffect(() => {
     if (showLibraryModal) {
       reload();
+    } else {
+      setDataList([]);
     }
   }, [showLibraryModal]);
 
@@ -298,7 +300,7 @@ const ResourceList = () => {
 
   return (
     <Spin className="w-full h-full" spinning={isRequesting && dataList.length === 0}>
-      <div id="resourceScrollableDiv" className="w-full h-[calc(60vh-60px)] overflow-y-auto">
+      <div id="resourceScrollableDiv" className="w-full h-[60vh-60px)] overflow-y-auto">
         {dataList.length > 0 ? (
           <InfiniteScroll
             dataLength={dataList.length}

@@ -120,7 +120,7 @@ export const TemplateList = ({ language, categoryId, searchQuery }: TemplateList
   const { visible } = useCanvasTemplateModal((state) => ({
     visible: state.visible,
   }));
-  const { dataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCanvasTemplates({
         query: {
@@ -139,6 +139,12 @@ export const TemplateList = ({ language, categoryId, searchQuery }: TemplateList
     if (!visible) return;
     reload();
   }, [language, categoryId, visible]);
+
+  useEffect(() => {
+    if (!visible) {
+      setDataList([]);
+    }
+  }, [visible]);
 
   const debounced = useDebouncedCallback(() => {
     reload();
