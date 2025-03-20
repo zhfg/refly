@@ -213,7 +213,7 @@ const DocumentList = () => {
 
   return (
     <Spin className="w-full h-full" spinning={isRequesting && dataList.length === 0}>
-      <div id="documentScrollableDiv" className="w-full h-[calc(60vh] overflow-y-auto">
+      <div id="documentScrollableDiv" className="w-full h-[calc(60vh-60px)] overflow-y-auto">
         {dataList.length > 0 ? (
           <InfiniteScroll
             dataLength={dataList.length}
