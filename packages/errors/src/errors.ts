@@ -200,6 +200,14 @@ export class StaticFileNotFoundError extends BaseError {
   };
 }
 
+export class CodeArtifactNotFoundError extends BaseError {
+  code = 'E1013';
+  messageDict = {
+    en: 'Code artifact not found, please refresh',
+    'zh-CN': '代码组件不存在，请刷新重试',
+  };
+}
+
 export class StorageQuotaExceeded extends BaseError {
   code = 'E2001';
   messageDict = {
@@ -249,6 +257,7 @@ const errorMap = {
   E1009: ShareNotFoundError,
   E1011: ActionResultNotFoundError,
   E1012: StaticFileNotFoundError,
+  E1013: CodeArtifactNotFoundError,
   E2001: StorageQuotaExceeded,
   E2002: ModelUsageQuotaExceeded,
   E2003: ModelNotSupportedError,

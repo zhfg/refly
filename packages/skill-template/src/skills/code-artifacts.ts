@@ -9,7 +9,6 @@ import {
   Artifact,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { randomUUID } from 'node:crypto';
 
 // Import prompt sections
 import { reactiveArtifactInstructions } from '../scheduler/module/artifacts/prompt';
@@ -19,7 +18,7 @@ import { buildFinalRequestMessages } from '../scheduler/utils/message';
 import { prepareContext } from '../scheduler/utils/context';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
-import { safeStringifyJSON } from '@refly-packages/utils';
+import { genCodeArtifactID, safeStringifyJSON } from '@refly-packages/utils';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { checkModelContextLenSupport } from '../scheduler/utils/model';
 import { processContextUrls } from '../utils/url-processing';
@@ -183,7 +182,7 @@ export class CodeArtifacts extends BaseSkill {
 
     // Create a code artifact entity
     const title = '';
-    const codeEntityId = randomUUID();
+    const codeEntityId = genCodeArtifactID();
 
     // Create and emit the code artifact
     const artifact: Artifact = {

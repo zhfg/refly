@@ -28,6 +28,7 @@ import { ActionModule } from './action/action.module';
 import { RedisService } from '@/common/redis.service';
 import { ShareModule } from './share/share.module';
 import { TemplateModule } from './template/template.module';
+import { CodeArtifactModule } from './code-artifact/code-artifact.module';
 
 class CustomThrottlerGuard extends ThrottlerGuard {
   protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
@@ -125,6 +126,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
     ActionModule,
     ShareModule,
     TemplateModule,
+    CodeArtifactModule,
   ],
   controllers: [AppController],
   providers: [
