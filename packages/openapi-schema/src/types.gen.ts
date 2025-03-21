@@ -2155,11 +2155,11 @@ export type UpsertCodeArtifactRequest = {
   /**
    * Code artifact title
    */
-  title: string;
+  title?: string;
   /**
    * Code artifact type
    */
-  type: string;
+  type?: string;
   /**
    * Code artifact content
    */
@@ -2167,7 +2167,7 @@ export type UpsertCodeArtifactRequest = {
   /**
    * Code artifact language
    */
-  language: string;
+  language?: string;
   /**
    * Whether to create the code artifact if it does not exist
    */

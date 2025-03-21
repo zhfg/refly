@@ -2892,7 +2892,6 @@ export const ShareRecordSchema = {
 
 export const UpsertCodeArtifactRequestSchema = {
   type: 'object',
-  required: ['title', 'type', 'language'],
   properties: {
     artifactId: {
       type: 'string',

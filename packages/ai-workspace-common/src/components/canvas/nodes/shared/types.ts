@@ -15,7 +15,7 @@ import {
   TokenUsageItem,
 } from '@refly/openapi-schema';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;

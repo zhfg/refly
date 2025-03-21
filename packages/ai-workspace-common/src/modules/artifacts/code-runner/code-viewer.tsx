@@ -4,7 +4,7 @@ import { Button, Tooltip, Divider, message, Select } from 'antd';
 import Renderer from './render';
 import MonacoEditor from './render/MonacoEditor';
 import { useTranslation } from 'react-i18next';
-import { CodeArtifactType } from './types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';

@@ -27,11 +27,11 @@ import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { useUpdateActionResult } from './use-update-action-result';
 import { useSubscriptionUsage } from '../use-subscription-usage';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { getArtifactContentAndAttributes } from '@refly-packages/ai-workspace-common/modules/artifacts/utils';
 import { useFindCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-code-artifact';
 import { useFindImages } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-images';
-import { ARTIFACT_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/modules/artifacts/const';
+import { ARTIFACT_TAG_CLOSED_REGEX, getArtifactContentAndAttributes } from '@refly/utils/artifact';
 import { useFindWebsite } from './use-find-website';
+import { codeArtifactEmitter } from '@refly-packages/ai-workspace-common/events/codeArtifact';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -144,14 +144,12 @@ export const useInvokeAction = () => {
               // Use extracted title if available, fallback to artifact.title
               title: title || artifact.title,
               entityId: artifact.entityId,
-              contentPreview: codeContent, // Set content preview for code artifact
+              // contentPreview: codeContent, // Set content preview for code artifact
               metadata: {
                 status: 'generating',
                 language: language || 'typescript', // Use extracted language or default
                 type: type || '', // Use extracted type if available
                 title: title || artifact?.title || '',
-                // If artifact is closed, set activeTab to preview
-                ...(isArtifactClosed && { activeTab: 'preview' }),
               },
             },
           },
@@ -172,19 +170,29 @@ export const useInvokeAction = () => {
           {
             // Update title if available from extracted attributes
             ...(title && { title }),
-            contentPreview: codeContent, // Update content preview
+            // contentPreview: codeContent, // Update content preview
             metadata: {
               status: 'generating',
               // Update language and type if available from extracted attributes
               ...(language && { language }),
               ...(type && { type }),
               title: title || artifact?.title || '',
-              // If artifact is closed, set activeTab to preview
-              ...(isArtifactClosed && { activeTab: 'preview' }),
             },
           },
         );
       }
+
+      if (isArtifactClosed) {
+        codeArtifactEmitter.emit('statusUpdate', {
+          artifactId: artifact.entityId,
+          status: 'finish',
+        });
+      }
+
+      codeArtifactEmitter.emit('contentUpdate', {
+        artifactId: artifact.entityId,
+        content: codeContent,
+      });
     }
   };
 

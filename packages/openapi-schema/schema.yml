@@ -4029,10 +4029,6 @@ components:
           description: Update timestamp
     UpsertCodeArtifactRequest:
       type: object
-      required:
-        - title
-        - type
-        - language
       properties:
         artifactId:
           type: string
