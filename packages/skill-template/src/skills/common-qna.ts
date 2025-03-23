@@ -24,7 +24,6 @@ import { isValidUrl } from '@refly-packages/utils';
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';
 import { checkModelContextLenSupport } from '../scheduler/utils/model';
-import { MAX_OUTPUT_TOKENS_LEVEL2 } from '../scheduler/utils/constants';
 
 export class CommonQnA extends BaseSkill {
   name = 'commonQnA';
@@ -203,7 +202,7 @@ export class CommonQnA extends BaseSkill {
       );
     }
 
-    const model = this.engine.chatModel({ temperature: 0.1, maxTokens: MAX_OUTPUT_TOKENS_LEVEL2 });
+    const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {
