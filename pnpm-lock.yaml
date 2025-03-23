@@ -634,9 +634,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.61.3
         version: 5.61.3(react@18.3.1)
-      '@tiptap-pro/extension-table-of-contents':
-        specifier: ~2.11.2
-        version: 2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4)
       '@tiptap-pro/extension-unique-id':
         specifier: ~2.11.2
         version: 2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4)
@@ -938,9 +935,6 @@ importers:
       '@tippyjs/react':
         specifier: ^4.2.6
         version: 4.2.6(react-dom@18.3.1)(react@18.3.1)
-      '@tiptap-pro/extension-table-of-contents':
-        specifier: ~2.11.2
-        version: 2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4)
       '@tiptap/core':
         specifier: 2.7.4
         version: 2.7.4(@tiptap/pm@2.7.4)
@@ -8319,17 +8313,6 @@ packages:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       tippy.js: 6.3.7
-    dev: false
-
-  /@tiptap-pro/extension-table-of-contents@2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4):
-    resolution: {integrity: sha512-Thb9Kou3J1/Bppc8SVnWUrMtANgqH7iPc/s+fYzxBLzQ2ZIWlPozMA8w9Qq7FN3GoJHyPUsaQK94hzoanQphmA==}
-    peerDependencies:
-      '@tiptap/core': ^2.0.0
-      '@tiptap/pm': ^2.0.0
-    dependencies:
-      '@tiptap/core': 2.7.4(@tiptap/pm@2.7.4)
-      '@tiptap/pm': 2.7.4
-      uuid: 10.0.0
     dev: false
 
   /@tiptap-pro/extension-unique-id@2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4):
