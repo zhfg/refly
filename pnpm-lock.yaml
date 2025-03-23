@@ -634,9 +634,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.61.3
         version: 5.61.3(react@18.3.1)
-      '@tiptap-pro/extension-unique-id':
-        specifier: ~2.11.2
-        version: 2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4)
       '@types/aos':
         specifier: ^3.0.7
         version: 3.0.7
@@ -8313,17 +8310,6 @@ packages:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       tippy.js: 6.3.7
-    dev: false
-
-  /@tiptap-pro/extension-unique-id@2.11.7(@tiptap/core@2.7.4)(@tiptap/pm@2.7.4):
-    resolution: {integrity: sha512-TJxn2Leea1+D65dm26rLXHdPbVgfBOT+trHr1mIDvER1lotD6ArHGo4HYWU8jhe+r5rS2uncxiWA2tgWAdC0pg==}
-    peerDependencies:
-      '@tiptap/core': ^2.0.0
-      '@tiptap/pm': ^2.0.0
-    dependencies:
-      '@tiptap/core': 2.7.4(@tiptap/pm@2.7.4)
-      '@tiptap/pm': 2.7.4
-      uuid: 10.0.0
     dev: false
 
   /@tiptap/core@2.7.4(@tiptap/pm@2.7.4):
