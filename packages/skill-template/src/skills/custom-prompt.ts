@@ -19,7 +19,6 @@ import { extractAndCrawlUrls } from '../scheduler/utils/extract-weblink';
 import { processContextUrls } from '../utils/url-processing';
 // prompts
 import * as customPrompt from '../scheduler/module/customPrompt/index';
-import { MAX_OUTPUT_TOKENS_LEVEL2 } from '../scheduler/utils/constants';
 
 export class CustomPrompt extends BaseSkill {
   name = 'customPrompt';
@@ -236,7 +235,6 @@ export class CustomPrompt extends BaseSkill {
     const model = this.engine.chatModel({
       temperature: Number(tplConfig?.temperature?.value ?? 0.1),
       topP: Number(tplConfig?.topP?.value ?? 1),
-      maxTokens: MAX_OUTPUT_TOKENS_LEVEL2,
     });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
