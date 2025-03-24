@@ -39,15 +39,17 @@ import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code
 import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 interface NodeContentProps {
   status: 'generating' | 'finish' | 'failed';
   entityId: string;
   shareId?: string;
+  legacyData?: CodeArtifact;
 }
 
 const NodeContent = memo(
-  ({ status, entityId, shareId }: NodeContentProps) => {
+  ({ status, entityId, shareId, legacyData }: NodeContentProps) => {
     const isLogin = useUserStoreShallow((state) => state.isLogin);
     const { data: remoteData } = useGetCodeArtifactDetail(
       {
@@ -60,8 +62,8 @@ const NodeContent = memo(
     );
     const { data: shareData } = useFetchShareData<CodeArtifact>(shareId);
     const artifactData = useMemo(
-      () => shareData || remoteData?.data || null,
-      [shareData, remoteData],
+      () => shareData || remoteData?.data || legacyData || null,
+      [shareData, remoteData, legacyData],
     );
 
     return (
@@ -78,7 +80,12 @@ const NodeContent = memo(
     );
   },
   (prevProps, nextProps) =>
-    prevProps.entityId === nextProps.entityId && prevProps.status === nextProps.status,
+    prevProps.entityId === nextProps.entityId &&
+    prevProps.status === nextProps.status &&
+    prevProps.legacyData?.content === nextProps.legacyData?.content &&
+    prevProps.legacyData?.type === nextProps.legacyData?.type &&
+    prevProps.legacyData?.title === nextProps.legacyData?.title &&
+    prevProps.legacyData?.language === nextProps.legacyData?.language,
 );
 
 export const CodeArtifactNode = memo(
@@ -189,10 +196,26 @@ export const CodeArtifactNode = memo(
       } as CanvasNode);
     }, [id, data, deleteNode]);
 
+    // Legacy code artifact data
+    const legacyData = useMemo<CodeArtifact | null>(() => {
+      return {
+        content: data.contentPreview,
+        type: data.metadata?.type,
+        artifactId: data.entityId,
+        title: data.title,
+        language: data.metadata?.language,
+      };
+    }, [data]);
+
     const insertToDoc = useInsertToDocument(data.entityId);
     const handleInsertToDoc = useCallback(async () => {
-      if (!data?.contentPreview) return;
-      await insertToDoc('insertBelow', data?.contentPreview);
+      const { data: codeArtifact, error } = await getClient().getCodeArtifactDetail({
+        query: { artifactId: data.entityId },
+      });
+      if (!codeArtifact?.success || error) {
+        return;
+      }
+      await insertToDoc('insertBelow', codeArtifact?.data?.content);
     }, [insertToDoc, data]);
 
     const handleAskAI = useCallback(() => {
@@ -222,9 +245,7 @@ export const CodeArtifactNode = memo(
               contextItems: [
                 {
                   type: 'codeArtifact',
-                  title: data?.contentPreview
-                    ? `${data.title} - ${data?.contentPreview?.slice(0, 10)}`
-                    : data.title,
+                  title: data.title,
                   entityId: data.entityId,
                   metadata: {
                     ...data.metadata,
@@ -341,6 +362,7 @@ export const CodeArtifactNode = memo(
                       status={data.metadata?.status}
                       entityId={data.entityId}
                       shareId={data.metadata?.shareId}
+                      legacyData={legacyData}
                     />
                   </div>
                 )}

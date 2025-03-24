@@ -64,6 +64,7 @@ export interface CodeArtifactNodeMeta {
   style?: React.CSSProperties;
   originalWidth?: number;
   activeTab?: 'code' | 'preview';
+  code?: string; // @deprecated
 }
 
 export type SkillNodeMeta = {

@@ -10,7 +10,7 @@ import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { RAGService } from '@/rag/rag.service';
 import { Prisma } from '@prisma/client';
-import { User } from '@refly-packages/openapi-schema';
+import { UpsertCodeArtifactRequest, User } from '@refly-packages/openapi-schema';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +23,7 @@ import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto'
 import { Redis } from '@hocuspocus/extension-redis';
 import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
 import ms from 'ms';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class CollabService {
@@ -246,7 +247,6 @@ export class CollabService {
   }
 
   private async storeCanvasEntity({
-    state,
     document,
     context,
   }: {
@@ -261,10 +261,12 @@ export class CollabService {
       return;
     }
 
-    const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
-    await this.minio.client.putObject(stateStorageKey, state);
+    const cleanedDocument = await this.cleanCanvasDocument(user, document);
+    const cleanedState = Buffer.from(Y.encodeStateAsUpdate(cleanedDocument));
+    const title = cleanedDocument.getText('title').toJSON();
 
-    const title = document.getText('title').toJSON();
+    const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
+    await this.minio.client.putObject(stateStorageKey, cleanedState);
 
     const stateStorageStat = await this.minio.client.statObject(stateStorageKey);
 
@@ -315,6 +317,100 @@ export class CollabService {
     }
     this.logger.warn(`unknown context entity type: ${JSON.stringify(context)}`);
     return null;
+  }
+
+  /**
+   * Clean canvas document by removing legacy code artifact nodes and processing them
+   * @param user - The user performing the cleanup
+   * @param document - The canvas document to clean
+   * @returns The cleaned document
+   */
+  async cleanCanvasDocument(user: User, document: Y.Doc) {
+    const nodes = document.getArray('nodes').toJSON() ?? [];
+    const legacyArtifactNodes = nodes.filter(
+      (node) =>
+        node.type === 'codeArtifact' &&
+        node.data?.entityId &&
+        (node.data?.contentPreview || node.data?.metadata?.code),
+    );
+
+    if (!legacyArtifactNodes.length) {
+      return document;
+    }
+
+    const limit = pLimit(5);
+    const processedArtifacts = await Promise.all(
+      legacyArtifactNodes.map((node) =>
+        limit(() =>
+          this.processLegacyCodeArtifact(user, node.data?.entityId, {
+            title: node.data?.metadata?.title,
+            type: node.data?.metadata?.type,
+            language: node.data?.metadata?.language,
+            content: node.data?.contentPreview || node.data?.metadata?.code,
+          }),
+        ),
+      ),
+    );
+    const processedArtifactIds = new Set(
+      processedArtifacts.map((artifact) => artifact?.artifactId).filter(Boolean),
+    );
+
+    const cleanNodes = nodes.map((node: any) => {
+      if (node.type === 'codeArtifact' && processedArtifactIds.has(node.data?.entityId)) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            contentPreview: undefined,
+            metadata: {
+              ...node.data.metadata,
+              code: undefined,
+            },
+          },
+        };
+      }
+      return node;
+    });
+
+    document.transact(() => {
+      document.getArray('nodes').delete(0, document.getArray('nodes').length);
+      document.getArray('nodes').insert(0, cleanNodes);
+    });
+
+    return document;
+  }
+
+  async processLegacyCodeArtifact(
+    user: User,
+    artifactId: string,
+    param: UpsertCodeArtifactRequest,
+  ) {
+    const releaseLock = await this.redis.acquireLock(`code-artifact-process:${artifactId}`);
+
+    if (!releaseLock) {
+      this.logger.warn(`failed to acquire lock for code artifact: ${artifactId}`);
+      return null;
+    }
+
+    try {
+      const storageKey = `code-artifact/${artifactId}`;
+      const codeArtifact = await this.prisma.codeArtifact.create({
+        data: {
+          artifactId,
+          uid: user.uid,
+          storageKey,
+          type: param.type,
+          language: param.language,
+          title: param.title,
+        },
+      });
+      if (param.content) {
+        await this.minio.client.putObject(storageKey, param.content);
+      }
+      return codeArtifact;
+    } finally {
+      await releaseLock();
+    }
   }
 
   async openDirectConnection(documentName: string, context?: CollabContext) {
