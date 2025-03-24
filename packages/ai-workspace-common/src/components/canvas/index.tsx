@@ -62,6 +62,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import HelperLines from './common/helper-line/index';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -154,9 +155,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
+
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
-  const { onNodesChange, truncateAllNodesContent } = useNodeOperations();
+  const {
+    onNodesChange,
+    truncateAllNodesContent,
+    onNodeDragStop,
+    helperLineHorizontal,
+    helperLineVertical,
+  } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
 
   const { onEdgesChange, onConnect } = useEdgeOperations();
@@ -637,7 +645,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Optimize node dragging performance
   const { setIsNodeDragging, setDraggingNodeId } = useEditorPerformance();
 
-  const onNodeDragStart = useCallback(
+  const handleNodeDragStart = useCallback(
     (_: React.MouseEvent, node: Node) => {
       setIsNodeDragging(true);
       setDraggingNodeId(node.id);
@@ -645,10 +653,49 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [setIsNodeDragging, setDraggingNodeId],
   );
 
-  const onNodeDragStop = useCallback(() => {
-    setIsNodeDragging(false);
-    setDraggingNodeId(null);
-  }, [setIsNodeDragging, setDraggingNodeId]);
+  const [readonlyDragWarningDebounce, setReadonlyDragWarningDebounce] =
+    useState<NodeJS.Timeout | null>(null);
+
+  const handleReadonlyDrag = useCallback(
+    (event: React.MouseEvent) => {
+      if (readonly) {
+        if (!readonlyDragWarningDebounce) {
+          message.warning(t('common.readonlyDragDescription'));
+
+          const debounceTimeout = setTimeout(() => {
+            setReadonlyDragWarningDebounce(null);
+          }, 3000);
+
+          setReadonlyDragWarningDebounce(debounceTimeout);
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    [readonly, readonlyDragWarningDebounce, t],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (readonlyDragWarningDebounce) {
+        clearTimeout(readonlyDragWarningDebounce);
+      }
+    };
+  }, [readonlyDragWarningDebounce]);
+
+  // Handle node drag stop and apply snap positions
+  const handleNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      // Call the hook's onNodeDragStop method
+      onNodeDragStop(node.id);
+
+      // Reset performance tracking
+      setIsNodeDragging(false);
+      setDraggingNodeId(null);
+    },
+    [onNodeDragStop, setIsNodeDragging, setDraggingNodeId],
+  );
 
   const onSelectionContextMenu = useCallback(
     (event: React.MouseEvent) => {
@@ -780,37 +827,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     );
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
 
-  const [readonlyDragWarningDebounce, setReadonlyDragWarningDebounce] =
-    useState<NodeJS.Timeout | null>(null);
-
-  const handleReadonlyDrag = useCallback(
-    (event: React.MouseEvent) => {
-      if (readonly) {
-        if (!readonlyDragWarningDebounce) {
-          message.warning(t('common.readonlyDragDescription'));
-
-          const debounceTimeout = setTimeout(() => {
-            setReadonlyDragWarningDebounce(null);
-          }, 3000);
-
-          setReadonlyDragWarningDebounce(debounceTimeout);
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    },
-    [readonly, readonlyDragWarningDebounce, t],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (readonlyDragWarningDebounce) {
-        clearTimeout(readonlyDragWarningDebounce);
-      }
-    };
-  }, [readonlyDragWarningDebounce]);
-
   return (
     <Spin
       className="w-full h-full"
@@ -874,8 +890,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onPaneClick={handlePanelClick}
             onPaneContextMenu={readonly ? undefined : onPaneContextMenu}
             onNodeContextMenu={readonly ? undefined : onNodeContextMenu}
-            onNodeDragStart={readonly ? handleReadonlyDrag : onNodeDragStart}
-            onNodeDragStop={readonly ? undefined : onNodeDragStop}
+            onNodeDragStart={readonly ? handleReadonlyDrag : handleNodeDragStart}
+            onNodeDragStop={readonly ? undefined : handleNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId && !readonly}
             nodesConnectable={!readonly}
@@ -894,6 +910,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
             {memoizedBackground}
             {memoizedMiniMap}
+            <HelperLines horizontal={helperLineHorizontal} vertical={helperLineVertical} />
           </ReactFlow>
 
           <LayoutControl
