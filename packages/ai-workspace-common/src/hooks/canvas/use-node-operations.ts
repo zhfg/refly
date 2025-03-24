@@ -112,9 +112,8 @@ export const useNodeOperations = () => {
       }
 
       // Check if this is a position change for snap alignment
-      const isPositionChange = changes.some(
-        (change) => change.type === 'position' && change.position,
-      );
+      const isPositionChange =
+        changes.length === 1 && changes[0]?.type === 'position' && changes[0]?.position;
 
       // Apply changes with or without helper lines based on change type
       const updatedNodes = isPositionChange
