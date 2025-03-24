@@ -42,6 +42,7 @@ function HelperLinesRenderer({ horizontal, vertical }: HelperLinesProps) {
     ctx.scale(dpi, dpi);
     ctx.clearRect(0, 0, width, height);
     ctx.strokeStyle = '#00968f';
+    ctx.globalAlpha = 0.5;
 
     if (typeof vertical === 'number') {
       ctx.moveTo(vertical * transform[2] + transform[0], 0);
