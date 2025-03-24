@@ -39,24 +39,36 @@ const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
     if (!node?.type) return null;
 
-    switch (node.type) {
-      case 'resource':
-        return <ResourceNodePreview node={node} resourceId={node.data.entityId} />;
-      case 'document':
-        return <DocumentNodePreview node={node} />;
-      case 'skill':
-        return <SkillNodePreview />;
-      case 'tool':
-        return <ToolNodePreview />;
-      case 'skillResponse':
-        return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
-      case 'codeArtifact':
-        return <CodeArtifactNodePreview node={node} artifactId={node.data.entityId} />;
-      case 'website':
-        return <WebsiteNodePreview node={node} />;
-      default:
-        return null;
-    }
+    // Use useMemo to create the appropriate preview component
+    return useMemo(() => {
+      switch (node.type) {
+        case 'resource':
+          return <ResourceNodePreview node={node} resourceId={node.data?.entityId} />;
+        case 'document':
+          return <DocumentNodePreview node={node} />;
+        case 'skill':
+          return <SkillNodePreview />;
+        case 'tool':
+          return <ToolNodePreview />;
+        case 'skillResponse':
+          return <SkillResponseNodePreview node={node} resultId={node.data?.entityId} />;
+        case 'codeArtifact':
+          return <CodeArtifactNodePreview node={node} artifactId={node.data?.entityId} />;
+        case 'website':
+          return <WebsiteNodePreview node={node} />;
+        default:
+          return null;
+      }
+    }, [
+      node.type,
+      node.data?.entityId,
+      node.data?.contentPreview,
+      node.data?.title,
+      node.data?.metadata?.status,
+      node.data?.metadata?.activeTab,
+      node.data?.metadata?.url,
+      node.data?.metadata?.viewMode,
+    ]);
   },
   (prevProps, nextProps) => {
     // Check type and entity ID
@@ -130,7 +142,7 @@ export const DraggableNodePreview = memo(
 
     const handleClose = useCallback(() => {
       removePinnedNode(canvasId, node.id);
-    }, [node, removePinnedNode, canvasId]);
+    }, [node.id, removePinnedNode, canvasId]);
 
     useEffect(() => {
       const handleFullScreenPreview = () => {
@@ -196,27 +208,23 @@ export const DraggableNodePreview = memo(
     // Setup drag
     const [{ isDragging }, drag, preview] = useDrag({
       type: ITEM_TYPE,
-      item: { id: node.id, index },
+      item: useMemo(() => ({ id: node.id, index }), [node.id, index]),
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
       canDrag: () => !isMaximized, // Prevent dragging when maximized
     });
 
-    // Setup drop
-    const [, drop] = useDrop({
-      accept: ITEM_TYPE,
-      hover: (item: DragItem, monitor) => {
-        if (!previewRef.current) {
-          return;
-        }
+    // Memoize hover handler for better performance
+    const handleHover = useCallback(
+      (item: DragItem, monitor) => {
+        if (!previewRef.current) return;
+
         const dragIndex = item.index;
         const hoverIndex = index;
 
         // Don't replace items with themselves
-        if (dragIndex === hoverIndex) {
-          return;
-        }
+        if (dragIndex === hoverIndex) return;
 
         // Determine mouse position
         const hoverBoundingRect = previewRef.current.getBoundingClientRect();
@@ -224,55 +232,66 @@ export const DraggableNodePreview = memo(
         const clientOffset = monitor.getClientOffset();
         const hoverClientX = (clientOffset as XYCoord).x - hoverBoundingRect.left;
 
-        // Only perform the move when the mouse has crossed half of the items height or width
-        // Dragging right
-        if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) {
-          return;
-        }
-        // Dragging left
-        if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
-          return;
-        }
+        // Only perform the move when the mouse has crossed half of the items width
+        // Dragging right to left
+        if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) return;
+
+        // Dragging left to right
+        if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) return;
 
         // Time to actually perform the action
         moveCard(dragIndex, hoverIndex);
-        // Note: we're mutating the monitor item here!
-        // Generally it's better to avoid mutations,
-        // but it's good here for the sake of performance
-        // to avoid expensive index searches.
+
+        // Update the index for performance
         item.index = hoverIndex;
       },
+      [index, moveCard],
+    );
+
+    // Setup drop
+    const [, drop] = useDrop({
+      accept: ITEM_TYPE,
+      hover: handleHover,
     });
 
     // Connect the refs
-    // Initialize drag preview without preview image
     drag(dragRef);
     drop(preview(previewRef));
 
-    const opacity = isDragging ? 0.4 : 1;
+    // Memoize container styles
+    const containerStyle = useMemo(() => ({ opacity: isDragging ? 0.4 : 1 }), [isDragging]);
+
+    // Memoize NodePreviewHeader props to prevent unnecessary re-renders
+    const headerProps = useMemo(
+      () => ({
+        node,
+        onClose: handleClose,
+        onMaximize: handleMaximize,
+        onWideMode: handleWideMode,
+        isMaximized,
+        isWideMode,
+        dragHandleProps: { ref: dragRef },
+        isDragging,
+      }),
+      [node, handleClose, handleMaximize, handleWideMode, isMaximized, isWideMode, isDragging],
+    );
+
+    // Memoize PreviewComponent to prevent unnecessary re-renders
+    const previewComponent = useMemo(() => <PreviewComponent node={node} />, [node]);
 
     return (
       <div
         data-preview-id={node?.id}
         className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow-lg bg-transparent"
         ref={previewRef}
-        style={{ opacity }}
+        style={containerStyle}
       >
         <div className={previewClassName} style={previewStyles}>
           <div ref={dragRef} className="pointer-events-auto">
-            <NodePreviewHeader
-              node={node}
-              onClose={handleClose}
-              onMaximize={handleMaximize}
-              onWideMode={handleWideMode}
-              isMaximized={isMaximized}
-              isWideMode={isWideMode}
-              dragHandleProps={{ ref: dragRef }}
-              isDragging={isDragging}
-            />
+            <NodePreviewHeader {...headerProps} />
           </div>
           <div className="h-[calc(100%-52px)] overflow-auto rounded-b-lg pointer-events-auto preview-container">
-            <PreviewComponent node={node} />
+            {previewComponent}
           </div>
         </div>
       </div>
@@ -309,56 +328,74 @@ export const DraggableNodePreview = memo(
   },
 );
 
-export const NodePreviewContainer = ({
-  canvasId,
-  nodes,
-}: {
-  canvasId: string;
-  nodes: CanvasNode<any>[];
-}) => {
-  const { rawNodePreviews, reorderNodePreviews } = useCanvasStoreShallow((state) => ({
-    rawNodePreviews: state.config[canvasId]?.nodePreviews ?? [],
-    reorderNodePreviews: state.reorderNodePreviews,
-  }));
+export const NodePreviewContainer = memo(
+  ({
+    canvasId,
+    nodes,
+  }: {
+    canvasId: string;
+    nodes: CanvasNode<any>[];
+  }) => {
+    const { rawNodePreviews, reorderNodePreviews } = useCanvasStoreShallow((state) => ({
+      rawNodePreviews: state.config[canvasId]?.nodePreviews ?? [],
+      reorderNodePreviews: state.reorderNodePreviews,
+    }));
 
-  // Compute fresh node previews using the utility function
-  const nodePreviews = useMemo(() => {
-    // Prefer flowNodes from ReactFlow but fall back to canvas store nodes
-    const canvasNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
-    const nodesSource = nodes.length > 0 ? nodes : canvasNodes;
+    // Compute fresh node previews using the utility function
+    const nodePreviews = useMemo(() => {
+      // Prefer flowNodes from ReactFlow but fall back to canvas store nodes
+      const canvasNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+      const nodesSource = nodes?.length > 0 ? nodes : canvasNodes;
 
-    return getFreshNodePreviews(nodesSource, rawNodePreviews);
-  }, [nodes, rawNodePreviews, canvasId]);
+      return getFreshNodePreviews(nodesSource, rawNodePreviews);
+    }, [nodes, rawNodePreviews, canvasId]);
 
-  const moveCard = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      reorderNodePreviews(canvasId, dragIndex, hoverIndex);
-    },
-    [canvasId, reorderNodePreviews],
-  );
+    const moveCard = useCallback(
+      (dragIndex: number, hoverIndex: number) => {
+        reorderNodePreviews(canvasId, dragIndex, hoverIndex);
+      },
+      [canvasId, reorderNodePreviews],
+    );
 
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex h-full w-full">
-        <ScrollingComponent
-          horizontalStrength={horizontalStrength}
-          verticalStrength={() => 0}
-          className="flex flex-row gap-2 overflow-x-auto w-full h-full"
-        >
-          {nodePreviews?.filter(Boolean)?.map((node, index) => (
-            <DraggableNodePreview
-              key={node?.id}
-              node={node}
-              canvasId={canvasId}
-              index={index}
-              moveCard={moveCard}
-            />
-          ))}
-        </ScrollingComponent>
-      </div>
-    </DndProvider>
-  );
-};
+    // Memoize rendering of node previews
+    const nodePreviewsRendered = useMemo(() => {
+      return nodePreviews
+        ?.filter(Boolean)
+        ?.map((node, index) => (
+          <DraggableNodePreview
+            key={node?.id}
+            node={node}
+            canvasId={canvasId}
+            index={index}
+            moveCard={moveCard}
+          />
+        ));
+    }, [nodePreviews, canvasId, moveCard]);
+
+    // Memoize ScrollingComponent props
+    const scrollingComponentProps = useMemo(
+      () => ({
+        horizontalStrength,
+        verticalStrength: () => 0,
+        className: 'flex flex-row gap-2 overflow-x-auto w-full h-full',
+      }),
+      [],
+    );
+
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <div className="flex h-full w-full">
+          <ScrollingComponent {...scrollingComponentProps}>
+            {nodePreviewsRendered}
+          </ScrollingComponent>
+        </div>
+      </DndProvider>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.canvasId === nextProps.canvasId &&
+    prevProps.nodes?.length === nextProps.nodes?.length,
+);
 
 // Maintain the original NodePreview component for backward compatibility,
 // but use the draggable container internally
@@ -389,7 +426,7 @@ export const NodePreview = memo(
 
     const handleClose = useCallback(() => {
       removePinnedNode(canvasId, node.id);
-    }, [node, removePinnedNode, canvasId]);
+    }, [node.id, removePinnedNode, canvasId]);
 
     useEffect(() => {
       const handleFullScreenPreview = () => {
@@ -452,6 +489,22 @@ export const NodePreview = memo(
       };
     }, [node.id, isMaximized]);
 
+    // Memoize NodePreviewHeader props to prevent unnecessary re-renders
+    const headerProps = useMemo(
+      () => ({
+        node,
+        onClose: handleClose,
+        onMaximize: handleMaximize,
+        onWideMode: handleWideMode,
+        isMaximized,
+        isWideMode,
+      }),
+      [node, handleClose, handleMaximize, handleWideMode, isMaximized, isWideMode],
+    );
+
+    // Memoize PreviewComponent to prevent unnecessary re-renders
+    const previewComponent = useMemo(() => <PreviewComponent node={node} />, [node]);
+
     return (
       <div
         data-preview-id={node?.id}
@@ -460,17 +513,10 @@ export const NodePreview = memo(
       >
         <div className={previewClassName} style={previewStyles}>
           <div className="pointer-events-auto">
-            <NodePreviewHeader
-              node={node}
-              onClose={handleClose}
-              onMaximize={handleMaximize}
-              onWideMode={handleWideMode}
-              isMaximized={isMaximized}
-              isWideMode={isWideMode}
-            />
+            <NodePreviewHeader {...headerProps} />
           </div>
           <div className="h-[calc(100%-52px)] overflow-auto rounded-b-lg pointer-events-auto preview-container">
-            <PreviewComponent node={node} />
+            {previewComponent}
           </div>
         </div>
       </div>
