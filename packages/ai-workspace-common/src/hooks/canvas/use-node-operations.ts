@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { applyNodeChanges, NodeChange } from '@xyflow/react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
@@ -6,6 +6,10 @@ import { useContextPanelStoreShallow } from '../../stores/context-panel';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { useUploadMinimap } from '@refly-packages/ai-workspace-common/hooks/use-upload-minimap';
 import { truncateContent, MAX_CONTENT_PREVIEW_LENGTH } from '../../utils/content';
+import { getHelperLines } from '../../components/canvas/common/helper-line/util';
+
+// Add snap threshold constant
+const SNAP_THRESHOLD = 10;
 
 export const useNodeOperations = () => {
   const canvasId = useCanvasId();
@@ -18,6 +22,64 @@ export const useNodeOperations = () => {
   }));
   const { debouncedHandleUpdateCanvasMiniMap } = useUploadMinimap(canvasId);
   const { throttledSyncNodesToYDoc } = useCanvasSync();
+
+  // Add helper line states
+  const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
+  const [helperLineVertical, setHelperLineVertical] = useState<number | undefined>(undefined);
+  const [lastSnapPosition, setLastSnapPosition] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
+
+  // Custom apply node changes function for snap alignment
+  const customApplyNodeChanges = useCallback(
+    (changes: NodeChange[], nodes: any[]) => {
+      // Reset helper lines
+      setHelperLineHorizontal(undefined);
+      setHelperLineVertical(undefined);
+
+      // Check if it's a single node being dragged
+      if (
+        changes.length === 1 &&
+        changes[0]?.type === 'position' &&
+        changes[0]?.dragging &&
+        changes[0]?.position
+      ) {
+        // Calculate helper lines and snap position
+        const helperLines = getHelperLines(changes[0], nodes, SNAP_THRESHOLD);
+
+        // Update changes with snap position if available
+        const updatedChanges = changes.map((change) => {
+          if (change.type === 'position' && change.position) {
+            const newPosition = {
+              x: helperLines.snapPosition.x ?? change.position.x,
+              y: helperLines.snapPosition.y ?? change.position.y,
+            };
+
+            // Store last snap position for this node
+            setLastSnapPosition((prev) => ({
+              ...prev,
+              [change.id]: newPosition,
+            }));
+
+            return {
+              ...change,
+              position: newPosition,
+            };
+          }
+          return change;
+        });
+
+        // Set helper lines for display
+        setHelperLineHorizontal(helperLines.horizontal);
+        setHelperLineVertical(helperLines.vertical);
+
+        return applyNodeChanges(updatedChanges, nodes);
+      }
+
+      return applyNodeChanges(changes, nodes);
+    },
+    [setHelperLineHorizontal, setHelperLineVertical, setLastSnapPosition],
+  );
 
   const updateNodesWithSync = useCallback(
     (updatedNodes: any[]) => {
@@ -49,13 +111,64 @@ export const useNodeOperations = () => {
         }
       }
 
-      const updatedNodes = applyNodeChanges(changes, mutableNodes);
+      // Check if this is a position change for snap alignment
+      const isPositionChange = changes.some(
+        (change) => change.type === 'position' && change.position,
+      );
+
+      // Apply changes with or without helper lines based on change type
+      const updatedNodes = isPositionChange
+        ? customApplyNodeChanges(changes, mutableNodes)
+        : applyNodeChanges(changes, mutableNodes);
+
       updateNodesWithSync(updatedNodes);
       debouncedHandleUpdateCanvasMiniMap();
 
       return updatedNodes;
     },
-    [canvasId, updateNodesWithSync],
+    [
+      canvasId,
+      updateNodesWithSync,
+      removeContextItem,
+      removeNodePreview,
+      customApplyNodeChanges,
+      debouncedHandleUpdateCanvasMiniMap,
+    ],
+  );
+
+  // Clear helper lines and apply final position
+  const onNodeDragStop = useCallback(
+    (nodeId: string) => {
+      // Apply the last snap position if it exists
+      if (lastSnapPosition[nodeId]) {
+        const { data } = useCanvasStore.getState();
+        const nodes = data[canvasId]?.nodes ?? [];
+
+        const updatedNodes = nodes.map((node) => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              position: lastSnapPosition[nodeId],
+            };
+          }
+          return node;
+        });
+
+        updateNodesWithSync(updatedNodes);
+
+        // Clear the snap position for this node
+        setLastSnapPosition((prev) => {
+          const newState = { ...prev };
+          delete newState[nodeId];
+          return newState;
+        });
+      }
+
+      // Clear helper lines
+      setHelperLineHorizontal(undefined);
+      setHelperLineVertical(undefined);
+    },
+    [canvasId, lastSnapPosition, updateNodesWithSync],
   );
 
   // New function to truncate content for skill-response nodes only
@@ -199,5 +312,14 @@ export const useNodeOperations = () => {
     setNodeSizeMode,
     updateAllNodesSizeMode,
     truncateAllNodesContent,
+    onNodeDragStop,
+    // Export helper line states for use in components
+    helperLineHorizontal,
+    helperLineVertical,
+    // Reset helper lines method
+    resetHelperLines: () => {
+      setHelperLineHorizontal(undefined);
+      setHelperLineVertical(undefined);
+    },
   };
 };

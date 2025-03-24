@@ -10,9 +10,6 @@ import {
   Node,
   Edge,
   useStoreApi,
-  applyNodeChanges,
-  NodeChange,
-  OnNodesChange,
 } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -65,9 +62,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
-import { getHelperLines } from './common/helper-line/util';
 import HelperLines from './common/helper-line/index';
-const SNAP_THRESHOLD = 10;
 
 const selectionStyles = `
   .react-flow__selection {
@@ -163,14 +158,17 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
-  const { onNodesChange, truncateAllNodesContent } = useNodeOperations();
+  const {
+    onNodesChange,
+    truncateAllNodesContent,
+    onNodeDragStop,
+    helperLineHorizontal,
+    helperLineVertical,
+  } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
 
   const { onEdgesChange, onConnect } = useEdgeOperations();
   const edgeStyles = useEdgeStyles();
-
-  const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
-  const [helperLineVertical, setHelperLineVertical] = useState<number | undefined>(undefined);
 
   // Call truncateAllNodesContent when nodes are loaded
   useEffect(() => {
@@ -209,7 +207,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }));
 
   const reactFlowInstance = useReactFlow();
-  const { setNodes } = reactFlowInstance;
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider, readonly, shareNotFound, shareLoading } = useCanvasContext();
@@ -648,7 +645,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Optimize node dragging performance
   const { setIsNodeDragging, setDraggingNodeId } = useEditorPerformance();
 
-  const onNodeDragStart = useCallback(
+  const handleNodeDragStart = useCallback(
     (_: React.MouseEvent, node: Node) => {
       setIsNodeDragging(true);
       setDraggingNodeId(node.id);
@@ -687,116 +684,17 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     };
   }, [readonlyDragWarningDebounce]);
 
-  // keep the last snap position of the node
-  const [lastSnapPosition, setLastSnapPosition] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
-
-  const customApplyNodeChanges = useCallback(
-    (changes: NodeChange[], nodes: Node[]): Node[] => {
-      // reset the helper lines (clear existing lines, if any)
-      setHelperLineHorizontal(undefined);
-      setHelperLineVertical(undefined);
-
-      // this will be true if it's a single node being dragged
-      // inside we calculate the helper lines and snap position for the position where the node is being moved to
-      if (
-        changes.length === 1 &&
-        changes[0]?.type === 'position' &&
-        changes[0]?.dragging &&
-        changes[0]?.position
-      ) {
-        const helperLines = getHelperLines(changes[0], nodes, SNAP_THRESHOLD);
-
-        // if we have a helper line, we snap the node to the helper line position
-        const updatedChanges = changes.map((change) => {
-          if (change.type === 'position' && change.position) {
-            const newPosition = {
-              x: helperLines.snapPosition.x ?? change.position.x,
-              y: helperLines.snapPosition.y ?? change.position.y,
-            };
-
-            setLastSnapPosition((prev) => ({
-              ...prev,
-              [change.id]: newPosition,
-            }));
-
-            return {
-              ...change,
-              position: newPosition,
-            };
-          }
-          return change;
-        });
-
-        // if helper lines are returned, we set them so that they can be displayed
-        setHelperLineHorizontal(helperLines.horizontal);
-        setHelperLineVertical(helperLines.vertical);
-
-        return applyNodeChanges(updatedChanges, nodes);
-      }
-
-      return applyNodeChanges(changes, nodes);
-    },
-    [setLastSnapPosition, setHelperLineHorizontal, setHelperLineVertical],
-  );
-
-  const onNodesChangeHelperLines: OnNodesChange = useCallback(
-    (changes) => {
-      setNodes((nodes) => customApplyNodeChanges(changes, nodes));
-    },
-    [setNodes, customApplyNodeChanges],
-  );
-
-  const handleOnNodesChange = (changes: NodeChange[]) => {
-    onNodesChange(changes);
-    const change = changes[0];
-    if (change?.type === 'position' && change?.position) {
-      onNodesChangeHelperLines(changes);
-    }
-  };
-
-  const onNodeDragStop = useCallback(
+  // Handle node drag stop and apply snap positions
+  const handleNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
-      // check if there is a saved snap position
-      if (lastSnapPosition[node?.id]) {
-        // apply the last snap position, ensure the node is not offset
-        const { setNodes } = reactFlowInstance;
-        setNodes((nodes) =>
-          nodes.map((n) => {
-            if (n.id === node.id) {
-              return {
-                ...n,
-                position: lastSnapPosition[node.id],
-              };
-            }
-            return n;
-          }),
-        );
+      // Call the hook's onNodeDragStop method
+      onNodeDragStop(node.id);
 
-        // clear the snap position of the node
-        setLastSnapPosition((prev) => {
-          const newState = { ...prev };
-          delete newState[node.id];
-          return newState;
-        });
-      }
-
+      // Reset performance tracking
       setIsNodeDragging(false);
       setDraggingNodeId(null);
-
-      // when the drag ends, clear the helper lines
-      setHelperLineHorizontal(undefined);
-      setHelperLineVertical(undefined);
     },
-    [
-      setIsNodeDragging,
-      setDraggingNodeId,
-      lastSnapPosition,
-      reactFlowInstance,
-      setHelperLineHorizontal,
-      setHelperLineVertical,
-    ],
+    [onNodeDragStop, setIsNodeDragging, setDraggingNodeId],
   );
 
   const onSelectionContextMenu = useCallback(
@@ -984,7 +882,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
-            onNodesChange={readonly ? readonlyNodesChange : handleOnNodesChange}
+            onNodesChange={readonly ? readonlyNodesChange : onNodesChange}
             onEdgesChange={readonly ? readonlyEdgesChange : onEdgesChange}
             onConnect={readonly ? readonlyConnect : onConnect}
             onConnectEnd={readonly ? undefined : temporaryEdgeOnConnectEnd}
@@ -992,8 +890,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onPaneClick={handlePanelClick}
             onPaneContextMenu={readonly ? undefined : onPaneContextMenu}
             onNodeContextMenu={readonly ? undefined : onNodeContextMenu}
-            onNodeDragStart={readonly ? handleReadonlyDrag : onNodeDragStart}
-            onNodeDragStop={readonly ? undefined : onNodeDragStop}
+            onNodeDragStart={readonly ? handleReadonlyDrag : handleNodeDragStart}
+            onNodeDragStop={readonly ? undefined : handleNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId && !readonly}
             nodesConnectable={!readonly}
