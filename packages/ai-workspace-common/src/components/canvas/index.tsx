@@ -655,10 +655,151 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [setIsNodeDragging, setDraggingNodeId],
   );
 
-  const onNodeDragStop = useCallback(() => {
-    setIsNodeDragging(false);
-    setDraggingNodeId(null);
-  }, [setIsNodeDragging, setDraggingNodeId]);
+  const [readonlyDragWarningDebounce, setReadonlyDragWarningDebounce] =
+    useState<NodeJS.Timeout | null>(null);
+
+  const handleReadonlyDrag = useCallback(
+    (event: React.MouseEvent) => {
+      if (readonly) {
+        if (!readonlyDragWarningDebounce) {
+          message.warning(t('common.readonlyDragDescription'));
+
+          const debounceTimeout = setTimeout(() => {
+            setReadonlyDragWarningDebounce(null);
+          }, 3000);
+
+          setReadonlyDragWarningDebounce(debounceTimeout);
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    [readonly, readonlyDragWarningDebounce, t],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (readonlyDragWarningDebounce) {
+        clearTimeout(readonlyDragWarningDebounce);
+      }
+    };
+  }, [readonlyDragWarningDebounce]);
+
+  // keep the last snap position of the node
+  const [lastSnapPosition, setLastSnapPosition] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
+
+  const customApplyNodeChanges = useCallback(
+    (changes: NodeChange[], nodes: Node[]): Node[] => {
+      // reset the helper lines (clear existing lines, if any)
+      setHelperLineHorizontal(undefined);
+      setHelperLineVertical(undefined);
+
+      // this will be true if it's a single node being dragged
+      // inside we calculate the helper lines and snap position for the position where the node is being moved to
+      if (
+        changes.length === 1 &&
+        changes[0].type === 'position' &&
+        changes[0].dragging &&
+        changes[0].position
+      ) {
+        const helperLines = getHelperLines(changes[0], nodes);
+
+        // if we have a helper line, we snap the node to the helper line position
+        const updatedChanges = changes.map((change) => {
+          if (change.type === 'position' && change.position) {
+            const newPosition = {
+              x: helperLines.snapPosition.x ?? change.position.x,
+              y: helperLines.snapPosition.y ?? change.position.y,
+            };
+
+            // if the node is snapped, record the final position
+            if (
+              helperLines.snapPosition.x !== undefined ||
+              helperLines.snapPosition.y !== undefined
+            ) {
+              setLastSnapPosition((prev) => ({
+                ...prev,
+                [change.id]: newPosition,
+              }));
+            }
+
+            return {
+              ...change,
+              position: newPosition,
+            };
+          }
+          return change;
+        });
+
+        // if helper lines are returned, we set them so that they can be displayed
+        setHelperLineHorizontal(helperLines.horizontal);
+        setHelperLineVertical(helperLines.vertical);
+
+        return applyNodeChanges(updatedChanges, nodes);
+      }
+
+      return applyNodeChanges(changes, nodes);
+    },
+    [setLastSnapPosition, setHelperLineHorizontal, setHelperLineVertical],
+  );
+
+  const onNodesChangeHelperLines: OnNodesChange = useCallback(
+    (changes) => {
+      setNodes((nodes) => customApplyNodeChanges(changes, nodes));
+    },
+    [setNodes, customApplyNodeChanges],
+  );
+
+  const handleOnNodesChange = (changes: NodeChange[]) => {
+    onNodesChange(changes);
+    onNodesChangeHelperLines(changes);
+  };
+
+  const onNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      // check if there is a saved snap position
+      if (lastSnapPosition[node.id]) {
+        // apply the last snap position, ensure the node is not offset
+        const { setNodes } = reactFlowInstance;
+        setNodes((nodes) =>
+          nodes.map((n) => {
+            if (n.id === node.id) {
+              return {
+                ...n,
+                position: lastSnapPosition[node.id],
+              };
+            }
+            return n;
+          }),
+        );
+
+        // clear the snap position of the node
+        setLastSnapPosition((prev) => {
+          const newState = { ...prev };
+          delete newState[node.id];
+          return newState;
+        });
+      }
+
+      setIsNodeDragging(false);
+      setDraggingNodeId(null);
+
+      // when the drag ends, clear the helper lines
+      setHelperLineHorizontal(undefined);
+      setHelperLineVertical(undefined);
+    },
+    [
+      setIsNodeDragging,
+      setDraggingNodeId,
+      lastSnapPosition,
+      reactFlowInstance,
+      setHelperLineHorizontal,
+      setHelperLineVertical,
+    ],
+  );
 
   const onSelectionContextMenu = useCallback(
     (event: React.MouseEvent) => {
@@ -789,89 +930,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }),
     );
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
-
-  const [readonlyDragWarningDebounce, setReadonlyDragWarningDebounce] =
-    useState<NodeJS.Timeout | null>(null);
-
-  const handleReadonlyDrag = useCallback(
-    (event: React.MouseEvent) => {
-      if (readonly) {
-        if (!readonlyDragWarningDebounce) {
-          message.warning(t('common.readonlyDragDescription'));
-
-          const debounceTimeout = setTimeout(() => {
-            setReadonlyDragWarningDebounce(null);
-          }, 3000);
-
-          setReadonlyDragWarningDebounce(debounceTimeout);
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    },
-    [readonly, readonlyDragWarningDebounce, t],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (readonlyDragWarningDebounce) {
-        clearTimeout(readonlyDragWarningDebounce);
-      }
-    };
-  }, [readonlyDragWarningDebounce]);
-
-  const customApplyNodeChanges = useCallback((changes: NodeChange[], nodes: Node[]): Node[] => {
-    // reset the helper lines (clear existing lines, if any)
-    setHelperLineHorizontal(undefined);
-    setHelperLineVertical(undefined);
-
-    // this will be true if it's a single node being dragged
-    // inside we calculate the helper lines and snap position for the position where the node is being moved to
-    if (
-      changes.length === 1 &&
-      changes[0].type === 'position' &&
-      changes[0].dragging &&
-      changes[0].position
-    ) {
-      const helperLines = getHelperLines(changes[0], nodes);
-
-      // if we have a helper line, we snap the node to the helper line position
-      // 创建一个新的变更对象，而不是直接修改只读对象
-      const updatedChanges = changes.map((change) => {
-        if (change.type === 'position' && change.position) {
-          return {
-            ...change,
-            position: {
-              x: helperLines.snapPosition.x ?? change.position.x,
-              y: helperLines.snapPosition.y ?? change.position.y,
-            },
-          };
-        }
-        return change;
-      });
-
-      // if helper lines are returned, we set them so that they can be displayed
-      setHelperLineHorizontal(helperLines.horizontal);
-      setHelperLineVertical(helperLines.vertical);
-
-      return applyNodeChanges(updatedChanges, nodes);
-    }
-
-    return applyNodeChanges(changes, nodes);
-  }, []);
-
-  const onNodesChangeHelperLines: OnNodesChange = useCallback(
-    (changes) => {
-      setNodes((nodes) => customApplyNodeChanges(changes, nodes));
-    },
-    [setNodes, customApplyNodeChanges],
-  );
-
-  const handleOnNodesChange = (changes: NodeChange[]) => {
-    onNodesChange(changes);
-    onNodesChangeHelperLines(changes);
-  };
 
   return (
     <Spin
