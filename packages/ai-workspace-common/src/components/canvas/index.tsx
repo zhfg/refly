@@ -716,16 +716,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
               y: helperLines.snapPosition.y ?? change.position.y,
             };
 
-            // if the node is snapped, record the final position
-            if (
-              helperLines.snapPosition.x !== undefined ||
-              helperLines.snapPosition.y !== undefined
-            ) {
-              setLastSnapPosition((prev) => ({
-                ...prev,
-                [change.id]: newPosition,
-              }));
-            }
+            setLastSnapPosition((prev) => ({
+              ...prev,
+              [change.id]: newPosition,
+            }));
 
             return {
               ...change,

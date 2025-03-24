@@ -6,6 +6,23 @@ type GetHelperLinesResult = {
   snapPosition: Partial<XYPosition>;
 };
 
+// get the absolute position of the node, considering all parent nodes
+function getNodeAbsolutePosition(node: Node, nodes: Node[]): XYPosition {
+  let x = node.position.x;
+  let y = node.position.y;
+
+  if (node.parentId) {
+    const parent = nodes.find((n) => n.id === node.parentId);
+    if (parent) {
+      const parentPos = getNodeAbsolutePosition(parent, nodes);
+      x += parentPos.x;
+      y += parentPos.y;
+    }
+  }
+
+  return { x, y };
+}
+
 // this utility function can be called with a position change (inside onNodesChange)
 // it checks all other nodes and calculated the helper line positions and the position where the current node should snap to
 export function getHelperLines(
@@ -24,11 +41,22 @@ export function getHelperLines(
     return defaultResult;
   }
 
+  // get the parent node chain of the current node
+  let parentOffset = { x: 0, y: 0 };
+  if (nodeA.parentId) {
+    const parent = nodes.find((n) => n.id === nodeA.parentId);
+    if (parent) {
+      const parentAbsPos = getNodeAbsolutePosition(parent, nodes);
+      parentOffset = parentAbsPos;
+    }
+  }
+
+  // calculate the absolute bounds of the current node
   const nodeABounds = {
-    left: change.position.x,
-    right: change.position.x + (nodeA.measured?.width ?? 0),
-    top: change.position.y,
-    bottom: change.position.y + (nodeA.measured?.height ?? 0),
+    left: parentOffset.x + change.position.x,
+    right: parentOffset.x + change.position.x + (nodeA.measured?.width ?? 0),
+    top: parentOffset.y + change.position.y,
+    bottom: parentOffset.y + change.position.y + (nodeA.measured?.height ?? 0),
     width: nodeA.measured?.width ?? 0,
     height: nodeA.measured?.height ?? 0,
   };
@@ -39,11 +67,14 @@ export function getHelperLines(
   return nodes
     .filter((node) => node.id !== nodeA.id)
     .reduce<GetHelperLinesResult>((result, nodeB) => {
+      // compare the nodeB's absolute position with the nodeA's absolute position
+      const nodeBAbsPos = getNodeAbsolutePosition(nodeB, nodes);
+
       const nodeBBounds = {
-        left: nodeB.position.x,
-        right: nodeB.position.x + (nodeB.measured?.width ?? 0),
-        top: nodeB.position.y,
-        bottom: nodeB.position.y + (nodeB.measured?.height ?? 0),
+        left: nodeBAbsPos.x,
+        right: nodeBAbsPos.x + (nodeB.measured?.width ?? 0),
+        top: nodeBAbsPos.y,
+        bottom: nodeBAbsPos.y + (nodeB.measured?.height ?? 0),
         width: nodeB.measured?.width ?? 0,
         height: nodeB.measured?.height ?? 0,
       };
@@ -59,7 +90,9 @@ export function getHelperLines(
       const distanceLeftLeft = Math.abs(nodeABounds.left - nodeBBounds.left);
 
       if (distanceLeftLeft < verticalDistance) {
-        result.snapPosition.x = nodeBBounds.left;
+        // convert the absolute position to a relative position for node positioning
+        result.snapPosition.x = nodeBBounds.left - parentOffset.x;
+        // keep the helper line at the absolute position to display correctly
         result.vertical = nodeBBounds.left;
         verticalDistance = distanceLeftLeft;
       }
@@ -75,7 +108,7 @@ export function getHelperLines(
       const distanceRightRight = Math.abs(nodeABounds.right - nodeBBounds.right);
 
       if (distanceRightRight < verticalDistance) {
-        result.snapPosition.x = nodeBBounds.right - nodeABounds.width;
+        result.snapPosition.x = nodeBBounds.right - nodeABounds.width - parentOffset.x;
         result.vertical = nodeBBounds.right;
         verticalDistance = distanceRightRight;
       }
@@ -91,7 +124,7 @@ export function getHelperLines(
       const distanceLeftRight = Math.abs(nodeABounds.left - nodeBBounds.right);
 
       if (distanceLeftRight < verticalDistance) {
-        result.snapPosition.x = nodeBBounds.right;
+        result.snapPosition.x = nodeBBounds.right - parentOffset.x;
         result.vertical = nodeBBounds.right;
         verticalDistance = distanceLeftRight;
       }
@@ -107,7 +140,7 @@ export function getHelperLines(
       const distanceRightLeft = Math.abs(nodeABounds.right - nodeBBounds.left);
 
       if (distanceRightLeft < verticalDistance) {
-        result.snapPosition.x = nodeBBounds.left - nodeABounds.width;
+        result.snapPosition.x = nodeBBounds.left - nodeABounds.width - parentOffset.x;
         result.vertical = nodeBBounds.left;
         verticalDistance = distanceRightLeft;
       }
@@ -118,7 +151,7 @@ export function getHelperLines(
       const distanceTopTop = Math.abs(nodeABounds.top - nodeBBounds.top);
 
       if (distanceTopTop < horizontalDistance) {
-        result.snapPosition.y = nodeBBounds.top;
+        result.snapPosition.y = nodeBBounds.top - parentOffset.y;
         result.horizontal = nodeBBounds.top;
         horizontalDistance = distanceTopTop;
       }
@@ -132,7 +165,7 @@ export function getHelperLines(
       const distanceBottomTop = Math.abs(nodeABounds.bottom - nodeBBounds.top);
 
       if (distanceBottomTop < horizontalDistance) {
-        result.snapPosition.y = nodeBBounds.top - nodeABounds.height;
+        result.snapPosition.y = nodeBBounds.top - nodeABounds.height - parentOffset.y;
         result.horizontal = nodeBBounds.top;
         horizontalDistance = distanceBottomTop;
       }
@@ -143,7 +176,7 @@ export function getHelperLines(
       const distanceBottomBottom = Math.abs(nodeABounds.bottom - nodeBBounds.bottom);
 
       if (distanceBottomBottom < horizontalDistance) {
-        result.snapPosition.y = nodeBBounds.bottom - nodeABounds.height;
+        result.snapPosition.y = nodeBBounds.bottom - nodeABounds.height - parentOffset.y;
         result.horizontal = nodeBBounds.bottom;
         horizontalDistance = distanceBottomBottom;
       }
@@ -157,7 +190,7 @@ export function getHelperLines(
       const distanceTopBottom = Math.abs(nodeABounds.top - nodeBBounds.bottom);
 
       if (distanceTopBottom < horizontalDistance) {
-        result.snapPosition.y = nodeBBounds.bottom;
+        result.snapPosition.y = nodeBBounds.bottom - parentOffset.y;
         result.horizontal = nodeBBounds.bottom;
         horizontalDistance = distanceTopBottom;
       }
