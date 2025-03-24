@@ -23,6 +23,7 @@ import {
   MAX_SHORT_DOCUMENTS_RATIO,
   MAX_RAG_RELEVANT_RESOURCES_RATIO,
   MAX_SHORT_RESOURCES_RATIO,
+  MAX_URL_SOURCES_TOKENS,
 } from './constants';
 import { Source } from '@refly-packages/openapi-schema';
 
@@ -666,7 +667,7 @@ export async function processUrlSourcesWithSimilarity(
       // 2.1 large content, use inMemoryGetRelevantChunks for recall
       const relevantChunks = await inMemoryGetRelevantChunks(
         query,
-        source.pageContent || '',
+        source?.pageContent?.slice(0, MAX_URL_SOURCES_TOKENS) || '',
         {
           entityId: source.url || '',
           title: source.title || '',
@@ -706,7 +707,7 @@ export async function processUrlSourcesWithSimilarity(
       const remainingTokens = maxTokens - usedTokens;
       let relevantChunks = await inMemoryGetRelevantChunks(
         query,
-        remainingSource.pageContent || '',
+        remainingSource?.pageContent?.slice(0, MAX_URL_SOURCES_TOKENS) || '',
         {
           entityId: remainingSource.url || '',
           title: remainingSource.title || '',
