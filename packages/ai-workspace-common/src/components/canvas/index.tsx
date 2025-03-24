@@ -10,6 +10,9 @@ import {
   Node,
   Edge,
   useStoreApi,
+  applyNodeChanges,
+  NodeChange,
+  OnNodesChange,
 } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -62,6 +65,8 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import { getHelperLines } from './common/helper-line/util';
+import HelperLines from './common/helper-line/index';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -154,6 +159,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
+
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
   const { onNodesChange, truncateAllNodesContent } = useNodeOperations();
@@ -161,6 +167,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const { onEdgesChange, onConnect } = useEdgeOperations();
   const edgeStyles = useEdgeStyles();
+
+  const [helperLineHorizontal, setHelperLineHorizontal] = useState<number | undefined>(undefined);
+  const [helperLineVertical, setHelperLineVertical] = useState<number | undefined>(undefined);
 
   // Call truncateAllNodesContent when nodes are loaded
   useEffect(() => {
@@ -199,6 +208,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }));
 
   const reactFlowInstance = useReactFlow();
+  const { setNodes } = reactFlowInstance;
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider, readonly, shareNotFound, shareLoading } = useCanvasContext();
@@ -811,6 +821,58 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     };
   }, [readonlyDragWarningDebounce]);
 
+  const customApplyNodeChanges = useCallback((changes: NodeChange[], nodes: Node[]): Node[] => {
+    // reset the helper lines (clear existing lines, if any)
+    setHelperLineHorizontal(undefined);
+    setHelperLineVertical(undefined);
+
+    // this will be true if it's a single node being dragged
+    // inside we calculate the helper lines and snap position for the position where the node is being moved to
+    if (
+      changes.length === 1 &&
+      changes[0].type === 'position' &&
+      changes[0].dragging &&
+      changes[0].position
+    ) {
+      const helperLines = getHelperLines(changes[0], nodes);
+
+      // if we have a helper line, we snap the node to the helper line position
+      // 创建一个新的变更对象，而不是直接修改只读对象
+      const updatedChanges = changes.map((change) => {
+        if (change.type === 'position' && change.position) {
+          return {
+            ...change,
+            position: {
+              x: helperLines.snapPosition.x ?? change.position.x,
+              y: helperLines.snapPosition.y ?? change.position.y,
+            },
+          };
+        }
+        return change;
+      });
+
+      // if helper lines are returned, we set them so that they can be displayed
+      setHelperLineHorizontal(helperLines.horizontal);
+      setHelperLineVertical(helperLines.vertical);
+
+      return applyNodeChanges(updatedChanges, nodes);
+    }
+
+    return applyNodeChanges(changes, nodes);
+  }, []);
+
+  const onNodesChangeHelperLines: OnNodesChange = useCallback(
+    (changes) => {
+      setNodes((nodes) => customApplyNodeChanges(changes, nodes));
+    },
+    [setNodes, customApplyNodeChanges],
+  );
+
+  const handleOnNodesChange = (changes: NodeChange[]) => {
+    onNodesChange(changes);
+    onNodesChangeHelperLines(changes);
+  };
+
   return (
     <Spin
       className="w-full h-full"
@@ -866,7 +928,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
-            onNodesChange={readonly ? readonlyNodesChange : onNodesChange}
+            onNodesChange={readonly ? readonlyNodesChange : handleOnNodesChange}
             onEdgesChange={readonly ? readonlyEdgesChange : onEdgesChange}
             onConnect={readonly ? readonlyConnect : onConnect}
             onConnectEnd={readonly ? undefined : temporaryEdgeOnConnectEnd}
@@ -894,6 +956,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
             {memoizedBackground}
             {memoizedMiniMap}
+            <HelperLines horizontal={helperLineHorizontal} vertical={helperLineVertical} />
           </ReactFlow>
 
           <LayoutControl

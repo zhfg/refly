@@ -1,4 +1,4 @@
-import { Node, NodeProps } from '@xyflow/react';
+import { Node, NodeProps, XYPosition } from '@xyflow/react';
 import {
   ActionLog,
   ActionMeta,
@@ -31,6 +31,7 @@ export type CanvasNodeData<T = Record<string, unknown>> = {
 export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType> & {
   className?: string;
   style?: React.CSSProperties;
+  position?: XYPosition;
 };
 
 // Node specific metadata types
