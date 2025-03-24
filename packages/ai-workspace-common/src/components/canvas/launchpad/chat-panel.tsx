@@ -11,6 +11,7 @@ import { useContextFilterErrorTip } from './context-manager/hooks/use-context-fi
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 import { SelectedSkillHeader } from './selected-skill-header';
 import {
@@ -33,6 +34,7 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { omit } from '@refly-packages/utils/index';
+import { cn } from '@refly-packages/utils/cn';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -78,7 +80,7 @@ const PremiumBanner = () => {
   );
 };
 
-export const ChatPanel = () => {
+export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
@@ -118,6 +120,11 @@ export const ChatPanel = () => {
   const { addNode } = useAddNode();
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
+
+  const { setShowReflyPilot, addReflyPilotMessage } = useCanvasStoreShallow((state) => ({
+    setShowReflyPilot: state.setShowReflyPilot,
+    addReflyPilotMessage: state.addReflyPilotMessage,
+  }));
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -176,6 +183,15 @@ export const ChatPanel = () => {
     const { contextItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
+
+    // Add message to Refly Pilot
+    addReflyPilotMessage({
+      id: resultId,
+      resultId,
+    });
+
+    // Ensure Refly Pilot is visible
+    setShowReflyPilot(true);
 
     chatStore.setNewQAText('');
 
@@ -260,14 +276,19 @@ export const ChatPanel = () => {
 
   return (
     <div className="relative w-full" data-cy="launchpad-chat-panel">
-      <div className="ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden">
+      <div
+        className={cn(
+          'ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden',
+          embeddedMode && 'embedded-chat-panel border border-gray-100',
+        )}
+      >
         <SelectedSkillHeader
           skill={selectedSkill}
           setSelectedSkill={setSelectedSkill}
           onClose={() => setSelectedSkill(null)}
         />
         {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
-        <div className="px-3">
+        <div className={cn('px-3', embeddedMode && 'px-2')}>
           <ContextManager
             className="py-2"
             contextItems={contextItems}

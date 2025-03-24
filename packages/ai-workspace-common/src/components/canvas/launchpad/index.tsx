@@ -2,6 +2,7 @@ import { useEffect, memo, useCallback } from 'react';
 
 import { ChatPanel } from './chat-panel';
 import { SkillDisplay } from './skill-display';
+import { cn } from '@refly-packages/utils/cn';
 
 // stores
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -14,10 +15,12 @@ import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/com
 
 interface LaunchPadProps {
   visible?: boolean;
+  inReflyPilot?: boolean;
+  className?: string;
 }
 
 export const LaunchPad = memo(
-  ({ visible = true }: LaunchPadProps) => {
+  ({ visible = true, inReflyPilot = false, className }: LaunchPadProps) => {
     // stores
     const contextPanelStore = useContextPanelStoreShallow((state) => ({
       resetState: state.resetState,
@@ -55,17 +58,25 @@ export const LaunchPad = memo(
     }
 
     return (
-      <div className="ai-copilot-operation-container" data-cy="launchpad">
-        <div className="ai-copilot-operation-body">
+      <div
+        className={cn(
+          'ai-copilot-operation-container',
+          inReflyPilot && 'embedded-launchpad',
+          className,
+        )}
+        data-cy="launchpad"
+      >
+        <div className={cn('ai-copilot-operation-body', inReflyPilot && 'p-2')}>
           <SkillDisplay />
           <RecommendQuestionsPanel
             isOpen={recommendQuestionsOpen}
             onClose={() => setRecommendQuestionsOpen(false)}
           />
-          <ChatPanel />
+          <ChatPanel embeddedMode={inReflyPilot} />
         </div>
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.visible === nextProps.visible,
+  (prevProps, nextProps) =>
+    prevProps.visible === nextProps.visible && prevProps.inReflyPilot === nextProps.inReflyPilot,
 );

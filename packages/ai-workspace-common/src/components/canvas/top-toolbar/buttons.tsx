@@ -13,6 +13,7 @@ import { useReactFlow } from '@xyflow/react';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const ToolbarButtons = memo(
   ({
@@ -34,6 +35,11 @@ export const ToolbarButtons = memo(
     const { setNodeCenter } = useNodePosition();
     const { getNodes } = useReactFlow();
     const { hoverCardEnabled } = useHoverCard();
+
+    const { showReflyPilot, setShowReflyPilot } = useCanvasStoreShallow((state) => ({
+      showReflyPilot: state.showReflyPilot,
+      setShowReflyPilot: state.setShowReflyPilot,
+    }));
 
     const handleNodeSelect = useCallback(
       (item: IContextItem) => {
@@ -61,6 +67,16 @@ export const ToolbarButtons = memo(
       placement: 'bottom' as const,
     };
 
+    const pilotButtonConfig = {
+      title: t(`canvas.toolbar.${showReflyPilot ? 'hideReflyPilot' : 'showReflyPilot'}`, {
+        defaultValue: showReflyPilot ? 'Hide Refly Pilot' : 'Show Refly Pilot',
+      }),
+      description: t('canvas.toolbar.toggleReflyPilotDescription', {
+        defaultValue: 'Toggle the visibility of Refly Pilot',
+      }),
+      placement: 'bottom' as const,
+    };
+
     const previewButton = (
       <Button
         type="text"
@@ -79,6 +95,22 @@ export const ToolbarButtons = memo(
       />
     );
 
+    const pilotButton = (
+      <Button
+        type="text"
+        icon={
+          <span
+            className="flex items-center justify-center text-xs font-semibold"
+            style={{ color: showReflyPilot ? '#000' : '#9CA3AF' }}
+          >
+            Refly Pilot
+          </span>
+        }
+        onClick={() => setShowReflyPilot(!showReflyPilot)}
+        className="!w-14 h-6 flex items-center justify-center"
+      />
+    );
+
     const exportImageButton = (
       <Button
         type="text"
@@ -90,45 +122,54 @@ export const ToolbarButtons = memo(
     );
 
     return (
-      <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-        <Popover
-          open={searchOpen}
-          onOpenChange={setSearchOpen}
-          overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
-          trigger="click"
-          placement="bottomRight"
-          content={
-            <NodeSelector
-              onSelect={handleNodeSelect}
-              showFooterActions={true}
-              onClickOutside={() => setSearchOpen(false)}
-            />
-          }
-          overlayClassName="node-search-popover"
-        >
-          <Tooltip title={t('canvas.toolbar.searchNode')}>
-            <Button
-              type="text"
-              icon={<IconSearch style={{ color: '#000' }} />}
-              className="w-8 h-6 flex items-center justify-center mr-1"
-            />
-          </Tooltip>
-        </Popover>
+      <>
+        <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+          {hoverCardEnabled ? (
+            <HoverCard {...pilotButtonConfig}>{pilotButton}</HoverCard>
+          ) : (
+            <Tooltip title={pilotButtonConfig.title}>{pilotButton}</Tooltip>
+          )}
+        </div>
+        <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+          <Popover
+            open={searchOpen}
+            onOpenChange={setSearchOpen}
+            overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
+            trigger="click"
+            placement="bottomRight"
+            content={
+              <NodeSelector
+                onSelect={handleNodeSelect}
+                showFooterActions={true}
+                onClickOutside={() => setSearchOpen(false)}
+              />
+            }
+            overlayClassName="node-search-popover"
+          >
+            <Tooltip title={t('canvas.toolbar.searchNode')}>
+              <Button
+                type="text"
+                icon={<IconSearch style={{ color: '#000' }} />}
+                className="w-8 h-6 flex items-center justify-center mr-1"
+              />
+            </Tooltip>
+          </Popover>
 
-        {hoverCardEnabled ? (
-          <HoverCard {...previewButtonConfig}>{previewButton}</HoverCard>
-        ) : (
-          <Tooltip title={previewButtonConfig.title}>{previewButton}</Tooltip>
-        )}
+          {hoverCardEnabled ? (
+            <HoverCard {...previewButtonConfig}>{previewButton}</HoverCard>
+          ) : (
+            <Tooltip title={previewButtonConfig.title}>{previewButton}</Tooltip>
+          )}
 
-        {hoverCardEnabled ? (
-          <HoverCard {...maxRatioButtonConfig}>{maxRatioButton}</HoverCard>
-        ) : (
-          <Tooltip title={maxRatioButtonConfig.title}>{maxRatioButton}</Tooltip>
-        )}
+          {hoverCardEnabled ? (
+            <HoverCard {...maxRatioButtonConfig}>{maxRatioButton}</HoverCard>
+          ) : (
+            <Tooltip title={maxRatioButtonConfig.title}>{maxRatioButton}</Tooltip>
+          )}
 
-        <Tooltip title={t('canvas.toolbar.exportImage')}>{exportImageButton}</Tooltip>
-      </div>
+          <Tooltip title={t('canvas.toolbar.exportImage')}>{exportImageButton}</Tooltip>
+        </div>
+      </>
     );
   },
 );

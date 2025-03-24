@@ -12,7 +12,6 @@ import {
   useStoreApi,
 } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
-import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreviewContainer } from './node-preview';
@@ -168,9 +167,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }
   }, [canvasId, truncateAllNodesContent]);
 
-  const { showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
+  const { showPreview, showMaxRatio } = useCanvasStoreShallow((state) => ({
     showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
     showMaxRatio: state.showMaxRatio,
   }));
 
@@ -565,16 +563,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedEdges = useMemo(() => edges, [edges]);
 
-  // Memoize LaunchPad component
-  const memoizedLaunchPad = useMemo(
-    () => (
-      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-        <LaunchPad visible={!readonly && showLaunchpad} />
-      </div>
-    ),
-    [readonly, showLaunchpad],
-  );
-
   // Memoize MiniMap styles
   const miniMapStyles = useMemo(
     () => ({
@@ -885,8 +873,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             changeMode={toggleInteractionMode}
             readonly={readonly}
           />
-
-          {memoizedLaunchPad}
         </div>
 
         {/* Display the not found overlay when shareNotFound is true */}

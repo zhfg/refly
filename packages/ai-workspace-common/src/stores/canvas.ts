@@ -40,6 +40,8 @@ export interface CanvasState {
   nodeSizeMode: 'compact' | 'adaptive';
   autoLayout: boolean;
   showTemplates: boolean;
+  showReflyPilot: boolean;
+  reflyPilotMessages: { id: string; resultId: string; timestamp: number }[];
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -63,6 +65,10 @@ export interface CanvasState {
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
   setAutoLayout: (enabled: boolean) => void;
   setShowTemplates: (show: boolean) => void;
+  setShowReflyPilot: (show: boolean) => void;
+  addReflyPilotMessage: (message: { id: string; resultId: string }) => void;
+  removeReflyPilotMessage: (id: string) => void;
+  clearReflyPilotMessages: () => void;
   clearState: () => void;
 }
 
@@ -90,6 +96,8 @@ const defaultCanvasState = () => ({
   nodeSizeMode: 'compact' as const,
   autoLayout: false,
   showTemplates: true,
+  showReflyPilot: true,
+  reflyPilotMessages: [],
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -248,6 +256,27 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showTemplates = show;
         }),
+      setShowReflyPilot: (show) =>
+        set((state) => {
+          state.showReflyPilot = show;
+        }),
+      addReflyPilotMessage: (message) =>
+        set((state) => {
+          state.reflyPilotMessages.push({
+            ...message,
+            timestamp: Date.now(),
+          });
+        }),
+      removeReflyPilotMessage: (id) =>
+        set((state) => {
+          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+            (message) => message.id !== id,
+          );
+        }),
+      clearReflyPilotMessages: () =>
+        set((state) => {
+          state.reflyPilotMessages = [];
+        }),
       clearState: () => set(defaultCanvasState()),
     })),
     {
@@ -259,6 +288,8 @@ export const useCanvasStore = create<CanvasState>()(
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
+        showReflyPilot: state.showReflyPilot,
+        reflyPilotMessages: state.reflyPilotMessages,
       }),
     },
   ),
