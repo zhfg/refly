@@ -38,6 +38,8 @@ import {
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
+import { CodeArtifactService } from '@/code-artifact/code-artifact.service';
+import { codeArtifactPO2DTO } from '@/code-artifact/code-artifact.dto';
 
 const SHARE_CODE_PREFIX = {
   document: 'doc-',
@@ -68,6 +70,7 @@ export class ShareService {
     private readonly canvasService: CanvasService,
     private readonly knowledgeService: KnowledgeService,
     private readonly actionService: ActionService,
+    private readonly codeArtifactService: CodeArtifactService,
     private readonly subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {}
@@ -178,6 +181,20 @@ export class ShareService {
         const { shareRecord } = await this.createShareForSkillResponse(user, {
           entityId: node.data?.entityId,
           entityType: 'skillResponse',
+          parentShareId: shareId,
+          allowDuplication,
+        });
+
+        if (node.data) {
+          node.data.metadata = {
+            ...node.data.metadata,
+            shareId: shareRecord?.shareId,
+          };
+        }
+      } else if (node.type === 'codeArtifact') {
+        const { shareRecord } = await this.createShareForCodeArtifact(user, {
+          entityId: node.data?.entityId,
+          entityType: 'codeArtifact',
           parentShareId: shareId,
           allowDuplication,
         });
@@ -475,6 +492,81 @@ export class ShareService {
     return { shareRecord, resource };
   }
 
+  async createShareForCodeArtifact(user: User, param: CreateShareRequest) {
+    const { entityId, entityType, title, parentShareId, allowDuplication } = param;
+
+    if (entityType !== 'codeArtifact') {
+      throw new ParamsError('Entity type must be codeArtifact');
+    }
+
+    // Check if shareRecord already exists
+    const existingShareRecord = await this.prisma.shareRecord.findFirst({
+      where: {
+        entityId,
+        entityType: 'codeArtifact',
+        uid: user.uid,
+        deletedAt: null,
+      },
+    });
+
+    // Generate shareId only if needed
+    const shareId = existingShareRecord?.shareId ?? genShareId('codeArtifact');
+
+    // Get the code artifact data from either the shareData or shareDataStorageKey
+    const codeArtifactData = await this.codeArtifactService.getCodeArtifactDetail(user, entityId);
+    const codeArtifact = codeArtifactPO2DTO(codeArtifactData);
+
+    // Upload the code artifact data to storage
+    const { storageKey } = await this.miscService.uploadBuffer(user, {
+      fpath: 'codeArtifact.json',
+      buf: Buffer.from(JSON.stringify(codeArtifact)),
+      entityId,
+      entityType: 'codeArtifact',
+      visibility: 'public',
+      storageKey: `share/${shareId}.json`,
+    });
+
+    let shareRecord: ShareRecord;
+
+    if (existingShareRecord) {
+      // Update existing shareRecord
+      shareRecord = await this.prisma.shareRecord.update({
+        where: {
+          pk: existingShareRecord.pk,
+        },
+        data: {
+          title: title ?? 'Code Artifact',
+          storageKey,
+          parentShareId,
+          allowDuplication,
+          updatedAt: new Date(),
+        },
+      });
+      this.logger.log(
+        `Updated existing share record: ${shareRecord.shareId} for code artifact: ${entityId}`,
+      );
+    } else {
+      // Create new shareRecord
+      shareRecord = await this.prisma.shareRecord.create({
+        data: {
+          shareId,
+          title: title ?? 'Code Artifact',
+          uid: user.uid,
+          entityId,
+          entityType: 'codeArtifact',
+          storageKey,
+          parentShareId,
+          allowDuplication,
+        },
+      });
+      this.logger.log(
+        `Created new share record: ${shareRecord.shareId} for code artifact: ${entityId}`,
+      );
+    }
+
+    return { shareRecord };
+  }
+
   async createShareForSkillResponse(user: User, param: CreateShareRequest) {
     const { entityId: resultId, parentShareId, allowDuplication, coverStorageKey } = param;
 
@@ -722,7 +814,7 @@ export class ShareService {
       case 'skillResponse':
         return (await this.createShareForSkillResponse(user, req)).shareRecord;
       case 'codeArtifact':
-        return (await this.createShareForRawData(user, req)).shareRecord;
+        return (await this.createShareForCodeArtifact(user, req)).shareRecord;
       default:
         throw new ParamsError(`Unsupported entity type ${req.entityType} for sharing`);
     }

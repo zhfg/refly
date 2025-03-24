@@ -1,4 +1,4 @@
-import { useState, memo, useCallback, useEffect } from 'react';
+import { useState, memo, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CanvasNode,
@@ -10,13 +10,15 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { ConfigScope, Skill, CodeArtifactType } from '@refly/openapi-schema';
+import { ConfigScope, Skill, CodeArtifactType, CodeArtifact } from '@refly/openapi-schema';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { fullscreenEmitter } from '@refly-packages/ai-workspace-common/events/fullscreen';
 import { codeArtifactEmitter } from '@refly-packages/ai-workspace-common/events/codeArtifact';
 import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useDebouncedCallback } from 'use-debounce';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -28,6 +30,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
   const { addNode } = useAddNode();
   const { readonly: canvasReadOnly } = useCanvasContext();
+  const isLogin = useUserStoreShallow((state) => state.isLogin);
+
   // Use activeTab from node metadata with fallback to 'code'
   const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
@@ -35,6 +39,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
 
   const status = node?.data?.metadata?.status;
   const entityId = node?.data?.entityId ?? '';
+  const shareId = node?.data?.metadata?.shareId ?? '';
 
   const { data: remoteData } = useGetCodeArtifactDetail(
     {
@@ -43,10 +48,15 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
       },
     },
     null,
-    { enabled: artifactId && status === 'finish' },
+    { enabled: isLogin && !shareId && artifactId && status === 'finish' },
   );
-  const remoteArtifact = remoteData?.data;
-  const [content, setContent] = useState(remoteArtifact?.content ?? '');
+  const { data: shareData } = useFetchShareData<CodeArtifact>(shareId);
+
+  const artifactData = useMemo(
+    () => shareData || remoteData?.data || null,
+    [shareData, remoteData],
+  );
+  const [content, setContent] = useState(artifactData?.content ?? '');
 
   useEffect(() => {
     const handleContentUpdate = (data: { artifactId: string; content: string }) => {
@@ -71,10 +81,10 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   }, [status, artifactId]);
 
   useEffect(() => {
-    if (remoteArtifact) {
-      setContent(remoteArtifact.content);
+    if (artifactData) {
+      setContent(artifactData.content);
     }
-  }, [remoteArtifact]);
+  }, [artifactData]);
 
   // Update node data when tab changes
   const handleTabChange = useCallback((tab: 'code' | 'preview') => {
@@ -182,50 +192,6 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     },
     [status],
   );
-
-  // const handlePreviewImageChange = useCallback(
-  //   async (blob: Blob) => {
-  //     if (!entityId) {
-  //       return;
-  //     }
-
-  //     // Upload the screenshot
-  //     const { data, error } = await getClient().upload({
-  //       body: {
-  //         file: blob,
-  //         entityId,
-  //         entityType: 'codeArtifact',
-  //         // storageKey: `static/${entityId}`,
-  //       },
-  //     });
-
-  //     if (error || !data?.success) {
-  //       console.error('Failed to upload screenshot:', error);
-  //     } else {
-  //       const uploadResult = data?.data;
-  //       console.log('uploadResult', uploadResult);
-  //       setNodeDataByEntity(
-  //         {
-  //           entityId,
-  //           type: 'codeArtifact',
-  //         },
-  //         {
-  //           metadata: {
-  //             previewUrl: uploadResult.url,
-  //             previewStorageKey: uploadResult.storageKey,
-  //           },
-  //         },
-  //       );
-  //       await getClient().updateCodeArtifact({
-  //         body: {
-  //           artifactId,
-  //           previewStorageKey: uploadResult.storageKey,
-  //         },
-  //       });
-  //     }
-  //   },
-  //   [entityId, setNodeDataByEntity],
-  // );
 
   if (!artifactId) {
     return (

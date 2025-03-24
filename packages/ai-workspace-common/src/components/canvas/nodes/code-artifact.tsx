@@ -34,36 +34,44 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { Skill } from '@refly/openapi-schema';
+import { CodeArtifact, Skill } from '@refly/openapi-schema';
 import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
 import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface NodeContentProps {
   status: 'generating' | 'finish' | 'failed';
   entityId: string;
+  shareId?: string;
 }
 
 const NodeContent = memo(
-  ({ status, entityId }: NodeContentProps) => {
-    const { data } = useGetCodeArtifactDetail(
+  ({ status, entityId, shareId }: NodeContentProps) => {
+    const isLogin = useUserStoreShallow((state) => state.isLogin);
+    const { data: remoteData } = useGetCodeArtifactDetail(
       {
         query: {
           artifactId: entityId,
         },
       },
       null,
-      { enabled: status === 'finish' },
+      { enabled: isLogin && !shareId && status === 'finish' },
     );
-    const remoteData = data?.data;
+    const { data: shareData } = useFetchShareData<CodeArtifact>(shareId);
+    const artifactData = useMemo(
+      () => shareData || remoteData?.data || null,
+      [shareData, remoteData],
+    );
 
     return (
       <div className="h-full h-full flex justify-center items-center">
         <Renderer
-          content={remoteData?.content}
-          type={remoteData?.type}
-          key={remoteData?.artifactId}
-          title={remoteData?.title}
-          language={remoteData?.language}
+          content={artifactData?.content}
+          type={artifactData?.type}
+          key={artifactData?.artifactId}
+          title={artifactData?.title}
+          language={artifactData?.language}
           onRequestFix={() => {}}
         />
       </div>
@@ -329,7 +337,11 @@ export const CodeArtifactNode = memo(
                     }}
                     className={isResizing ? 'pointer-events-none' : ''}
                   >
-                    <NodeContent status={data.metadata?.status} entityId={data.entityId} />
+                    <NodeContent
+                      status={data.metadata?.status}
+                      entityId={data.entityId}
+                      shareId={data.metadata?.shareId}
+                    />
                   </div>
                 )}
               </div>
