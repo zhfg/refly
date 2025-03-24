@@ -6,7 +6,10 @@ import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState, useMemo, useCallback, useRef, memo, useEffect } from 'react';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import {
+  useCanvasStore,
+  useCanvasStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CodeArtifactNodePreview } from './code-artifact';
 import { WebsiteNodePreview } from './website';
 import { fullscreenEmitter } from '@refly-packages/ai-workspace-common/events/fullscreen';
@@ -14,6 +17,23 @@ import {
   nodeActionEmitter,
   createNodeEventName,
 } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useDrag, useDrop, DndProvider, XYCoord } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import withScrolling, { createHorizontalStrength } from 'react-dnd-scrolling';
+import { getFreshNodePreviews } from '@refly-packages/ai-workspace-common/utils/canvas';
+
+// DnD item type constant
+const ITEM_TYPE = 'node-preview';
+
+// Create a scrolling component with enhanced horizontal sensitivity
+const ScrollingComponent = withScrolling('div');
+const horizontalStrength = createHorizontalStrength(250);
+
+// DnD item interface
+interface DragItem {
+  id: string;
+  index: number;
+}
 
 const PreviewComponent = memo(
   ({ node }: { node: CanvasNode<any> }) => {
@@ -72,6 +92,276 @@ const PreviewComponent = memo(
   },
 );
 
+export const DraggableNodePreview = memo(
+  ({
+    node,
+    canvasId,
+    index,
+    moveCard,
+  }: {
+    node: CanvasNode<any>;
+    canvasId: string;
+    index: number;
+    moveCard: (dragIndex: number, hoverIndex: number) => void;
+  }) => {
+    const [isMaximized, setIsMaximized] = useState(false);
+    const [isWideMode, setIsWideMode] = useState(false);
+    const previewRef = useRef<HTMLDivElement>(null);
+    const dragRef = useRef<HTMLDivElement>(null);
+
+    // Add ESC key handler to exit fullscreen
+    useEffect(() => {
+      const handleEscKey = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isMaximized) {
+          setIsMaximized(false);
+        }
+      };
+
+      document.addEventListener('keydown', handleEscKey);
+
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
+    }, [isMaximized]);
+
+    const { removePinnedNode } = useCanvasStoreShallow((state) => ({
+      removePinnedNode: state.removeNodePreview,
+    }));
+
+    const handleClose = useCallback(() => {
+      removePinnedNode(canvasId, node.id);
+    }, [node, removePinnedNode, canvasId]);
+
+    useEffect(() => {
+      const handleFullScreenPreview = () => {
+        setIsMaximized(true);
+      };
+
+      const eventName = createNodeEventName(node.id, 'fullScreenPreview');
+      nodeActionEmitter.on(eventName, handleFullScreenPreview);
+
+      return () => {
+        nodeActionEmitter.off(eventName, handleFullScreenPreview);
+      };
+    }, [node.id]);
+
+    const previewStyles = useMemo(
+      () => ({
+        height: isMaximized ? '100vh' : 'calc(100vh - 72px)',
+        width: isMaximized ? 'calc(100vw)' : isWideMode ? '840px' : '420px',
+        top: isMaximized ? 0 : null,
+        right: isMaximized ? 0 : null,
+        zIndex: isMaximized ? 50 : 10,
+        transition: isMaximized
+          ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+          : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
+      }),
+      [isMaximized, isWideMode],
+    );
+
+    const previewClassName = useMemo(
+      () => `
+    bg-white 
+    rounded-lg 
+    will-change-transform
+    ${isMaximized ? 'fixed' : ''}
+  `,
+      [isMaximized],
+    );
+
+    const handleMaximize = useCallback(() => {
+      setIsMaximized(!isMaximized);
+    }, [isMaximized]);
+
+    const handleWideMode = useCallback(() => {
+      setIsWideMode(!isWideMode);
+    }, [isWideMode]);
+
+    // Listen for exitFullscreenForFix event
+    useEffect(() => {
+      const handleExitFullscreenForFix = (data: { nodeId: string }) => {
+        // Only exit fullscreen if this is the node requesting the fix
+        if (data.nodeId === node.id && isMaximized) {
+          setIsMaximized(false);
+        }
+      };
+
+      fullscreenEmitter.on('exitFullscreenForFix', handleExitFullscreenForFix);
+
+      return () => {
+        fullscreenEmitter.off('exitFullscreenForFix', handleExitFullscreenForFix);
+      };
+    }, [node.id, isMaximized]);
+
+    // Setup drag
+    const [{ isDragging }, drag, preview] = useDrag({
+      type: ITEM_TYPE,
+      item: { id: node.id, index },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+      canDrag: () => !isMaximized, // Prevent dragging when maximized
+    });
+
+    // Setup drop
+    const [, drop] = useDrop({
+      accept: ITEM_TYPE,
+      hover: (item: DragItem, monitor) => {
+        if (!previewRef.current) {
+          return;
+        }
+        const dragIndex = item.index;
+        const hoverIndex = index;
+
+        // Don't replace items with themselves
+        if (dragIndex === hoverIndex) {
+          return;
+        }
+
+        // Determine mouse position
+        const hoverBoundingRect = previewRef.current.getBoundingClientRect();
+        const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+        const clientOffset = monitor.getClientOffset();
+        const hoverClientX = (clientOffset as XYCoord).x - hoverBoundingRect.left;
+
+        // Only perform the move when the mouse has crossed half of the items height or width
+        // Dragging right
+        if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) {
+          return;
+        }
+        // Dragging left
+        if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+          return;
+        }
+
+        // Time to actually perform the action
+        moveCard(dragIndex, hoverIndex);
+        // Note: we're mutating the monitor item here!
+        // Generally it's better to avoid mutations,
+        // but it's good here for the sake of performance
+        // to avoid expensive index searches.
+        item.index = hoverIndex;
+      },
+    });
+
+    // Connect the refs
+    // Initialize drag preview without preview image
+    drag(dragRef);
+    drop(preview(previewRef));
+
+    const opacity = isDragging ? 0.4 : 1;
+
+    return (
+      <div
+        data-preview-id={node?.id}
+        className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow-lg bg-transparent"
+        ref={previewRef}
+        style={{ opacity }}
+      >
+        <div className={previewClassName} style={previewStyles}>
+          <div ref={dragRef} className="pointer-events-auto">
+            <NodePreviewHeader
+              node={node}
+              onClose={handleClose}
+              onMaximize={handleMaximize}
+              onWideMode={handleWideMode}
+              isMaximized={isMaximized}
+              isWideMode={isWideMode}
+              dragHandleProps={{ ref: dragRef }}
+              isDragging={isDragging}
+            />
+          </div>
+          <div className="h-[calc(100%-52px)] overflow-auto rounded-b-lg pointer-events-auto preview-container">
+            <PreviewComponent node={node} />
+          </div>
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    const basicPropsEqual =
+      prevProps.node?.id === nextProps.node?.id &&
+      prevProps.canvasId === nextProps.canvasId &&
+      prevProps.index === nextProps.index;
+
+    if (!basicPropsEqual) return false;
+
+    const contentEqual =
+      prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview;
+
+    const titleEqual = prevProps.node?.data?.title === nextProps.node?.data?.title;
+
+    const statusEqual =
+      prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status;
+
+    // Check node-specific metadata
+    let nodeSpecificEqual = true;
+    if (prevProps.node?.type === 'codeArtifact') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab;
+    } else if (prevProps.node?.type === 'website') {
+      nodeSpecificEqual =
+        prevProps.node?.data?.metadata?.url === nextProps.node?.data?.metadata?.url &&
+        prevProps.node?.data?.metadata?.viewMode === nextProps.node?.data?.metadata?.viewMode;
+    }
+
+    return basicPropsEqual && contentEqual && titleEqual && statusEqual && nodeSpecificEqual;
+  },
+);
+
+export const NodePreviewContainer = ({
+  canvasId,
+  nodes,
+}: {
+  canvasId: string;
+  nodes: CanvasNode<any>[];
+}) => {
+  const { rawNodePreviews, reorderNodePreviews } = useCanvasStoreShallow((state) => ({
+    rawNodePreviews: state.config[canvasId]?.nodePreviews ?? [],
+    reorderNodePreviews: state.reorderNodePreviews,
+  }));
+
+  // Compute fresh node previews using the utility function
+  const nodePreviews = useMemo(() => {
+    // Prefer flowNodes from ReactFlow but fall back to canvas store nodes
+    const canvasNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+    const nodesSource = nodes.length > 0 ? nodes : canvasNodes;
+
+    return getFreshNodePreviews(nodesSource, rawNodePreviews);
+  }, [nodes, rawNodePreviews, canvasId]);
+
+  const moveCard = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      reorderNodePreviews(canvasId, dragIndex, hoverIndex);
+    },
+    [canvasId, reorderNodePreviews],
+  );
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className="flex h-full w-full">
+        <ScrollingComponent
+          horizontalStrength={horizontalStrength}
+          verticalStrength={() => 0}
+          className="flex flex-row gap-2 overflow-x-auto w-full h-full"
+        >
+          {nodePreviews?.filter(Boolean)?.map((node, index) => (
+            <DraggableNodePreview
+              key={node?.id}
+              node={node}
+              canvasId={canvasId}
+              index={index}
+              moveCard={moveCard}
+            />
+          ))}
+        </ScrollingComponent>
+      </div>
+    </DndProvider>
+  );
+};
+
+// Maintain the original NodePreview component for backward compatibility,
+// but use the draggable container internally
 export const NodePreview = memo(
   ({ node, canvasId }: { node: CanvasNode<any>; canvasId: string }) => {
     const [isMaximized, setIsMaximized] = useState(false);

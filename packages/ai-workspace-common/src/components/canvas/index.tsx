@@ -15,7 +15,7 @@ import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
-import { NodePreview } from './node-preview';
+import { NodePreviewContainer } from './node-preview';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
@@ -49,7 +49,6 @@ import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/can
 import { MultiSelectionMenus } from './multi-selection-menu';
 import { CustomEdge } from './edges/custom-edge';
 import NotFoundOverlay from './NotFoundOverlay';
-import { getFreshNodePreviews } from '../../utils/canvas';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 import { useDragToCreateNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-drag-create-node';
 import { message } from 'antd';
@@ -174,21 +173,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     showLaunchpad: state.showLaunchpad,
     showMaxRatio: state.showMaxRatio,
   }));
-
-  const { rawNodePreviews } = useCanvasStoreShallow((state) => ({
-    rawNodePreviews: state.config[canvasId]?.nodePreviews ?? [],
-  }));
-
-  // Use the ReactFlow useNodes hoo
-
-  // Compute fresh node previews using the utility function
-  const nodePreviews = useMemo(() => {
-    // Prefer flowNodes from ReactFlow but fall back to canvas store nodes
-    const canvasNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
-    const nodesSource = nodes.length > 0 ? nodes : canvasNodes;
-
-    return getFreshNodePreviews(nodesSource, rawNodePreviews);
-  }, [nodes, rawNodePreviews, canvasId]);
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } =
     useSiderStoreShallow((state) => ({
@@ -918,11 +902,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onScroll={(e) => updateIndicators(e.currentTarget)}
           >
             <div className="relative h-full overflow-y-hidden">
-              <div className="flex gap-2 h-full">
-                {nodePreviews?.filter(Boolean)?.map((node) => (
-                  <NodePreview key={node?.id} node={node} canvasId={canvasId} />
-                ))}
-              </div>
+              <NodePreviewContainer canvasId={canvasId} nodes={nodes} />
             </div>
           </div>
         )}
