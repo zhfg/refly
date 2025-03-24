@@ -67,6 +67,7 @@ import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { EmptyGuide } from './empty-guide';
 import { getHelperLines } from './common/helper-line/util';
 import HelperLines from './common/helper-line/index';
+const SNAP_THRESHOLD = 10;
 
 const selectionStyles = `
   .react-flow__selection {
@@ -701,11 +702,11 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       // inside we calculate the helper lines and snap position for the position where the node is being moved to
       if (
         changes.length === 1 &&
-        changes[0].type === 'position' &&
-        changes[0].dragging &&
-        changes[0].position
+        changes[0]?.type === 'position' &&
+        changes[0]?.dragging &&
+        changes[0]?.position
       ) {
-        const helperLines = getHelperLines(changes[0], nodes);
+        const helperLines = getHelperLines(changes[0], nodes, SNAP_THRESHOLD);
 
         // if we have a helper line, we snap the node to the helper line position
         const updatedChanges = changes.map((change) => {
@@ -755,13 +756,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const handleOnNodesChange = (changes: NodeChange[]) => {
     onNodesChange(changes);
-    onNodesChangeHelperLines(changes);
+    const change = changes[0];
+    if (change?.type === 'position' && change?.position) {
+      onNodesChangeHelperLines(changes);
+    }
   };
 
   const onNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       // check if there is a saved snap position
-      if (lastSnapPosition[node.id]) {
+      if (lastSnapPosition[node?.id]) {
         // apply the last snap position, ensure the node is not offset
         const { setNodes } = reactFlowInstance;
         setNodes((nodes) =>
