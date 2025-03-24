@@ -31,6 +31,7 @@ import {
   IconDownloadFile,
   IconCodeArtifact,
   IconWebsite,
+  IconWideMode,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
@@ -105,11 +106,13 @@ interface NodePreviewHeaderProps {
   node: CanvasNode<any>;
   onClose: () => void;
   onMaximize?: () => void;
+  onWideMode?: () => void;
   isMaximized?: boolean;
+  isWideMode?: boolean;
 }
 
 export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
-  ({ node, onClose, onMaximize, isMaximized = false }) => {
+  ({ node, onClose, onMaximize, onWideMode, isMaximized = false, isWideMode = false }) => {
     const { t } = useTranslation();
     const IconComponent = getNodeIcon(node);
     const nodeColor = NODE_COLORS[node.type];
@@ -316,6 +319,15 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
 
         {/* Right: Action Buttons */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {onWideMode && (
+            <Button
+              type="text"
+              className={`p-1.5 hover:bg-gray-100 ${isWideMode ? 'text-primary-600' : 'text-gray-500'}`}
+              onClick={() => onWideMode()}
+            >
+              <IconWideMode className="w-4 h-4" />
+            </Button>
+          )}
           {onMaximize && (
             <Button
               type="text"

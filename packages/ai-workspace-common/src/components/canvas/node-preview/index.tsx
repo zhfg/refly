@@ -75,6 +75,7 @@ const PreviewComponent = memo(
 export const NodePreview = memo(
   ({ node, canvasId }: { node: CanvasNode<any>; canvasId: string }) => {
     const [isMaximized, setIsMaximized] = useState(false);
+    const [isWideMode, setIsWideMode] = useState(false);
     const previewRef = useRef<HTMLDivElement>(null);
 
     // Add ESC key handler to exit fullscreen
@@ -116,7 +117,7 @@ export const NodePreview = memo(
     const previewStyles = useMemo(
       () => ({
         height: isMaximized ? '100vh' : 'calc(100vh - 72px)',
-        width: isMaximized ? 'calc(100vw)' : '420px',
+        width: isMaximized ? 'calc(100vw)' : isWideMode ? '840px' : '420px',
         top: isMaximized ? 0 : null,
         right: isMaximized ? 0 : null,
         zIndex: isMaximized ? 50 : 10,
@@ -124,7 +125,7 @@ export const NodePreview = memo(
           ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
           : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
       }),
-      [isMaximized],
+      [isMaximized, isWideMode],
     );
 
     const previewClassName = useMemo(
@@ -140,6 +141,10 @@ export const NodePreview = memo(
     const handleMaximize = useCallback(() => {
       setIsMaximized(!isMaximized);
     }, [isMaximized]);
+
+    const handleWideMode = useCallback(() => {
+      setIsWideMode(!isWideMode);
+    }, [isWideMode]);
 
     // Listen for exitFullscreenForFix event
     useEffect(() => {
@@ -169,7 +174,9 @@ export const NodePreview = memo(
               node={node}
               onClose={handleClose}
               onMaximize={handleMaximize}
+              onWideMode={handleWideMode}
               isMaximized={isMaximized}
+              isWideMode={isWideMode}
             />
           </div>
           <div className="h-[calc(100%-52px)] overflow-auto rounded-b-lg pointer-events-auto preview-container">

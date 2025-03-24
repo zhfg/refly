@@ -52,6 +52,7 @@ import {
   RiExpandDiagonalLine,
   RiGuideLine,
 } from 'react-icons/ri';
+import { RxEnterFullScreen } from 'react-icons/rx';
 import { PiAtom } from 'react-icons/pi';
 import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -135,6 +136,7 @@ export const IconSubscription = LuGift;
 export const IconExit = RxExit;
 export const IconExpand = RiExpandDiagonalLine;
 export const IconShrink = AiOutlineShrink;
+export const IconWideMode = RxEnterFullScreen;
 export const IconDocumentation = LuBookOpen;
 export const IconMouse = MdOutlineMouse;
 export const IconTouchpad = LuTouchpad;
