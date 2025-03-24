@@ -30,6 +30,7 @@ import {
   ParamsError,
   ResourceNotFoundError,
   DocumentNotFoundError,
+  CodeArtifactNotFoundError,
 } from '@refly-packages/errors';
 import { FileObject } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
@@ -146,6 +147,15 @@ export class MiscService implements OnModuleInit {
       });
       if (!document) {
         throw new DocumentNotFoundError();
+      }
+    } else if (entityType === 'codeArtifact') {
+      const codeArtifact = await this.prisma.codeArtifact.findUnique({
+        where: {
+          artifactId: entityId,
+        },
+      });
+      if (!codeArtifact) {
+        throw new CodeArtifactNotFoundError();
       }
     } else {
       throw new ParamsError(`Invalid entity type: ${entityType}`);

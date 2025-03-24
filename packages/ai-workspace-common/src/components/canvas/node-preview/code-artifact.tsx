@@ -34,6 +34,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
 
   const status = node?.data?.metadata?.status;
+  const entityId = node?.data?.entityId ?? '';
 
   const { data: remoteData } = useGetCodeArtifactDetail(
     {
@@ -149,7 +150,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
           },
         },
         // Connect the skill node to the code artifact node
-        [{ type: 'codeArtifact', entityId: node.data?.entityId ?? '' }],
+        [{ type: 'codeArtifact', entityId }],
         false,
         true,
       );
@@ -182,6 +183,50 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     [status],
   );
 
+  // const handlePreviewImageChange = useCallback(
+  //   async (blob: Blob) => {
+  //     if (!entityId) {
+  //       return;
+  //     }
+
+  //     // Upload the screenshot
+  //     const { data, error } = await getClient().upload({
+  //       body: {
+  //         file: blob,
+  //         entityId,
+  //         entityType: 'codeArtifact',
+  //         // storageKey: `static/${entityId}`,
+  //       },
+  //     });
+
+  //     if (error || !data?.success) {
+  //       console.error('Failed to upload screenshot:', error);
+  //     } else {
+  //       const uploadResult = data?.data;
+  //       console.log('uploadResult', uploadResult);
+  //       setNodeDataByEntity(
+  //         {
+  //           entityId,
+  //           type: 'codeArtifact',
+  //         },
+  //         {
+  //           metadata: {
+  //             previewUrl: uploadResult.url,
+  //             previewStorageKey: uploadResult.storageKey,
+  //           },
+  //         },
+  //       );
+  //       await getClient().updateCodeArtifact({
+  //         body: {
+  //           artifactId,
+  //           previewStorageKey: uploadResult.storageKey,
+  //         },
+  //       });
+  //     }
+  //   },
+  //   [entityId, setNodeDataByEntity],
+  // );
+
   if (!artifactId) {
     return (
       <div className="h-full flex items-center justify-center bg-white rounded p-3">
@@ -200,7 +245,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             code={content}
             language={language}
             title={node.data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
-            entityId={node.data?.entityId ?? ''}
+            entityId={entityId}
             isGenerating={status === 'generating'}
             activeTab={currentTab}
             onTabChange={handleTabChange}

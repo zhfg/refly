@@ -2169,6 +2169,10 @@ export type UpsertCodeArtifactRequest = {
    */
   language?: string;
   /**
+   * Code artifact preview storage key
+   */
+  previewStorageKey?: string;
+  /**
    * Whether to create the code artifact if it does not exist
    */
   createIfNotExists?: boolean;

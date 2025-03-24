@@ -2913,6 +2913,10 @@ export const UpsertCodeArtifactRequestSchema = {
       type: 'string',
       description: 'Code artifact language',
     },
+    previewStorageKey: {
+      type: 'string',
+      description: 'Code artifact preview storage key',
+    },
     createIfNotExists: {
       type: 'boolean',
       description: 'Whether to create the code artifact if it does not exist',

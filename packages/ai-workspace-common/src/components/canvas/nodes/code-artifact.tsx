@@ -1,12 +1,8 @@
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import {
-  CanvasNode,
-  CanvasNodeData,
-  CodeArtifactNodeMeta,
-  CodeArtifactNodeProps,
-} from './shared/types';
+import Moveable from 'react-moveable';
+import { CanvasNode, CodeArtifactNodeProps } from './shared/types';
 import { CustomHandle } from './shared/custom-handle';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
@@ -39,23 +35,42 @@ import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { Skill } from '@refly/openapi-schema';
-import Moveable from 'react-moveable';
+import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/render';
+import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
 
 interface NodeContentProps {
-  data: CanvasNodeData<CodeArtifactNodeMeta>;
-  isOperating?: boolean;
+  status: 'generating' | 'finish' | 'failed';
+  entityId: string;
 }
 
 const NodeContent = memo(
-  ({ data }: NodeContentProps) => {
-    // Always show the content, even when generating
+  ({ status, entityId }: NodeContentProps) => {
+    const { data } = useGetCodeArtifactDetail(
+      {
+        query: {
+          artifactId: entityId,
+        },
+      },
+      null,
+      { enabled: status === 'finish' },
+    );
+    const remoteData = data?.data;
+
     return (
       <div className="h-full h-full flex justify-center items-center">
-        <div id={`code-artifact-preview-${data.entityId}`}>Generating...</div>
+        <Renderer
+          content={remoteData?.content}
+          type={remoteData?.type}
+          key={remoteData?.artifactId}
+          title={remoteData?.title}
+          language={remoteData?.language}
+          onRequestFix={() => {}}
+        />
       </div>
     );
   },
-  (prevProps, nextProps) => prevProps.data.entityId === nextProps.data.entityId,
+  (prevProps, nextProps) =>
+    prevProps.entityId === nextProps.entityId && prevProps.status === nextProps.status,
 );
 
 export const CodeArtifactNode = memo(
@@ -314,7 +329,7 @@ export const CodeArtifactNode = memo(
                     }}
                     className={isResizing ? 'pointer-events-none' : ''}
                   >
-                    <NodeContent data={data} />
+                    <NodeContent status={data.metadata?.status} entityId={data.entityId} />
                   </div>
                 )}
               </div>

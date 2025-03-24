@@ -54,6 +54,8 @@ export interface ResourceNodeMeta {
 
 export interface CodeArtifactNodeMeta {
   status?: 'generating' | 'finish' | 'failed';
+  previewUrl?: string;
+  previewStorageKey?: string;
   language?: string;
   type?: CodeArtifactType;
   title?: string;

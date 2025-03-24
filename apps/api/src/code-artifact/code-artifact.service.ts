@@ -40,7 +40,8 @@ export class CodeArtifactService {
 
   async updateCodeArtifact(user: User, body: UpsertCodeArtifactRequest) {
     const { uid } = user;
-    const { artifactId, title, type, language, content, createIfNotExists } = body;
+    const { artifactId, title, type, language, content, previewStorageKey, createIfNotExists } =
+      body;
 
     if (!artifactId) {
       throw new ParamsError('ArtifactId is required for updating a code artifact');
@@ -65,6 +66,7 @@ export class CodeArtifactService {
           type,
           language,
           storageKey,
+          previewStorageKey,
           uid,
         },
       });
@@ -75,6 +77,7 @@ export class CodeArtifactService {
           title,
           type,
           language,
+          previewStorageKey,
         },
       });
     }
