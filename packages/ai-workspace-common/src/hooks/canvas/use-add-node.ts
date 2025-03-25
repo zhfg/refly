@@ -90,7 +90,7 @@ export const useAddNode = () => {
 
   const addNode = useCallback(
     (
-      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
+      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition; id?: string },
       connectTo?: CanvasNodeFilter[],
       shouldPreview = true,
       needSetCenter = false,
@@ -162,6 +162,7 @@ export const useAddNode = () => {
         data: enrichedData,
         position: newPosition,
         selected: true,
+        id: node?.id,
       });
 
       // Apply style based on nodeSizeMode

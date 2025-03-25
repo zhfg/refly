@@ -27,6 +27,13 @@ interface CanvasConfig {
   nodePreviews: NodePreview[];
 }
 
+interface ReflyPilotMessage {
+  id: string;
+  resultId: string;
+  nodeId: string;
+  timestamp: number;
+}
+
 export interface CanvasState {
   data: Record<string, CanvasData>;
   config: Record<string, CanvasConfig>;
@@ -41,7 +48,7 @@ export interface CanvasState {
   autoLayout: boolean;
   showTemplates: boolean;
   showReflyPilot: boolean;
-  reflyPilotMessages: { id: string; resultId: string; timestamp: number }[];
+  reflyPilotMessages: ReflyPilotMessage[];
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -66,8 +73,9 @@ export interface CanvasState {
   setAutoLayout: (enabled: boolean) => void;
   setShowTemplates: (show: boolean) => void;
   setShowReflyPilot: (show: boolean) => void;
-  addReflyPilotMessage: (message: { id: string; resultId: string }) => void;
+  addReflyPilotMessage: (message: Omit<ReflyPilotMessage, 'timestamp'>) => void;
   removeReflyPilotMessage: (id: string) => void;
+  removeReflyPilotMessageByNodeId: (nodeId: string) => void;
   clearReflyPilotMessages: () => void;
   clearState: () => void;
 }
@@ -271,6 +279,12 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.reflyPilotMessages = state.reflyPilotMessages.filter(
             (message) => message.id !== id,
+          );
+        }),
+      removeReflyPilotMessageByNodeId: (nodeId) =>
+        set((state) => {
+          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+            (message) => message.nodeId !== nodeId,
           );
         }),
       clearReflyPilotMessages: () =>

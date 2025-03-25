@@ -267,7 +267,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
               <div key={message.id}>
                 <MemoizedSkillResponseNodePreview
                   node={{
-                    id: message.id,
+                    id: message.nodeId,
                     type: 'skillResponse',
                     position: { x: 0, y: 0 },
                     data: {

@@ -8,7 +8,7 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
-import { genActionResultID } from '@refly-packages/utils/id';
+import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -184,11 +184,13 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
     const { reflyPilotMessages } = useCanvasStore.getState();
 
     const resultId = genActionResultID();
+    const nodeId = genUniqueId();
 
-    // Add message to Refly Pilot
+    // Add message to Refly Pilot with the new node ID
     addReflyPilotMessage({
       id: resultId,
       resultId,
+      nodeId,
     });
 
     // Ensure Refly Pilot is visible
@@ -246,6 +248,7 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
             contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
           },
         },
+        id: nodeId,
       },
       nodeFilters,
       false,

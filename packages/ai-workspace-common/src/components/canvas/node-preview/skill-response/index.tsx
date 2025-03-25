@@ -38,7 +38,12 @@ interface SkillResponseNodePreviewProps {
 }
 
 const StepsList = memo(
-  ({ steps, result, title }: { steps: ActionStep[]; result: ActionResult; title: string }) => {
+  ({
+    steps,
+    result,
+    title,
+    nodeId,
+  }: { steps: ActionStep[]; result: ActionResult; title: string; nodeId: string }) => {
     return (
       <>
         {steps.map((step, index) => (
@@ -54,6 +59,7 @@ const StepsList = memo(
               }
               index={index + 1}
               query={title}
+              nodeId={nodeId}
             />
           </div>
         ))}
@@ -233,6 +239,8 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const isPending = result?.status === 'executing' || result?.status === 'waiting' || loading;
 
+  console.log('node id', node);
+
   return (
     <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
       {title && (
@@ -289,7 +297,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
             {steps.length === 0 && isPending && (
               <Skeleton className="mt-1" active paragraph={{ rows: 5 }} />
             )}
-            <StepsList steps={steps} result={result} title={title} />
+            <StepsList steps={steps} result={result} title={title} nodeId={node.id} />
           </>
         )}
       </div>
