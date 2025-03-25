@@ -8,6 +8,7 @@ import { MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
 import { CollabService } from '@/collab/collab.service';
+import { CodeArtifactService } from '@/code-artifact/code-artifact.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { CanvasNotFoundError, StorageQuotaExceeded } from '@refly-packages/errors';
 import {
@@ -44,6 +45,7 @@ export class CanvasService {
     private miscService: MiscService,
     private actionService: ActionService,
     private knowledgeService: KnowledgeService,
+    private codeArtifactService: CodeArtifactService,
     private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_DELETE_KNOWLEDGE_ENTITY)
@@ -188,8 +190,8 @@ export class CanvasService {
     }
 
     const nodes: CanvasNode[] = doc.getArray('nodes').toJSON();
-    const libEntityNodes = nodes.filter(
-      (node) => node.type === 'document' || node.type === 'resource',
+    const libEntityNodes = nodes.filter((node) =>
+      ['document', 'resource', 'codeArtifact'].includes(node.type),
     );
 
     // Check storage quota if entities need to be duplicated
@@ -251,6 +253,17 @@ export class CanvasService {
                 if (resource) {
                   node.data.entityId = resource.resourceId;
                   replaceEntityMap[entityId] = resource.resourceId;
+                }
+                break;
+              }
+              case 'codeArtifact': {
+                const codeArtifact = await this.codeArtifactService.duplicateCodeArtifact(
+                  user,
+                  entityId,
+                );
+                if (codeArtifact) {
+                  node.data.entityId = codeArtifact.artifactId;
+                  replaceEntityMap[entityId] = codeArtifact.artifactId;
                 }
                 break;
               }

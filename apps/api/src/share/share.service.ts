@@ -29,11 +29,13 @@ import { SubscriptionService } from '@/subscription/subscription.service';
 import {
   genActionResultID,
   genCanvasID,
+  genCodeArtifactID,
   genDocumentID,
   genResourceID,
   markdown2StateUpdate,
   pick,
   safeParseJSON,
+  batchReplaceRegex,
 } from '@refly-packages/utils';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { MINIO_INTERNAL } from '@/common/minio.service';
@@ -955,7 +957,7 @@ export class ShareService {
 
     const newStorageKey = `resource/${newResourceId}.txt`;
 
-    const resourceDetail: Resource = JSON.parse(
+    const resourceDetail: Resource = safeParseJSON(
       (
         await this.miscService.downloadFile({
           storageKey: record.storageKey,
@@ -1031,6 +1033,63 @@ export class ShareService {
     return { entityId: newResourceId, entityType: 'resource' };
   }
 
+  async duplicateSharedCodeArtifact(user: User, shareId: string): Promise<Entity> {
+    // Find the source record
+    const record = await this.prisma.shareRecord.findFirst({
+      where: { shareId, deletedAt: null },
+    });
+    if (!record) {
+      throw new ShareNotFoundError();
+    }
+
+    // Generate a new code artifact ID
+    const newCodeArtifactId = genCodeArtifactID();
+
+    // Download the shared code artifact data
+    const codeArtifactDetail = safeParseJSON(
+      (
+        await this.miscService.downloadFile({
+          storageKey: record.storageKey,
+          visibility: 'public',
+        })
+      ).toString(),
+    );
+
+    if (!codeArtifactDetail) {
+      throw new ShareNotFoundError();
+    }
+
+    const newStorageKey = `code-artifact/${newCodeArtifactId}`;
+    await this.minio.client.putObject(newStorageKey, codeArtifactDetail.content);
+
+    // Create a new code artifact record
+    await this.prisma.codeArtifact.create({
+      data: {
+        ...pick(codeArtifactDetail, ['title', 'codeType', 'description']),
+        artifactId: newCodeArtifactId,
+        uid: user.uid,
+        storageKey: newStorageKey,
+        language: codeArtifactDetail.language,
+        title: codeArtifactDetail.title,
+        type: codeArtifactDetail.type,
+      },
+    });
+
+    // Create duplication record
+    await this.prisma.duplicateRecord.create({
+      data: {
+        sourceId: record.entityId,
+        targetId: newCodeArtifactId,
+        entityType: 'codeArtifact',
+        uid: user.uid,
+        shareId,
+        status: 'finish',
+      },
+    });
+
+    return { entityId: newCodeArtifactId, entityType: 'codeArtifact' };
+  }
+
   async duplicateSharedSkillResponse(
     user: User,
     shareId: string,
@@ -1058,25 +1117,6 @@ export class ShareService {
       ).toString(),
     );
 
-    // Replace entities in context and history
-    let processedContext = JSON.stringify(result.context);
-    let processedHistory = JSON.stringify(result.history);
-
-    if (replaceEntityMap && Object.keys(replaceEntityMap).length > 0) {
-      try {
-        for (const [oldId, newId] of Object.entries(replaceEntityMap)) {
-          if (processedContext) {
-            processedContext = processedContext.replace(new RegExp(oldId, 'g'), newId);
-          }
-          if (processedHistory) {
-            processedHistory = processedHistory.replace(new RegExp(oldId, 'g'), newId);
-          }
-        }
-      } catch (error) {
-        this.logger.error(`Failed to replace entityId in context and history: ${error}`);
-      }
-    }
-
     // Create a new action result record
     await this.prisma.$transaction([
       this.prisma.actionResult.create({
@@ -1087,8 +1127,8 @@ export class ShareService {
           type: result.type,
           input: JSON.stringify(result.input),
           actionMeta: JSON.stringify(result.actionMeta),
-          context: processedContext,
-          history: processedHistory,
+          context: batchReplaceRegex(JSON.stringify(result.context), replaceEntityMap),
+          history: batchReplaceRegex(JSON.stringify(result.history), replaceEntityMap),
           tplConfig: JSON.stringify(result.tplConfig),
           runtimeConfig: JSON.stringify(result.runtimeConfig),
           errors: JSON.stringify(result.errors),
@@ -1102,7 +1142,7 @@ export class ShareService {
                 order: index,
                 content: step.content ?? '',
                 resultId: newResultId,
-                artifacts: JSON.stringify(step.artifacts),
+                artifacts: batchReplaceRegex(JSON.stringify(step.artifacts), replaceEntityMap),
                 structuredData: JSON.stringify(step.structuredData),
                 logs: JSON.stringify(step.logs),
                 tokenUsage: JSON.stringify(step.tokenUsage),
@@ -1148,8 +1188,8 @@ export class ShareService {
 
     const { nodes, edges } = canvasData;
 
-    const libEntityNodes = nodes.filter(
-      (node) => node.type === 'document' || node.type === 'resource',
+    const libEntityNodes = nodes.filter((node) =>
+      ['document', 'resource', 'codeArtifact'].includes(node.type),
     );
 
     // Check storage quota before creating a new canvas
@@ -1196,6 +1236,14 @@ export class ShareService {
               if (resource) {
                 node.data.entityId = resource.entityId;
                 replaceEntityMap[entityId] = resource.entityId;
+              }
+              break;
+            }
+            case 'codeArtifact': {
+              const codeArtifact = await this.duplicateSharedCodeArtifact(user, shareId);
+              if (codeArtifact) {
+                node.data.entityId = codeArtifact.entityId;
+                replaceEntityMap[entityId] = codeArtifact.entityId;
               }
               break;
             }
@@ -1288,6 +1336,10 @@ export class ShareService {
 
     if (shareId.startsWith(SHARE_CODE_PREFIX.skillResponse)) {
       return this.duplicateSharedSkillResponse(user, shareId);
+    }
+
+    if (shareId.startsWith(SHARE_CODE_PREFIX.codeArtifact)) {
+      return this.duplicateSharedCodeArtifact(user, shareId);
     }
 
     throw new ParamsError(`Unsupported share type ${shareId}`);
