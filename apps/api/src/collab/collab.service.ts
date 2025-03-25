@@ -377,6 +377,7 @@ export class CollabService {
       const cleanNodes = nodes.map((node: any) => {
         if (node.type === 'codeArtifact' && processedArtifactMap.has(node.data?.entityId)) {
           const newArtifact = processedArtifactMap.get(node.data?.entityId);
+          const status = node.data?.metadata?.status;
           return {
             ...node,
             data: {
@@ -386,6 +387,7 @@ export class CollabService {
               metadata: {
                 ...node.data.metadata,
                 code: undefined,
+                status: status === 'finished' ? 'finish' : status, // convert 'finished' to 'finish'
               },
             },
           };
