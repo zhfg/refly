@@ -143,7 +143,7 @@ const PreCode = React.memo(
                 activeTab,
                 width: 600,
                 height: 400,
-                status: 'finished',
+                status: 'finish',
               },
             },
           },
