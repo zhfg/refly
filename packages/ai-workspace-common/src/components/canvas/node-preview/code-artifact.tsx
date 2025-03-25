@@ -48,7 +48,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
       },
     },
     null,
-    { enabled: isLogin && !shareId && artifactId && status.startsWith('finish') },
+    { enabled: isLogin && !shareId && artifactId && status?.startsWith('finish') },
   );
   const { data: shareData } = useFetchShareData<CodeArtifact>(shareId);
 
