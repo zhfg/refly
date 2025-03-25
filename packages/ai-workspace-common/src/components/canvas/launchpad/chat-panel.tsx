@@ -198,7 +198,6 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
-    setContextItems([]);
 
     // Determine if we're in Refly Pilot mode
     const isInReflyPilot = embeddedMode;
@@ -295,6 +294,70 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
     }
   };
 
+  // Memoize the context manager component to prevent unnecessary re-renders
+  const contextManagerComponent = useMemo(() => {
+    return (
+      <ContextManager
+        className="py-2"
+        contextItems={contextItems}
+        setContextItems={setContextItems}
+        filterErrorInfo={filterErrorInfo}
+      />
+    );
+  }, [contextItems, setContextItems, filterErrorInfo]);
+
+  // Memoize the chat input component
+  const chatInputComponent = useMemo(() => {
+    return (
+      <ChatInput
+        query={chatStore.newQAText}
+        setQuery={chatStore.setNewQAText}
+        selectedSkillName={selectedSkill?.name}
+        autoCompletionPlacement={'topLeft'}
+        handleSendMessage={handleSendMessage}
+        onUploadImage={handleImageUpload}
+      />
+    );
+  }, [
+    chatStore.newQAText,
+    chatStore.setNewQAText,
+    selectedSkill?.name,
+    handleSendMessage,
+    handleImageUpload,
+  ]);
+
+  // Memoize chat actions component
+  const chatActionsComponent = useMemo(() => {
+    return (
+      <ChatActions
+        className="py-2"
+        query={chatStore.newQAText}
+        model={chatStore.selectedModel}
+        setModel={chatStore.setSelectedModel}
+        runtimeConfig={runtimeConfig}
+        setRuntimeConfig={setRuntimeConfig}
+        form={form}
+        handleSendMessage={handleSendMessage}
+        handleAbort={handleAbort}
+        customActions={customActions}
+        onUploadImage={handleImageUpload}
+        contextItems={contextItems}
+      />
+    );
+  }, [
+    chatStore.newQAText,
+    chatStore.selectedModel,
+    chatStore.setSelectedModel,
+    runtimeConfig,
+    setRuntimeConfig,
+    form,
+    handleSendMessage,
+    handleAbort,
+    customActions,
+    handleImageUpload,
+    contextItems,
+  ]);
+
   return (
     <div className="relative w-full" data-cy="launchpad-chat-panel">
       <div
@@ -310,22 +373,8 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
         />
         {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
         <div className={cn('px-3', embeddedMode && 'px-2')}>
-          <ContextManager
-            className="py-2"
-            contextItems={contextItems}
-            setContextItems={setContextItems}
-            filterErrorInfo={filterErrorInfo}
-          />
-          <div>
-            <ChatInput
-              query={chatStore.newQAText}
-              setQuery={chatStore.setNewQAText}
-              selectedSkillName={selectedSkill?.name}
-              autoCompletionPlacement={'topLeft'}
-              handleSendMessage={handleSendMessage}
-              onUploadImage={handleImageUpload}
-            />
-          </div>
+          {contextManagerComponent}
+          <div>{chatInputComponent}</div>
 
           {selectedSkill?.configSchema?.items?.length > 0 && (
             <ConfigManager
@@ -356,20 +405,7 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
             />
           )}
 
-          <ChatActions
-            className="py-2"
-            query={chatStore.newQAText}
-            model={chatStore.selectedModel}
-            setModel={chatStore.setSelectedModel}
-            runtimeConfig={runtimeConfig}
-            setRuntimeConfig={setRuntimeConfig}
-            form={form}
-            handleSendMessage={handleSendMessage}
-            handleAbort={handleAbort}
-            customActions={customActions}
-            onUploadImage={handleImageUpload}
-            contextItems={contextItems}
-          />
+          {chatActionsComponent}
         </div>
       </div>
     </div>

@@ -15,7 +15,6 @@ import { useReactFlow } from '@xyflow/react';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { RefreshCw } from 'lucide-react';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface ReflyPilotProps {
   className?: string;
@@ -77,6 +76,14 @@ const ReflyPilotHeader = memo(
   },
 );
 
+// Optimize SkillResponseNodePreview with memo
+const MemoizedSkillResponseNodePreview = memo(SkillResponseNodePreview, (prevProps, nextProps) => {
+  return (
+    prevProps.resultId === nextProps.resultId &&
+    prevProps.node.data?.entityId === nextProps.node.data?.entityId
+  );
+});
+
 export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [contentHeight, setContentHeight] = useState('auto');
@@ -95,10 +102,6 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
 
   const { setNewQAText } = useChatStoreShallow((state) => ({
     setNewQAText: state.setNewQAText,
-  }));
-
-  const { clearContextItems } = useContextPanelStoreShallow((state) => ({
-    clearContextItems: state.clearContextItems,
   }));
 
   // Cache thread history for each message
@@ -180,9 +183,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
     clearReflyPilotMessages();
     // Clear chat input
     setNewQAText('');
-    // Clear context items
-    clearContextItems();
-  }, [clearReflyPilotMessages, setNewQAText, clearContextItems]);
+  }, [clearReflyPilotMessages, setNewQAText]);
 
   const containerStyles = useMemo(
     () => ({
@@ -264,7 +265,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
           <div className="flex flex-col divide-y">
             {sortedMessages.map((message) => (
               <div key={message.id}>
-                <SkillResponseNodePreview
+                <MemoizedSkillResponseNodePreview
                   node={{
                     id: message.id,
                     type: 'skillResponse',

@@ -1,4 +1,4 @@
-import { useEffect, memo, useCallback } from 'react';
+import { useEffect, memo, useCallback, useMemo } from 'react';
 
 import { ChatPanel } from './chat-panel';
 import { SkillDisplay } from './skill-display';
@@ -53,6 +53,11 @@ export const LaunchPad = memo(
       }
     }, [canvasId, clearLaunchpadState]);
 
+    // Memoize the ChatPanel component to prevent unnecessary re-renders
+    const chatPanelComponent = useMemo(() => {
+      return <ChatPanel embeddedMode={inReflyPilot} />;
+    }, [inReflyPilot]);
+
     if (!visible) {
       return null;
     }
@@ -72,7 +77,7 @@ export const LaunchPad = memo(
             isOpen={recommendQuestionsOpen}
             onClose={() => setRecommendQuestionsOpen(false)}
           />
-          <ChatPanel embeddedMode={inReflyPilot} />
+          {chatPanelComponent}
         </div>
       </div>
     );
