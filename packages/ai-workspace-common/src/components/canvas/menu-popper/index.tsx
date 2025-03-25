@@ -1,4 +1,4 @@
-import { Button, Divider } from 'antd';
+import { Button, Divider, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -16,13 +16,14 @@ import {
   IconResource,
   IconWebsite,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { genMemoID, genSkillID, genResourceID } from '@refly-packages/utils/id';
+import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -231,20 +232,31 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     );
   };
 
-  const createCodeArtifactNode = (position: { x: number; y: number }) => {
+  const createCodeArtifactNode = async (position: { x: number; y: number }) => {
     // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
-    const codeArtifactId = genResourceID();
+    const stopLoading = message.loading(t('codeArtifact.creating'));
+    const { data, error } = await getClient().createCodeArtifact({
+      body: {
+        title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
+        language: 'typescript',
+        type: 'text/html',
+      },
+    });
+    stopLoading();
+
+    if (!data?.success || error) {
+      return;
+    }
+
     addNode(
       {
         type: 'codeArtifact',
         data: {
           title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
-          entityId: codeArtifactId,
-          contentPreview: '',
+          entityId: data?.data?.artifactId,
           metadata: {
             status: 'finish',
             language: 'typescript',
-            activeTab: 'code',
           },
         },
         position: position,

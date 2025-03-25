@@ -4,7 +4,7 @@ import HTMLRenderer from './html';
 import SVGRender from './svg';
 import ReactRenderer from './react';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { CodeArtifactType } from '../types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 
 interface RendererProps {
   content: string;

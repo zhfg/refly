@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 import { IconCopy, IconCode, IconEye } from '@arco-design/web-react/icon';
 import { cn } from '@refly/utils';
 import MermaidComponent from '../mermaid/render';

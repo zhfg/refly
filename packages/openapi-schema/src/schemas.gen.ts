@@ -1189,6 +1189,24 @@ export const ArtifactSchema = {
       description: 'Artifact status',
       $ref: '#/components/schemas/ArtifactStatus',
     },
+    content: {
+      type: 'string',
+      description: 'Artifact content',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Artifact metadata',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Artifact creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Artifact update time',
+    },
   },
 } as const;
 
@@ -1269,6 +1287,56 @@ export const ActionStepSchema = {
       items: {
         $ref: '#/components/schemas/TokenUsageItem',
       },
+    },
+  },
+} as const;
+
+export const CodeArtifactTypeSchema = {
+  type: 'string',
+  description: 'Code artifact type',
+  enum: [
+    'application/refly.artifacts.react',
+    'image/svg+xml',
+    'application/refly.artifacts.mermaid',
+    'text/markdown',
+    'application/refly.artifacts.code',
+    'text/html',
+  ],
+} as const;
+
+export const CodeArtifactSchema = {
+  type: 'object',
+  description: 'Code artifact',
+  required: ['type', 'artifactId', 'title'],
+  properties: {
+    type: {
+      type: 'string',
+      description: 'Artifact type',
+      $ref: '#/components/schemas/CodeArtifactType',
+    },
+    artifactId: {
+      type: 'string',
+      description: 'Artifact ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Artifact title',
+    },
+    content: {
+      type: 'string',
+      description: 'Code artifact content',
+    },
+    language: {
+      type: 'string',
+      description: 'Code artifact language',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
     },
   },
 } as const;
@@ -2820,6 +2888,73 @@ export const ShareRecordSchema = {
       description: 'Update timestamp',
     },
   },
+} as const;
+
+export const UpsertCodeArtifactRequestSchema = {
+  type: 'object',
+  properties: {
+    artifactId: {
+      type: 'string',
+      description: 'Code artifact ID (not needed for creation)',
+    },
+    title: {
+      type: 'string',
+      description: 'Code artifact title',
+    },
+    type: {
+      type: 'string',
+      description: 'Code artifact type',
+    },
+    content: {
+      type: 'string',
+      description: 'Code artifact content',
+    },
+    language: {
+      type: 'string',
+      description: 'Code artifact language',
+    },
+    previewStorageKey: {
+      type: 'string',
+      description: 'Code artifact preview storage key',
+    },
+    createIfNotExists: {
+      type: 'boolean',
+      description: 'Whether to create the code artifact if it does not exist',
+      default: false,
+    },
+  },
+} as const;
+
+export const UpsertCodeArtifactResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CodeArtifact',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const GetCodeArtifactDetailResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CodeArtifact',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const CreateShareRequestSchema = {

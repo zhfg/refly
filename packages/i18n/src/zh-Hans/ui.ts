@@ -1248,6 +1248,7 @@ const translations = {
     downloadSuccess: '已下载 {{fileName}}',
     downloadError: '下载文件失败',
     refreshing: '预览刷新中...',
+    creating: '创建代码组件中...',
     sharing: '分享代码中...',
     shareLoading: '加载分享代码中...',
     noCodeFound: '暂无代码内容',

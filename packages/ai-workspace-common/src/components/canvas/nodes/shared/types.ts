@@ -15,7 +15,7 @@ import {
   TokenUsageItem,
 } from '@refly/openapi-schema';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -55,6 +55,9 @@ export interface ResourceNodeMeta {
 
 export interface CodeArtifactNodeMeta {
   status?: 'generating' | 'finish' | 'failed';
+  shareId?: string;
+  previewUrl?: string;
+  previewStorageKey?: string;
   language?: string;
   type?: CodeArtifactType;
   title?: string;
@@ -62,6 +65,7 @@ export interface CodeArtifactNodeMeta {
   style?: React.CSSProperties;
   originalWidth?: number;
   activeTab?: 'code' | 'preview';
+  code?: string; // @deprecated
 }
 
 export type SkillNodeMeta = {

@@ -1275,6 +1275,7 @@ const translations = {
     downloadSuccess: 'Downloaded {{fileName}}',
     downloadError: 'Failed to download file',
     refreshing: 'Refreshing preview...',
+    creating: 'Creating code artifact...',
     sharing: 'Sharing code...',
     shareLoading: 'Loading shared code...',
     noCodeFound: 'No code content found to display',
