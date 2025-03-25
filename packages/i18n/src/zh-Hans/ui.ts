@@ -2160,6 +2160,20 @@ const translations = {
     duplicateCanvasEntities: '复制该画布所包含的文档以及资源',
     noDescription: '暂无描述',
   },
+  project: {
+    create: '创建项目',
+    createModal: {
+      title: '名称',
+      titlePlaceholder: '请输入项目名称',
+      description: '描述',
+      descriptionPlaceholder: '请输入项目描述',
+      cropCoverPicture: '裁剪封面图片',
+      coverPicture: '封面',
+      onlyImageAllowed: '只允许上传 PNG, JPG, JPEG, GIF 类型的图片',
+      imageSizeLimited: '图片大小限制为 {{size}} MB',
+      uploadCoverPicture: '上传封面',
+    },
+  },
 };
 
 export default translations;

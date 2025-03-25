@@ -2223,6 +2223,20 @@ const translations = {
     duplicateCanvasEntities: 'Duplicate the canvas entities',
     noDescription: 'No description',
   },
+  project: {
+    create: 'Create Project',
+    createModal: {
+      title: 'Name',
+      titlePlaceholder: 'Please enter project name',
+      description: 'Description',
+      descriptionPlaceholder: 'Please enter project description',
+      coverPicture: 'Cover',
+      cropCoverPicture: 'Crop Cover Picture',
+      onlyImageAllowed: 'Only PNG, JPG, JPEG, GIF images are allowed',
+      imageSizeLimited: 'Image size limited to {{size}} MB',
+      uploadCoverPicture: 'Upload Cover',
+    },
+  },
 };
 
 export default translations;
