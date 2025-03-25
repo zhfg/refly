@@ -9,6 +9,9 @@ import {
   IconShrink,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
+import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
+import { useReactFlow } from '@xyflow/react';
+import { genUniqueId } from '@refly-packages/utils/id';
 
 interface ReflyPilotProps {
   className?: string;
@@ -61,6 +64,9 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [contentHeight, setContentHeight] = useState('auto');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const findThreadHistory = useFindThreadHistory();
+  const reactFlowInstance = useReactFlow();
+  const { getEdges, setEdges } = reactFlowInstance;
 
   const { showReflyPilot, setShowReflyPilot, reflyPilotMessages } = useCanvasStoreShallow(
     (state) => ({
@@ -69,6 +75,72 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
       reflyPilotMessages: state.reflyPilotMessages,
     }),
   );
+
+  // Cache thread history for each message
+  const messagesWithHistory = useMemo(() => {
+    return reflyPilotMessages.map((message) => {
+      const threadHistory = findThreadHistory({ resultId: message.resultId });
+      return {
+        ...message,
+        threadHistory,
+      };
+    });
+  }, [reflyPilotMessages, findThreadHistory]);
+
+  // Sort messages by timestamp (oldest first)
+  const sortedMessages = useMemo(() => {
+    return [...messagesWithHistory].sort((a, b) => a.timestamp - b.timestamp);
+  }, [messagesWithHistory]);
+
+  // Function to automatically connect nodes
+  const connectNodes = useCallback(
+    (sourceResultId: string, targetResultId: string) => {
+      if (!sourceResultId || !targetResultId) return;
+
+      const nodes = reactFlowInstance.getNodes();
+      const edges = getEdges();
+
+      // Find source and target nodes by resultId
+      const sourceNode = nodes.find((node) => node.data?.entityId === sourceResultId);
+      const targetNode = nodes.find((node) => node.data?.entityId === targetResultId);
+
+      if (!sourceNode || !targetNode) return;
+
+      // Check if the edge already exists
+      const connectionExists = edges.some(
+        (edge) => edge.source === sourceNode.id && edge.target === targetNode.id,
+      );
+
+      // If the edge already exists, do not create a new edge
+      if (connectionExists) return;
+
+      // Create and add the new edge
+      const newEdge = {
+        id: `edge-${genUniqueId()}`,
+        source: sourceNode.id,
+        target: targetNode.id,
+        type: 'default',
+      };
+
+      setEdges((eds) => [...eds, newEdge]);
+    },
+    [reactFlowInstance, getEdges, setEdges],
+  );
+
+  // Connect node history when messages change
+  useEffect(() => {
+    // For each message, connect it to its thread history
+    for (const message of messagesWithHistory) {
+      if (message.threadHistory && message.threadHistory.length > 0) {
+        // Get the most recent node in the thread history (last item)
+        const mostRecentNode = message.threadHistory[message.threadHistory.length - 1];
+        if (mostRecentNode?.data?.entityId) {
+          // Connect this node to the Refly Pilot message
+          connectNodes(mostRecentNode.data.entityId, message.resultId);
+        }
+      }
+    }
+  }, [messagesWithHistory, connectNodes]);
 
   const handleClose = useCallback(() => {
     setShowReflyPilot(false);
@@ -88,11 +160,6 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
     }),
     [isMaximized],
   );
-
-  // Sort messages by timestamp (newest first)
-  const sortedMessages = useMemo(() => {
-    return [...reflyPilotMessages].sort((a, b) => b.timestamp - a.timestamp);
-  }, [reflyPilotMessages]);
 
   // Handle window resize and update dimensions
   useEffect(() => {
@@ -128,7 +195,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
   useEffect(() => {
     if (messagesContainerRef.current && sortedMessages.length > 0) {
       const container = messagesContainerRef.current;
-      container.scrollTop = 0; // Scroll to the top since messages are sorted newest first
+      container.scrollTop = container.scrollHeight; // 滚动到底部以显示最新消息
     }
   }, [sortedMessages.length]);
 

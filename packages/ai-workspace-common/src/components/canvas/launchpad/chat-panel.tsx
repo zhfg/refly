@@ -11,7 +11,7 @@ import { useContextFilterErrorTip } from './context-manager/hooks/use-context-fi
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 import { SelectedSkillHeader } from './selected-skill-header';
 import {
@@ -121,7 +121,7 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
 
-  const { setShowReflyPilot, addReflyPilotMessage } = useCanvasStoreShallow((state) => ({
+  const { setShowReflyPilot, addReflyPilotMessage } = useCanvasStore((state) => ({
     setShowReflyPilot: state.setShowReflyPilot,
     addReflyPilotMessage: state.addReflyPilotMessage,
   }));
@@ -181,6 +181,7 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
     const query = userInput || newQAText.trim();
 
     const { contextItems } = useContextPanelStore.getState();
+    const { reflyPilotMessages } = useCanvasStore.getState();
 
     const resultId = genActionResultID();
 
@@ -198,6 +199,26 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
     setContextItems([]);
+
+    // Determine if we're in Refly Pilot mode
+    const isInReflyPilot = embeddedMode;
+
+    // Get thread context (previous messages) when in Refly Pilot
+    const nodeFilters = [...convertContextItemsToNodeFilters(contextItems)];
+
+    if (isInReflyPilot && reflyPilotMessages.length > 0) {
+      // Find the most recent message to connect to
+      const mostRecentMessage = [...reflyPilotMessages].sort(
+        (a, b) => b.timestamp - a.timestamp,
+      )[0];
+      if (mostRecentMessage?.resultId) {
+        // Add the most recent message as a connection point
+        nodeFilters.push({
+          type: 'skillResponse',
+          entityId: mostRecentMessage.resultId,
+        });
+      }
+    }
 
     invokeAction(
       {
@@ -227,8 +248,8 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
           },
         },
       },
-      convertContextItemsToNodeFilters(contextItems),
-      true,
+      nodeFilters,
+      false,
       true,
     );
   };
