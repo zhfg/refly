@@ -16,6 +16,7 @@ import {
   FilePlus,
   Trash2,
   Target,
+  GripVertical,
 } from 'lucide-react';
 import { NODE_COLORS } from '../nodes/shared/colors';
 import { CanvasNode } from '../nodes/shared/types';
@@ -31,6 +32,7 @@ import {
   IconDownloadFile,
   IconCodeArtifact,
   IconWebsite,
+  IconWideMode,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
@@ -105,11 +107,24 @@ interface NodePreviewHeaderProps {
   node: CanvasNode<any>;
   onClose: () => void;
   onMaximize?: () => void;
+  onWideMode?: () => void;
   isMaximized?: boolean;
+  isWideMode?: boolean;
+  dragHandleProps?: any;
+  isDragging?: boolean;
 }
 
 export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
-  ({ node, onClose, onMaximize, isMaximized = false }) => {
+  ({
+    node,
+    onClose,
+    onMaximize,
+    onWideMode,
+    isMaximized = false,
+    isWideMode = false,
+    dragHandleProps,
+    isDragging = false,
+  }) => {
     const { t } = useTranslation();
     const IconComponent = getNodeIcon(node);
     const nodeColor = NODE_COLORS[node.type];
@@ -289,7 +304,17 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
     };
 
     return (
-      <div className="flex justify-between items-center py-2 px-4 border-b border-[#EAECF0]">
+      <div
+        className={`flex justify-between items-center py-2 px-4 border-b border-[#EAECF0] ${isDragging ? 'bg-gray-50' : ''} relative`}
+      >
+        {dragHandleProps && (
+          <div
+            {...dragHandleProps}
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 -translate-y-3 w-10 h-5 flex items-center justify-center cursor-move text-gray-300 hover:text-gray-500 bg-white border border-gray-100 rounded-b-md z-10 transition-colors duration-150 opacity-0 hover:opacity-100"
+          >
+            <GripVertical className="w-3 h-3 rotate-90" />
+          </div>
+        )}
         {/* Left: Icon and Title */}
         <div className="flex items-center gap-2 flex-grow overflow-hidden">
           <div
@@ -316,6 +341,15 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
 
         {/* Right: Action Buttons */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {onWideMode && (
+            <Button
+              type="text"
+              className={`p-1.5 hover:bg-gray-100 ${isWideMode ? 'text-primary-600' : 'text-gray-500'}`}
+              onClick={() => onWideMode()}
+            >
+              <IconWideMode className="w-4 h-4" />
+            </Button>
+          )}
           {onMaximize && (
             <Button
               type="text"
