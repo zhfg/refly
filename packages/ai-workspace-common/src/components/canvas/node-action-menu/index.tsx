@@ -43,6 +43,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas';
 
 interface MenuItem {
   key?: string;
@@ -82,6 +83,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   const { setShowPreview } = useCanvasStoreShallow((state) => ({
     setShowPreview: state.setShowPreview,
   }));
+  const { previewNode } = useNodePreviewControl({ canvasId });
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,
@@ -100,8 +102,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
   }, [nodeData?.metadata?.sizeMode]);
 
-  const { addNodePreview, nodePreviews, clickToPreview } = useCanvasStoreShallow((state) => ({
-    addNodePreview: state.addNodePreview,
+  const { nodePreviews, clickToPreview } = useCanvasStoreShallow((state) => ({
     nodePreviews: state.config[canvasId]?.nodePreviews ?? [],
     clickToPreview: state.clickToPreview,
   }));
@@ -186,21 +187,21 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     if (nodeType === 'image') {
       nodeActionEmitter.emit(createNodeEventName(nodeId, 'preview'));
     } else {
-      addNodePreview(canvasId, node);
+      previewNode(node);
       locateToNodePreviewEmitter.emit('locateToNodePreview', {
         id: nodeId,
         canvasId,
       });
     }
     onClose?.();
-  }, [node, nodeId, canvasId, onClose, addNodePreview]);
+  }, [node, nodeId, canvasId, onClose, previewNode]);
 
   const handleFullScreenPreview = useCallback(() => {
     setShowPreview(true);
     const isPreviewOpen = nodePreviews?.some((preview) => preview.id === nodeId);
 
     if (!isPreviewOpen) {
-      addNodePreview(canvasId, node);
+      previewNode(node);
     }
 
     requestAnimationFrame(() => {
@@ -208,7 +209,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     });
 
     onClose?.();
-  }, [node, nodeId, canvasId, onClose, addNodePreview, nodeType, nodePreviews]);
+  }, [node, nodeId, canvasId, onClose, previewNode, nodeType, nodePreviews]);
 
   const handleUngroup = useCallback(() => {
     ungroupNodes(nodeId);
@@ -259,7 +260,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeData?.contentPreview, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
 
   const handleEditQuery = useCallback(() => {
-    addNodePreview(canvasId, node);
+    previewNode(node);
 
     setTimeout(() => {
       locateToNodePreviewEmitter.emit('locateToNodePreview', {
@@ -270,7 +271,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     }, 100);
 
     onClose?.();
-  }, [nodeId, canvasId, node, addNodePreview, onClose]);
+  }, [nodeId, canvasId, node, previewNode, onClose]);
   const { createMemo } = useCreateMemo();
 
   const handleCreateMemo = useCallback(() => {

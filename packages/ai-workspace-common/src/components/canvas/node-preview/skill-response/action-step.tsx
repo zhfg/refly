@@ -206,8 +206,6 @@ const ActualContent = memo(
 
     if (!content) return null;
 
-    console.log('resultId', resultId);
-
     return (
       <div className="my-3 text-gray-600 text-base">
         <div className={`skill-response-content-${resultId}-${step.name}`}>
