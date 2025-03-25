@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from 'antd';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 import { cn } from '@refly-packages/utils/cn';
@@ -12,6 +13,9 @@ import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useReactFlow } from '@xyflow/react';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { RefreshCw } from 'lucide-react';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface ReflyPilotProps {
   className?: string;
@@ -22,10 +26,12 @@ const ReflyPilotHeader = memo(
     onClose,
     onMaximize,
     isMaximized,
+    onClearConversation,
   }: {
     onClose: () => void;
     onMaximize: () => void;
     isMaximized: boolean;
+    onClearConversation: () => void;
   }) => {
     const { t } = useTranslation();
 
@@ -39,21 +45,32 @@ const ReflyPilotHeader = memo(
             {t('canvas.reflyPilot.title', { defaultValue: 'Refly Pilot' })}
           </span>
         </div>
-        <div className="flex items-center">
-          <button
-            type="button"
+        <div className="flex items-center gap-2">
+          <Button
+            type="text"
+            size="small"
+            className="flex items-center text-gray-600 h-7 px-2"
+            onClick={onClearConversation}
+            icon={<RefreshCw className="w-3.5 h-3.5 mr-1" />}
+          >
+            {t('canvas.reflyPilot.newConversation', { defaultValue: 'New conversation' })}
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
             onClick={onMaximize}
-            className="flex items-center justify-center h-6 w-6 text-gray-400 hover:text-gray-600"
           >
             {isMaximized ? <IconShrink className="w-4 h-4" /> : <IconExpand className="w-4 h-4" />}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
             onClick={onClose}
-            className="flex items-center justify-center h-6 w-6 text-gray-400 hover:text-gray-600"
           >
             <IconClose className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -68,13 +85,21 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
   const reactFlowInstance = useReactFlow();
   const { getEdges, setEdges } = reactFlowInstance;
 
-  const { showReflyPilot, setShowReflyPilot, reflyPilotMessages } = useCanvasStoreShallow(
-    (state) => ({
+  const { showReflyPilot, setShowReflyPilot, reflyPilotMessages, clearReflyPilotMessages } =
+    useCanvasStoreShallow((state) => ({
       showReflyPilot: state.showReflyPilot,
       setShowReflyPilot: state.setShowReflyPilot,
       reflyPilotMessages: state.reflyPilotMessages,
-    }),
-  );
+      clearReflyPilotMessages: state.clearReflyPilotMessages,
+    }));
+
+  const { setNewQAText } = useChatStoreShallow((state) => ({
+    setNewQAText: state.setNewQAText,
+  }));
+
+  const { clearContextItems } = useContextPanelStoreShallow((state) => ({
+    clearContextItems: state.clearContextItems,
+  }));
 
   // Cache thread history for each message
   const messagesWithHistory = useMemo(() => {
@@ -150,6 +175,15 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
     setIsMaximized(!isMaximized);
   }, [isMaximized]);
 
+  const handleClearConversation = useCallback(() => {
+    // Clear all messages
+    clearReflyPilotMessages();
+    // Clear chat input
+    setNewQAText('');
+    // Clear context items
+    clearContextItems();
+  }, [clearReflyPilotMessages, setNewQAText, clearContextItems]);
+
   const containerStyles = useMemo(
     () => ({
       width: isMaximized ? '840px' : '420px',
@@ -215,6 +249,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
         onClose={handleClose}
         onMaximize={handleMaximize}
         isMaximized={isMaximized}
+        onClearConversation={handleClearConversation}
       />
       <div
         ref={messagesContainerRef}
@@ -228,7 +263,7 @@ export const ReflyPilot = memo(({ className }: ReflyPilotProps) => {
         ) : (
           <div className="flex flex-col divide-y">
             {sortedMessages.map((message) => (
-              <div key={message.id} className="p-4">
+              <div key={message.id}>
                 <SkillResponseNodePreview
                   node={{
                     id: message.id,

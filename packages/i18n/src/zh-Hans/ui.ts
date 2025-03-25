@@ -1102,6 +1102,11 @@ const translations = {
         noUrlProvided: '未提供网站 URL',
       },
     },
+    reflyPilot: {
+      title: 'Refly Pilot',
+      newConversation: '新会话',
+      clearConversation: '清空会话',
+    },
   },
   resource: {
     multilingualSearch: {

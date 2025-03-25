@@ -61,12 +61,12 @@ export const LaunchPad = memo(
       <div
         className={cn(
           'ai-copilot-operation-container',
-          inReflyPilot && 'embedded-launchpad',
+          inReflyPilot && 'embedded-launchpad w-full',
           className,
         )}
         data-cy="launchpad"
       >
-        <div className={cn('ai-copilot-operation-body', inReflyPilot && 'p-2')}>
+        <div className={cn('ai-copilot-operation-body', inReflyPilot && 'p-4')}>
           <SkillDisplay />
           <RecommendQuestionsPanel
             isOpen={recommendQuestionsOpen}

@@ -1126,6 +1126,11 @@ const translations = {
         noUrlProvided: 'No website URL provided',
       },
     },
+    reflyPilot: {
+      title: 'Refly Pilot',
+      newConversation: 'New conversation',
+      clearConversation: 'Clear conversation',
+    },
   },
   resource: {
     multilingualSearch: {
