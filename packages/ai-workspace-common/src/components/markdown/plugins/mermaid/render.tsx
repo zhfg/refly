@@ -305,7 +305,7 @@ const MermaidComponent = memo(
                 activeTab: 'preview', // Default to preview for Mermaid
                 width: 600,
                 height: 400,
-                status: 'finished',
+                status: 'finish',
               },
             },
           },
