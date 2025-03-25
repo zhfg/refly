@@ -1275,6 +1275,9 @@ export class ShareService {
             if (result) {
               node.data.entityId = result.entityId;
             }
+
+            // Remove the shareId from the metadata
+            node.data.metadata.shareId = undefined;
           }),
         ),
     );
