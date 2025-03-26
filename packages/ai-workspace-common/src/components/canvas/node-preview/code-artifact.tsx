@@ -186,11 +186,11 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     async (newCode: string) => {
       setContent(newCode);
 
-      if (status !== 'generating') {
+      if (status !== 'generating' && !canvasReadOnly) {
         updateRemoteArtifact(newCode);
       }
     },
-    [status],
+    [status, canvasReadOnly],
   );
 
   if (!artifactId) {
