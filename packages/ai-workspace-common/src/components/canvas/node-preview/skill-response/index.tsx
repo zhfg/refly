@@ -239,8 +239,6 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const isPending = result?.status === 'executing' || result?.status === 'waiting' || loading;
 
-  console.log('node id', node);
-
   return (
     <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
       {title && (

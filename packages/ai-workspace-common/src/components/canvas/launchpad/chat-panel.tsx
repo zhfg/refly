@@ -80,7 +80,10 @@ const PremiumBanner = () => {
   );
 };
 
-export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) => {
+export const ChatPanel = ({
+  embeddedMode = false,
+  parentResultId,
+}: { embeddedMode?: boolean; parentResultId?: string }) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
@@ -121,10 +124,12 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
 
-  const { setShowReflyPilot, addReflyPilotMessage } = useCanvasStore((state) => ({
-    setShowReflyPilot: state.setShowReflyPilot,
-    addReflyPilotMessage: state.addReflyPilotMessage,
-  }));
+  const { setShowReflyPilot, addReflyPilotMessage, addReflyPilotMessageByResultId } =
+    useCanvasStore((state) => ({
+      setShowReflyPilot: state.setShowReflyPilot,
+      addReflyPilotMessage: state.addReflyPilotMessage,
+      addReflyPilotMessageByResultId: state.addReflyPilotMessageByResultId,
+    }));
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -187,11 +192,21 @@ export const ChatPanel = ({ embeddedMode = false }: { embeddedMode?: boolean }) 
     const nodeId = genUniqueId();
 
     // Add message to Refly Pilot with the new node ID
-    addReflyPilotMessage({
-      id: resultId,
-      resultId,
-      nodeId,
-    });
+    if (embeddedMode && parentResultId) {
+      // When in embedded mode with a parentResultId, use the resultId-specific function
+      addReflyPilotMessageByResultId(parentResultId, {
+        id: resultId,
+        resultId,
+        nodeId,
+      });
+    } else {
+      // Otherwise use the global message function
+      addReflyPilotMessage({
+        id: resultId,
+        resultId,
+        nodeId,
+      });
+    }
 
     // Ensure Refly Pilot is visible
     setShowReflyPilot(true);

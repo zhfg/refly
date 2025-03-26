@@ -17,10 +17,11 @@ interface LaunchPadProps {
   visible?: boolean;
   inReflyPilot?: boolean;
   className?: string;
+  parentResultId?: string;
 }
 
 export const LaunchPad = memo(
-  ({ visible = true, inReflyPilot = false, className }: LaunchPadProps) => {
+  ({ visible = true, inReflyPilot = false, className, parentResultId }: LaunchPadProps) => {
     // stores
     const contextPanelStore = useContextPanelStoreShallow((state) => ({
       resetState: state.resetState,
@@ -55,8 +56,8 @@ export const LaunchPad = memo(
 
     // Memoize the ChatPanel component to prevent unnecessary re-renders
     const chatPanelComponent = useMemo(() => {
-      return <ChatPanel embeddedMode={inReflyPilot} />;
-    }, [inReflyPilot]);
+      return <ChatPanel embeddedMode={inReflyPilot} parentResultId={parentResultId} />;
+    }, [inReflyPilot, parentResultId]);
 
     if (!visible) {
       return null;
@@ -83,5 +84,7 @@ export const LaunchPad = memo(
     );
   },
   (prevProps, nextProps) =>
-    prevProps.visible === nextProps.visible && prevProps.inReflyPilot === nextProps.inReflyPilot,
+    prevProps.visible === nextProps.visible &&
+    prevProps.inReflyPilot === nextProps.inReflyPilot &&
+    prevProps.parentResultId === nextProps.parentResultId,
 );

@@ -49,6 +49,7 @@ export interface CanvasState {
   showTemplates: boolean;
   showReflyPilot: boolean;
   reflyPilotMessages: ReflyPilotMessage[];
+  reflyPilotMessagesByResultId: Record<string, ReflyPilotMessage[]>;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -77,6 +78,13 @@ export interface CanvasState {
   removeReflyPilotMessage: (id: string) => void;
   removeReflyPilotMessageByNodeId: (nodeId: string) => void;
   clearReflyPilotMessages: () => void;
+  addReflyPilotMessageByResultId: (
+    resultId: string,
+    message: Omit<ReflyPilotMessage, 'timestamp'>,
+  ) => void;
+  getReflyPilotMessagesByResultId: (resultId: string) => ReflyPilotMessage[];
+  removeReflyPilotMessageByResultId: (resultId: string, id: string) => void;
+  clearReflyPilotMessagesByResultId: (resultId: string) => void;
   clearState: () => void;
 }
 
@@ -106,6 +114,7 @@ const defaultCanvasState = () => ({
   showTemplates: true,
   showReflyPilot: true,
   reflyPilotMessages: [],
+  reflyPilotMessagesByResultId: {},
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -274,12 +283,31 @@ export const useCanvasStore = create<CanvasState>()(
             ...message,
             timestamp: Date.now(),
           });
+
+          // Also add to resultId mapping if it exists
+          if (message.resultId && state.reflyPilotMessagesByResultId) {
+            state.reflyPilotMessagesByResultId[message.resultId] =
+              state.reflyPilotMessagesByResultId[message.resultId] || [];
+            state.reflyPilotMessagesByResultId[message.resultId].push({
+              ...message,
+              timestamp: Date.now(),
+            });
+          }
         }),
       removeReflyPilotMessage: (id) =>
         set((state) => {
           state.reflyPilotMessages = state.reflyPilotMessages.filter(
             (message) => message.id !== id,
           );
+
+          // Also remove from all resultId mappings
+          for (const resultId of Object.keys(state.reflyPilotMessagesByResultId || {})) {
+            if (state.reflyPilotMessagesByResultId[resultId]) {
+              state.reflyPilotMessagesByResultId[resultId] = state.reflyPilotMessagesByResultId[
+                resultId
+              ].filter((message) => message.id !== id);
+            }
+          }
         }),
       removeReflyPilotMessageByNodeId: (nodeId) =>
         set((state) => {
@@ -290,6 +318,51 @@ export const useCanvasStore = create<CanvasState>()(
       clearReflyPilotMessages: () =>
         set((state) => {
           state.reflyPilotMessages = [];
+          state.reflyPilotMessagesByResultId = {};
+        }),
+      addReflyPilotMessageByResultId: (resultId, message) =>
+        set((state) => {
+          state.reflyPilotMessagesByResultId ??= {};
+          state.reflyPilotMessagesByResultId[resultId] ??= [];
+
+          state.reflyPilotMessagesByResultId[resultId].push({
+            ...message,
+            timestamp: Date.now(),
+          });
+
+          // Also add to global messages for backward compatibility
+          state.reflyPilotMessages.push({
+            ...message,
+            timestamp: Date.now(),
+          });
+        }),
+      getReflyPilotMessagesByResultId: (resultId) => {
+        const state = useCanvasStore.getState();
+        return state.reflyPilotMessagesByResultId?.[resultId] || [];
+      },
+      removeReflyPilotMessageByResultId: (resultId, id) =>
+        set((state) => {
+          if (state.reflyPilotMessagesByResultId?.[resultId]) {
+            state.reflyPilotMessagesByResultId[resultId] = state.reflyPilotMessagesByResultId[
+              resultId
+            ].filter((message) => message.id !== id);
+          }
+
+          // Also remove from global messages
+          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+            (message) => message.id !== id,
+          );
+        }),
+      clearReflyPilotMessagesByResultId: (resultId) =>
+        set((state) => {
+          if (state.reflyPilotMessagesByResultId) {
+            delete state.reflyPilotMessagesByResultId[resultId];
+          }
+
+          // Also remove these messages from global list
+          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+            (message) => message.resultId !== resultId,
+          );
         }),
       clearState: () => set(defaultCanvasState()),
     })),
