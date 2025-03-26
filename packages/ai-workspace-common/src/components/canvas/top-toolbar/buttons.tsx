@@ -85,7 +85,7 @@ export const ToolbarButtons = memo(
             className="flex items-center justify-center text-xs font-semibold"
             style={{ color: showReflyPilot ? '#000' : '#9CA3AF' }}
           >
-            Refly Pilot
+            Ask AI
           </span>
         }
         onClick={() => setShowReflyPilot(!showReflyPilot)}
