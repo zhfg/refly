@@ -19,6 +19,7 @@ interface LaunchPadProps {
   className?: string;
   parentResultId?: string;
   onAddMessage?: (message: { id: string; resultId: string; nodeId: string }) => void;
+  onGenerateMessageIds?: () => { resultId: string; nodeId: string };
 }
 
 export const LaunchPad = memo(
@@ -28,6 +29,7 @@ export const LaunchPad = memo(
     className,
     parentResultId,
     onAddMessage,
+    onGenerateMessageIds,
   }: LaunchPadProps) => {
     // stores
     const contextPanelStore = useContextPanelStoreShallow((state) => ({
@@ -68,9 +70,10 @@ export const LaunchPad = memo(
           embeddedMode={inReflyPilot}
           parentResultId={parentResultId}
           onAddMessage={onAddMessage}
+          onGenerateMessageIds={onGenerateMessageIds}
         />
       );
-    }, [inReflyPilot, parentResultId, onAddMessage]);
+    }, [inReflyPilot, parentResultId, onAddMessage, onGenerateMessageIds]);
 
     if (!visible) {
       return null;
@@ -100,5 +103,6 @@ export const LaunchPad = memo(
     prevProps.visible === nextProps.visible &&
     prevProps.inReflyPilot === nextProps.inReflyPilot &&
     prevProps.parentResultId === nextProps.parentResultId &&
-    prevProps.onAddMessage === nextProps.onAddMessage,
+    prevProps.onAddMessage === nextProps.onAddMessage &&
+    prevProps.onGenerateMessageIds === nextProps.onGenerateMessageIds,
 );

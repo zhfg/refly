@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 import {
   CanvasNode,
   ResponseNodeMeta,
@@ -6,8 +6,10 @@ import {
 import { LinearThread } from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot/linear-thread';
 import { cn } from '@refly-packages/utils/cn';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
-import { useEffect } from 'react';
+import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
+// Define the message shape
 interface LinearThreadMessage {
   id: string;
   resultId: string;
@@ -25,6 +27,7 @@ export const EnhancedSkillResponse = memo(
   ({ node, resultId, className }: EnhancedSkillResponseProps) => {
     const [messages, setMessages] = useState<LinearThreadMessage[]>([]);
     const findThreadHistory = useFindThreadHistory();
+    const { addNode } = useAddNode();
 
     // Initialize messages from resultId and its thread history
     useEffect(() => {
@@ -54,22 +57,43 @@ export const EnhancedSkillResponse = memo(
       }
     }, [resultId, node, findThreadHistory]);
 
-    // Handler for adding new messages
-    const handleAddMessage = (message: Omit<LinearThreadMessage, 'timestamp'>) => {
-      setMessages((prev) => [...prev, { ...message, timestamp: Date.now() }]);
-    };
+    // Simple message adder for backward compatibility
+    const handleSimpleAddMessage = useCallback(
+      (message: { id: string; resultId: string; nodeId: string }) => {
+        const newMessage = {
+          id: message.id,
+          resultId: message.resultId,
+          nodeId: message.nodeId,
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, newMessage]);
+      },
+      [addNode, resultId],
+    );
+
+    // Handler for clearing messages
+    const handleClearMessages = useCallback(() => {
+      setMessages([]);
+    }, []);
+
+    // Handler for generating new message IDs
+    const handleGenerateMessageIds = useCallback(() => {
+      const newResultId = genActionResultID();
+      const newNodeId = genUniqueId();
+      return { resultId: newResultId, nodeId: newNodeId };
+    }, []);
 
     return (
       <div className={cn('flex flex-col h-full w-full', className)}>
         <div className="flex flex-1 overflow-hidden">
           <LinearThread
             resultId={resultId}
-            node={node}
             standalone={false}
             className="h-full w-full"
-            initialMessages={messages}
-            useResultIdMapping={true}
-            onAddMessage={handleAddMessage}
+            messages={messages}
+            onAddMessage={handleSimpleAddMessage}
+            onClearMessages={handleClearMessages}
+            onGenerateMessageIds={handleGenerateMessageIds}
           />
         </div>
       </div>

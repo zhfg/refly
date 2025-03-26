@@ -11,7 +11,6 @@ import { useContextFilterErrorTip } from './context-manager/hooks/use-context-fi
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 import { SelectedSkillHeader } from './selected-skill-header';
 import {
@@ -80,15 +79,21 @@ const PremiumBanner = () => {
   );
 };
 
+interface ChatPanelProps {
+  embeddedMode?: boolean;
+  onAddMessage?: (
+    message: { id: string; resultId: string; nodeId: string },
+    query: string,
+    contextItems: any[],
+  ) => void;
+  onGenerateMessageIds?: () => { resultId: string; nodeId: string };
+}
+
 export const ChatPanel = ({
   embeddedMode = false,
-  parentResultId,
   onAddMessage,
-}: {
-  embeddedMode?: boolean;
-  parentResultId?: string;
-  onAddMessage?: (message: { id: string; resultId: string; nodeId: string }) => void;
-}) => {
+  onGenerateMessageIds,
+}: ChatPanelProps) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
@@ -128,11 +133,6 @@ export const ChatPanel = ({
   const { addNode } = useAddNode();
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
-
-  const { setShowReflyPilot, addLinearThreadMessage } = useCanvasStore((state) => ({
-    setShowReflyPilot: state.setShowReflyPilot,
-    addLinearThreadMessage: state.addLinearThreadMessage,
-  }));
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -189,56 +189,32 @@ export const ChatPanel = ({
     const query = userInput || newQAText.trim();
 
     const { contextItems } = useContextPanelStore.getState();
-    const { linearThreadMessages } = useCanvasStore.getState();
 
-    const resultId = genActionResultID();
-    const nodeId = genUniqueId();
+    // Generate new message IDs using the provided function
+    const { resultId, nodeId } = onGenerateMessageIds?.() ?? {
+      resultId: genActionResultID(),
+      nodeId: genUniqueId(),
+    };
 
-    // Add message to Refly Pilot with the new node ID
-    if (embeddedMode && parentResultId && onAddMessage) {
-      // When in embedded mode with a parentResultId and onAddMessage is provided, use the callback
-      onAddMessage({
-        id: resultId,
-        resultId,
-        nodeId,
-      });
-    } else {
-      // Otherwise use the global message function for backward compatibility
-      addLinearThreadMessage({
-        id: resultId,
-        resultId,
-        nodeId,
-      });
+    // Call onAddMessage callback with all required data
+    if (onAddMessage) {
+      onAddMessage(
+        {
+          id: resultId,
+          resultId,
+          nodeId,
+        },
+        query,
+        contextItems,
+      );
     }
-
-    // Ensure Refly Pilot is visible
-    setShowReflyPilot(true);
 
     chatStore.setNewQAText('');
 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
 
-    // Determine if we're in Refly Pilot mode
-    const isInReflyPilot = embeddedMode;
-
-    // Get thread context (previous messages) when in Refly Pilot
-    const nodeFilters = [...convertContextItemsToNodeFilters(contextItems)];
-
-    if (isInReflyPilot && linearThreadMessages.length > 0) {
-      // Find the most recent message to connect to
-      const mostRecentMessage = [...linearThreadMessages].sort(
-        (a, b) => b.timestamp - a.timestamp,
-      )[0];
-      if (mostRecentMessage?.resultId) {
-        // Add the most recent message as a connection point
-        nodeFilters.push({
-          type: 'skillResponse',
-          entityId: mostRecentMessage.resultId,
-        });
-      }
-    }
-
+    // Invoke the action with the API
     invokeAction(
       {
         query,
@@ -255,6 +231,10 @@ export const ChatPanel = ({
       },
     );
 
+    // Create node in the canvas
+    const nodeFilters = [...convertContextItemsToNodeFilters(contextItems)];
+
+    // Add node to canvas
     addNode(
       {
         type: 'skillResponse',

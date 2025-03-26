@@ -10,7 +10,6 @@ import {
   IconShrink,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
-import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { RefreshCw } from 'lucide-react';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import {
@@ -32,9 +31,10 @@ interface ReflyPilotProps {
   resultId?: string;
   node?: CanvasNode<ResponseNodeMeta>;
   standalone?: boolean;
-  initialMessages?: LinearThreadMessage[];
-  useResultIdMapping?: boolean;
-  onAddMessage?: (message: Omit<LinearThreadMessage, 'timestamp'>) => void;
+  messages: LinearThreadMessage[];
+  onAddMessage: (message: { id: string; resultId: string; nodeId: string }) => void;
+  onClearMessages: () => void;
+  onGenerateMessageIds: () => { resultId: string; nodeId: string };
 }
 
 const LinearThreadHeader = memo(
@@ -103,31 +103,27 @@ const MemoizedSkillResponseNodePreview = memo(SkillResponseNodePreview, (prevPro
 
 export const LinearThreadContent = memo(
   ({
-    messagesWithHistory,
+    messages,
     messagesContainerRef,
     contentHeight,
   }: {
-    messagesWithHistory: any[];
+    messages: LinearThreadMessage[];
     messagesContainerRef: React.RefObject<HTMLDivElement>;
     contentHeight: string | number;
   }) => {
-    const sortedMessages = messagesWithHistory;
-
-    console.log('sortedMessages', sortedMessages);
-
     return (
       <div
         ref={messagesContainerRef}
         className="flex-grow overflow-auto preview-container"
         style={{ height: contentHeight, width: '100%' }}
       >
-        {sortedMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-gray-500">
             <p className="text-sm">No messages yet</p>
           </div>
         ) : (
           <div className="flex flex-col divide-y">
-            {sortedMessages.map((message) => (
+            {messages.map((message) => (
               <div key={message.id}>
                 <MemoizedSkillResponseNodePreview
                   node={{
@@ -157,24 +153,19 @@ export const LinearThread = memo(
   ({
     className,
     resultId,
-    node,
     standalone = true,
-    initialMessages = [],
-    useResultIdMapping = false,
+    messages,
     onAddMessage,
+    onClearMessages,
+    onGenerateMessageIds,
   }: ReflyPilotProps) => {
     const [isMaximized, setIsMaximized] = useState(false);
     const [contentHeight, setContentHeight] = useState('auto');
-    const [localMessages, setLocalMessages] = useState<LinearThreadMessage[]>(initialMessages);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
-    const findThreadHistory = useFindThreadHistory();
 
-    const { setShowReflyPilot, clearLinearThreadMessages, addLinearThreadMessage } =
-      useCanvasStoreShallow((state) => ({
-        setShowReflyPilot: state.setShowReflyPilot,
-        clearLinearThreadMessages: state.clearLinearThreadMessages,
-        addLinearThreadMessage: state.addLinearThreadMessage,
-      }));
+    const { setShowReflyPilot } = useCanvasStoreShallow((state) => ({
+      setShowReflyPilot: state.setShowReflyPilot,
+    }));
 
     // Add context panel store to manage context items
     const { setContextItems } = useContextPanelStoreShallow((state) => ({
@@ -192,124 +183,6 @@ export const LinearThread = memo(
       setContextItems,
     });
 
-    // Add local methods to manage messages
-    const addLocalMessage = useCallback(
-      (message: Omit<LinearThreadMessage, 'timestamp'>) => {
-        const newMessage = {
-          ...message,
-          timestamp: Date.now(),
-        };
-        setLocalMessages((prev) => [...prev, newMessage]);
-
-        // Also call external handler if provided
-        if (onAddMessage) {
-          onAddMessage(message);
-        }
-
-        // For backward compatibility
-        if (!useResultIdMapping) {
-          addLinearThreadMessage(newMessage);
-        }
-      },
-      [addLinearThreadMessage, onAddMessage, useResultIdMapping],
-    );
-
-    const clearLocalMessages = useCallback(() => {
-      setLocalMessages([]);
-      if (!useResultIdMapping) {
-        clearLinearThreadMessages();
-      }
-    }, [clearLinearThreadMessages, useResultIdMapping]);
-
-    // Initialize with thread history if resultId is provided
-    useEffect(() => {
-      if (resultId && node) {
-        // If we already have messages for this result, skip initialization
-        if (localMessages.some((msg) => msg.resultId === resultId)) {
-          return;
-        }
-
-        // Find thread history based on resultId
-        const threadHistory = findThreadHistory({ resultId });
-
-        // Get existing resultIds in messages for comparison
-        const existingResultIds = new Set(localMessages.map((msg) => msg.resultId));
-
-        // Track if we need to add any new messages
-        let addedNewMessages = false;
-
-        // Process all history nodes including current one
-        const allNodes = [...threadHistory, node];
-
-        // Add all history nodes to messages with appropriate timestamps if not already there
-        allNodes.forEach((historyNode, index) => {
-          const nodeResultId = historyNode?.data?.entityId;
-          if (nodeResultId && !existingResultIds.has(nodeResultId)) {
-            const newMessage = {
-              id: `history-${historyNode.id}-${index}`,
-              resultId: nodeResultId,
-              nodeId: historyNode.id,
-              timestamp: Date.now() - (allNodes.length - index) * 1000, // Ensure proper ordering
-            };
-
-            setLocalMessages((prev) => [...prev, newMessage]);
-            addedNewMessages = true;
-            existingResultIds.add(nodeResultId); // Mark as added
-          }
-        });
-
-        // If we didn't add any new messages and resultId isn't in messages yet, add it
-        if (!addedNewMessages && !existingResultIds.has(resultId)) {
-          const newMessage = {
-            id: `current-${node.id}`,
-            resultId: resultId,
-            nodeId: node.id,
-            timestamp: Date.now(),
-          };
-
-          setLocalMessages((prev) => [...prev, newMessage]);
-        }
-      }
-    }, [resultId, node, findThreadHistory, localMessages]);
-
-    // Cache thread history for each message
-    const messagesWithHistory = useMemo(() => {
-      // Use local messages as the source
-      const sourceMessages = localMessages;
-
-      // If resultId is provided, prioritize showing messages related to this result and its history
-      if (resultId) {
-        // Find the complete thread history for this result
-        const threadHistory = findThreadHistory({ resultId });
-        const historyIds = new Set(
-          threadHistory.map((node) => node.data?.entityId).filter(Boolean),
-        );
-
-        // Include the selected resultId
-        historyIds.add(resultId);
-
-        // Filter messages to show only those relevant to this result's conversation thread
-        const relevantMessages = sourceMessages.filter((message) =>
-          historyIds.has(message.resultId),
-        );
-
-        // Sort by timestamp to ensure correct ordering
-        const sortedMessages = [...relevantMessages].sort((a, b) => a.timestamp - b.timestamp);
-
-        return sortedMessages.map((message) => ({
-          ...message,
-          threadHistory: findThreadHistory({ resultId: message.resultId }),
-        }));
-      }
-
-      // Default case: show all messages sorted by timestamp
-      const sortedMessages = [...sourceMessages].sort((a, b) => a.timestamp - b.timestamp);
-      return sortedMessages.map((message) => ({
-        ...message,
-        threadHistory: findThreadHistory({ resultId: message.resultId }),
-      }));
-    }, [localMessages, findThreadHistory, resultId]);
-
     const handleClose = useCallback(() => {
       setShowReflyPilot(false);
     }, [setShowReflyPilot]);
@@ -320,10 +193,10 @@ export const LinearThread = memo(
 
     const handleClearConversation = useCallback(() => {
       // Clear all messages
-      clearLocalMessages();
+      onClearMessages();
       // Clear chat input
       setNewQAText('');
-    }, [clearLocalMessages, setNewQAText]);
+    }, [onClearMessages, setNewQAText]);
 
     const containerStyles = useMemo(
       () => ({
@@ -348,7 +221,7 @@ export const LinearThread = memo(
         // Calculate content height
         const availableHeight = viewportHeight - topOffset - headerHeight - launchpadHeight;
 
-        if (messagesWithHistory.length === 0) {
+        if (messages.length === 0) {
           setContentHeight('auto');
         } else {
           setContentHeight(`${Math.max(300, availableHeight)}px`);
@@ -364,15 +237,15 @@ export const LinearThread = memo(
       return () => {
         window.removeEventListener('resize', updateDimensions);
       };
-    }, [messagesWithHistory.length]);
+    }, [messages.length]);
 
     // Scroll to bottom when new messages are added
     useEffect(() => {
-      if (messagesContainerRef.current && messagesWithHistory.length > 0) {
+      if (messagesContainerRef.current && messages.length > 0) {
         const container = messagesContainerRef.current;
         container.scrollTop = container.scrollHeight; // Scroll to bottom to show newest messages
       }
-    }, [messagesWithHistory.length]);
+    }, [messages.length]);
 
     // Update context when resultId changes or component mounts
     useEffect(() => {
@@ -398,7 +271,7 @@ export const LinearThread = memo(
           />
         )}
         <LinearThreadContent
-          messagesWithHistory={messagesWithHistory}
+          messages={messages}
           messagesContainerRef={messagesContainerRef}
           contentHeight={contentHeight}
         />
@@ -407,7 +280,8 @@ export const LinearThread = memo(
             visible={true}
             inReflyPilot={true}
             parentResultId={!standalone && resultId ? resultId : undefined}
-            onAddMessage={addLocalMessage}
+            onAddMessage={onAddMessage}
+            onGenerateMessageIds={onGenerateMessageIds}
           />
         </div>
       </div>
