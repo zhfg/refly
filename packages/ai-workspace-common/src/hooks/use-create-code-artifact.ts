@@ -2,11 +2,10 @@ import { useCallback } from 'react';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 
 export const useCreateCodeArtifact = () => {
   const { t } = useTranslation();
-  const { addNode } = useAddNode();
 
   return useCallback(
     async (params?: {
@@ -34,8 +33,8 @@ export const useCreateCodeArtifact = () => {
         return;
       }
 
-      addNode(
-        {
+      nodeOperationsEmitter.emit('addNode', {
+        node: {
           type: 'codeArtifact',
           data: {
             title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
@@ -47,11 +46,10 @@ export const useCreateCodeArtifact = () => {
           },
           position: position,
         },
-        [],
-        true,
-        true,
-      );
+        shouldPreview: true,
+        needSetCenter: true,
+      });
     },
-    [addNode, t],
+    [t],
   );
 };

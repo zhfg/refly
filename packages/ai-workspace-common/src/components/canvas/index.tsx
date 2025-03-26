@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
-import { Modal, Result } from 'antd';
+import { Modal, Result, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
@@ -51,7 +51,7 @@ import { CustomEdge } from './edges/custom-edge';
 import NotFoundOverlay from './NotFoundOverlay';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 import { useDragToCreateNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-drag-create-node';
-import { message } from 'antd';
+import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -810,6 +810,20 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }),
     );
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
+
+  // Add event listener for node operations
+  useEffect(() => {
+    const handleAddNode = ({ node, connectTo, shouldPreview, needSetCenter }) => {
+      if (readonly) return;
+      addNode(node, connectTo, shouldPreview, needSetCenter);
+    };
+
+    nodeOperationsEmitter.on('addNode', handleAddNode);
+
+    return () => {
+      nodeOperationsEmitter.off('addNode', handleAddNode);
+    };
+  }, [addNode, handleNodePreview, reactFlowInstance, readonly]);
 
   return (
     <Spin
