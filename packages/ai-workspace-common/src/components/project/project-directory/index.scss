@@ -24,4 +24,14 @@
       }
     }
   }
+
+  .ant-checkbox-inner {
+    width: 13px;
+    height: 13px;
+    &::after {
+      width: 4px;
+      height: 7px;
+      border-width: 1px;
+    }
+  }
 }

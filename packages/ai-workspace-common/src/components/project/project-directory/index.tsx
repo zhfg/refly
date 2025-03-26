@@ -1,6 +1,16 @@
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { Layout, Button, Avatar, Divider, Typography, Collapse, List } from 'antd';
+import {
+  Layout,
+  Button,
+  Avatar,
+  Divider,
+  Typography,
+  Collapse,
+  List,
+  Checkbox,
+  message,
+} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
   IconLeft,
@@ -11,11 +21,13 @@ import {
   IconCanvas,
   IconSearch,
   IconPlus,
+  IconDelete,
+  IconClose,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import Logo from '@/assets/logo.svg';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import './index.scss';
 
 const { Text, Paragraph } = Typography;
@@ -172,6 +184,75 @@ const SourcesMenu = () => {
     { id: '4', title: '知识博主严伯钧' },
     { id: '5', title: '年度 MRR 分析报告' },
   ]);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+
+  const handleSourceHover = (id: string | null) => {
+    if (!isMultiSelectMode) {
+      setHoveredSourceId(id);
+    }
+  };
+
+  const toggleSourceSelection = (id: string) => {
+    setSelectedSources((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((sourceId) => sourceId !== id);
+      }
+      setIsMultiSelectMode(true);
+      return [...prev, id];
+    });
+  };
+
+  const exitMultiSelectMode = useCallback(() => {
+    setIsMultiSelectMode(false);
+    setSelectedSources([]);
+    setHoveredSourceId(null);
+  }, []);
+
+  // 删除所选sources
+  const deleteSelectedSources = useCallback(() => {
+    // 这里应该调用API来删除选中的sources
+    message.success(`已删除 ${selectedSources.length} 个来源`);
+    // 清空选择状态
+    exitMultiSelectMode();
+  }, [selectedSources, exitMultiSelectMode]);
+
+  const headerActions = useMemo(() => {
+    if (isMultiSelectMode) {
+      return (
+        <div className="flex items-center gap-2">
+          <Button
+            type="text"
+            size="small"
+            icon={<IconDelete className={cn(iconClassName, 'text-gray-500')} />}
+            onClick={deleteSelectedSources}
+          />
+          <Button
+            type="text"
+            size="small"
+            icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
+            onClick={exitMultiSelectMode}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          type="text"
+          size="small"
+          icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
+        />
+        <Button
+          type="text"
+          size="small"
+          icon={<IconSearch className={cn(iconClassName, 'text-gray-500')} />}
+        />
+      </div>
+    );
+  }, [isMultiSelectMode, deleteSelectedSources, exitMultiSelectMode]);
 
   return (
     <div className="flex-grow overflow-y-auto min-h-[150px]">
@@ -185,32 +266,57 @@ const SourcesMenu = () => {
             key: 'sources',
             label: <span className="text-sm font-medium">Sources</span>,
             children: (
-              <div className="h-full flex flex-col px-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500">Sources 详情</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<IconSearch className={cn(iconClassName, 'text-gray-500')} />}
-                    />
-                  </div>
+              <div className="h-full flex flex-col">
+                <div className="flex justify-between items-center mb-2 px-3">
+                  <span className="text-xs text-gray-500">
+                    {isMultiSelectMode ? `已选择 ${selectedSources.length} 项` : 'Sources 详情'}
+                  </span>
+                  {headerActions}
                 </div>
-                <div className="flex-grow overflow-y-auto">
+                <div className="flex-grow overflow-y-auto px-3">
                   <List
                     itemLayout="horizontal"
                     split={false}
                     dataSource={sourceList}
                     renderItem={(item) => (
-                      <List.Item className="!py-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                        <div className="flex items-center gap-2">
-                          <IconUser className={cn(iconClassName, 'text-gray-500')} />
-                          <span className="text-[13px] text-gray-700">{item.title}</span>
+                      <List.Item
+                        className={cn(
+                          '!py-2 !pl-1 !pr-2 my-1 rounded-md hover:bg-gray-50 cursor-pointer relative group',
+                          selectedSources.includes(item.id) && 'bg-gray-50',
+                        )}
+                        onMouseEnter={() => handleSourceHover(item.id)}
+                        onMouseLeave={() => handleSourceHover(null)}
+                      >
+                        <div className="flex items-center gap-1 w-full">
+                          <div
+                            className="flex items-center gap-1.5 flex-grow"
+                            onClick={() => toggleSourceSelection(item.id)}
+                          >
+                            <IconUser className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 flex items-center justify-center" />
+                            <Text
+                              className="text-[13px] w-[120px] text-gray-700"
+                              ellipsis={{
+                                tooltip: true,
+                              }}
+                            >
+                              {item.title}
+                            </Text>
+                          </div>
+                          <div
+                            className={cn(
+                              'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
+                              isMultiSelectMode || hoveredSourceId === item.id
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )}
+                          >
+                            <Checkbox
+                              checked={selectedSources.includes(item.id)}
+                              onChange={() => toggleSourceSelection(item.id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
+                          </div>
                         </div>
                       </List.Item>
                     )}
