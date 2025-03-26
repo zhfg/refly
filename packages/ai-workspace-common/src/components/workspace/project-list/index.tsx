@@ -29,7 +29,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
-import { useMatch } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 
 const ActionDropdown = ({
@@ -181,9 +181,11 @@ const ActionDropdown = ({
 const ProjectCard = ({ item, onDelete }: { item: Resource; onDelete: () => void }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+  const navigate = useNavigate();
 
   const handleCardClick = (e: React.MouseEvent) => {
     console.log('handleCardClick', e);
+    navigate('/project/123?canvasId=c-hn0joweqr7zv6mv3jgqz9dwq');
   };
 
   return (

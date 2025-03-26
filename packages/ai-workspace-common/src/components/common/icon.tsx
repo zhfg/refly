@@ -40,6 +40,9 @@ import {
   LuShare2,
   LuCirclePlay,
   LuPencilLine,
+  LuChevronLeft,
+  LuChevronRight,
+  LuUserRound,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -159,6 +162,9 @@ export const IconShare = LuShare2;
 export const IconClose = LuX;
 export const IconLink = LuLink;
 export const IconProject = SiOpenproject;
+export const IconLeft = LuChevronLeft;
+export const IconRight = LuChevronRight;
+export const IconUser = LuUserRound;
 
 export const IconChrome = ChromeIcon;
 export const ModelProviderIcons = {

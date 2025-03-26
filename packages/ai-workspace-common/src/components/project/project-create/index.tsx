@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Form, Input, message, Modal, Upload } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
 import ImgCrop from 'antd-img-crop';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { MdLibraryBooks } from 'react-icons/md';
@@ -27,7 +26,6 @@ export const CreateProjectModal = ({
   const { t, i18n } = useTranslation();
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const { uploadCanvasCover } = useExportCanvasAsImage();
   const [loadingCoverPicture, setLoadingCoverPicture] = useState(false);
   const [coverPictureUrl, setCoverPictureUrl] = useState(coverPicture);
 
@@ -35,7 +33,7 @@ export const CreateProjectModal = ({
     if (confirmLoading) return;
 
     setConfirmLoading(true);
-    const { storageKey } = await uploadCanvasCover();
+
     const { data } = await getClient().createCanvasTemplate({
       body: {
         title,
@@ -43,7 +41,7 @@ export const CreateProjectModal = ({
         language: i18n.language,
         categoryId: 'project',
         canvasId: 'project',
-        coverStorageKey: storageKey,
+        coverStorageKey: '1',
       },
     });
     setConfirmLoading(false);
