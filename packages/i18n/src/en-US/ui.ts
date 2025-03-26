@@ -2225,6 +2225,9 @@ const translations = {
   },
   project: {
     create: 'Create Project',
+    addSource: 'Add Source',
+    canvas: 'Canvas',
+    source: 'Source',
     createModal: {
       createTitle: 'Create Project',
       editTitle: 'Edit Project',

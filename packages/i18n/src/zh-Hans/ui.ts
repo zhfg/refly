@@ -2162,6 +2162,9 @@ const translations = {
   },
   project: {
     create: '创建项目',
+    addSource: '添加资源',
+    canvas: '画布',
+    source: '资源',
     createModal: {
       createTitle: '创建项目',
       editTitle: '编辑项目',

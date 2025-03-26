@@ -11,6 +11,7 @@ import {
   Checkbox,
   message,
   Input,
+  Empty,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -29,6 +30,7 @@ import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import Logo from '@/assets/logo.svg';
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import './index.scss';
 
 const { Text, Paragraph } = Typography;
@@ -82,7 +84,7 @@ const ProjectSettings = ({
         </div>
       </div>
 
-      <div className="py-4 cursor-pointer" onClick={handleEditSettings}>
+      <div className="py-5 cursor-pointer" onClick={handleEditSettings}>
         <div className="flex items-center gap-3">
           <img src={Logo} alt="Refly" className="w-10 h-10 rounded-md" />
           <div className="flex flex-col">
@@ -123,6 +125,7 @@ const ProjectSettings = ({
 
 // Canvas菜单组件
 const CanvasMenu = () => {
+  const { t } = useTranslation();
   const [canvasList] = useState([
     { id: '1', title: 'Refly 产品快速上手指南' },
     { id: '2', title: 'jina reader 支持本地 sdk 或者 api 调用' },
@@ -138,6 +141,10 @@ const CanvasMenu = () => {
     setHoveredCanvasId(id);
   }, []);
 
+  const handleAddCanvas = () => {
+    console.log('handleAddCanvas');
+  };
+
   return (
     <Collapse
       defaultActiveKey={['canvas']}
@@ -147,15 +154,16 @@ const CanvasMenu = () => {
       items={[
         {
           key: 'canvas',
-          label: <span className="text-sm font-medium">Canvas</span>,
+          label: <span className="text-sm font-medium">{t('project.canvas')}</span>,
           children: (
             <div className="flex flex-col">
               <Button
                 type="text"
-                className="flex items-center justify-start mb-2 text-blue-500 hover:text-blue-600"
-                icon={<IconPlus className={cn(iconClassName, 'text-blue-500')} />}
+                className="flex items-center justify-start mb-2 mx-3 !text-green-600"
+                icon={<IconPlus className={cn(iconClassName)} />}
+                onClick={handleAddCanvas}
               >
-                <span className="text-[13px]">新建 Canvas</span>
+                {t('loggedHomePage.siderMenu.newCanvas')}
               </Button>
               <div className="max-h-[20vh] overflow-y-auto px-3">
                 <List
@@ -213,6 +221,8 @@ const SourcesMenu = () => {
     { id: '4', title: '知识博主严伯钧' },
     { id: '5', title: '年度 MRR 分析报告' },
   ]);
+  const { t } = useTranslation();
+  // const [sourceList] = useState([]);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
@@ -262,6 +272,10 @@ const SourcesMenu = () => {
       item.title.toLowerCase().includes(searchValue.toLowerCase()),
     );
   }, [searchValue, sourceList]);
+
+  const handleAddSource = () => {
+    console.log('handleAddSource');
+  };
 
   const headerActions = useMemo(() => {
     if (isSearchMode) {
@@ -313,6 +327,7 @@ const SourcesMenu = () => {
           type="text"
           size="small"
           icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
+          onClick={handleAddSource}
         />
         <Button
           type="text"
@@ -329,6 +344,7 @@ const SourcesMenu = () => {
     deleteSelectedSources,
     exitMultiSelectMode,
     toggleSearchMode,
+    handleAddSource,
   ]);
 
   return (
@@ -341,7 +357,7 @@ const SourcesMenu = () => {
         items={[
           {
             key: 'sources',
-            label: <span className="text-sm font-medium">Sources</span>,
+            label: <span className="text-sm font-medium">{t('project.source')}</span>,
             children: (
               <div className="h-full flex flex-col">
                 <div
@@ -357,6 +373,23 @@ const SourcesMenu = () => {
                     itemLayout="horizontal"
                     split={false}
                     dataSource={filteredSourceList}
+                    locale={{
+                      emptyText: (
+                        <Empty className="text-xs" description={t('common.empty')}>
+                          <Button
+                            size="small"
+                            type="default"
+                            className="text-xs"
+                            icon={
+                              <IconPlus size={12} className="flex items-center justify-center" />
+                            }
+                            onClick={handleAddSource}
+                          >
+                            {t('project.addSource')}
+                          </Button>
+                        </Empty>
+                      ),
+                    }}
                     renderItem={(item) => (
                       <List.Item
                         className={cn(
@@ -429,7 +462,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
       )}
     >
-      <div className="project-directory flex h-full flex-col py-2 overflow-y-auto">
+      <div className="project-directory flex h-full flex-col py-3 overflow-y-auto">
         <ProjectSettings source={source} setCollapse={setCollapse} />
         <CanvasMenu />
         <SourcesMenu />
