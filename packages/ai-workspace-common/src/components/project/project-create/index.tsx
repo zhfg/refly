@@ -9,16 +9,20 @@ import { MdLibraryBooks } from 'react-icons/md';
 import { BiSolidEdit } from 'react-icons/bi';
 
 interface CreateProjectModalProps {
+  mode?: 'create' | 'edit';
   title?: string;
   description?: string;
+  instructions?: string;
   coverPicture?: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
 }
 
 export const CreateProjectModal = ({
+  mode = 'create',
   title,
   description,
+  instructions,
   coverPicture,
   visible,
   setVisible,
@@ -92,6 +96,7 @@ export const CreateProjectModal = ({
       form.setFieldsValue({
         title,
         description,
+        instructions,
       });
       setCoverPictureUrl(coverPicture);
     }
@@ -106,7 +111,7 @@ export const CreateProjectModal = ({
       confirmLoading={confirmLoading}
       okText={t('common.confirm')}
       cancelText={t('common.cancel')}
-      title={t('project.createModal.title')}
+      title={t(`project.createModal.${mode}Title`)}
     >
       <div className="w-full h-full pt-4 overflow-y-auto">
         <Form form={form} labelCol={{ span: 5 }}>
@@ -165,6 +170,12 @@ export const CreateProjectModal = ({
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               placeholder={t('project.createModal.descriptionPlaceholder')}
+            />
+          </Form.Item>
+          <Form.Item label={t('project.createModal.instructions')} name="instructions">
+            <Input.TextArea
+              autoSize={{ minRows: 3, maxRows: 6 }}
+              placeholder={t('project.createModal.instructionsPlaceholder')}
             />
           </Form.Item>
         </Form>

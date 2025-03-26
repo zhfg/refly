@@ -1,0 +1,27 @@
+.project-directory {
+  .ant-collapse-header {
+    padding: 8px 12px !important;
+    color: #4e5969 !important;
+  }
+
+  .ant-collapse-content-box {
+    padding: 8px 0 !important;
+  }
+
+  .sources-collapse {
+    height: 100%;
+    .ant-collapse-item {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      .ant-collapse-content {
+        flex-grow: 1;
+        overflow: hidden;
+        .ant-collapse-content-box {
+          height: 100%;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+}

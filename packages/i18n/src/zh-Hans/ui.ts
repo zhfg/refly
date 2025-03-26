@@ -2163,6 +2163,8 @@ const translations = {
   project: {
     create: '创建项目',
     createModal: {
+      createTitle: '创建项目',
+      editTitle: '编辑项目',
       title: '名称',
       titlePlaceholder: '请输入项目名称',
       description: '描述',
@@ -2172,6 +2174,8 @@ const translations = {
       onlyImageAllowed: '只允许上传 PNG, JPG, JPEG, GIF 类型的图片',
       imageSizeLimited: '图片大小限制为 {{size}} MB',
       uploadCoverPicture: '上传封面',
+      instructions: '预设提示词',
+      instructionsPlaceholder: '请输入提示词',
     },
   },
 };

@@ -2226,6 +2226,8 @@ const translations = {
   project: {
     create: 'Create Project',
     createModal: {
+      createTitle: 'Create Project',
+      editTitle: 'Edit Project',
       title: 'Name',
       titlePlaceholder: 'Please enter project name',
       description: 'Description',
@@ -2235,6 +2237,8 @@ const translations = {
       onlyImageAllowed: 'Only PNG, JPG, JPEG, GIF images are allowed',
       imageSizeLimited: 'Image size limited to {{size}} MB',
       uploadCoverPicture: 'Upload Cover',
+      instructions: 'Instructions',
+      instructionsPlaceholder: 'Please enter instructions',
     },
   },
 };
