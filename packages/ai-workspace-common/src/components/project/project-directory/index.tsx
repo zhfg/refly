@@ -10,6 +10,7 @@ import {
   List,
   Checkbox,
   message,
+  Input,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -131,6 +132,12 @@ const CanvasMenu = () => {
     { id: '6', title: 'jina reader 支持本地 sdk 或者 api 调用' },
   ]);
 
+  const [hoveredCanvasId, setHoveredCanvasId] = useState<string | null>(null);
+
+  const handleCanvasHover = useCallback((id: string | null) => {
+    setHoveredCanvasId(id);
+  }, []);
+
   return (
     <Collapse
       defaultActiveKey={['canvas']}
@@ -156,12 +163,34 @@ const CanvasMenu = () => {
                   split={false}
                   dataSource={canvasList}
                   renderItem={(item) => (
-                    <List.Item className="!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
-                        <Text className="w-[120px] text-[13px] text-gray-700 truncate">
-                          {item.title}
-                        </Text>
+                    <List.Item
+                      className="!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer"
+                      onMouseEnter={() => handleCanvasHover(item.id)}
+                      onMouseLeave={() => handleCanvasHover(null)}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2">
+                          <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
+                          <Text className="w-[120px] text-[13px] text-gray-700 truncate">
+                            {item.title}
+                          </Text>
+                        </div>
+                        <div
+                          className={cn(
+                            'transition-opacity duration-200',
+                            hoveredCanvasId === item.id ? 'opacity-100' : 'opacity-0',
+                          )}
+                        >
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={
+                              <IconMoreHorizontal
+                                className={cn(iconClassName, 'text-gray-500 hover:text-green-600')}
+                              />
+                            }
+                          />
+                        </div>
                       </div>
                     </List.Item>
                   )}
@@ -187,6 +216,8 @@ const SourcesMenu = () => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   const handleSourceHover = (id: string | null) => {
     if (!isMultiSelectMode) {
@@ -210,6 +241,13 @@ const SourcesMenu = () => {
     setHoveredSourceId(null);
   }, []);
 
+  const toggleSearchMode = useCallback(() => {
+    setIsSearchMode((prev) => !prev);
+    if (isSearchMode) {
+      setSearchValue('');
+    }
+  }, [isSearchMode]);
+
   // 删除所选sources
   const deleteSelectedSources = useCallback(() => {
     // 这里应该调用API来删除选中的sources
@@ -218,22 +256,53 @@ const SourcesMenu = () => {
     exitMultiSelectMode();
   }, [selectedSources, exitMultiSelectMode]);
 
+  const filteredSourceList = useMemo(() => {
+    if (!searchValue) return sourceList;
+    return sourceList.filter((item) =>
+      item.title.toLowerCase().includes(searchValue.toLowerCase()),
+    );
+  }, [searchValue, sourceList]);
+
   const headerActions = useMemo(() => {
-    if (isMultiSelectMode) {
+    if (isSearchMode) {
       return (
-        <div className="flex items-center gap-2">
-          <Button
+        <div className="flex items-center gap-2 w-full justify-between mt-2">
+          <Input
+            autoFocus
             type="text"
-            size="small"
-            icon={<IconDelete className={cn(iconClassName, 'text-gray-500')} />}
-            onClick={deleteSelectedSources}
+            className="text-xs px-2 py-1 border border-gray-200 rounded-md flex-grow focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="搜索Sources..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
           <Button
             type="text"
             size="small"
             icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
-            onClick={exitMultiSelectMode}
+            onClick={toggleSearchMode}
           />
+        </div>
+      );
+    }
+
+    if (isMultiSelectMode) {
+      return (
+        <div className="flex items-center justify-between gap-2 mt-2">
+          <div className="text-xs text-gray-500">已选择 {selectedSources.length} 项</div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="text"
+              size="small"
+              icon={<IconDelete className={cn(iconClassName, 'text-gray-500')} />}
+              onClick={deleteSelectedSources}
+            />
+            <Button
+              type="text"
+              size="small"
+              icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
+              onClick={exitMultiSelectMode}
+            />
+          </div>
         </div>
       );
     }
@@ -249,10 +318,18 @@ const SourcesMenu = () => {
           type="text"
           size="small"
           icon={<IconSearch className={cn(iconClassName, 'text-gray-500')} />}
+          onClick={toggleSearchMode}
         />
       </div>
     );
-  }, [isMultiSelectMode, deleteSelectedSources, exitMultiSelectMode]);
+  }, [
+    isMultiSelectMode,
+    isSearchMode,
+    searchValue,
+    deleteSelectedSources,
+    exitMultiSelectMode,
+    toggleSearchMode,
+  ]);
 
   return (
     <div className="flex-grow overflow-y-auto min-h-[150px]">
@@ -267,17 +344,19 @@ const SourcesMenu = () => {
             label: <span className="text-sm font-medium">Sources</span>,
             children: (
               <div className="h-full flex flex-col">
-                <div className="flex justify-between items-center mb-2 px-3">
-                  <span className="text-xs text-gray-500">
-                    {isMultiSelectMode ? `已选择 ${selectedSources.length} 项` : 'Sources 详情'}
-                  </span>
+                <div
+                  className={`mb-2 px-3 ${
+                    isMultiSelectMode || isSearchMode ? '' : 'flex justify-between items-center'
+                  }`}
+                >
+                  <div className="text-xs text-gray-500">Sources 详情</div>
                   {headerActions}
                 </div>
                 <div className="flex-grow overflow-y-auto px-3">
                   <List
                     itemLayout="horizontal"
                     split={false}
-                    dataSource={sourceList}
+                    dataSource={filteredSourceList}
                     renderItem={(item) => (
                       <List.Item
                         className={cn(
