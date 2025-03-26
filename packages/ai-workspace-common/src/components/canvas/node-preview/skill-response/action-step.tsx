@@ -327,6 +327,8 @@ export const ActionStepCard = memo(
       [setSelectedNodeByEntity],
     );
 
+    if (!step) return null;
+
     return (
       <div className="flex flex-col gap-1">
         <div className="my-1 text-gray-600 text-sm flex items-center gap-2 font-medium">
@@ -372,13 +374,14 @@ export const ActionStepCard = memo(
           />
         )}
 
-        {step.artifacts?.map((artifact) => (
-          <ArtifactItem
-            key={artifact.entityId}
-            artifact={artifact}
-            onSelect={() => handleArtifactSelect(artifact)}
-          />
-        ))}
+        {Array.isArray(step.artifacts) &&
+          step.artifacts.map((artifact) => (
+            <ArtifactItem
+              key={artifact.entityId}
+              artifact={artifact}
+              onSelect={() => handleArtifactSelect(artifact)}
+            />
+          ))}
 
         <RecommendQuestions relatedQuestions={parsedData.recommendedQuestions?.questions || []} />
 
