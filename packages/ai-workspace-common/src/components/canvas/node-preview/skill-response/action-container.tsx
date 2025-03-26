@@ -270,7 +270,7 @@ const ActionContainerComponent = ({ result, step, nodeId }: ActionContainerProps
           </ArcoDropdown>
         )}
       </div>
-      {!isPending && (
+      {!isPending && step?.content && (
         <div className="flex flex-row justify-between items-center text-sm">
           <div className="-ml-1 text-sm flex flex-row items-center">
             {!readonly && !isShareMode && step.content && (
