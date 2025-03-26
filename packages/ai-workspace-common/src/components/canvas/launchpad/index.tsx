@@ -18,10 +18,17 @@ interface LaunchPadProps {
   inReflyPilot?: boolean;
   className?: string;
   parentResultId?: string;
+  onAddMessage?: (message: { id: string; resultId: string; nodeId: string }) => void;
 }
 
 export const LaunchPad = memo(
-  ({ visible = true, inReflyPilot = false, className, parentResultId }: LaunchPadProps) => {
+  ({
+    visible = true,
+    inReflyPilot = false,
+    className,
+    parentResultId,
+    onAddMessage,
+  }: LaunchPadProps) => {
     // stores
     const contextPanelStore = useContextPanelStoreShallow((state) => ({
       resetState: state.resetState,
@@ -56,8 +63,14 @@ export const LaunchPad = memo(
 
     // Memoize the ChatPanel component to prevent unnecessary re-renders
     const chatPanelComponent = useMemo(() => {
-      return <ChatPanel embeddedMode={inReflyPilot} parentResultId={parentResultId} />;
-    }, [inReflyPilot, parentResultId]);
+      return (
+        <ChatPanel
+          embeddedMode={inReflyPilot}
+          parentResultId={parentResultId}
+          onAddMessage={onAddMessage}
+        />
+      );
+    }, [inReflyPilot, parentResultId, onAddMessage]);
 
     if (!visible) {
       return null;
@@ -86,5 +99,6 @@ export const LaunchPad = memo(
   (prevProps, nextProps) =>
     prevProps.visible === nextProps.visible &&
     prevProps.inReflyPilot === nextProps.inReflyPilot &&
-    prevProps.parentResultId === nextProps.parentResultId,
+    prevProps.parentResultId === nextProps.parentResultId &&
+    prevProps.onAddMessage === nextProps.onAddMessage,
 );

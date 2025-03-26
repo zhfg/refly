@@ -27,7 +27,7 @@ interface CanvasConfig {
   nodePreviews: NodePreview[];
 }
 
-interface ReflyPilotMessage {
+interface LinearThreadMessage {
   id: string;
   resultId: string;
   nodeId: string;
@@ -48,8 +48,7 @@ export interface CanvasState {
   autoLayout: boolean;
   showTemplates: boolean;
   showReflyPilot: boolean;
-  reflyPilotMessages: ReflyPilotMessage[];
-  reflyPilotMessagesByResultId: Record<string, ReflyPilotMessage[]>;
+  linearThreadMessages: LinearThreadMessage[];
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -74,17 +73,10 @@ export interface CanvasState {
   setAutoLayout: (enabled: boolean) => void;
   setShowTemplates: (show: boolean) => void;
   setShowReflyPilot: (show: boolean) => void;
-  addReflyPilotMessage: (message: Omit<ReflyPilotMessage, 'timestamp'>) => void;
-  removeReflyPilotMessage: (id: string) => void;
-  removeReflyPilotMessageByNodeId: (nodeId: string) => void;
-  clearReflyPilotMessages: () => void;
-  addReflyPilotMessageByResultId: (
-    resultId: string,
-    message: Omit<ReflyPilotMessage, 'timestamp'>,
-  ) => void;
-  getReflyPilotMessagesByResultId: (resultId: string) => ReflyPilotMessage[];
-  removeReflyPilotMessageByResultId: (resultId: string, id: string) => void;
-  clearReflyPilotMessagesByResultId: (resultId: string) => void;
+  addLinearThreadMessage: (message: Omit<LinearThreadMessage, 'timestamp'>) => void;
+  removeLinearThreadMessage: (id: string) => void;
+  removeLinearThreadMessageByNodeId: (nodeId: string) => void;
+  clearLinearThreadMessages: () => void;
   clearState: () => void;
 }
 
@@ -113,8 +105,7 @@ const defaultCanvasState = () => ({
   autoLayout: false,
   showTemplates: true,
   showReflyPilot: true,
-  reflyPilotMessages: [],
-  reflyPilotMessagesByResultId: {},
+  linearThreadMessages: [],
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -277,92 +268,28 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showReflyPilot = show;
         }),
-      addReflyPilotMessage: (message) =>
+      addLinearThreadMessage: (message) =>
         set((state) => {
-          state.reflyPilotMessages.push({
+          state.linearThreadMessages.push({
             ...message,
             timestamp: Date.now(),
           });
-
-          // Also add to resultId mapping if it exists
-          if (message.resultId && state.reflyPilotMessagesByResultId) {
-            state.reflyPilotMessagesByResultId[message.resultId] =
-              state.reflyPilotMessagesByResultId[message.resultId] || [];
-            state.reflyPilotMessagesByResultId[message.resultId].push({
-              ...message,
-              timestamp: Date.now(),
-            });
-          }
         }),
-      removeReflyPilotMessage: (id) =>
+      removeLinearThreadMessage: (id) =>
         set((state) => {
-          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+          state.linearThreadMessages = state.linearThreadMessages.filter(
             (message) => message.id !== id,
           );
-
-          // Also remove from all resultId mappings
-          for (const resultId of Object.keys(state.reflyPilotMessagesByResultId || {})) {
-            if (state.reflyPilotMessagesByResultId[resultId]) {
-              state.reflyPilotMessagesByResultId[resultId] = state.reflyPilotMessagesByResultId[
-                resultId
-              ].filter((message) => message.id !== id);
-            }
-          }
         }),
-      removeReflyPilotMessageByNodeId: (nodeId) =>
+      removeLinearThreadMessageByNodeId: (nodeId) =>
         set((state) => {
-          state.reflyPilotMessages = state.reflyPilotMessages.filter(
+          state.linearThreadMessages = state.linearThreadMessages.filter(
             (message) => message.nodeId !== nodeId,
           );
         }),
-      clearReflyPilotMessages: () =>
+      clearLinearThreadMessages: () =>
         set((state) => {
-          state.reflyPilotMessages = [];
-          state.reflyPilotMessagesByResultId = {};
-        }),
-      addReflyPilotMessageByResultId: (resultId, message) =>
-        set((state) => {
-          state.reflyPilotMessagesByResultId ??= {};
-          state.reflyPilotMessagesByResultId[resultId] ??= [];
-
-          state.reflyPilotMessagesByResultId[resultId].push({
-            ...message,
-            timestamp: Date.now(),
-          });
-
-          // Also add to global messages for backward compatibility
-          state.reflyPilotMessages.push({
-            ...message,
-            timestamp: Date.now(),
-          });
-        }),
-      getReflyPilotMessagesByResultId: (resultId) => {
-        const state = useCanvasStore.getState();
-        return state.reflyPilotMessagesByResultId?.[resultId] || [];
-      },
-      removeReflyPilotMessageByResultId: (resultId, id) =>
-        set((state) => {
-          if (state.reflyPilotMessagesByResultId?.[resultId]) {
-            state.reflyPilotMessagesByResultId[resultId] = state.reflyPilotMessagesByResultId[
-              resultId
-            ].filter((message) => message.id !== id);
-          }
-
-          // Also remove from global messages
-          state.reflyPilotMessages = state.reflyPilotMessages.filter(
-            (message) => message.id !== id,
-          );
-        }),
-      clearReflyPilotMessagesByResultId: (resultId) =>
-        set((state) => {
-          if (state.reflyPilotMessagesByResultId) {
-            delete state.reflyPilotMessagesByResultId[resultId];
-          }
-
-          // Also remove these messages from global list
-          state.reflyPilotMessages = state.reflyPilotMessages.filter(
-            (message) => message.resultId !== resultId,
-          );
+          state.linearThreadMessages = [];
         }),
       clearState: () => set(defaultCanvasState()),
     })),
@@ -376,7 +303,7 @@ export const useCanvasStore = create<CanvasState>()(
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
         showReflyPilot: state.showReflyPilot,
-        reflyPilotMessages: state.reflyPilotMessages,
+        linearThreadMessages: state.linearThreadMessages,
       }),
     },
   ),

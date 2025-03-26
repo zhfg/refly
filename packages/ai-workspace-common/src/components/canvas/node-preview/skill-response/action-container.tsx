@@ -38,8 +38,8 @@ const ActionContainerComponent = ({ result, step, nodeId }: ActionContainerProps
   const { addToContext } = useAddToContext();
   const { setNodeCenter } = useNodePosition();
   const { deleteNode } = useDeleteNode();
-  const { removeReflyPilotMessageByNodeId } = useCanvasStore((state) => ({
-    removeReflyPilotMessageByNodeId: state.removeReflyPilotMessageByNodeId,
+  const { removeLinearThreadMessageByNodeId } = useCanvasStore((state) => ({
+    removeLinearThreadMessageByNodeId: state.removeLinearThreadMessageByNodeId,
   }));
 
   const { title } = result ?? {};
@@ -197,7 +197,7 @@ const ActionContainerComponent = ({ result, step, nodeId }: ActionContainerProps
   const handleDeleteNode = useCallback(() => {
     if (nodeId) {
       // Remove the Refly Pilot message first
-      removeReflyPilotMessageByNodeId(nodeId);
+      removeLinearThreadMessageByNodeId(nodeId);
 
       // Then delete the node
       deleteNode({
@@ -210,7 +210,7 @@ const ActionContainerComponent = ({ result, step, nodeId }: ActionContainerProps
         },
       });
     }
-  }, [nodeId, deleteNode, result, removeReflyPilotMessageByNodeId]);
+  }, [nodeId, deleteNode, result, removeLinearThreadMessageByNodeId]);
 
   // More menu items
   const moreMenuItems: MenuProps['items'] = useMemo(() => {

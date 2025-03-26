@@ -83,7 +83,12 @@ const PremiumBanner = () => {
 export const ChatPanel = ({
   embeddedMode = false,
   parentResultId,
-}: { embeddedMode?: boolean; parentResultId?: string }) => {
+  onAddMessage,
+}: {
+  embeddedMode?: boolean;
+  parentResultId?: string;
+  onAddMessage?: (message: { id: string; resultId: string; nodeId: string }) => void;
+}) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
@@ -124,12 +129,10 @@ export const ChatPanel = ({
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
 
-  const { setShowReflyPilot, addReflyPilotMessage, addReflyPilotMessageByResultId } =
-    useCanvasStore((state) => ({
-      setShowReflyPilot: state.setShowReflyPilot,
-      addReflyPilotMessage: state.addReflyPilotMessage,
-      addReflyPilotMessageByResultId: state.addReflyPilotMessageByResultId,
-    }));
+  const { setShowReflyPilot, addLinearThreadMessage } = useCanvasStore((state) => ({
+    setShowReflyPilot: state.setShowReflyPilot,
+    addLinearThreadMessage: state.addLinearThreadMessage,
+  }));
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -186,22 +189,22 @@ export const ChatPanel = ({
     const query = userInput || newQAText.trim();
 
     const { contextItems } = useContextPanelStore.getState();
-    const { reflyPilotMessages } = useCanvasStore.getState();
+    const { linearThreadMessages } = useCanvasStore.getState();
 
     const resultId = genActionResultID();
     const nodeId = genUniqueId();
 
     // Add message to Refly Pilot with the new node ID
-    if (embeddedMode && parentResultId) {
-      // When in embedded mode with a parentResultId, use the resultId-specific function
-      addReflyPilotMessageByResultId(parentResultId, {
+    if (embeddedMode && parentResultId && onAddMessage) {
+      // When in embedded mode with a parentResultId and onAddMessage is provided, use the callback
+      onAddMessage({
         id: resultId,
         resultId,
         nodeId,
       });
     } else {
-      // Otherwise use the global message function
-      addReflyPilotMessage({
+      // Otherwise use the global message function for backward compatibility
+      addLinearThreadMessage({
         id: resultId,
         resultId,
         nodeId,
@@ -222,9 +225,9 @@ export const ChatPanel = ({
     // Get thread context (previous messages) when in Refly Pilot
     const nodeFilters = [...convertContextItemsToNodeFilters(contextItems)];
 
-    if (isInReflyPilot && reflyPilotMessages.length > 0) {
+    if (isInReflyPilot && linearThreadMessages.length > 0) {
       // Find the most recent message to connect to
-      const mostRecentMessage = [...reflyPilotMessages].sort(
+      const mostRecentMessage = [...linearThreadMessages].sort(
         (a, b) => b.timestamp - a.timestamp,
       )[0];
       if (mostRecentMessage?.resultId) {

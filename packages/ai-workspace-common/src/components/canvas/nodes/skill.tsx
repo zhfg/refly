@@ -9,14 +9,7 @@ import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
-import {
-  CanvasNodeType,
-  ModelInfo,
-  Skill,
-  SkillRuntimeConfig,
-  SkillTemplateConfig,
-} from '@refly/openapi-schema';
-import { useDebouncedCallback } from 'use-debounce';
+import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refly/openapi-schema';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -47,6 +40,7 @@ import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-up
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
+import { useContextUpdateByEdges } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -171,9 +165,12 @@ export const SkillNode = memo(
     const isTargetConnected = useMemo(() => edges?.some((edge) => edge.target === id), [edges, id]);
     const isSourceConnected = useMemo(() => edges?.some((edge) => edge.source === id), [edges, id]);
 
-    const updateNodeData = useDebouncedCallback((data: Partial<CanvasNodeData<SkillNodeMeta>>) => {
-      patchNodeData(id, data);
-    }, 50);
+    const updateNodeData = useCallback(
+      (data: Partial<CanvasNodeData<SkillNodeMeta>>) => {
+        patchNodeData(id, data);
+      },
+      [id, patchNodeData],
+    );
 
     const { skillSelectedModel, setSkillSelectedModel } = useChatStoreShallow((state) => ({
       skillSelectedModel: state.skillSelectedModel,
@@ -393,48 +390,13 @@ export const SkillNode = memo(
       [entityId, setNodeDataByEntity],
     );
 
-    const updateContextItemsByEdges = () => {
-      if (readonly) return;
-
-      const currentEdges = edges?.filter((edge) => edge.target === id) || [];
-      if (!currentEdges.length && !contextItems.length) return;
-
-      const nodes = getNodes() as CanvasNode<any>[];
-
-      // get all source nodes that are connected to the current node
-      const connectedSourceIds = new Set(currentEdges.map((edge) => edge.source));
-
-      // filter current contextItems, remove nodes that are no longer connected
-      const updatedContextItems = contextItems.filter((item) => {
-        const itemNode = nodes.find((node) => node.data?.entityId === item.entityId);
-        return itemNode && connectedSourceIds.has(itemNode.id);
-      });
-
-      // add new connected nodes to contextItems
-      for (const edge of currentEdges) {
-        const sourceNode = nodes.find((node) => node.id === edge.source);
-        if (!sourceNode?.data?.entityId || ['skill', 'group'].includes(sourceNode?.type)) continue;
-
-        const exists = updatedContextItems.some(
-          (item) => item.entityId === sourceNode.data.entityId,
-        );
-        if (!exists) {
-          updatedContextItems.push({
-            entityId: sourceNode.data.entityId,
-            type: sourceNode.type as CanvasNodeType,
-            title: sourceNode.data.title || '',
-          });
-        }
-      }
-
-      if (JSON.stringify(updatedContextItems) !== JSON.stringify(contextItems)) {
-        patchNodeData(id, { metadata: { contextItems: updatedContextItems } });
-      }
-    };
-
-    const debouncedUpdateContextItems = useDebouncedCallback(() => {
-      updateContextItemsByEdges();
-    }, 300);
+    // Use the new custom hook instead of the local implementation
+    const { debouncedUpdateContextItems } = useContextUpdateByEdges({
+      readonly,
+      nodeId: id,
+      contextItems,
+      updateNodeData: (data) => patchNodeData(id, data),
+    });
 
     // listen to edges changes and automatically update contextItems
     useEffect(() => {
