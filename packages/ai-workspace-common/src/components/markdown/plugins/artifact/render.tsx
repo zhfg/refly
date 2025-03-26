@@ -39,7 +39,7 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
     const nodes = getNodes() as CanvasNode[];
     const thisNode = nodes.find((node) => node.data?.entityId === id);
 
-    if (!thisNode) return null;
+    if (!thisNode) return [false, null];
 
     // Find the descendant nodes that are code artifacts and pick the latest one
     const edges = getEdges();
