@@ -26,11 +26,12 @@ import {
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-import { genMemoID, genSkillID, genResourceID } from '@refly-packages/utils/id';
+import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { cn } from '@refly-packages/utils/cn';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
+import { useCreateCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/use-create-code-artifact';
 
 interface ContextMenuProps {
   open: boolean;
@@ -130,29 +131,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     );
   };
 
-  const createCodeArtifactNode = (position: { x: number; y: number }) => {
-    // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
-    const codeArtifactId = genResourceID();
-    addNode(
-      {
-        type: 'codeArtifact',
-        data: {
-          title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
-          entityId: codeArtifactId,
-          contentPreview: '',
-          metadata: {
-            status: 'finish',
-            language: 'typescript',
-            activeTab: 'code',
-          },
-        },
-        position: position,
-      },
-      [],
-      true,
-      true,
-    );
-  };
+  const createCodeArtifactNode = useCreateCodeArtifact();
 
   const createWebsiteNode = (position: { x: number; y: number }) => {
     addNode(
@@ -403,7 +382,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
         setOpen(false);
         break;
       case 'createCodeArtifact':
-        createCodeArtifactNode(position);
+        createCodeArtifactNode({ position });
         setOpen(false);
         break;
       case 'createWebsite':
