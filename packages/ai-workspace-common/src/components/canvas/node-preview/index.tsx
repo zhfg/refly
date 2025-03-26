@@ -390,7 +390,7 @@ export const NodePreviewContainer = memo(
       <DndProvider backend={HTML5Backend}>
         <div className="flex h-full w-full">
           <ScrollingComponent {...scrollingComponentProps}>
-            {showReflyPilot && <ReflyPilot className="mr-2" />}
+            {showReflyPilot && <ReflyPilot />}
             {nodePreviewsRendered}
           </ScrollingComponent>
         </div>

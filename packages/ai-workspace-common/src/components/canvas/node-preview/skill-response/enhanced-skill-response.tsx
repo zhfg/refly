@@ -38,8 +38,11 @@ export const EnhancedSkillResponse = memo(
         // Initialize with empty messages array
         const initialMessages: LinearThreadMessage[] = [];
 
-        // Add all history nodes to messages
-        const allNodes = [...threadHistory, node];
+        // Check if current node is already in thread history to avoid duplication
+        const isNodeInHistory = threadHistory.some((historyNode) => historyNode.id === node.id);
+
+        // Add all history nodes to messages (and current node only if not already in history)
+        const allNodes = isNodeInHistory ? threadHistory : [...threadHistory, node];
 
         allNodes.forEach((historyNode, index) => {
           const nodeResultId = historyNode?.data?.entityId;

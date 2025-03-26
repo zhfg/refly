@@ -1,7 +1,7 @@
 import { useState, useCallback, memo } from 'react';
 import { Button, Tooltip, Popover } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
+import { MdOutlineImage } from 'react-icons/md';
 import {
   IconDownloadFile,
   IconSearch,
@@ -19,9 +19,7 @@ export const ToolbarButtons = memo(
   ({
     canvasTitle,
     showPreview,
-    showMaxRatio,
     setShowPreview,
-    setShowMaxRatio,
   }: {
     canvasTitle: string;
     showPreview: boolean;
@@ -60,13 +58,6 @@ export const ToolbarButtons = memo(
       placement: 'bottom' as const,
     };
 
-    const maxRatioButtonConfig = {
-      title: t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`),
-      description: t('canvas.toolbar.toggleMaxRatioDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.webm',
-      placement: 'bottom' as const,
-    };
-
     const pilotButtonConfig = {
       title: t(`canvas.toolbar.${showReflyPilot ? 'hideReflyPilot' : 'showReflyPilot'}`, {
         defaultValue: showReflyPilot ? 'Hide Refly Pilot' : 'Show Refly Pilot',
@@ -83,15 +74,6 @@ export const ToolbarButtons = memo(
         icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
         onClick={() => setShowPreview(!showPreview)}
         className="w-8 h-6 flex items-center justify-center mr-1"
-      />
-    );
-
-    const maxRatioButton = (
-      <Button
-        type="text"
-        icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
-        onClick={() => setShowMaxRatio(!showMaxRatio)}
-        className="w-8 h-6 flex items-center justify-center"
       />
     );
 
@@ -159,12 +141,6 @@ export const ToolbarButtons = memo(
             <HoverCard {...previewButtonConfig}>{previewButton}</HoverCard>
           ) : (
             <Tooltip title={previewButtonConfig.title}>{previewButton}</Tooltip>
-          )}
-
-          {hoverCardEnabled ? (
-            <HoverCard {...maxRatioButtonConfig}>{maxRatioButton}</HoverCard>
-          ) : (
-            <Tooltip title={maxRatioButtonConfig.title}>{maxRatioButton}</Tooltip>
           )}
 
           <Tooltip title={t('canvas.toolbar.exportImage')}>{exportImageButton}</Tooltip>
