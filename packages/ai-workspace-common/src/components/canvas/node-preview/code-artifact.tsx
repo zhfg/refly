@@ -41,7 +41,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
   const entityId = node?.data?.entityId ?? '';
   const shareId = node?.data?.metadata?.shareId ?? '';
 
-  const { data: remoteData } = useGetCodeArtifactDetail(
+  const { data: remoteData, isLoading: isRemoteLoading } = useGetCodeArtifactDetail(
     {
       query: {
         artifactId,
@@ -50,7 +50,9 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     null,
     { enabled: isLogin && !shareId && artifactId && status?.startsWith('finish') },
   );
-  const { data: shareData } = useFetchShareData<CodeArtifact>(shareId);
+  const { data: shareData, loading: isShareLoading } = useFetchShareData<CodeArtifact>(shareId);
+
+  const isLoading = isRemoteLoading || isShareLoading;
 
   const artifactData = useMemo(
     () => shareData || remoteData?.data || null,
@@ -199,6 +201,14 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
         <span className="text-gray-500">
           {t('codeArtifact.noSelection', 'No code artifact selected')}
         </span>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full grow items-center justify-center">
+        <div className="text-gray-500">{t('codeArtifact.shareLoading')}</div>
       </div>
     );
   }
