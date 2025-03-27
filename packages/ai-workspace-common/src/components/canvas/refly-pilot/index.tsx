@@ -1,9 +1,11 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { ThreadContainer } from './thread-container';
 
 export const ReflyPilot = memo(() => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const {
     setShowReflyPilot,
     linearThreadMessages,
@@ -15,6 +17,17 @@ export const ReflyPilot = memo(() => {
     addLinearThreadMessage: state.addLinearThreadMessage,
     clearLinearThreadMessages: state.clearLinearThreadMessages,
   }));
+
+  // Scroll to bottom effect
+  useEffect(() => {
+    if (containerRef.current) {
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [linearThreadMessages]);
 
   // Handler for adding new messages
   const handleAddMessage = useCallback(
@@ -55,6 +68,7 @@ export const ReflyPilot = memo(() => {
 
   return (
     <ThreadContainer
+      ref={containerRef}
       standalone={true}
       messages={linearThreadMessages}
       onAddMessage={handleAddMessage}

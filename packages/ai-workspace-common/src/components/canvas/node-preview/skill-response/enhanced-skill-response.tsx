@@ -47,6 +47,17 @@ export const EnhancedSkillResponse = memo(
       [messages.length],
     );
 
+    // Scroll to bottom effect
+    useEffect(() => {
+      if (containerRef.current) {
+        setTimeout(() => {
+          if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+          }
+        }, 100);
+      }
+    }, [messages]);
+
     // Hooks
     const selectedSkill = useFindSkill(selectedSkillName);
     const { invokeAction, abortAction } = useInvokeAction();

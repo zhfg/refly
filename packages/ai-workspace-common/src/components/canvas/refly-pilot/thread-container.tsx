@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { cn } from '@refly-packages/utils/cn';
@@ -15,7 +15,7 @@ import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
-interface ThreadContainerProps {
+export interface ThreadContainerProps {
   className?: string;
   resultId?: string;
   standalone?: boolean;
@@ -85,16 +85,18 @@ const ThreadHeader = memo(
 ThreadHeader.displayName = 'ThreadHeader';
 
 export const ThreadContainer = memo(
-  ({
-    className,
-    resultId,
-    standalone = true,
-    messages,
-    onAddMessage,
-    onClearMessages,
-    onGenerateMessageIds,
-    onClose,
-  }: ThreadContainerProps) => {
+  forwardRef<HTMLDivElement, ThreadContainerProps>((props, ref) => {
+    const {
+      className,
+      resultId,
+      standalone = true,
+      messages,
+      onAddMessage,
+      onClearMessages,
+      onGenerateMessageIds,
+      onClose,
+    } = props;
+
     const [isMaximized, setIsMaximized] = useState(false);
     const [contentHeight, setContentHeight] = useState('auto');
 
@@ -188,6 +190,7 @@ export const ThreadContainer = memo(
 
     return (
       <div
+        ref={ref}
         className={cn(
           'flex-shrink-0 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col',
           className,
@@ -217,7 +220,7 @@ export const ThreadContainer = memo(
         </div>
       </div>
     );
-  },
+  }),
 );
 
 ThreadContainer.displayName = 'ThreadContainer';

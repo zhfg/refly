@@ -1,4 +1,4 @@
-import { memo, useRef } from 'react';
+import { memo, useRef, useEffect } from 'react';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 
 export interface LinearThreadMessage {
@@ -27,6 +27,17 @@ MemoizedSkillResponseNodePreview.displayName = 'MemoizedSkillResponseNodePreview
 export const LinearThreadContent = memo(
   ({ messages, contentHeight, className = '' }: LinearThreadContentProps) => {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to bottom effect
+    useEffect(() => {
+      if (messagesContainerRef.current) {
+        setTimeout(() => {
+          if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+          }
+        }, 100);
+      }
+    }, [messages]);
 
     return (
       <div
