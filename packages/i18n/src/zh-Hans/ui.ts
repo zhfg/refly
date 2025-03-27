@@ -2165,6 +2165,8 @@ const translations = {
     addSource: '添加资源',
     canvas: '画布',
     source: '资源',
+    noDescription: '快来填写描述吧～',
+    customInstructions: '预设提示词',
     createModal: {
       createTitle: '创建项目',
       editTitle: '编辑项目',
@@ -2179,6 +2181,12 @@ const translations = {
       uploadCoverPicture: '上传封面',
       instructions: '预设提示词',
       instructionsPlaceholder: '请输入提示词',
+    },
+    action: {
+      deleteSuccess: '删除成功',
+      deleteConfirm: '确定删除项目 "{{name}}" 吗？',
+      createSuccess: '创建成功',
+      editSuccess: '编辑成功',
     },
   },
 };

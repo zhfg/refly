@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Dropdown, Button, Popconfirm, message, Empty, Divider, Typography } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Divider, Typography, Image } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   Spinner,
@@ -9,11 +9,10 @@ import type { MenuProps, DropdownProps } from 'antd';
 import {
   IconMoreHorizontal,
   IconDelete,
-  IconDownloadFile,
   IconProject,
   IconPlus,
+  IconEdit,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { LuPlus, LuExternalLink } from 'react-icons/lu';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -23,114 +22,56 @@ import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { Resource } from '@refly/openapi-schema';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
-import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { Project } from '@refly/openapi-schema';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
+import { useNavigate } from 'react-router-dom';
 
 const ActionDropdown = ({
-  resource,
+  project,
   afterDelete,
-}: { resource: Resource; afterDelete: () => void }) => {
+  setEditProjectModalVisible,
+}: {
+  project: Project;
+  afterDelete: () => void;
+  setEditProjectModalVisible: (visible: boolean) => void;
+}) => {
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
-  const { refetchUsage } = useSubscriptionUsage();
-  const { addNode } = useAddNode();
-  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    setShowLibraryModal: state.setShowLibraryModal,
-  }));
-  const { deleteResource } = useDeleteResource();
-  const { downloadFile } = useDownloadFile();
-  const isShareCanvas = useMatch('/share/canvas/:canvasId');
-
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    deleteResource(resource.resourceId).then((success) => {
-      if (success) {
-        message.success(t('common.putSuccess'));
-        setPopupVisible(false);
-        refetchUsage();
-        afterDelete?.();
-      }
-    });
-  };
-
-  const handleAddToCanvas: MenuProps['onClick'] = ({ domEvent }) => {
-    domEvent.stopPropagation();
-    addNode(
-      {
-        type: 'resource',
-        data: {
-          title: resource.title,
-          entityId: resource.resourceId,
-          contentPreview: resource.contentPreview,
-        },
+    const res = await getClient().deleteProject({
+      body: {
+        projectId: project.projectId,
       },
-      [],
-      true,
-      true,
-    );
-    setShowLibraryModal(false);
-    setPopupVisible(false);
-  };
-
-  const handleOpenWebpage: MenuProps['onClick'] = ({ domEvent }) => {
-    domEvent.stopPropagation();
-    if (resource.data?.url) {
-      window.open(resource.data.url, '_blank');
-      setPopupVisible(false);
+    });
+    if (res?.data?.success) {
+      message.success(t('project.action.deleteSuccess'));
+      afterDelete?.();
     }
   };
 
-  const handleDownloadFile: MenuProps['onClick'] = ({ domEvent }) => {
-    domEvent.stopPropagation();
-    downloadFile(resource);
-    setPopupVisible(false);
+  const handleEdit = () => {
+    console.log('handleEdit');
+    setEditProjectModalVisible(true);
   };
 
   const items: MenuProps['items'] = [
-    !isShareCanvas && {
-      label: (
-        <div className="flex items-center flex-grow">
-          <LuPlus size={16} className="mr-2" />
-          {t('workspace.addToCanvas')}
-        </div>
-      ),
-      key: 'addToCanvas',
-      onClick: handleAddToCanvas,
-    },
     {
       label: (
         <div className="flex items-center flex-grow">
-          <LuExternalLink size={16} className="mr-2" />
-          {t('workspace.openWebpage')}
+          <IconEdit size={16} className="mr-2" />
+          {t('workspace.deleteDropdownMenu.edit')}
         </div>
       ),
-      key: 'openWebpage',
-      onClick: handleOpenWebpage,
-      disabled: !resource.data?.url,
+      key: 'edit',
+      onClick: handleEdit,
     },
-    resource.downloadURL &&
-      resource.resourceType === 'file' && {
-        label: (
-          <div className="flex items-center flex-grow">
-            <IconDownloadFile size={16} className="mr-2" />
-            {t('workspace.downloadFile')}
-          </div>
-        ),
-        key: 'downloadFile',
-        onClick: handleDownloadFile,
-      },
     {
       label: (
         <Popconfirm
           placement="bottomLeft"
-          title={t('canvas.nodeActions.resourceDeleteConfirm', {
-            title: resource.title || t('common.untitled'),
+          title={t('project.action.deleteConfirm', {
+            name: project.name || t('common.untitled'),
           })}
           onConfirm={handleDelete}
           onCancel={(e?: React.MouseEvent) => {
@@ -161,43 +102,47 @@ const ActionDropdown = ({
   };
 
   return (
-    <Dropdown
-      trigger={['click']}
-      open={popupVisible}
-      onOpenChange={handleOpenChange}
-      menu={{ items }}
-    >
-      <Button
-        type="text"
-        icon={<IconMoreHorizontal />}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      />
-    </Dropdown>
+    <div className="relative" onClick={(e) => e.stopPropagation()}>
+      <Dropdown
+        trigger={['click']}
+        open={popupVisible}
+        onOpenChange={handleOpenChange}
+        menu={{ items }}
+      >
+        <Button
+          type="text"
+          icon={<IconMoreHorizontal />}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        />
+      </Dropdown>
+    </div>
   );
 };
 
-const ProjectCard = ({ item, onDelete }: { item: Resource; onDelete: () => void }) => {
+const ProjectCard = ({
+  project,
+  onDelete,
+  reload,
+  handleClick,
+}: {
+  project: Project;
+  onDelete: () => void;
+  reload: () => void;
+  handleClick: () => void;
+}) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
-  const navigate = useNavigate();
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    console.log('handleCardClick', e);
-    navigate('/project/123?canvasId=c-hn0joweqr7zv6mv3jgqz9dwq');
-  };
+  const [editProjectModalVisible, setEditProjectModalVisible] = useState(false);
 
   return (
     <div
       className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200"
-      onClick={handleCardClick}
+      onClick={handleClick}
     >
       <div className="h-36 px-4 py-3 overflow-hidden">
-        <Markdown
-          content={item.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
-          className="text-xs opacity-80"
-        />
+        <Image src={project.coverUrl} alt={project.name || t('common.untitled')} />
       </div>
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
@@ -205,31 +150,52 @@ const ProjectCard = ({ item, onDelete }: { item: Resource; onDelete: () => void 
           <IconProject color="#6172F3" size={22} />
           <div className="flex-1 min-w-0">
             <Typography.Text className="text-sm font-medium w-48" ellipsis={{ tooltip: true }}>
-              {item.title || t('common.untitled')}
+              {project.name || t('common.untitled')}
             </Typography.Text>
             <p className="text-xs text-gray-500">
-              {time(item.updatedAt, language as LOCALE)
+              {time(project.updatedAt, language as LOCALE)
                 .utc()
                 .fromNow()}
             </p>
           </div>
         </div>
-        <ActionDropdown resource={item} afterDelete={onDelete} />
+
+        <ActionDropdown
+          project={project}
+          afterDelete={onDelete}
+          setEditProjectModalVisible={setEditProjectModalVisible}
+        />
       </div>
+
+      <CreateProjectModal
+        mode="edit"
+        projectId={project.projectId}
+        title={project.name}
+        description={project.description}
+        instructions={project.customInstructions}
+        coverPicture={project.coverUrl}
+        visible={editProjectModalVisible}
+        setVisible={setEditProjectModalVisible}
+        onSuccess={() => {
+          reload();
+        }}
+      />
     </div>
   );
 };
 
 const ProjectList = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
-  const { showLibraryModal } = useSiderStoreShallow((state) => ({
+  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
+    setShowLibraryModal: state.setShowLibraryModal,
   }));
 
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
-      const res = await getClient().listResources({
+      const res = await getClient().listProjects({
         query: queryPayload,
       });
       return res?.data;
@@ -237,12 +203,21 @@ const ProjectList = () => {
     pageSize: 12,
   });
 
-  const resourceCards = useMemo(() => {
+  const handleCardClick = (project: Project) => {
+    setShowLibraryModal(false);
+    const canvases = project.canvases || [];
+    const canvasId = canvases?.[0]?.canvasId || 'empty';
+    navigate(`/project/${project.projectId}?canvasId=${canvasId}`);
+  };
+
+  const projectCards = useMemo(() => {
     return dataList?.map((item) => (
       <ProjectCard
-        key={item.resourceId}
-        item={item}
-        onDelete={() => setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))}
+        key={item.projectId}
+        project={item}
+        onDelete={() => setDataList(dataList.filter((n) => n.projectId !== item.projectId))}
+        reload={reload}
+        handleClick={() => handleCardClick(item)}
       />
     ));
   }, [dataList, setDataList]);
@@ -277,6 +252,9 @@ const ProjectList = () => {
       <CreateProjectModal
         visible={createProjectModalVisible}
         setVisible={setCreateProjectModalVisible}
+        onSuccess={() => {
+          reload();
+        }}
       />
     </div>
   );
@@ -294,7 +272,7 @@ const ProjectList = () => {
             scrollableTarget="resourceScrollableDiv"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-              {resourceCards}
+              {projectCards}
             </div>
           </InfiniteScroll>
         ) : (

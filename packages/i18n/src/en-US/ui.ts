@@ -2228,6 +2228,8 @@ const translations = {
     addSource: 'Add Source',
     canvas: 'Canvas',
     source: 'Source',
+    noDescription: 'Quickly fill in the description ~',
+    customInstructions: 'Custom Instructions',
     createModal: {
       createTitle: 'Create Project',
       editTitle: 'Edit Project',
@@ -2242,6 +2244,12 @@ const translations = {
       uploadCoverPicture: 'Upload Cover',
       instructions: 'Instructions',
       instructionsPlaceholder: 'Please enter instructions',
+    },
+    action: {
+      deleteSuccess: 'Delete successfully',
+      deleteConfirm: 'Are you sure you want to delete the project "{{name}}"?',
+      createSuccess: 'Create successfully',
+      editSuccess: 'Edit successfully',
     },
   },
 };

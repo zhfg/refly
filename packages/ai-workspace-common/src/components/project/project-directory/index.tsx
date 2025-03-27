@@ -3,7 +3,6 @@ import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import {
   Layout,
   Button,
-  Avatar,
   Divider,
   Typography,
   Collapse,
@@ -28,10 +27,11 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
-import Logo from '@/assets/logo.svg';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
+import { useGetProjectDetail } from '@refly-packages/ai-workspace-common/queries';
+import { Canvas, Project, Document, Resource } from '@refly/openapi-schema';
 
 const { Text, Paragraph } = Typography;
 
@@ -40,11 +40,16 @@ const iconClassName = 'w-4 h-4 flex items-center justify-center';
 const ProjectSettings = ({
   source,
   setCollapse,
+  data,
+  onUpdate,
 }: {
   source: 'sider' | 'popover';
   setCollapse: (collapse: boolean) => void;
+  data: Project;
+  onUpdate: (data: Project) => void;
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
 
   const handleEditSettings = () => {
@@ -86,54 +91,52 @@ const ProjectSettings = ({
 
       <div className="py-5 cursor-pointer" onClick={handleEditSettings}>
         <div className="flex items-center gap-3">
-          <img src={Logo} alt="Refly" className="w-10 h-10 rounded-md" />
+          <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
           <div className="flex flex-col">
-            <span className="text-sm">团队运营知识库</span>
-            <div className="flex items-center gap-2 pt-1">
-              <Avatar
-                size="small"
-                className="w-[20px] h-[20px]"
-                icon={<IconUser className={iconClassName} />}
-              />
-              <span className="text-xs text-gray-500">ch@refly.ai</span>
-            </div>
+            <span className="text-sm">{data?.name || t('common.untitled')}</span>
           </div>
         </div>
 
-        <Paragraph className="text-xs text-gray-400 py-2 pb-0 pt-3">快来填写描述吧～</Paragraph>
+        <Paragraph className="text-xs text-gray-400 py-2 pb-0 pt-3" ellipsis={{ rows: 1 }}>
+          {data?.description || t('project.noDescription')}
+        </Paragraph>
 
         <Divider className="my-2" />
         <div className="flex items-center justify-between gap-2 font-medium text-xs text-gray-400">
-          <span>instructions</span>
+          <span>{t('project.customInstructions')}</span>
           <Button
             type="text"
             size="small"
             icon={<IconEdit className={cn(iconClassName, 'text-gray-500')} />}
           />
         </div>
+        {data?.customInstructions && (
+          <Paragraph className="text-xs py-1 !mb-0" ellipsis={{ rows: 1 }}>
+            {data?.customInstructions}
+          </Paragraph>
+        )}
       </div>
 
       <CreateProjectModal
         mode="edit"
-        title="创建项目"
+        projectId={data?.projectId}
+        title={data?.name}
+        description={data?.description}
+        coverPicture={data?.coverUrl}
+        instructions={data?.customInstructions}
         visible={createProjectModalVisible}
         setVisible={setCreateProjectModalVisible}
+        onSuccess={(data) => {
+          onUpdate(data);
+        }}
       />
     </div>
   );
 };
 
 // Canvas菜单组件
-const CanvasMenu = () => {
+const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
   const { t } = useTranslation();
-  const [canvasList] = useState([
-    { id: '1', title: 'Refly 产品快速上手指南' },
-    { id: '2', title: 'jina reader 支持本地 sdk 或者 api 调用' },
-    { id: '3', title: 'Refly 产品快速上手指南' },
-    { id: '4', title: 'jina reader 支持本地 sdk 或者 api 调用' },
-    { id: '5', title: 'Refly 产品快速上手指南' },
-    { id: '6', title: 'jina reader 支持本地 sdk 或者 api 调用' },
-  ]);
 
   const [hoveredCanvasId, setHoveredCanvasId] = useState<string | null>(null);
 
@@ -157,23 +160,44 @@ const CanvasMenu = () => {
           label: <span className="text-sm font-medium">{t('project.canvas')}</span>,
           children: (
             <div className="flex flex-col">
-              <Button
-                type="text"
-                className="flex items-center justify-start mb-2 mx-3 !text-green-600"
-                icon={<IconPlus className={cn(iconClassName)} />}
-                onClick={handleAddCanvas}
-              >
-                {t('loggedHomePage.siderMenu.newCanvas')}
-              </Button>
+              {canvasList.length > 0 && (
+                <Button
+                  type="text"
+                  className="flex items-center justify-start mb-2 mx-3 !text-green-600"
+                  icon={<IconPlus className={cn(iconClassName)} />}
+                  onClick={handleAddCanvas}
+                >
+                  {t('loggedHomePage.siderMenu.newCanvas')}
+                </Button>
+              )}
               <div className="max-h-[20vh] overflow-y-auto px-3">
                 <List
                   itemLayout="horizontal"
                   split={false}
                   dataSource={canvasList}
+                  locale={{
+                    emptyText: (
+                      <Empty
+                        className="text-xs my-2"
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={t('common.empty')}
+                      >
+                        <Button
+                          type="default"
+                          size="small"
+                          className="text-xs text-gray-600"
+                          icon={<IconPlus size={12} className="flex items-center justify-center" />}
+                          onClick={handleAddCanvas}
+                        >
+                          {t('loggedHomePage.siderMenu.newCanvas')}
+                        </Button>
+                      </Empty>
+                    ),
+                  }}
                   renderItem={(item) => (
                     <List.Item
                       className="!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer"
-                      onMouseEnter={() => handleCanvasHover(item.id)}
+                      onMouseEnter={() => handleCanvasHover(item.canvasId)}
                       onMouseLeave={() => handleCanvasHover(null)}
                     >
                       <div className="flex items-center justify-between w-full">
@@ -186,7 +210,7 @@ const CanvasMenu = () => {
                         <div
                           className={cn(
                             'transition-opacity duration-200',
-                            hoveredCanvasId === item.id ? 'opacity-100' : 'opacity-0',
+                            hoveredCanvasId === item.canvasId ? 'opacity-100' : 'opacity-0',
                           )}
                         >
                           <Button
@@ -213,16 +237,10 @@ const CanvasMenu = () => {
 };
 
 // Sources菜单组件
-const SourcesMenu = () => {
-  const [sourceList] = useState([
-    { id: '1', title: 'Refly 产品快速上手指南' },
-    { id: '2', title: 'Refly AI Canvas 设计指南' },
-    { id: '3', title: 'Aerobic Exercise Improves' },
-    { id: '4', title: '知识博主严伯钧' },
-    { id: '5', title: '年度 MRR 分析报告' },
-  ]);
+const SourcesMenu = ({ sourcesList }: { sourcesList?: Array<Document | Resource> }) => {
   const { t } = useTranslation();
-  // const [sourceList] = useState([]);
+  // 使用传入的 sourcesList 或默认空数组
+  const [sourceList] = useState(sourcesList || []);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
@@ -347,6 +365,21 @@ const SourcesMenu = () => {
     handleAddSource,
   ]);
 
+  // 获取每个项目的 ID
+  const getItemId = useCallback((item: Document | Resource) => {
+    return 'docId' in item ? item.docId : item.resourceId;
+  }, []);
+
+  // 获取每个项目的图标
+  const getItemIcon = useCallback((item: Document | Resource) => {
+    // 根据类型返回不同的图标
+    return 'docId' in item ? (
+      <IconCanvas className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 flex items-center justify-center" />
+    ) : (
+      <IconUser className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 flex items-center justify-center" />
+    );
+  }, []);
+
   return (
     <div className="flex-grow overflow-y-auto min-h-[150px]">
       <Collapse
@@ -375,7 +408,11 @@ const SourcesMenu = () => {
                     dataSource={filteredSourceList}
                     locale={{
                       emptyText: (
-                        <Empty className="text-xs" description={t('common.empty')}>
+                        <Empty
+                          className="text-xs my-2"
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description={t('common.empty')}
+                        >
                           <Button
                             size="small"
                             type="default"
@@ -390,48 +427,51 @@ const SourcesMenu = () => {
                         </Empty>
                       ),
                     }}
-                    renderItem={(item) => (
-                      <List.Item
-                        className={cn(
-                          '!py-2 !pl-1 !pr-2 my-1 rounded-md hover:bg-gray-50 cursor-pointer relative group',
-                          selectedSources.includes(item.id) && 'bg-gray-50',
-                        )}
-                        onMouseEnter={() => handleSourceHover(item.id)}
-                        onMouseLeave={() => handleSourceHover(null)}
-                      >
-                        <div className="flex items-center gap-1 w-full">
-                          <div
-                            className="flex items-center gap-1.5 flex-grow"
-                            onClick={() => toggleSourceSelection(item.id)}
-                          >
-                            <IconUser className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 flex items-center justify-center" />
-                            <Text
-                              className="text-[13px] w-[120px] text-gray-700"
-                              ellipsis={{
-                                tooltip: true,
-                              }}
+                    renderItem={(item) => {
+                      const itemId = getItemId(item);
+                      return (
+                        <List.Item
+                          className={cn(
+                            '!py-2 !pl-1 !pr-2 my-1 rounded-md hover:bg-gray-50 cursor-pointer relative group',
+                            selectedSources.includes(itemId) && 'bg-gray-50',
+                          )}
+                          onMouseEnter={() => handleSourceHover(itemId)}
+                          onMouseLeave={() => handleSourceHover(null)}
+                        >
+                          <div className="flex items-center gap-1 w-full">
+                            <div
+                              className="flex items-center gap-1.5 flex-grow"
+                              onClick={() => toggleSourceSelection(itemId)}
                             >
-                              {item.title}
-                            </Text>
+                              {getItemIcon(item)}
+                              <Text
+                                className="text-[13px] w-[120px] text-gray-700"
+                                ellipsis={{
+                                  tooltip: true,
+                                }}
+                              >
+                                {item.title}
+                              </Text>
+                            </div>
+                            <div
+                              className={cn(
+                                'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
+                                isMultiSelectMode || hoveredSourceId === itemId
+                                  ? 'opacity-100'
+                                  : 'opacity-0',
+                              )}
+                            >
+                              <Checkbox
+                                checked={selectedSources.includes(itemId)}
+                                onChange={() => toggleSourceSelection(itemId)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
+                            </div>
                           </div>
-                          <div
-                            className={cn(
-                              'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
-                              isMultiSelectMode || hoveredSourceId === item.id
-                                ? 'opacity-100'
-                                : 'opacity-0',
-                            )}
-                          >
-                            <Checkbox
-                              checked={selectedSources.includes(item.id)}
-                              onChange={() => toggleSourceSelection(item.id)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
-                          </div>
-                        </div>
-                      </List.Item>
-                    )}
+                        </List.Item>
+                      );
+                    }}
                   />
                 </div>
               </div>
@@ -454,6 +494,36 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     setCollapse: state.setCollapse,
   }));
   console.log('projectId', projectId);
+  const { data: projectDetail } = useGetProjectDetail({ query: { projectId } }, null, {
+    enabled: !!projectId,
+  });
+  const data = projectDetail?.data;
+  const [projectData, setProjectData] = useState(data);
+  const canvases = data?.canvases || [];
+  const documents = data?.documents || [];
+  const resources = data?.resources || [];
+
+  // 混合并排序 documents 和 resources 数组
+  const mergedSources = useMemo(() => {
+    // 确保 documents 和 resources 存在
+    const docs = documents || [];
+    const res = resources || [];
+
+    // 合并两个数组
+    const merged = [...docs, ...res];
+
+    // 根据 updatedAt 排序，最新的放在前面
+    return merged.sort((a, b) => {
+      const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA; // 降序排列
+    });
+  }, [documents, resources]);
+
+  useEffect(() => {
+    setProjectData(data);
+  }, [data]);
+
   return (
     <Layout.Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}
@@ -463,9 +533,17 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
       )}
     >
       <div className="project-directory flex h-full flex-col py-3 overflow-y-auto">
-        <ProjectSettings source={source} setCollapse={setCollapse} />
-        <CanvasMenu />
-        <SourcesMenu />
+        <ProjectSettings
+          source={source}
+          setCollapse={setCollapse}
+          data={projectData}
+          onUpdate={(data) => {
+            console.log('data', data);
+            setProjectData({ ...projectData, ...data });
+          }}
+        />
+        <CanvasMenu canvasList={canvases} />
+        <SourcesMenu sourcesList={mergedSources} />
       </div>
     </Layout.Sider>
   );
