@@ -2326,6 +2326,7 @@ components:
         - canvas
         - share
         - user
+        - project
         - skillResponse
         - codeArtifact
     Entity:

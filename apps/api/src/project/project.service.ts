@@ -64,6 +64,21 @@ export class ProjectService {
 
   async createProject(user: User, body: UpsertProjectRequest) {
     const projectId = genProjectID();
+
+    // Check if the given cover static file exists
+    if (body.coverStorageKey) {
+      const staticFile = await this.prisma.staticFile.findFirst({
+        where: {
+          storageKey: body.coverStorageKey,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+      if (!staticFile) {
+        throw new ParamsError('coverStorageKey is invalid');
+      }
+    }
+
     const project = await this.prisma.project.create({
       data: {
         projectId,
@@ -75,7 +90,20 @@ export class ProjectService {
       },
     });
 
-    // TODO: bind the cover static file to avoid being cleaned
+    // Bind the cover static file to the project
+    if (project.coverStorageKey) {
+      await this.prisma.staticFile.updateMany({
+        where: {
+          storageKey: project.coverStorageKey,
+          uid: user.uid,
+          deletedAt: null,
+        },
+        data: {
+          entityId: project.projectId,
+          entityType: 'project',
+        },
+      });
+    }
 
     return project;
   }

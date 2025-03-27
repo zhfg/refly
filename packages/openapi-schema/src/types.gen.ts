@@ -347,6 +347,7 @@ export type EntityType =
   | 'canvas'
   | 'share'
   | 'user'
+  | 'project'
   | 'skillResponse'
   | 'codeArtifact';
 
