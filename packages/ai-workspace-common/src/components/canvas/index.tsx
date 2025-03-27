@@ -63,6 +63,8 @@ import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { EmptyGuide } from './empty-guide';
 import HelperLines from './common/helper-line/index';
 
+const GRID_SIZE = 10;
+
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -869,6 +871,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           )}
           <ReactFlow
             {...flowConfig}
+            snapToGrid={true}
+            snapGrid={[GRID_SIZE, GRID_SIZE]}
             edgeTypes={edgeTypes}
             panOnScroll={interactionMode === 'touchpad'}
             panOnDrag={interactionMode === 'mouse'}
