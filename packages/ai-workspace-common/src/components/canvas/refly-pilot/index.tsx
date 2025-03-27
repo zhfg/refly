@@ -31,13 +31,14 @@ export const ReflyPilot = memo(() => {
 
   // Handler for adding new messages
   const handleAddMessage = useCallback(
-    (message: { id: string; resultId: string; nodeId: string }) => {
+    (message: { id: string; resultId: string; nodeId: string; data?: any }) => {
       // Create the full message with timestamp
       const fullMessage = {
         id: message.id,
         resultId: message.resultId,
         nodeId: message.nodeId,
         timestamp: Date.now(),
+        data: message.data || { title: '', entityId: message.resultId },
       };
 
       // Add message to the global store

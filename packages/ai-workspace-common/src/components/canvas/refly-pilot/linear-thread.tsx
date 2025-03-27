@@ -1,12 +1,6 @@
 import { memo, useRef, useEffect } from 'react';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
-
-export interface LinearThreadMessage {
-  id: string;
-  resultId: string;
-  nodeId: string;
-  timestamp: number;
-}
+import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface LinearThreadContentProps {
   messages: LinearThreadMessage[];
@@ -58,13 +52,7 @@ export const LinearThreadContent = memo(
                     id: message.nodeId,
                     type: 'skillResponse',
                     position: { x: 0, y: 0 },
-                    data: {
-                      entityId: message.resultId,
-                      title: 'Refly Pilot Response',
-                      metadata: {
-                        status: 'finish',
-                      },
-                    },
+                    data: message.data,
                   }}
                   resultId={message.resultId}
                 />

@@ -34,6 +34,7 @@ import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-up
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { omit } from '@refly-packages/utils/index';
 import { cn } from '@refly-packages/utils/cn';
+import { ActionStatus } from '@refly/openapi-schema';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -82,7 +83,7 @@ const PremiumBanner = () => {
 interface ChatPanelProps {
   embeddedMode?: boolean;
   onAddMessage?: (
-    message: { id: string; resultId: string; nodeId: string },
+    message: { id: string; resultId: string; nodeId: string; data?: any },
     query: string,
     contextItems: any[],
   ) => void;
@@ -203,6 +204,21 @@ export const ChatPanel = ({
           id: resultId,
           resultId,
           nodeId,
+          data: {
+            title: query,
+            entityId: resultId,
+            metadata: {
+              status: 'executing' as ActionStatus,
+              contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
+              tplConfig,
+              modelInfo: selectedModel,
+              selectedSkill,
+              runtimeConfig,
+              structuredData: {
+                query,
+              },
+            },
+          },
         },
         query,
         contextItems,

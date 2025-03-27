@@ -93,6 +93,7 @@ export type ResponseNodeMeta = {
   artifacts?: Artifact[];
   currentLog?: ActionLog;
   structuredData?: Record<string, unknown>;
+  selectedSkill?: Skill;
   contextItems?: IContextItem[];
   tplConfig?: SkillTemplateConfig;
   runtimeConfig?: SkillRuntimeConfig;

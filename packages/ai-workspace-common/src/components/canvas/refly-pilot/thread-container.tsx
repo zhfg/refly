@@ -8,7 +8,8 @@ import {
   IconShrink,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { RefreshCw } from 'lucide-react';
-import { LinearThreadContent, LinearThreadMessage } from './linear-thread';
+import { LinearThreadContent } from './linear-thread';
+import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -20,7 +21,7 @@ export interface ThreadContainerProps {
   resultId?: string;
   standalone?: boolean;
   messages: LinearThreadMessage[];
-  onAddMessage: (message: { id: string; resultId: string; nodeId: string }) => void;
+  onAddMessage: (message: { id: string; resultId: string; nodeId: string; data: any }) => void;
   onClearMessages: () => void;
   onGenerateMessageIds: () => { resultId: string; nodeId: string };
   onClose?: () => void;

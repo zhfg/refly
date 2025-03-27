@@ -3,16 +3,20 @@ import {
   CanvasNode,
   ResponseNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import {
-  LinearThreadContent,
-  LinearThreadMessage,
-} from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot/linear-thread';
+import { LinearThreadContent } from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot/linear-thread';
+import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { cn } from '@refly-packages/utils/cn';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { ChatPanel } from '@refly-packages/ai-workspace-common/components/canvas/node-chat-panel';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refly/openapi-schema';
+import {
+  ModelInfo,
+  Skill,
+  SkillRuntimeConfig,
+  SkillTemplateConfig,
+  ActionStatus,
+} from '@refly/openapi-schema';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -99,6 +103,7 @@ export const EnhancedSkillResponse = memo(
                 resultId: nodeResultId,
                 nodeId: historyNode.id,
                 timestamp: Date.now() - (allNodes.length - index) * 1000, // Ensure proper ordering
+                data: historyNode.data,
               });
             }
           });
@@ -170,11 +175,26 @@ export const EnhancedSkillResponse = memo(
       const newNodeId = genUniqueId();
 
       // Create message object for the thread
-      const newMessage = {
+      const newMessage: LinearThreadMessage = {
         id: `message-${newNodeId}`,
         resultId: newResultId,
         nodeId: newNodeId,
         timestamp: Date.now(),
+        data: {
+          title: currentQuery,
+          entityId: newResultId,
+          metadata: {
+            status: 'executing' as ActionStatus,
+            contextItems,
+            tplConfig,
+            selectedSkill,
+            modelInfo,
+            runtimeConfig,
+            structuredData: {
+              query: currentQuery,
+            },
+          } as ResponseNodeMeta,
+        },
       };
 
       // Add this message to the thread
@@ -205,14 +225,16 @@ export const EnhancedSkillResponse = memo(
             title: currentQuery,
             entityId: newResultId,
             metadata: {
-              status: 'executing',
+              status: 'executing' as ActionStatus,
               contextItems,
               tplConfig,
               selectedSkill,
               modelInfo,
               runtimeConfig,
-              query: currentQuery,
-            },
+              structuredData: {
+                query: currentQuery,
+              },
+            } as ResponseNodeMeta,
           },
         },
         convertContextItemsToNodeFilters(contextItems),

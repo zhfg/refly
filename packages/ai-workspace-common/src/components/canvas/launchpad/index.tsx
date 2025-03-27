@@ -18,7 +18,7 @@ interface LaunchPadProps {
   inReflyPilot?: boolean;
   className?: string;
   parentResultId?: string;
-  onAddMessage?: (message: { id: string; resultId: string; nodeId: string }) => void;
+  onAddMessage?: (message: { id: string; resultId: string; nodeId: string; data?: any }) => void;
   onGenerateMessageIds?: () => { resultId: string; nodeId: string };
 }
 

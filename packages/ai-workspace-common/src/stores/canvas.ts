@@ -4,6 +4,10 @@ import { useShallow } from 'zustand/react/shallow';
 import { persist } from 'zustand/middleware';
 import { Edge } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNodeData,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 
 interface CanvasData {
   nodes: CanvasNode<any>[];
@@ -27,11 +31,12 @@ interface CanvasConfig {
   nodePreviews: NodePreview[];
 }
 
-interface LinearThreadMessage {
+export interface LinearThreadMessage {
   id: string;
   resultId: string;
   nodeId: string;
   timestamp: number;
+  data: CanvasNodeData<ResponseNodeMeta>;
 }
 
 export interface CanvasState {
