@@ -115,10 +115,6 @@ export const ChatPanel = ({
       runtimeConfig: state.runtimeConfig,
       setRuntimeConfig: state.setRuntimeConfig,
     }));
-  const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
-    setSelectedSkill: state.setSelectedSkill,
-  }));
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
     setNewQAText: state.setNewQAText,
@@ -226,9 +222,6 @@ export const ChatPanel = ({
     }
 
     chatStore.setNewQAText('');
-
-    // Reset selected skill after sending message
-    skillStore.setSelectedSkill(null);
 
     // Invoke the action with the API
     invokeAction(
