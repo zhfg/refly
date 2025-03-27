@@ -142,7 +142,9 @@ const ProjectCard = ({
       onClick={handleClick}
     >
       <div className="h-36 px-4 py-3 overflow-hidden">
-        <Image src={project.coverUrl} alt={project.name || t('common.untitled')} />
+        {project.coverUrl && (
+          <Image src={project.coverUrl} alt={project.name || t('common.untitled')} />
+        )}
       </div>
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
