@@ -3,7 +3,10 @@ import { useDebouncedCallback } from 'use-debounce';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useReactFlow } from '@xyflow/react';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useFindThreadHistory } from './use-find-thread-history';
 
 interface UseContextUpdateByEdgesProps {
@@ -90,7 +93,9 @@ export const useContextUpdateByResultId = ({
 
     // Find the node associated with this resultId
     const nodes = getNodes();
-    const currentNode = nodes.find((n) => n.data?.entityId === resultId);
+    const currentNode = nodes.find(
+      (n) => n.data?.entityId === resultId,
+    ) as CanvasNode<ResponseNodeMeta>;
 
     if (!currentNode) return;
 
@@ -99,24 +104,46 @@ export const useContextUpdateByResultId = ({
 
     if (threadHistory.length === 0 && !currentNode) return;
 
-    // Get the most recent node in the thread history (or the node itself if history is empty)
-    const contextNode =
-      threadHistory.length > 0 ? threadHistory[threadHistory.length - 1] : currentNode;
+    // Collect all thread history node entityIds
+    const historyEntityIds = new Set<string>();
+    for (const historyNode of threadHistory) {
+      if (historyNode?.data?.entityId) {
+        historyEntityIds.add(String(historyNode.data.entityId));
+      }
+    }
 
-    // Add to context items if it's a valid node
-    if (contextNode?.data?.entityId && contextNode.type) {
-      setContextItems([
-        {
-          entityId: String(contextNode.data.entityId),
-          // Explicitly cast the type to CanvasNodeType
-          type: contextNode.type as CanvasNodeType,
-          title: String(contextNode.data.title || ''),
-          // Instead of using withHistory, add it to metadata
+    // Get current node's context items and filter out those that are in thread history
+    const finalContextItems: IContextItem[] = [];
+    const currentContextItems = currentNode.data?.metadata?.contextItems;
+
+    if (currentContextItems && currentContextItems.length > 0) {
+      for (const item of currentContextItems) {
+        // Skip items that are already in thread history
+        if (!historyEntityIds.has(item.entityId)) {
+          finalContextItems.push(item);
+        }
+      }
+    }
+
+    // Only add the last node from thread history as context item with withHistory flag
+    if (threadHistory.length > 0) {
+      const lastHistoryNode = threadHistory[threadHistory.length - 1];
+      if (lastHistoryNode?.data?.entityId && lastHistoryNode.type) {
+        // Skip if this node is already the current node
+        finalContextItems.push({
+          entityId: String(lastHistoryNode.data.entityId),
+          type: lastHistoryNode.type as CanvasNodeType,
+          title: String(lastHistoryNode.data.title || ''),
           metadata: {
             withHistory: true,
           },
-        },
-      ]);
+        });
+      }
+    }
+
+    // Set all collected context items
+    if (finalContextItems.length > 0) {
+      setContextItems(finalContextItems);
     }
   }, [resultId, getNodes, findThreadHistory, setContextItems]);
 

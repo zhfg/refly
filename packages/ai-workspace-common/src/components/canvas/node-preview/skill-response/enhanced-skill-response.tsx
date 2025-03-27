@@ -19,6 +19,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
+import { useReactFlow } from '@xyflow/react';
 
 interface EnhancedSkillResponseProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -31,6 +32,7 @@ export const EnhancedSkillResponse = memo(
     // Thread messages state
     const [messages, setMessages] = useState<LinearThreadMessage[]>([]);
     const findThreadHistory = useFindThreadHistory();
+    const { getNodes, getEdges } = useReactFlow();
 
     // Local state for ChatPanel
     const [query, setQuery] = useState('');
@@ -42,21 +44,11 @@ export const EnhancedSkillResponse = memo(
 
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
+    const retryTimeoutRef = useRef<NodeJS.Timeout>();
     const contentHeight = useMemo(
       () => (messages.length === 0 ? 'auto' : '300px'),
       [messages.length],
     );
-
-    // Scroll to bottom effect
-    useEffect(() => {
-      if (containerRef.current) {
-        setTimeout(() => {
-          if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-          }
-        }, 100);
-      }
-    }, [messages]);
 
     // Hooks
     const selectedSkill = useFindSkill(selectedSkillName);
@@ -64,45 +56,88 @@ export const EnhancedSkillResponse = memo(
     const { canvasId, readonly } = useCanvasContext();
     const { addNode } = useAddNode();
 
-    // Initialize messages from resultId and its thread history
+    const { debouncedUpdateContextItems } = useContextUpdateByResultId({
+      resultId,
+      setContextItems,
+    });
+
+    // Initialize messages from resultId and its thread history with retry mechanism
     useEffect(() => {
-      if (resultId && node) {
-        // Find thread history based on resultId
-        const threadHistory = findThreadHistory({ resultId });
+      const initializeMessages = () => {
+        if (resultId && node) {
+          const nodes = getNodes();
+          const edges = getEdges();
 
-        // Initialize with empty messages array
-        const initialMessages: LinearThreadMessage[] = [];
-
-        // Check if current node is already in thread history to avoid duplication
-        const isNodeInHistory = threadHistory.some((historyNode) => historyNode.id === node.id);
-
-        // Add all history nodes to messages (and current node only if not already in history)
-        const allNodes = isNodeInHistory ? threadHistory : [...threadHistory, node];
-
-        allNodes.forEach((historyNode, index) => {
-          const nodeResultId = historyNode?.data?.entityId;
-          if (nodeResultId) {
-            initialMessages.push({
-              id: `history-${historyNode.id}-${index}`,
-              resultId: nodeResultId,
-              nodeId: historyNode.id,
-              timestamp: Date.now() - (allNodes.length - index) * 1000, // Ensure proper ordering
-            });
+          // Check if we have enough data loaded
+          if (nodes.length === 0 || edges.length === 0) {
+            // Clear any existing timeout
+            if (retryTimeoutRef.current) {
+              clearTimeout(retryTimeoutRef.current);
+            }
+            // Retry after a delay
+            retryTimeoutRef.current = setTimeout(initializeMessages, 500);
+            return;
           }
-        });
 
-        setMessages(initialMessages);
+          // Find thread history based on resultId
+          const threadHistory = findThreadHistory({ resultId });
 
-        // Initialize ChatPanel state from node data if available
-        if (node?.data?.metadata) {
-          const metadata = node.data.metadata as any;
-          if (metadata.selectedSkill?.name) setSelectedSkillName(metadata.selectedSkill.name);
-          if (metadata.modelInfo) setModelInfo(metadata.modelInfo);
-          if (metadata.tplConfig) setTplConfig(metadata.tplConfig);
-          if (metadata.runtimeConfig) setRuntimeConfig(metadata.runtimeConfig);
+          // Initialize with empty messages array
+          const initialMessages: LinearThreadMessage[] = [];
+
+          // Check if current node is already in thread history to avoid duplication
+          const isNodeInHistory = threadHistory.some((historyNode) => historyNode.id === node.id);
+
+          // Add all history nodes to messages (and current node only if not already in history)
+          const allNodes = isNodeInHistory ? threadHistory : [...threadHistory, node];
+
+          allNodes.forEach((historyNode, index) => {
+            const nodeResultId = historyNode?.data?.entityId;
+            if (nodeResultId) {
+              initialMessages.push({
+                id: `history-${historyNode.id}-${index}`,
+                resultId: nodeResultId,
+                nodeId: historyNode.id,
+                timestamp: Date.now() - (allNodes.length - index) * 1000, // Ensure proper ordering
+              });
+            }
+          });
+
+          setMessages(initialMessages);
+
+          // Initialize ChatPanel state from node data if available
+          if (node?.data?.metadata) {
+            const metadata = node.data.metadata as any;
+            if (metadata.selectedSkill?.name) setSelectedSkillName(metadata.selectedSkill.name);
+            if (metadata.modelInfo) setModelInfo(metadata.modelInfo);
+            if (metadata.tplConfig) setTplConfig(metadata.tplConfig);
+            if (metadata.runtimeConfig) setRuntimeConfig(metadata.runtimeConfig);
+          }
+
+          debouncedUpdateContextItems();
         }
+      };
+
+      initializeMessages();
+
+      // Cleanup
+      return () => {
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+        }
+      };
+    }, [resultId, node, getNodes, getEdges, findThreadHistory]);
+
+    // Scroll to bottom effect
+    useEffect(() => {
+      if (containerRef.current && messages.length > 0) {
+        setTimeout(() => {
+          if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+          }
+        }, 100);
       }
-    }, [resultId, node, findThreadHistory]);
+    }, [messages]);
 
     // Handler for image upload
     const handleImageUpload = useCallback(async (file: File) => {
@@ -205,18 +240,6 @@ export const EnhancedSkillResponse = memo(
     const handleSetQuery = useCallback((newQuery: string) => {
       setQuery(newQuery);
     }, []);
-
-    const { debouncedUpdateContextItems } = useContextUpdateByResultId({
-      resultId,
-      setContextItems,
-    });
-
-    // Update context when resultId changes or component mounts
-    useEffect(() => {
-      if (resultId) {
-        debouncedUpdateContextItems();
-      }
-    }, [resultId, debouncedUpdateContextItems]);
 
     return (
       <div ref={containerRef} className={cn('flex flex-col h-full w-full', className)}>

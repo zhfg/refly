@@ -161,28 +161,9 @@ export const useAddNode = () => {
         type: node.type,
         data: enrichedData,
         position: newPosition,
-        selected: true,
+        selected: false,
         id: node?.id,
       });
-
-      // Apply style based on nodeSizeMode
-      // if (nodeSizeMode === 'compact') {
-      //   newNode.style = {
-      //     ...newNode.style,
-      //     width: '288px',
-      //     height: 'auto',
-      //     maxHeight: '384px',
-      //   };
-      // } else if (nodeSizeMode === 'adaptive') {
-      //   // Safely access originalWidth with type checking
-      //   const width = (newNode.data.metadata as any)?.originalWidth || 288;
-      //   newNode.style = {
-      //     ...newNode.style,
-      //     width: `${width}px`,
-      //     height: 'auto',
-      //     maxHeight: undefined,
-      //   };
-      // }
 
       // Create updated nodes array with the new node
       const updatedNodes = deduplicateNodes([
