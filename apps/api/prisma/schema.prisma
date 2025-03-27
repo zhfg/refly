@@ -503,25 +503,31 @@ model CodeArtifact {
 
 model Project {
   /// Primary key
-  pk         BigInt    @id @default(autoincrement())
+  pk                 BigInt     @id @default(autoincrement())
   /// Project id
-  projectId  String    @unique @map("project_id")
+  projectId          String     @unique @map("project_id")
   /// Project name
-  name       String    @map("name")
+  name               String     @map("name")
   /// UID
-  uid        String    @map("uid")
+  uid                String     @map("uid")
+  /// Description
+  description        String?    @map("description")
+  /// Cover storage key
+  coverStorageKey    String?    @map("cover_storage_key")
+  /// Custom instructions
+  customInstructions String?    @map("custom_instructions")
   /// Create timestamp
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt          DateTime?  @map("deleted_at") @db.Timestamptz()
   /// Documents
-  documents  Document[]
+  documents          Document[]
   /// Resources
-  resources  Resource[]
+  resources          Resource[]
   /// Canvases
-  canvases   Canvas[]
+  canvases           Canvas[]
 
   @@index([uid, deletedAt, updatedAt])
   @@map("projects")
@@ -947,12 +953,6 @@ model CheckoutSession {
 
   @@index([sessionId])
   @@map("checkout_sessions")
-}
-
-enum MessageType {
-  ai
-  human
-  system
 }
 
 model RefreshToken {

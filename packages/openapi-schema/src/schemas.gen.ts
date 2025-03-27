@@ -420,6 +420,93 @@ export const EntitySchema = {
   },
 } as const;
 
+export const ProjectSourceSchema = {
+  type: 'object',
+  description: 'Project source',
+  properties: {
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityType: {
+      description: 'Entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    title: {
+      type: 'string',
+      description: 'Project title',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Project creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Project update time',
+    },
+  },
+} as const;
+
+export const ProjectSchema = {
+  type: 'object',
+  description: 'Project',
+  required: ['projectId', 'name'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+    name: {
+      type: 'string',
+      description: 'Project name',
+    },
+    description: {
+      type: 'string',
+      description: 'Project description',
+    },
+    coverUrl: {
+      type: 'string',
+      description: 'Project cover URL',
+    },
+    canvases: {
+      type: 'array',
+      description: 'Canvases',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    resources: {
+      type: 'array',
+      description: 'Resources',
+      items: {
+        $ref: '#/components/schemas/Resource',
+      },
+    },
+    documents: {
+      type: 'array',
+      description: 'Documents',
+      items: {
+        $ref: '#/components/schemas/Document',
+      },
+    },
+    customInstructions: {
+      type: 'string',
+      description: 'Custom instructions for the project',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Project creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+    },
+  },
+} as const;
+
 export const LabelClassSchema = {
   type: 'object',
   description: 'Label class',
@@ -1107,12 +1194,6 @@ export const SearchStepSchema = {
       description: 'Step-specific result data',
     },
   },
-} as const;
-
-export const MessageTypeSchema = {
-  type: 'string',
-  description: 'Chat message type',
-  enum: ['ai', 'human', 'system'],
 } as const;
 
 export const ModelTierSchema = {
@@ -2768,6 +2849,118 @@ export const DeleteReferencesRequestSchema = {
       items: {
         type: 'string',
       },
+    },
+  },
+} as const;
+
+export const ListProjectResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Project list',
+          items: {
+            $ref: '#/components/schemas/Project',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const GetProjectDetailResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Project',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const UpsertProjectRequestSchema = {
+  type: 'object',
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID (only used for update)',
+    },
+    name: {
+      type: 'string',
+      description: 'Project name',
+    },
+    description: {
+      type: 'string',
+      description: 'Project description',
+    },
+    coverStorageKey: {
+      type: 'string',
+      description: 'Project cover storage key',
+    },
+    customInstructions: {
+      type: 'string',
+      description: 'Custom instructions',
+    },
+  },
+} as const;
+
+export const UpsertProjectResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Project',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const UpdateProjectItemsRequestSchema = {
+  type: 'object',
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['add', 'remove'],
+    },
+    items: {
+      type: 'array',
+      description: 'Item list',
+      items: {
+        $ref: '#/components/schemas/Entity',
+      },
+    },
+  },
+} as const;
+
+export const DeleteProjectRequestSchema = {
+  type: 'object',
+  required: ['projectId'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID to delete',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
   },
 } as const;

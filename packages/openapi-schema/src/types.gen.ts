@@ -365,6 +365,75 @@ export type Entity = {
 };
 
 /**
+ * Project source
+ */
+export type ProjectSource = {
+  /**
+   * Entity ID
+   */
+  entityId?: string;
+  /**
+   * Entity type
+   */
+  entityType?: EntityType;
+  /**
+   * Project title
+   */
+  title?: string;
+  /**
+   * Project creation time
+   */
+  createdAt?: string;
+  /**
+   * Project update time
+   */
+  updatedAt?: string;
+};
+
+/**
+ * Project
+ */
+export type Project = {
+  /**
+   * Project ID
+   */
+  projectId: string;
+  /**
+   * Project name
+   */
+  name: string;
+  /**
+   * Project description
+   */
+  description?: string;
+  /**
+   * Project cover URL
+   */
+  coverUrl?: string;
+  /**
+   * Canvases
+   */
+  canvases?: Array<Canvas>;
+  /**
+   * Resources
+   */
+  resources?: Array<Resource>;
+  /**
+   * Documents
+   */
+  documents?: Array<Document>;
+  /**
+   * Custom instructions for the project
+   */
+  customInstructions?: string;
+  /**
+   * Project creation time
+   */
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+/**
  * Label class
  */
 export type LabelClass = {
@@ -930,11 +999,6 @@ export type SearchStep = {
     [key: string]: unknown;
   };
 };
-
-/**
- * Chat message type
- */
-export type MessageType = 'ai' | 'human' | 'system';
 
 /**
  * Model tier
@@ -2035,6 +2099,71 @@ export type DeleteReferencesRequest = {
    * Reference ID list
    */
   referenceIds: Array<string>;
+};
+
+export type ListProjectResponse = BaseResponse & {
+  /**
+   * Project list
+   */
+  data?: Array<Project>;
+};
+
+export type GetProjectDetailResponse = BaseResponse & {
+  data?: Project;
+};
+
+export type UpsertProjectRequest = {
+  /**
+   * Project ID (only used for update)
+   */
+  projectId?: string;
+  /**
+   * Project name
+   */
+  name?: string;
+  /**
+   * Project description
+   */
+  description?: string;
+  /**
+   * Project cover storage key
+   */
+  coverStorageKey?: string;
+  /**
+   * Custom instructions
+   */
+  customInstructions?: string;
+};
+
+export type UpsertProjectResponse = BaseResponse & {
+  data?: Project;
+};
+
+export type UpdateProjectItemsRequest = {
+  /**
+   * Project ID
+   */
+  projectId?: string;
+  /**
+   * Operation type
+   */
+  operation?: 'add' | 'remove';
+  /**
+   * Item list
+   */
+  items?: Array<Entity>;
+};
+
+/**
+ * Operation type
+ */
+export type operation = 'add' | 'remove';
+
+export type DeleteProjectRequest = {
+  /**
+   * Project ID to delete
+   */
+  projectId: string;
 };
 
 /**
@@ -3835,6 +3964,55 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
+
+export type ListProjectsResponse = ListProjectResponse;
+
+export type ListProjectsError = unknown;
+
+export type GetProjectDetailData = {
+  query: {
+    /**
+     * Project ID
+     */
+    projectId: string;
+  };
+};
+
+export type GetProjectDetailResponse2 = GetProjectDetailResponse;
+
+export type GetProjectDetailError = unknown;
+
+export type CreateProjectData = {
+  body: UpsertProjectRequest;
+};
+
+export type CreateProjectResponse = UpsertProjectResponse;
+
+export type CreateProjectError = unknown;
+
+export type UpdateProjectData = {
+  body: UpsertProjectRequest;
+};
+
+export type UpdateProjectResponse = UpsertProjectResponse;
+
+export type UpdateProjectError = unknown;
+
+export type UpdateProjectItemsData = {
+  body: UpdateProjectItemsRequest;
+};
+
+export type UpdateProjectItemsResponse = BaseResponse;
+
+export type UpdateProjectItemsError = unknown;
+
+export type DeleteProjectData = {
+  body: DeleteProjectRequest;
+};
+
+export type DeleteProjectResponse = BaseResponse;
+
+export type DeleteProjectError = unknown;
 
 export type GetCodeArtifactDetailData = {
   query: {
