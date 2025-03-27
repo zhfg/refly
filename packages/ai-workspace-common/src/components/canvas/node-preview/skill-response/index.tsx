@@ -177,8 +177,8 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {
     // Prefer contextItems from node metadata
-    if (data.metadata?.contextItems) {
-      return purgeContextItems(data.metadata?.contextItems);
+    if (data?.metadata?.contextItems) {
+      return purgeContextItems(data?.metadata?.contextItems);
     }
 
     // Fallback to contextItems from context (could be legacy nodes)

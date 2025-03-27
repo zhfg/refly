@@ -90,7 +90,6 @@ export const ThreadContainer = memo(
     const {
       className,
       resultId,
-      standalone = true,
       messages,
       onAddMessage,
       onClearMessages,
@@ -117,7 +116,6 @@ export const ThreadContainer = memo(
 
     // Use our custom hook instead of the local implementation
     const { debouncedUpdateContextItems } = useContextUpdateByResultId({
-      standalone,
       resultId,
       setContextItems,
     });
@@ -143,13 +141,13 @@ export const ThreadContainer = memo(
 
     const containerStyles = useMemo(
       () => ({
-        width: standalone ? (isMaximized ? '840px' : '420px') : '100%',
+        width: isMaximized ? '840px' : '420px',
         transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column' as const,
-        height: standalone ? 'calc(100vh - 72px)' : '100%',
+        height: 'calc(100vh - 72px)',
       }),
-      [isMaximized, standalone],
+      [isMaximized],
     );
 
     // Handle window resize and update dimensions
@@ -184,10 +182,10 @@ export const ThreadContainer = memo(
 
     // Update context when resultId changes or component mounts
     useEffect(() => {
-      if (!standalone && resultId) {
+      if (resultId) {
         debouncedUpdateContextItems();
       }
-    }, [resultId, standalone, debouncedUpdateContextItems]);
+    }, [resultId, debouncedUpdateContextItems]);
 
     return (
       <div
@@ -198,14 +196,12 @@ export const ThreadContainer = memo(
         )}
         style={containerStyles}
       >
-        {standalone && (
-          <ThreadHeader
-            onClose={handleClose}
-            onMaximize={handleMaximize}
-            isMaximized={isMaximized}
-            onClearConversation={handleClearConversation}
-          />
-        )}
+        <ThreadHeader
+          onClose={handleClose}
+          onMaximize={handleMaximize}
+          isMaximized={isMaximized}
+          onClearConversation={handleClearConversation}
+        />
 
         <LinearThreadContent messages={messages} contentHeight={contentHeight} />
 
@@ -213,7 +209,6 @@ export const ThreadContainer = memo(
           <LaunchPad
             visible={true}
             inReflyPilot={true}
-            parentResultId={!standalone && resultId ? resultId : undefined}
             onAddMessage={onAddMessage}
             onGenerateMessageIds={onGenerateMessageIds}
             className="w-full"

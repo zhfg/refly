@@ -228,6 +228,8 @@ const ActualContent = memo(
 const ArtifactItem = memo(({ artifact, onSelect }: { artifact: any; onSelect: () => void }) => {
   const { t } = useTranslation();
 
+  if (!artifact?.title) return null;
+
   return (
     <div
       key={artifact.entityId}

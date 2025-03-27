@@ -1,10 +1,13 @@
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { ThreadContainer } from './thread-container';
+import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
 
 export const ReflyPilot = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { canvasId } = useCanvasContext();
 
   const {
     setShowReflyPilot,
@@ -17,6 +20,15 @@ export const ReflyPilot = memo(() => {
     addLinearThreadMessage: state.addLinearThreadMessage,
     clearLinearThreadMessages: state.clearLinearThreadMessages,
   }));
+
+  // Use the reset hook to handle canvas ID changes
+  useReflyPilotReset(canvasId);
+
+  // Extract the last message resultId for context updates
+  const lastMessageResultId = useMemo(() => {
+    const lastMessage = linearThreadMessages?.[linearThreadMessages.length - 1];
+    return lastMessage?.resultId;
+  }, [linearThreadMessages]);
 
   // Scroll to bottom effect
   useEffect(() => {
@@ -71,6 +83,7 @@ export const ReflyPilot = memo(() => {
     <ThreadContainer
       ref={containerRef}
       standalone={true}
+      resultId={lastMessageResultId}
       messages={linearThreadMessages}
       onAddMessage={handleAddMessage}
       onClearMessages={handleClearMessages}
