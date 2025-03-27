@@ -9,20 +9,17 @@ export const ReflyPilot = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { canvasId } = useCanvasContext();
 
-  const {
-    setShowReflyPilot,
-    linearThreadMessages,
-    addLinearThreadMessage,
-    clearLinearThreadMessages,
-  } = useCanvasStoreShallow((state) => ({
-    setShowReflyPilot: state.setShowReflyPilot,
-    linearThreadMessages: state.linearThreadMessages,
-    addLinearThreadMessage: state.addLinearThreadMessage,
-    clearLinearThreadMessages: state.clearLinearThreadMessages,
-  }));
+  const { setShowReflyPilot, linearThreadMessages, addLinearThreadMessage } = useCanvasStoreShallow(
+    (state) => ({
+      setShowReflyPilot: state.setShowReflyPilot,
+      linearThreadMessages: state.linearThreadMessages,
+      addLinearThreadMessage: state.addLinearThreadMessage,
+      clearLinearThreadMessages: state.clearLinearThreadMessages,
+    }),
+  );
 
   // Use the reset hook to handle canvas ID changes
-  useReflyPilotReset(canvasId);
+  const { resetReflyPilot } = useReflyPilotReset(canvasId);
 
   // Extract the last message resultId for context updates
   const lastMessageResultId = useMemo(() => {
@@ -62,11 +59,6 @@ export const ReflyPilot = memo(() => {
     [addLinearThreadMessage, setShowReflyPilot],
   );
 
-  // Handler for clearing messages
-  const handleClearMessages = useCallback(() => {
-    clearLinearThreadMessages();
-  }, [clearLinearThreadMessages]);
-
   // Handler for generating new message IDs
   const handleGenerateMessageIds = useCallback(() => {
     const newResultId = genActionResultID();
@@ -86,7 +78,7 @@ export const ReflyPilot = memo(() => {
       resultId={lastMessageResultId}
       messages={linearThreadMessages}
       onAddMessage={handleAddMessage}
-      onClearMessages={handleClearMessages}
+      onClearConversation={resetReflyPilot}
       onGenerateMessageIds={handleGenerateMessageIds}
       onClose={handleClose}
     />

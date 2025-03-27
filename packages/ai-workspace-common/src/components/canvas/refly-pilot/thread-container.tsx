@@ -12,9 +12,7 @@ import { LinearThreadContent } from './linear-thread';
 import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
 export interface ThreadContainerProps {
   className?: string;
@@ -22,7 +20,7 @@ export interface ThreadContainerProps {
   standalone?: boolean;
   messages: LinearThreadMessage[];
   onAddMessage: (message: { id: string; resultId: string; nodeId: string; data: any }) => void;
-  onClearMessages: () => void;
+  onClearConversation: () => void;
   onGenerateMessageIds: () => { resultId: string; nodeId: string };
   onClose?: () => void;
 }
@@ -92,7 +90,7 @@ export const ThreadContainer = memo(
       resultId,
       messages,
       onAddMessage,
-      onClearMessages,
+      onClearConversation,
       onGenerateMessageIds,
       onClose,
     } = props;
@@ -103,15 +101,6 @@ export const ThreadContainer = memo(
     // Get context panel store to manage context items
     const { setContextItems } = useContextPanelStoreShallow((state) => ({
       setContextItems: state.setContextItems,
-    }));
-
-    const { setNewQAText } = useChatStoreShallow((state) => ({
-      setNewQAText: state.setNewQAText,
-    }));
-
-    // Use launchpad store for recommend questions state
-    const { setRecommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
-      setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
     }));
 
     // Use our custom hook instead of the local implementation
@@ -129,15 +118,6 @@ export const ThreadContainer = memo(
     const handleMaximize = useCallback(() => {
       setIsMaximized(!isMaximized);
     }, [isMaximized]);
-
-    const handleClearConversation = useCallback(() => {
-      // Clear all messages
-      onClearMessages();
-      // Clear chat input
-      setNewQAText('');
-      // Close recommend questions panel if open
-      setRecommendQuestionsOpen(false);
-    }, [onClearMessages, setNewQAText, setRecommendQuestionsOpen]);
 
     const containerStyles = useMemo(
       () => ({
@@ -200,7 +180,7 @@ export const ThreadContainer = memo(
           onClose={handleClose}
           onMaximize={handleMaximize}
           isMaximized={isMaximized}
-          onClearConversation={handleClearConversation}
+          onClearConversation={onClearConversation}
         />
 
         <LinearThreadContent messages={messages} contentHeight={contentHeight} />
