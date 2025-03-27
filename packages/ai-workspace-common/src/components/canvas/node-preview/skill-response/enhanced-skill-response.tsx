@@ -1,21 +1,24 @@
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   CanvasNode,
   ResponseNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { LinearThread } from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot/linear-thread';
+import {
+  LinearThreadContent,
+  LinearThreadMessage,
+} from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot/linear-thread';
 import { cn } from '@refly-packages/utils/cn';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
+import { ChatPanel } from '@refly-packages/ai-workspace-common/components/canvas/node-chat-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refly/openapi-schema';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-
-// Define the message shape
-interface LinearThreadMessage {
-  id: string;
-  resultId: string;
-  nodeId: string;
-  timestamp: number;
-}
+import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 
 interface EnhancedSkillResponseProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -25,8 +28,29 @@ interface EnhancedSkillResponseProps {
 
 export const EnhancedSkillResponse = memo(
   ({ node, resultId, className }: EnhancedSkillResponseProps) => {
+    // Thread messages state
     const [messages, setMessages] = useState<LinearThreadMessage[]>([]);
     const findThreadHistory = useFindThreadHistory();
+
+    // Local state for ChatPanel
+    const [query, setQuery] = useState('');
+    const [selectedSkillName, setSelectedSkillName] = useState<string | undefined>();
+    const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+    const [contextItems, setContextItems] = useState<IContextItem[]>([]);
+    const [runtimeConfig, setRuntimeConfig] = useState<SkillRuntimeConfig>({});
+    const [tplConfig, setTplConfig] = useState<SkillTemplateConfig | undefined>();
+
+    // Refs
+    const containerRef = useRef<HTMLDivElement>(null);
+    const contentHeight = useMemo(
+      () => (messages.length === 0 ? 'auto' : '300px'),
+      [messages.length],
+    );
+
+    // Hooks
+    const selectedSkill = useFindSkill(selectedSkillName);
+    const { invokeAction, abortAction } = useInvokeAction();
+    const { canvasId, readonly } = useCanvasContext();
     const { addNode } = useAddNode();
 
     // Initialize messages from resultId and its thread history
@@ -57,49 +81,171 @@ export const EnhancedSkillResponse = memo(
         });
 
         setMessages(initialMessages);
+
+        // Initialize ChatPanel state from node data if available
+        if (node?.data?.metadata) {
+          const metadata = node.data.metadata as any;
+          if (metadata.selectedSkill?.name) setSelectedSkillName(metadata.selectedSkill.name);
+          if (metadata.modelInfo) setModelInfo(metadata.modelInfo);
+          if (metadata.tplConfig) setTplConfig(metadata.tplConfig);
+          if (metadata.runtimeConfig) setRuntimeConfig(metadata.runtimeConfig);
+        }
       }
     }, [resultId, node, findThreadHistory]);
 
-    // Simple message adder for backward compatibility
-    const handleSimpleAddMessage = useCallback(
-      (message: { id: string; resultId: string; nodeId: string }) => {
-        const newMessage = {
-          id: message.id,
-          resultId: message.resultId,
-          nodeId: message.nodeId,
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => [...prev, newMessage]);
-      },
-      [addNode, resultId],
-    );
+    // Handler for image upload
+    const handleImageUpload = useCallback(async (file: File) => {
+      // Mock implementation - in a real app, this would upload the image and return data
+      const mockImageData = {
+        entityId: genUniqueId(),
+        type: 'image',
+        title: file.name,
+        url: URL.createObjectURL(file),
+        name: file.name,
+      };
 
-    // Handler for clearing messages
-    const handleClearMessages = useCallback(() => {
-      setMessages([]);
+      setContextItems((prev) => [...prev, mockImageData as IContextItem]);
+
+      return mockImageData;
     }, []);
 
-    // Handler for generating new message IDs
-    const handleGenerateMessageIds = useCallback(() => {
+    // Handler for send message - Fixed to properly clear the query
+    const handleSendMessage = useCallback(() => {
+      if (!canvasId || !query.trim()) return;
+
+      // Store current query for later use
+      const currentQuery = query;
+
+      // Clear the input query immediately
+      setQuery('');
+
+      // Generate IDs for the new skill response
       const newResultId = genActionResultID();
       const newNodeId = genUniqueId();
-      return { resultId: newResultId, nodeId: newNodeId };
+
+      // Create message object for the thread
+      const newMessage = {
+        id: `message-${newNodeId}`,
+        resultId: newResultId,
+        nodeId: newNodeId,
+        timestamp: Date.now(),
+      };
+
+      // Add this message to the thread
+      setMessages((prev) => [...prev, newMessage]);
+
+      // Invoke the action with all necessary parameters
+      invokeAction(
+        {
+          resultId: newResultId,
+          query: currentQuery,
+          selectedSkill,
+          modelInfo,
+          contextItems,
+          tplConfig,
+          runtimeConfig,
+        },
+        {
+          entityId: canvasId,
+          entityType: 'canvas',
+        },
+      );
+
+      // Create a node to display the response
+      addNode(
+        {
+          type: 'skillResponse',
+          data: {
+            title: currentQuery,
+            entityId: newResultId,
+            metadata: {
+              status: 'executing',
+              contextItems,
+              tplConfig,
+              selectedSkill,
+              modelInfo,
+              runtimeConfig,
+              query: currentQuery,
+            },
+          },
+        },
+        convertContextItemsToNodeFilters(contextItems),
+        false,
+        true,
+      );
+    }, [
+      query,
+      selectedSkill,
+      modelInfo,
+      contextItems,
+      tplConfig,
+      runtimeConfig,
+      canvasId,
+      invokeAction,
+      addNode,
+    ]);
+
+    // Handler for setting selected skill
+    const handleSetSelectedSkill = useCallback((skill: Skill | null) => {
+      setSelectedSkillName(skill?.name);
     }, []);
 
+    // Custom wrapper for setQuery to ensure updates are reflected
+    const handleSetQuery = useCallback((newQuery: string) => {
+      setQuery(newQuery);
+    }, []);
+
+    const { debouncedUpdateContextItems } = useContextUpdateByResultId({
+      resultId,
+      setContextItems,
+    });
+
+    // Update context when resultId changes or component mounts
+    useEffect(() => {
+      if (resultId) {
+        debouncedUpdateContextItems();
+      }
+    }, [resultId, debouncedUpdateContextItems]);
+
     return (
-      <div className={cn('flex flex-col h-full w-full', className)}>
+      <div ref={containerRef} className={cn('flex flex-col h-full w-full', className)}>
         <div className="flex flex-1 overflow-hidden">
-          <LinearThread
-            resultId={resultId}
-            standalone={false}
-            className="h-full w-full"
-            messages={messages}
-            onAddMessage={handleSimpleAddMessage}
-            onClearMessages={handleClearMessages}
-            onGenerateMessageIds={handleGenerateMessageIds}
-          />
+          <div className="flex flex-col w-full">
+            <LinearThreadContent
+              messages={messages}
+              contentHeight={contentHeight}
+              className="mb-4"
+            />
+
+            <div className="mt-auto border-t border-gray-200 pt-4">
+              <ChatPanel
+                readonly={readonly}
+                query={query}
+                setQuery={handleSetQuery}
+                selectedSkill={selectedSkill}
+                setSelectedSkill={handleSetSelectedSkill}
+                contextItems={contextItems}
+                setContextItems={setContextItems}
+                modelInfo={modelInfo}
+                setModelInfo={setModelInfo}
+                runtimeConfig={runtimeConfig}
+                setRuntimeConfig={setRuntimeConfig}
+                tplConfig={tplConfig}
+                setTplConfig={setTplConfig}
+                handleSendMessage={handleSendMessage}
+                handleAbortAction={abortAction}
+                handleUploadImage={handleImageUpload}
+                onInputHeightChange={() => {
+                  // Adjust container height if needed
+                }}
+                className="w-full"
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
   },
 );
+
+EnhancedSkillResponse.displayName = 'EnhancedSkillResponse';

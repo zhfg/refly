@@ -1,16 +1,12 @@
 import { NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
-import { Button } from 'antd';
 import { Form } from '@arco-design/web-react';
 import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 
 import { getNodeCommonStyles } from './index';
-import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
-import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refly/openapi-schema';
-import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -21,15 +17,11 @@ import { cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/no
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
-import { ConfigManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/config-manager';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useTranslation } from 'react-i18next';
-import { IconClose } from '@arco-design/web-react/icon';
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -38,53 +30,12 @@ import classNames from 'classnames';
 import Moveable from 'react-moveable';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
-import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 import { useContextUpdateByEdges } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
+import { ChatPanel } from '@refly-packages/ai-workspace-common/components/canvas/node-chat-panel';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
-
-// Memoized Header Component
-const NodeHeader = memo(
-  ({
-    selectedSkillName,
-    setSelectedSkill,
-    readonly,
-  }: {
-    selectedSkillName?: string;
-    setSelectedSkill: (skill: Skill | null) => void;
-    readonly: boolean;
-  }) => {
-    const { t } = useTranslation();
-    return (
-      <div className="flex justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#6172F3] shadow-lg flex items-center justify-center flex-shrink-0">
-            {getSkillIcon(selectedSkillName, 'w-4 h-4 text-white')}
-          </div>
-          <span className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate">
-            {selectedSkillName
-              ? t(`${selectedSkillName}.name`, { ns: 'skill' })
-              : t('canvas.skill.askAI')}
-          </span>
-        </div>
-        {selectedSkillName && !readonly && (
-          <Button
-            type="text"
-            size="small"
-            className="p-0"
-            icon={<IconClose />}
-            onClick={() => {
-              setSelectedSkill?.(null);
-            }}
-          />
-        )}
-      </div>
-    );
-  },
-);
-
-NodeHeader.displayName = 'NodeHeader';
 
 export const SkillNode = memo(
   ({ data, selected, id }: NodeProps<SkillNode>) => {
@@ -96,24 +47,6 @@ export const SkillNode = memo(
     const { addNode } = useAddNode();
     const { deleteNode } = useDeleteNode();
     const [form] = Form.useForm();
-    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-    // Add ref for ChatInput component
-    const chatInputRef = useRef<HTMLDivElement>(null);
-
-    // Add useEffect for auto focus
-    useEffect(() => {
-      if (selected && !readonly) {
-        setTimeout(() => {
-          if (chatInputRef.current) {
-            const textArea = chatInputRef.current.querySelector('textarea');
-            if (textArea) {
-              textArea.focus();
-            }
-          }
-        }, 100);
-      }
-    }, [selected]);
 
     const moveableRef = useRef<Moveable>(null);
     const targetRef = useRef<HTMLDivElement>(null);
@@ -235,6 +168,14 @@ export const SkillNode = memo(
     const setRuntimeConfig = useCallback(
       (runtimeConfig: SkillRuntimeConfig) => {
         patchNodeData(id, { metadata: { runtimeConfig } });
+      },
+      [id, patchNodeData],
+    );
+
+    const setNodeDataByEntity = useSetNodeDataByEntity();
+    const setTplConfig = useCallback(
+      (config: SkillTemplateConfig) => {
+        setNodeDataByEntity({ entityId, type: 'skill' }, { metadata: { tplConfig: config } });
       },
       [id, patchNodeData],
     );
@@ -379,16 +320,8 @@ export const SkillNode = memo(
           },
         ]);
       }
+      return nodeData;
     };
-
-    const setNodeDataByEntity = useSetNodeDataByEntity();
-
-    const handleTplConfigChange = useCallback(
-      (config: SkillTemplateConfig) => {
-        setNodeDataByEntity({ entityId, type: 'skill' }, { metadata: { tplConfig: config } });
-      },
-      [entityId, setNodeDataByEntity],
-    );
 
     // Use the new custom hook instead of the local implementation
     const { debouncedUpdateContextItems } = useContextUpdateByEdges({
@@ -441,78 +374,25 @@ export const SkillNode = memo(
               </>
             }
 
-            <div className="flex flex-col gap-3 h-full p-3 box-border">
-              <NodeHeader
-                readonly={readonly}
-                selectedSkillName={skill?.name}
-                setSelectedSkill={setSelectedSkill}
-              />
-
-              <ContextManager
-                className="px-0.5"
-                contextItems={contextItems}
-                setContextItems={setContextItems}
-              />
-
-              <ChatInput
-                ref={chatInputRef}
-                query={localQuery}
-                setQuery={(value) => {
-                  setQuery(value);
-                  // Safely update size with a check
-                  setTimeout(() => {
-                    updateSize({ height: 'auto' });
-                  }, 0);
-                }}
-                selectedSkillName={skill?.name}
-                inputClassName="px-1 py-0"
-                maxRows={20}
-                handleSendMessage={handleSendMessage}
-                handleSelectSkill={(skill) => {
-                  setQuery(localQuery?.slice(0, -1));
-                  setSelectedSkill(skill);
-                }}
-                onUploadImage={handleImageUpload}
-              />
-
-              {skill?.configSchema?.items?.length > 0 && (
-                <ConfigManager
-                  key={skill?.name}
-                  form={form}
-                  formErrors={formErrors}
-                  setFormErrors={setFormErrors}
-                  schema={skill?.configSchema}
-                  tplConfig={tplConfig}
-                  fieldPrefix="tplConfig"
-                  configScope="runtime"
-                  onExpandChange={(_expanded) => {
-                    // Safely update size with a check
-                    setTimeout(() => {
-                      updateSize({ height: 'auto' });
-                    }, 0);
-                  }}
-                  resetConfig={() => {
-                    const defaultConfig = skill?.tplConfig ?? {};
-                    form.setFieldValue('tplConfig', defaultConfig);
-                  }}
-                  onFormValuesChange={(_, allValues) => {
-                    handleTplConfigChange(allValues.tplConfig);
-                  }}
-                />
-              )}
-
-              <ChatActions
-                query={localQuery}
-                model={modelInfo}
-                setModel={setModelInfo}
-                handleSendMessage={handleSendMessage}
-                handleAbort={abortAction}
-                onUploadImage={handleImageUpload}
-                contextItems={contextItems}
-                runtimeConfig={runtimeConfig}
-                setRuntimeConfig={setRuntimeConfig}
-              />
-            </div>
+            <ChatPanel
+              readonly={readonly}
+              query={localQuery}
+              setQuery={setQuery}
+              selectedSkill={skill}
+              setSelectedSkill={setSelectedSkill}
+              contextItems={contextItems}
+              setContextItems={setContextItems}
+              modelInfo={modelInfo}
+              setModelInfo={setModelInfo}
+              runtimeConfig={runtimeConfig || {}}
+              setRuntimeConfig={setRuntimeConfig}
+              tplConfig={tplConfig}
+              setTplConfig={setTplConfig}
+              handleSendMessage={handleSendMessage}
+              handleAbortAction={abortAction}
+              handleUploadImage={handleImageUpload}
+              onInputHeightChange={() => updateSize({ height: 'auto' })}
+            />
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react';
-import { LinearThread } from './linear-thread';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
+import { ThreadContainer } from './thread-container';
 
 export const ReflyPilot = memo(() => {
   const {
@@ -48,13 +48,21 @@ export const ReflyPilot = memo(() => {
     return { resultId: newResultId, nodeId: newNodeId };
   }, []);
 
+  // Handler for closing the Refly Pilot
+  const handleClose = useCallback(() => {
+    setShowReflyPilot(false);
+  }, [setShowReflyPilot]);
+
   return (
-    <LinearThread
+    <ThreadContainer
       standalone={true}
       messages={linearThreadMessages}
       onAddMessage={handleAddMessage}
       onClearMessages={handleClearMessages}
       onGenerateMessageIds={handleGenerateMessageIds}
+      onClose={handleClose}
     />
   );
 });
+
+ReflyPilot.displayName = 'ReflyPilot';

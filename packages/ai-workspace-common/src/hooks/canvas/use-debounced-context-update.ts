@@ -79,7 +79,6 @@ export const useContextUpdateByEdges = ({
  * Hook to update context items based on a result ID
  */
 export const useContextUpdateByResultId = ({
-  standalone = false,
   resultId,
   setContextItems,
 }: UseContextUpdateByResultIdProps) => {
@@ -87,7 +86,7 @@ export const useContextUpdateByResultId = ({
   const findThreadHistory = useFindThreadHistory();
 
   const updateContextItemsFromResultId = useCallback(() => {
-    if (!resultId || standalone) return;
+    if (!resultId) return;
 
     // Find the node associated with this resultId
     const nodes = getNodes();
@@ -119,7 +118,7 @@ export const useContextUpdateByResultId = ({
         },
       ]);
     }
-  }, [resultId, standalone, getNodes, findThreadHistory, setContextItems]);
+  }, [resultId, getNodes, findThreadHistory, setContextItems]);
 
   const debouncedUpdateContextItems = useDebouncedCallback(() => {
     updateContextItemsFromResultId();

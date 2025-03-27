@@ -68,7 +68,6 @@ export const LaunchPad = memo(
       return (
         <ChatPanel
           embeddedMode={inReflyPilot}
-          parentResultId={parentResultId}
           onAddMessage={onAddMessage}
           onGenerateMessageIds={onGenerateMessageIds}
         />

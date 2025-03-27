@@ -1,97 +1,18 @@
-import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { memo, useRef } from 'react';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
-import { cn } from '@refly-packages/utils/cn';
-import {
-  IconClose,
-  IconExpand,
-  IconShrink,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
-import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
-import { RefreshCw } from 'lucide-react';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import {
-  CanvasNode,
-  ResponseNodeMeta,
-} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 
-interface LinearThreadMessage {
+export interface LinearThreadMessage {
   id: string;
   resultId: string;
   nodeId: string;
   timestamp: number;
 }
 
-interface ReflyPilotProps {
-  className?: string;
-  resultId?: string;
-  node?: CanvasNode<ResponseNodeMeta>;
-  standalone?: boolean;
+interface LinearThreadContentProps {
   messages: LinearThreadMessage[];
-  onAddMessage: (message: { id: string; resultId: string; nodeId: string }) => void;
-  onClearMessages: () => void;
-  onGenerateMessageIds: () => { resultId: string; nodeId: string };
+  contentHeight: string | number;
+  className?: string;
 }
-
-const LinearThreadHeader = memo(
-  ({
-    onClose,
-    onMaximize,
-    isMaximized,
-    onClearConversation,
-  }: {
-    onClose: () => void;
-    onMaximize: () => void;
-    isMaximized: boolean;
-    onClearConversation: () => void;
-  }) => {
-    const { t } = useTranslation();
-
-    return (
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-500 shadow-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-medium">P</span>
-          </div>
-          <span className="text-sm font-medium leading-normal">
-            {t('canvas.reflyPilot.title', { defaultValue: 'Refly Pilot' })}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="text"
-            size="small"
-            className="flex items-center text-gray-600 h-7 px-2"
-            onClick={onClearConversation}
-            icon={<RefreshCw className="w-3.5 h-3.5 mr-1" />}
-          >
-            {t('canvas.reflyPilot.newConversation', { defaultValue: 'New conversation' })}
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
-            onClick={onMaximize}
-          >
-            {isMaximized ? <IconShrink className="w-4 h-4" /> : <IconExpand className="w-4 h-4" />}
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
-            onClick={onClose}
-          >
-            <IconClose className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  },
-);
 
 // Optimize SkillResponseNodePreview with memo
 const MemoizedSkillResponseNodePreview = memo(SkillResponseNodePreview, (prevProps, nextProps) => {
@@ -101,20 +22,16 @@ const MemoizedSkillResponseNodePreview = memo(SkillResponseNodePreview, (prevPro
   );
 });
 
+MemoizedSkillResponseNodePreview.displayName = 'MemoizedSkillResponseNodePreview';
+
 export const LinearThreadContent = memo(
-  ({
-    messages,
-    messagesContainerRef,
-    contentHeight,
-  }: {
-    messages: LinearThreadMessage[];
-    messagesContainerRef: React.RefObject<HTMLDivElement>;
-    contentHeight: string | number;
-  }) => {
+  ({ messages, contentHeight, className = '' }: LinearThreadContentProps) => {
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
     return (
       <div
         ref={messagesContainerRef}
-        className="flex-grow overflow-auto preview-container"
+        className={`flex-grow overflow-auto preview-container ${className}`}
         style={{ height: contentHeight, width: '100%' }}
       >
         {messages.length === 0 ? (
@@ -149,142 +66,4 @@ export const LinearThreadContent = memo(
   },
 );
 
-export const LinearThread = memo(
-  ({
-    className,
-    resultId,
-    standalone = true,
-    messages,
-    onAddMessage,
-    onClearMessages,
-    onGenerateMessageIds,
-  }: ReflyPilotProps) => {
-    const [isMaximized, setIsMaximized] = useState(false);
-    const [contentHeight, setContentHeight] = useState('auto');
-    const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-    const { setShowReflyPilot } = useCanvasStoreShallow((state) => ({
-      setShowReflyPilot: state.setShowReflyPilot,
-    }));
-
-    // Add context panel store to manage context items
-    const { setContextItems } = useContextPanelStoreShallow((state) => ({
-      setContextItems: state.setContextItems,
-    }));
-
-    const { setNewQAText } = useChatStoreShallow((state) => ({
-      setNewQAText: state.setNewQAText,
-    }));
-
-    // Use our new custom hook instead of the local implementation
-    const { debouncedUpdateContextItems } = useContextUpdateByResultId({
-      standalone,
-      resultId,
-      setContextItems,
-    });
-
-    const handleClose = useCallback(() => {
-      setShowReflyPilot(false);
-    }, [setShowReflyPilot]);
-
-    const handleMaximize = useCallback(() => {
-      setIsMaximized(!isMaximized);
-    }, [isMaximized]);
-
-    const handleClearConversation = useCallback(() => {
-      // Clear all messages
-      onClearMessages();
-      // Clear chat input
-      setNewQAText('');
-    }, [onClearMessages, setNewQAText]);
-
-    const containerStyles = useMemo(
-      () => ({
-        width: standalone ? (isMaximized ? '840px' : '420px') : '100%',
-        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-        display: 'flex',
-        flexDirection: 'column' as const,
-        height: standalone ? 'calc(100vh - 72px)' : '100%',
-      }),
-      [isMaximized, standalone],
-    );
-
-    // Handle window resize and update dimensions
-    useEffect(() => {
-      const updateDimensions = () => {
-        // Calculate available space
-        const viewportHeight = window.innerHeight;
-        const headerHeight = 52; // Header height
-        const launchpadHeight = 180; // Approximate height of launchpad + margins
-        const topOffset = 72; // Top offset from viewport
-
-        // Calculate content height
-        const availableHeight = viewportHeight - topOffset - headerHeight - launchpadHeight;
-
-        if (messages.length === 0) {
-          setContentHeight('auto');
-        } else {
-          setContentHeight(`${Math.max(300, availableHeight)}px`);
-        }
-      };
-
-      // Initial calculation
-      updateDimensions();
-
-      // Listen for window resize
-      window.addEventListener('resize', updateDimensions);
-
-      return () => {
-        window.removeEventListener('resize', updateDimensions);
-      };
-    }, [messages.length]);
-
-    // Scroll to bottom when new messages are added
-    useEffect(() => {
-      if (messagesContainerRef.current && messages.length > 0) {
-        const container = messagesContainerRef.current;
-        container.scrollTop = container.scrollHeight; // Scroll to bottom to show newest messages
-      }
-    }, [messages.length]);
-
-    // Update context when resultId changes or component mounts
-    useEffect(() => {
-      if (!standalone && resultId) {
-        debouncedUpdateContextItems();
-      }
-    }, [resultId, standalone, debouncedUpdateContextItems]);
-
-    return (
-      <div
-        className={cn(
-          'flex-shrink-0 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col',
-          className,
-        )}
-        style={containerStyles}
-      >
-        {standalone && (
-          <LinearThreadHeader
-            onClose={handleClose}
-            onMaximize={handleMaximize}
-            isMaximized={isMaximized}
-            onClearConversation={handleClearConversation}
-          />
-        )}
-        <LinearThreadContent
-          messages={messages}
-          messagesContainerRef={messagesContainerRef}
-          contentHeight={contentHeight}
-        />
-        <div className="mt-auto border-t border-gray-200">
-          <LaunchPad
-            visible={true}
-            inReflyPilot={true}
-            parentResultId={!standalone && resultId ? resultId : undefined}
-            onAddMessage={onAddMessage}
-            onGenerateMessageIds={onGenerateMessageIds}
-          />
-        </div>
-      </div>
-    );
-  },
-);
+LinearThreadContent.displayName = 'LinearThreadContent';
