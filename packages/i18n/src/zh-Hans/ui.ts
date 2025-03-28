@@ -2187,10 +2187,18 @@ const translations = {
       deleteConfirm: '确定删除项目 "{{name}}" 吗？',
       createSuccess: '创建成功',
       editSuccess: '编辑成功',
+      removeItemsSuccess: '已移除所选资源',
     },
     addSources: {
       title: '添加资源',
       selectAll: '全选',
+    },
+    sourceList: {
+      selectedCount: '已选择 {{count}} 项',
+      removeConfirm: '确定从当前项目中移除所选项吗？',
+      deleteConfirm: '将从知识库删除所选项，确定删除吗？',
+      searchPlaceholder: '输入关键词搜索...',
+      sourceCount: '{{resourceCount}} 个资源 · {{documentCount}} 个文档',
     },
   },
 };

@@ -2250,10 +2250,18 @@ const translations = {
       deleteConfirm: 'Are you sure you want to delete the project "{{name}}"?',
       createSuccess: 'Create successfully',
       editSuccess: 'Edit successfully',
+      removeItemsSuccess: 'Removed selected resources',
     },
     addSources: {
       title: 'Add Sources',
       selectAll: 'Select All',
+    },
+    sourceList: {
+      selectedCount: 'Selected {{count}} items',
+      removeConfirm: 'Are you sure you want to remove the selected items from the project?',
+      deleteConfirm: 'Will remove the selected items from the knowledge base, are you sure?',
+      searchPlaceholder: 'Search Sources...',
+      sourceCount: '{{resourceCount}} resources · {{documentCount}} documents',
     },
   },
 };
