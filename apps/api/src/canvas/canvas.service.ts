@@ -10,7 +10,7 @@ import { MiscService } from '@/misc/misc.service';
 import { CollabService } from '@/collab/collab.service';
 import { CodeArtifactService } from '@/code-artifact/code-artifact.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
-import { CanvasNotFoundError, StorageQuotaExceeded } from '@refly-packages/errors';
+import { CanvasNotFoundError, ParamsError, StorageQuotaExceeded } from '@refly-packages/errors';
 import {
   AutoNameCanvasRequest,
   DeleteCanvasRequest,
@@ -391,7 +391,14 @@ export class CanvasService {
       updates.title = title;
     }
     if (minimapStorageKey !== undefined) {
-      updates.minimapStorageKey = minimapStorageKey;
+      const minimapFile = await this.miscService.findFileAndBindEntity(minimapStorageKey, {
+        entityId: canvasId,
+        entityType: 'canvas',
+      });
+      if (!minimapFile) {
+        throw new ParamsError('Minimap file not found');
+      }
+      updates.minimapStorageKey = minimapFile.storageKey;
     }
 
     const updatedCanvas = await this.prisma.$transaction(async (tx) => {
