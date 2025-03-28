@@ -125,7 +125,10 @@ export const EnhancedSkillResponse = memo(
             if (metadata.runtimeConfig) setRuntimeConfig(metadata.runtimeConfig);
           }
 
-          debouncedUpdateContextItems();
+          // Add delay to ensure edges are properly updated before calling debouncedUpdateContextItems
+          setTimeout(() => {
+            debouncedUpdateContextItems();
+          }, 150);
         }
       };
 
@@ -153,7 +156,12 @@ export const EnhancedSkillResponse = memo(
     // Update context when lastMessageResultId changes
     useEffect(() => {
       if (lastMessageResultId) {
-        debouncedUpdateContextItems();
+        // Add delay to ensure edges are properly updated
+        const timer = setTimeout(() => {
+          debouncedUpdateContextItems();
+        }, 150);
+
+        return () => clearTimeout(timer);
       }
     }, [lastMessageResultId, debouncedUpdateContextItems]);
 

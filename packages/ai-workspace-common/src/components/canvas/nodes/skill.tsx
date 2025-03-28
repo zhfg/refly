@@ -333,7 +333,12 @@ export const SkillNode = memo(
 
     // listen to edges changes and automatically update contextItems
     useEffect(() => {
-      debouncedUpdateContextItems();
+      // Add a delay to ensure edges have been properly updated in React Flow
+      const timer = setTimeout(() => {
+        debouncedUpdateContextItems();
+      }, 150);
+
+      return () => clearTimeout(timer);
     }, [edges?.length, id, contextItems, getNodes()?.length, debouncedUpdateContextItems]);
 
     return (

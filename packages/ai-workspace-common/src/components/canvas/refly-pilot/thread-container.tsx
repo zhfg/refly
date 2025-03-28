@@ -163,7 +163,12 @@ export const ThreadContainer = memo(
     // Update context when resultId changes or component mounts
     useEffect(() => {
       if (resultId) {
-        debouncedUpdateContextItems();
+        // Add delay to ensure edges have been properly updated in React Flow
+        const timer = setTimeout(() => {
+          debouncedUpdateContextItems();
+        }, 150);
+
+        return () => clearTimeout(timer);
       }
     }, [resultId, debouncedUpdateContextItems]);
 

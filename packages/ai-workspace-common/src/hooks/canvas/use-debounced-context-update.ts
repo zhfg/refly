@@ -47,6 +47,10 @@ export const useContextUpdateByEdges = ({
 
     // filter current contextItems, remove nodes that are no longer connected
     const updatedContextItems = contextItems.filter((item) => {
+      if (currentEdges.length === 0 && contextItems.length > 0) {
+        return true;
+      }
+
       const itemNode = nodes.find((node) => node.data?.entityId === item.entityId);
       return itemNode && connectedSourceIds.has(itemNode.id);
     });

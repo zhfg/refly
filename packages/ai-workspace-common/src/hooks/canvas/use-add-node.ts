@@ -195,35 +195,40 @@ export const useAddNode = () => {
         }
       }
 
-      // Update nodes and edges
+      // First update nodes to ensure they exist
       setNodes(canvasId, updatedNodes);
-      setEdges(canvasId, updatedEdges);
 
-      // Apply branch layout if we're connecting to existing nodes
-      if (sourceNodes?.length > 0) {
-        // Use setTimeout to ensure the new node and edges are added before layout
-        setTimeout(() => {
-          // const { autoLayout } = useCanvasStore.getState();
-          const autoLayout = false;
-          if (!autoLayout) {
-            if (needSetCenter) {
-              setNodeCenter(newNode.id);
+      // Then update edges with a slight delay to ensure nodes are registered first
+      // This helps prevent the race condition where edges are created but nodes aren't ready
+      setTimeout(() => {
+        setEdges(canvasId, updatedEdges);
+
+        // Apply branch layout if we're connecting to existing nodes
+        if (sourceNodes?.length > 0) {
+          // Use setTimeout to ensure the new node and edges are added before layout
+          setTimeout(() => {
+            // const { autoLayout } = useCanvasStore.getState();
+            const autoLayout = false;
+            if (!autoLayout) {
+              if (needSetCenter) {
+                setNodeCenter(newNode.id);
+              }
+
+              return;
             }
 
-            return;
-          }
-
-          layoutBranchAndUpdatePositions(
-            sourceNodes,
-            updatedNodes,
-            updatedEdges,
-            {},
-            { needSetCenter: needSetCenter, targetNodeId: newNode.id },
-          );
-        }, 0);
-      } else if (needSetCenter) {
-        setNodeCenter(newNode.id);
-      }
+            layoutBranchAndUpdatePositions(
+              sourceNodes,
+              updatedNodes,
+              updatedEdges,
+              {},
+              { needSetCenter: needSetCenter, targetNodeId: newNode.id },
+            );
+          }, 50);
+        } else if (needSetCenter) {
+          setNodeCenter(newNode.id);
+        }
+      }, 10);
 
       if (
         newNode.type === 'document' ||
