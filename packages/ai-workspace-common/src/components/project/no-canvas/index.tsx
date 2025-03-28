@@ -5,9 +5,12 @@ import { SiderPopover } from '@refly-packages/ai-workspace-common/components/sid
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
-export const NoCanvas = () => {
+interface NoCanvasProps {
+  projectId: string;
+}
+export const NoCanvas = ({ projectId }: NoCanvasProps) => {
   const { t } = useTranslation();
-  const { debouncedCreateCanvas, isCreating } = useCreateCanvas();
+  const { debouncedCreateCanvas, isCreating } = useCreateCanvas({ projectId });
 
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,

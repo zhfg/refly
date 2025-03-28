@@ -6,7 +6,7 @@ export const Project = ({ projectId }: { projectId: string }) => {
   const canvasId = searchParams.get('canvasId');
   console.log('projectId', projectId);
   if (!canvasId || canvasId === 'empty') {
-    return <NoCanvas />;
+    return <NoCanvas projectId={projectId} />;
   }
 
   return <Canvas canvasId={canvasId} />;

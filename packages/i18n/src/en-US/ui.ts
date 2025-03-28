@@ -2251,6 +2251,9 @@ const translations = {
       createSuccess: 'Create successfully',
       editSuccess: 'Edit successfully',
       removeItemsSuccess: 'Removed selected resources',
+      addCanvas: 'Add Canvas',
+      createCanvas: 'Create New Canvas',
+      addExistingCanvas: 'Add Existing Canvas',
     },
     addSources: {
       title: 'Add Sources',

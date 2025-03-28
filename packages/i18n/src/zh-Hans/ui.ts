@@ -2188,6 +2188,9 @@ const translations = {
       createSuccess: '创建成功',
       editSuccess: '编辑成功',
       removeItemsSuccess: '已移除所选资源',
+      addCanvas: '添加画布',
+      createCanvas: '新建画布',
+      addExistingCanvas: '添加已有画布',
     },
     addSources: {
       title: '添加资源',

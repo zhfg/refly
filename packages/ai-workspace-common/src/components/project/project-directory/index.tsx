@@ -25,7 +25,6 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  console.log('projectId', projectId);
   const {
     data: projectDetail,
     refetch,
@@ -82,7 +81,13 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
             setProjectData({ ...projectData, ...data });
           }}
         />
-        <CanvasMenu canvasList={canvases} />
+        <CanvasMenu
+          canvasList={canvases}
+          projectId={projectId}
+          onUpdatedCanvasList={() => {
+            refetch();
+          }}
+        />
         <SourcesMenu
           isFetching={isFetching}
           sourceList={mergedSources as sourceObject[]}

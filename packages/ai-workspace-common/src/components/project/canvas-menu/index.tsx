@@ -1,19 +1,62 @@
 import { useState, useCallback } from 'react';
 import { Canvas } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { Collapse, Button, List, Empty, Typography } from 'antd';
+import { Collapse, Button, List, Empty, Typography, Dropdown } from 'antd';
 import {
   IconMoreHorizontal,
   IconCanvas,
   IconPlus,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { iconClassName } from '@refly-packages/ai-workspace-common/components/project/project-directory';
+import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 import cn from 'classnames';
 
 const { Text } = Typography;
 
-export const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
+const AddCanvasDropdown = ({ debouncedCreateCanvas }: { debouncedCreateCanvas: () => void }) => {
   const { t } = useTranslation();
+
+  const items = [
+    {
+      key: 'createCanvas',
+      label: t('project.action.createCanvas'),
+      onClick: () => {
+        debouncedCreateCanvas();
+      },
+    },
+    {
+      key: 'addExistingCanvas',
+      label: t('project.action.addExistingCanvas'),
+      onClick: () => {
+        console.log('addExistingCanvas');
+      },
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }}>
+      <Button
+        type="default"
+        size="small"
+        className="text-xs text-gray-600"
+        icon={<IconPlus size={12} className="flex items-center justify-center" />}
+      >
+        {t('project.action.addCanvas')}
+      </Button>
+    </Dropdown>
+  );
+};
+
+export const CanvasMenu = ({
+  canvasList,
+  projectId,
+  onUpdatedCanvasList,
+}: { canvasList: Canvas[]; projectId: string; onUpdatedCanvasList?: () => void }) => {
+  const { t } = useTranslation();
+  const { debouncedCreateCanvas, isCreating: createCanvasLoading } = useCreateCanvas({
+    projectId,
+    afterCreateSuccess: onUpdatedCanvasList,
+  });
 
   const [hoveredCanvasId, setHoveredCanvasId] = useState<string | null>(null);
 
@@ -22,7 +65,7 @@ export const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
   }, []);
 
   const handleAddCanvas = () => {
-    console.log('handleAddCanvas');
+    debouncedCreateCanvas();
   };
 
   return (
@@ -41,6 +84,7 @@ export const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
                 <Button
                   type="text"
                   className="flex items-center justify-start mb-2 mx-3 !text-green-600"
+                  loading={createCanvasLoading}
                   icon={<IconPlus className={cn(iconClassName)} />}
                   onClick={handleAddCanvas}
                 >
@@ -62,15 +106,7 @@ export const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
                         }}
                         description={t('common.empty')}
                       >
-                        <Button
-                          type="default"
-                          size="small"
-                          className="text-xs text-gray-600"
-                          icon={<IconPlus size={12} className="flex items-center justify-center" />}
-                          onClick={handleAddCanvas}
-                        >
-                          {t('loggedHomePage.siderMenu.newCanvas')}
-                        </Button>
+                        <AddCanvasDropdown debouncedCreateCanvas={debouncedCreateCanvas} />
                       </Empty>
                     ),
                   }}
@@ -84,7 +120,7 @@ export const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
                         <div className="flex items-center gap-2">
                           <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
                           <Text className="w-[120px] text-[13px] text-gray-700 truncate">
-                            {item.title}
+                            {item.title || t('common.untitled')}
                           </Text>
                         </div>
                         <div
