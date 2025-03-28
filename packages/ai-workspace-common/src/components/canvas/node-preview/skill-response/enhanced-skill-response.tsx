@@ -46,6 +46,12 @@ export const EnhancedSkillResponse = memo(
     const [runtimeConfig, setRuntimeConfig] = useState<SkillRuntimeConfig>({});
     const [tplConfig, setTplConfig] = useState<SkillTemplateConfig | undefined>();
 
+    // Extract the last message resultId for context updates
+    const lastMessageResultId = useMemo(() => {
+      const lastMessage = messages?.[messages.length - 1];
+      return lastMessage?.resultId;
+    }, [messages]);
+
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
     const retryTimeoutRef = useRef<NodeJS.Timeout>();
@@ -61,7 +67,7 @@ export const EnhancedSkillResponse = memo(
     const { addNode } = useAddNode();
 
     const { debouncedUpdateContextItems } = useContextUpdateByResultId({
-      resultId,
+      resultId: lastMessageResultId ?? resultId,
       setContextItems,
     });
 
@@ -143,6 +149,13 @@ export const EnhancedSkillResponse = memo(
         }, 100);
       }
     }, [messages]);
+
+    // Update context when lastMessageResultId changes
+    useEffect(() => {
+      if (lastMessageResultId) {
+        debouncedUpdateContextItems();
+      }
+    }, [lastMessageResultId, debouncedUpdateContextItems]);
 
     // Handler for image upload - memoized to prevent recreation on each render
     const handleImageUpload = useCallback(async (file: File) => {
@@ -280,7 +293,10 @@ export const EnhancedSkillResponse = memo(
           runtimeConfig={runtimeConfig}
           setRuntimeConfig={setRuntimeConfig}
           tplConfig={tplConfig}
-          setTplConfig={setTplConfig}
+          setTplConfig={(config) => {
+            setTplConfig(config);
+            console.log('tplConfig', config);
+          }}
           handleSendMessage={handleSendMessage}
           handleAbortAction={abortAction}
           handleUploadImage={handleImageUpload}
