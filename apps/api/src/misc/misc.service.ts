@@ -17,6 +17,7 @@ import {
   UploadResponse,
   User,
   FileVisibility,
+  Entity,
 } from '@refly-packages/openapi-schema';
 import { PrismaService } from '@/common/prisma.service';
 import { MINIO_EXTERNAL, MINIO_INTERNAL, MinioService } from '@/common/minio.service';
@@ -218,8 +219,24 @@ export class MiscService implements OnModuleInit {
     }
   }
 
-  generateFileURL(object: FileObject, options?: { download?: boolean }) {
-    const { visibility, storageKey } = object;
+  async findFileAndBindEntity(storageKey: string, entity: Entity) {
+    const staticFile = await this.prisma.staticFile.findFirst({
+      where: { storageKey, deletedAt: null },
+    });
+    if (!staticFile) {
+      return null;
+    }
+    return this.prisma.staticFile.update({
+      where: { pk: staticFile.pk },
+      data: {
+        entityId: entity.entityId,
+        entityType: entity.entityType,
+      },
+    });
+  }
+
+  generateFileURL(file: FileObject, options?: { download?: boolean }) {
+    const { visibility, storageKey } = file;
 
     let endpoint = '';
     if (visibility === 'public') {
