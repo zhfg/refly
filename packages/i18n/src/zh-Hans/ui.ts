@@ -2188,6 +2188,10 @@ const translations = {
       createSuccess: '创建成功',
       editSuccess: '编辑成功',
     },
+    addSources: {
+      title: '添加资源',
+      selectAll: '全选',
+    },
   },
 };
 

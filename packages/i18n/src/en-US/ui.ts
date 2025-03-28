@@ -2251,6 +2251,10 @@ const translations = {
       createSuccess: 'Create successfully',
       editSuccess: 'Edit successfully',
     },
+    addSources: {
+      title: 'Add Sources',
+      selectAll: 'Select All',
+    },
   },
 };
 

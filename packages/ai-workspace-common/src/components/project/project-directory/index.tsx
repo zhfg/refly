@@ -11,6 +11,7 @@ import {
   message,
   Input,
   Empty,
+  Skeleton,
 } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -32,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { useGetProjectDetail } from '@refly-packages/ai-workspace-common/queries';
 import { Canvas, Project, Document, Resource } from '@refly/openapi-schema';
+import { AddSources } from '@refly-packages/ai-workspace-common/components/project/add-sources';
 
 const { Text, Paragraph } = Typography;
 
@@ -178,8 +180,11 @@ const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
                   locale={{
                     emptyText: (
                       <Empty
-                        className="text-xs my-2"
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        className="text-xs my-2 "
+                        image={null}
+                        imageStyle={{
+                          display: 'none',
+                        }}
                         description={t('common.empty')}
                       >
                         <Button
@@ -237,15 +242,25 @@ const CanvasMenu = ({ canvasList }: { canvasList: Canvas[] }) => {
 };
 
 // Sources菜单组件
-const SourcesMenu = ({ sourcesList }: { sourcesList?: Array<Document | Resource> }) => {
+const SourcesMenu = ({
+  sourceList,
+  projectId,
+  onUpdatedItems,
+  isFetching,
+}: {
+  sourceList?: Array<Document | Resource>;
+  projectId: string;
+  onUpdatedItems?: () => void;
+  isFetching: boolean;
+}) => {
   const { t } = useTranslation();
-  // 使用传入的 sourcesList 或默认空数组
-  const [sourceList] = useState(sourcesList || []);
+
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [addSourcesVisible, setAddSourcesVisible] = useState(false);
 
   const handleSourceHover = (id: string | null) => {
     if (!isMultiSelectMode) {
@@ -292,7 +307,7 @@ const SourcesMenu = ({ sourcesList }: { sourcesList?: Array<Document | Resource>
   }, [searchValue, sourceList]);
 
   const handleAddSource = () => {
-    console.log('handleAddSource');
+    setAddSourcesVisible(true);
   };
 
   const headerActions = useMemo(() => {
@@ -365,14 +380,11 @@ const SourcesMenu = ({ sourcesList }: { sourcesList?: Array<Document | Resource>
     handleAddSource,
   ]);
 
-  // 获取每个项目的 ID
   const getItemId = useCallback((item: Document | Resource) => {
     return 'docId' in item ? item.docId : item.resourceId;
   }, []);
 
-  // 获取每个项目的图标
   const getItemIcon = useCallback((item: Document | Resource) => {
-    // 根据类型返回不同的图标
     return 'docId' in item ? (
       <IconCanvas className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 flex items-center justify-center" />
     ) : (
@@ -402,82 +414,101 @@ const SourcesMenu = ({ sourcesList }: { sourcesList?: Array<Document | Resource>
                   {headerActions}
                 </div>
                 <div className="flex-grow overflow-y-auto px-3">
-                  <List
-                    itemLayout="horizontal"
-                    split={false}
-                    dataSource={filteredSourceList}
-                    locale={{
-                      emptyText: (
-                        <Empty
-                          className="text-xs my-2"
-                          image={Empty.PRESENTED_IMAGE_SIMPLE}
-                          description={t('common.empty')}
-                        >
-                          <Button
-                            size="small"
-                            type="default"
-                            className="text-xs"
-                            icon={
-                              <IconPlus size={12} className="flex items-center justify-center" />
-                            }
-                            onClick={handleAddSource}
+                  {isFetching ? (
+                    <div className="flex justify-center h-full pt-4">
+                      <Skeleton active paragraph={{ rows: 8 }} title={false} />
+                    </div>
+                  ) : (
+                    <List
+                      itemLayout="horizontal"
+                      split={false}
+                      dataSource={filteredSourceList}
+                      locale={{
+                        emptyText: (
+                          <Empty
+                            className="text-xs my-2"
+                            imageStyle={{
+                              display: 'none',
+                            }}
+                            image={null}
+                            description={t('common.empty')}
                           >
-                            {t('project.addSource')}
-                          </Button>
-                        </Empty>
-                      ),
-                    }}
-                    renderItem={(item) => {
-                      const itemId = getItemId(item);
-                      return (
-                        <List.Item
-                          className={cn(
-                            '!py-2 !pl-1 !pr-2 my-1 rounded-md hover:bg-gray-50 cursor-pointer relative group',
-                            selectedSources.includes(itemId) && 'bg-gray-50',
-                          )}
-                          onMouseEnter={() => handleSourceHover(itemId)}
-                          onMouseLeave={() => handleSourceHover(null)}
-                        >
-                          <div className="flex items-center gap-1 w-full">
-                            <div
-                              className="flex items-center gap-1.5 flex-grow"
-                              onClick={() => toggleSourceSelection(itemId)}
+                            <Button
+                              size="small"
+                              type="default"
+                              className="text-xs"
+                              icon={
+                                <IconPlus size={12} className="flex items-center justify-center" />
+                              }
+                              onClick={handleAddSource}
                             >
-                              {getItemIcon(item)}
-                              <Text
-                                className="text-[13px] w-[120px] text-gray-700"
-                                ellipsis={{
-                                  tooltip: true,
-                                }}
+                              {t('project.addSource')}
+                            </Button>
+                          </Empty>
+                        ),
+                      }}
+                      renderItem={(item) => {
+                        const itemId = getItemId(item);
+                        return (
+                          <List.Item
+                            className={cn(
+                              '!py-2 !pl-1 !pr-2 my-1 rounded-md hover:bg-gray-50 cursor-pointer relative group',
+                              selectedSources.includes(itemId) && 'bg-gray-50',
+                            )}
+                            onMouseEnter={() => handleSourceHover(itemId)}
+                            onMouseLeave={() => handleSourceHover(null)}
+                          >
+                            <div className="flex items-center gap-1 w-full">
+                              <div
+                                className="flex items-center gap-1.5 flex-grow"
+                                onClick={() => toggleSourceSelection(itemId)}
                               >
-                                {item.title}
-                              </Text>
+                                {getItemIcon(item)}
+                                <Text
+                                  className="text-[13px] w-[120px] text-gray-700"
+                                  ellipsis={{
+                                    tooltip: true,
+                                  }}
+                                >
+                                  {item.title}
+                                </Text>
+                              </div>
+                              <div
+                                className={cn(
+                                  'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
+                                  isMultiSelectMode || hoveredSourceId === itemId
+                                    ? 'opacity-100'
+                                    : 'opacity-0',
+                                )}
+                              >
+                                <Checkbox
+                                  checked={selectedSources.includes(itemId)}
+                                  onChange={() => toggleSourceSelection(itemId)}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
+                              </div>
                             </div>
-                            <div
-                              className={cn(
-                                'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
-                                isMultiSelectMode || hoveredSourceId === itemId
-                                  ? 'opacity-100'
-                                  : 'opacity-0',
-                              )}
-                            >
-                              <Checkbox
-                                checked={selectedSources.includes(itemId)}
-                                onChange={() => toggleSourceSelection(itemId)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                              <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
-                            </div>
-                          </div>
-                        </List.Item>
-                      );
-                    }}
-                  />
+                          </List.Item>
+                        );
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             ),
           },
         ]}
+      />
+
+      <AddSources
+        visible={addSourcesVisible}
+        setVisible={setAddSourcesVisible}
+        projectId={projectId}
+        existingItems={sourceList?.map((item) => getItemId(item)) || []}
+        onSuccess={() => {
+          onUpdatedItems();
+        }}
       />
     </div>
   );
@@ -494,7 +525,11 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     setCollapse: state.setCollapse,
   }));
   console.log('projectId', projectId);
-  const { data: projectDetail } = useGetProjectDetail({ query: { projectId } }, null, {
+  const {
+    data: projectDetail,
+    refetch,
+    isFetching,
+  } = useGetProjectDetail({ query: { projectId } }, null, {
     enabled: !!projectId,
   });
   const data = projectDetail?.data;
@@ -503,20 +538,16 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   const documents = data?.documents || [];
   const resources = data?.resources || [];
 
-  // 混合并排序 documents 和 resources 数组
   const mergedSources = useMemo(() => {
-    // 确保 documents 和 resources 存在
     const docs = documents || [];
     const res = resources || [];
 
-    // 合并两个数组
     const merged = [...docs, ...res];
 
-    // 根据 updatedAt 排序，最新的放在前面
     return merged.sort((a, b) => {
       const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0;
       const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-      return dateB - dateA; // 降序排列
+      return dateB - dateA;
     });
   }, [documents, resources]);
 
@@ -543,7 +574,14 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           }}
         />
         <CanvasMenu canvasList={canvases} />
-        <SourcesMenu sourcesList={mergedSources} />
+        <SourcesMenu
+          isFetching={isFetching}
+          sourceList={mergedSources}
+          projectId={projectId}
+          onUpdatedItems={() => {
+            refetch();
+          }}
+        />
       </div>
     </Layout.Sider>
   );
