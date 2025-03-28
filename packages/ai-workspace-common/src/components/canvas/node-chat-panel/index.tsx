@@ -159,11 +159,27 @@ export const ChatPanel = memo(
     const userProfile = useUserStoreShallow((state) => state.userProfile);
     const isList = mode === 'list';
 
+    // Reset form when skill changes
+    useEffect(() => {
+      if (selectedSkill) {
+        form.resetFields();
+        setFormErrors({});
+      }
+    }, [selectedSkill, form, setFormErrors]);
+
+    // Memoize initialTplConfig to prevent unnecessary recalculations
+    const initialTplConfig = useMemo(() => {
+      return tplConfig || selectedSkill?.tplConfig || {};
+    }, [tplConfig, selectedSkill?.tplConfig]);
+
     const handleTplConfigChange = useCallback(
       (config: SkillTemplateConfig) => {
-        setTplConfig?.(config);
+        if (setTplConfig && JSON.stringify(config) !== JSON.stringify(initialTplConfig)) {
+          console.log('Config changed:', { old: initialTplConfig, new: config });
+          setTplConfig(config);
+        }
       },
-      [setTplConfig],
+      [setTplConfig, initialTplConfig],
     );
 
     const handleImageUpload = useCallback(
@@ -200,14 +216,18 @@ export const ChatPanel = memo(
       if (!selectedSkill?.configSchema?.items?.length || !setTplConfig) {
         return null;
       }
+
+      // Create a stable key based on skill and config content
+      const configKey = `${selectedSkill?.name}-${Object.keys(initialTplConfig).length}`;
+
       return (
         <ConfigManager
-          key={selectedSkill?.name}
+          key={configKey}
           form={form}
           formErrors={formErrors}
           setFormErrors={setFormErrors}
           schema={selectedSkill?.configSchema}
-          tplConfig={tplConfig}
+          tplConfig={initialTplConfig}
           fieldPrefix="tplConfig"
           configScope="runtime"
           onExpandChange={(_expanded) => {
@@ -225,7 +245,7 @@ export const ChatPanel = memo(
           onFormValuesChange={(_, allValues) => {
             // Debounce form value changes to prevent cascading updates
             const newConfig = allValues.tplConfig;
-            if (JSON.stringify(newConfig) !== JSON.stringify(tplConfig)) {
+            if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
               handleTplConfigChange(newConfig);
             }
           }}
@@ -237,7 +257,7 @@ export const ChatPanel = memo(
       selectedSkill?.tplConfig,
       form,
       formErrors,
-      tplConfig,
+      initialTplConfig,
       setTplConfig,
       onInputHeightChange,
       handleTplConfigChange,

@@ -252,9 +252,8 @@ export const SkillNode = memo(
         selectedSkill,
         modelInfo,
         runtimeConfig,
+        tplConfig,
       } = data?.metadata ?? {};
-
-      const tplConfig = form.getFieldValue('tplConfig');
 
       deleteElements({ nodes: [node] });
 

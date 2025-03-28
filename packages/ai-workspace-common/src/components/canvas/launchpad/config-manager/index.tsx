@@ -316,19 +316,20 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     return formErrors?.[field];
   };
 
+  console.log('tplConfig', tplConfig);
+
   // Handle initial setup - only run on mount and when tplConfig changes significantly
   useEffect(() => {
     // Skip if already initialized with this config
-    if (
-      initializedRef.current &&
-      JSON.stringify(prevTplConfigRef.current) === JSON.stringify(tplConfig)
-    ) {
+    if (initializedRef.current) {
       return;
     }
 
+    console.log('Initializing ConfigManager with tplConfig:', tplConfig);
+
     // Track this initialization
     initializedRef.current = true;
-    prevTplConfigRef.current = tplConfig;
+    prevTplConfigRef.current = tplConfig ? { ...tplConfig } : undefined;
 
     // Create a map for form updates
     const formUpdates = {};
@@ -339,7 +340,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     if (!tplConfig || Object.keys(tplConfig).length === 0) {
       // Setup default values from schema
       for (const item of schema.items || []) {
-        if (item.defaultValue !== undefined) {
+        if (item.defaultValue !== undefined && item.key) {
           const field = getFormField(fieldPrefix, item.key);
           const value = {
             value: item.defaultValue,
@@ -348,27 +349,26 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           };
 
           formUpdates[field] = value;
-
-          const key = item.key;
-          if (key) {
-            newFormValues[key] = value;
-          }
+          newFormValues[item.key] = value;
         }
       }
     } else {
       // Use provided tplConfig
       for (const [key, value] of Object.entries(tplConfig)) {
-        const field = getFormField(fieldPrefix, key);
-        formUpdates[field] = value;
-        newFormValues[key] = value as DynamicConfigValue;
+        if (value !== undefined) {
+          const field = getFormField(fieldPrefix, key);
+          formUpdates[field] = value;
+          newFormValues[key] = value as DynamicConfigValue;
+        }
       }
     }
 
-    // Update form state outside of React's rendering cycle
-    safeFormUpdate(form, formUpdates);
+    // Only update if we have changes to make
+    if (Object.keys(formUpdates).length > 0) {
+      // Update form state outside of React's rendering cycle
+      safeFormUpdate(form, formUpdates);
 
-    // Update component state
-    if (Object.keys(newFormValues).length > 0) {
+      // Update component state
       setFormValues(newFormValues);
     }
 
@@ -452,11 +452,24 @@ export const ConfigManager = (props: ConfigManagerProps) => {
         <Form
           form={form}
           className="config-manager__form"
-          onValuesChange={(changedValues, _allValues) => {
+          onValuesChange={(changedValues, allValues) => {
+            // Validate any changed fields
             for (const field of Object.keys(changedValues)) {
               validateField(field, changedValues[field]);
             }
-            onFormValuesChange?.(changedValues, _allValues);
+
+            // Handle config updates
+            if (allValues.tplConfig && onFormValuesChange) {
+              const newConfig = allValues.tplConfig;
+
+              // Deep comparison with current tplConfig
+              const currentConfigStr = JSON.stringify(tplConfig || {});
+              const newConfigStr = JSON.stringify(newConfig);
+
+              if (currentConfigStr !== newConfigStr) {
+                onFormValuesChange(changedValues, allValues);
+              }
+            }
           }}
         >
           <Space direction="vertical" style={{ width: '100%' }}>

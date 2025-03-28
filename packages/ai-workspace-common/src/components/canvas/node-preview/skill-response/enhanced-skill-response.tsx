@@ -55,6 +55,8 @@ export const EnhancedSkillResponse = memo(
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
     const retryTimeoutRef = useRef<NodeJS.Timeout>();
+    const isInitializedRef = useRef(false);
+    const prevTplConfigRef = useRef<SkillTemplateConfig | undefined>();
     const contentHeight = useMemo(
       () => (messages.length === 0 ? 'auto' : '300px'),
       [messages.length],
@@ -117,11 +119,23 @@ export const EnhancedSkillResponse = memo(
           setMessages(initialMessages);
 
           // Initialize ChatPanel state from node data if available
-          if (node?.data?.metadata) {
+          if (node?.data?.metadata && !isInitializedRef.current) {
+            isInitializedRef.current = true;
             const metadata = node.data.metadata as any;
+
             if (metadata.selectedSkill?.name) setSelectedSkillName(metadata.selectedSkill.name);
             if (metadata.modelInfo) setModelInfo(metadata.modelInfo);
-            if (metadata.tplConfig) setTplConfig(metadata.tplConfig);
+
+            // Preserve tplConfig stability
+            if (
+              metadata.tplConfig &&
+              (!prevTplConfigRef.current ||
+                JSON.stringify(metadata.tplConfig) !== JSON.stringify(prevTplConfigRef.current))
+            ) {
+              prevTplConfigRef.current = metadata.tplConfig;
+              setTplConfig(metadata.tplConfig);
+            }
+
             if (metadata.runtimeConfig) setRuntimeConfig(metadata.runtimeConfig);
           }
 
@@ -141,6 +155,13 @@ export const EnhancedSkillResponse = memo(
         }
       };
     }, [resultId, node, getNodes, getEdges, findThreadHistory, debouncedUpdateContextItems]);
+
+    // When tplConfig changes, update the ref
+    useEffect(() => {
+      if (tplConfig && JSON.stringify(tplConfig) !== JSON.stringify(prevTplConfigRef.current)) {
+        prevTplConfigRef.current = tplConfig;
+      }
+    }, [tplConfig]);
 
     // Scroll to bottom effect
     useEffect(() => {
@@ -284,6 +305,25 @@ export const EnhancedSkillResponse = memo(
       setQuery(newQuery);
     }, []);
 
+    // Memoized function to handle tplConfig changes for stability
+    const handleSetTplConfig = useCallback(
+      (config: SkillTemplateConfig) => {
+        // Only update if the config has actually changed
+        if (
+          !prevTplConfigRef.current ||
+          JSON.stringify(prevTplConfigRef.current) !== JSON.stringify(config)
+        ) {
+          console.log('EnhancedSkillResponse updating tplConfig', {
+            old: prevTplConfigRef.current,
+            new: config,
+          });
+          prevTplConfigRef.current = config;
+          setTplConfig(config);
+        }
+      },
+      [setTplConfig],
+    );
+
     // Memoize the ChatPanel component to prevent unnecessary re-renders
     const chatPanelComponent = useMemo(
       () => (
@@ -302,8 +342,11 @@ export const EnhancedSkillResponse = memo(
           setRuntimeConfig={setRuntimeConfig}
           tplConfig={tplConfig}
           setTplConfig={(config) => {
-            setTplConfig(config);
-            console.log('tplConfig', config);
+            console.log('EnhancedSkillResponse setting tplConfig', {
+              old: tplConfig,
+              new: config,
+            });
+            handleSetTplConfig(config);
           }}
           handleSendMessage={handleSendMessage}
           handleAbortAction={abortAction}
@@ -327,7 +370,7 @@ export const EnhancedSkillResponse = memo(
         runtimeConfig,
         setRuntimeConfig,
         tplConfig,
-        setTplConfig,
+        handleSetTplConfig,
         handleSendMessage,
         abortAction,
         handleImageUpload,
