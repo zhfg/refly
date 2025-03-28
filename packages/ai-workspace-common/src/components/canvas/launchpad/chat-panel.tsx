@@ -368,6 +368,42 @@ export const ChatPanel = ({
     contextItems,
   ]);
 
+  // Memoize the config manager component to prevent unnecessary re-renders
+  const configManagerComponent = useMemo(() => {
+    if (!selectedSkill?.configSchema?.items?.length) {
+      return null;
+    }
+
+    return (
+      <ConfigManager
+        key={selectedSkill?.name}
+        form={form}
+        formErrors={formErrors}
+        setFormErrors={setFormErrors}
+        schema={selectedSkill?.configSchema}
+        fieldPrefix="tplConfig"
+        configScope="runtime"
+        resetConfig={() => {
+          if (selectedSkill?.tplConfig) {
+            form.setFieldValue('tplConfig', selectedSkill.tplConfig);
+          } else {
+            const defaultConfig = {};
+            for (const item of selectedSkill?.configSchema?.items || []) {
+              if (item.defaultValue !== undefined) {
+                defaultConfig[item.key] = {
+                  value: item.defaultValue,
+                  label: item.labelDict?.en ?? item.key,
+                  displayValue: String(item.defaultValue),
+                };
+              }
+            }
+            form.setFieldValue('tplConfig', defaultConfig);
+          }
+        }}
+      />
+    );
+  }, [selectedSkill, form, formErrors, setFormErrors]);
+
   return (
     <div className="relative w-full" data-cy="launchpad-chat-panel">
       <div
@@ -386,34 +422,7 @@ export const ChatPanel = ({
           {contextManagerComponent}
           <div>{chatInputComponent}</div>
 
-          {selectedSkill?.configSchema?.items?.length > 0 && (
-            <ConfigManager
-              key={selectedSkill?.name}
-              form={form}
-              formErrors={formErrors}
-              setFormErrors={setFormErrors}
-              schema={selectedSkill?.configSchema}
-              fieldPrefix="tplConfig"
-              configScope="runtime"
-              resetConfig={() => {
-                if (selectedSkill?.tplConfig) {
-                  form.setFieldValue('tplConfig', selectedSkill.tplConfig);
-                } else {
-                  const defaultConfig = {};
-                  for (const item of selectedSkill?.configSchema?.items || []) {
-                    if (item.defaultValue !== undefined) {
-                      defaultConfig[item.key] = {
-                        value: item.defaultValue,
-                        label: item.labelDict?.en ?? item.key,
-                        displayValue: String(item.defaultValue),
-                      };
-                    }
-                  }
-                  form.setFieldValue('tplConfig', defaultConfig);
-                }
-              }}
-            />
-          )}
+          {configManagerComponent}
 
           {chatActionsComponent}
         </div>

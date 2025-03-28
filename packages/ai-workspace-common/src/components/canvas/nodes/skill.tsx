@@ -375,6 +375,7 @@ export const SkillNode = memo(
             }
 
             <ChatPanel
+              mode="node"
               readonly={readonly}
               query={localQuery}
               setQuery={setQuery}

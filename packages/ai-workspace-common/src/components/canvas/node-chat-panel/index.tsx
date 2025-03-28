@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Form } from '@arco-design/web-react';
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
@@ -11,6 +11,61 @@ import { ContextManager } from '@refly-packages/ai-workspace-common/components/c
 import { ConfigManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/config-manager';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useTranslation } from 'react-i18next';
+import { IoClose } from 'react-icons/io5';
+import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+import { cn } from '@refly-packages/utils/cn';
+import classNames from 'classnames';
+
+// Memoized Premium Banner Component
+const PremiumBanner = memo(() => {
+  const { t } = useTranslation();
+  const { showPremiumBanner, setShowPremiumBanner } = useLaunchpadStoreShallow((state) => ({
+    showPremiumBanner: state.showPremiumBanner,
+    setShowPremiumBanner: state.setShowPremiumBanner,
+  }));
+  const setSubscribeModalVisible = useSubscriptionStoreShallow(
+    (state) => state.setSubscribeModalVisible,
+  );
+
+  if (!showPremiumBanner) return null;
+
+  const handleUpgrade = () => {
+    setSubscribeModalVisible(true);
+  };
+
+  return (
+    <div className="flex items-center justify-between px-3 py-0.5 bg-gray-100 border-b">
+      <div className="flex items-center justify-between gap-2 w-full">
+        <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">
+          {t('copilot.premiumBanner.message')}
+        </span>
+        <div className="flex items-center gap-0.5">
+          <Button
+            type="text"
+            size="small"
+            className="text-xs text-green-600 px-2"
+            onClick={handleUpgrade}
+          >
+            {t('copilot.premiumBanner.upgrade')}
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            icon={<IoClose size={14} className="flex items-center justify-center" />}
+            onClick={() => setShowPremiumBanner(false)}
+            className="text-gray-400 hover:text-gray-500 flex items-center justify-center w-5 h-5 min-w-0 p-0"
+          />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+PremiumBanner.displayName = 'PremiumBanner';
 
 // Memoized Header Component
 const NodeHeader = memo(
@@ -73,6 +128,7 @@ export interface ChatPanelProps {
   handleUploadImage: (file: File) => Promise<any>;
   onInputHeightChange?: () => void;
   className?: string;
+  mode?: 'node' | 'list'; // Added mode prop to differentiate between node and list display
 }
 
 export const ChatPanel = memo(
@@ -95,10 +151,13 @@ export const ChatPanel = memo(
     handleUploadImage,
     onInputHeightChange,
     className = '',
+    mode = 'node', // Default to node mode
   }: ChatPanelProps) => {
     const [form] = Form.useForm();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const chatInputRef = useRef<HTMLDivElement>(null);
+    const userProfile = useUserStoreShallow((state) => state.userProfile);
+    const isList = mode === 'list';
 
     const handleTplConfigChange = useCallback(
       (config: SkillTemplateConfig) => {
@@ -137,16 +196,59 @@ export const ChatPanel = memo(
       }
     }, [readonly]);
 
-    return (
-      <div className={`flex flex-col gap-3 h-full p-3 box-border ${className}`}>
-        <NodeHeader
-          readonly={readonly}
-          selectedSkillName={selectedSkill?.name}
-          setSelectedSkill={setSelectedSkill}
+    const configManagerComponent = useMemo(() => {
+      if (!selectedSkill?.configSchema?.items?.length || !setTplConfig) {
+        return null;
+      }
+      return (
+        <ConfigManager
+          key={selectedSkill?.name}
+          form={form}
+          formErrors={formErrors}
+          setFormErrors={setFormErrors}
+          schema={selectedSkill?.configSchema}
+          tplConfig={tplConfig}
+          fieldPrefix="tplConfig"
+          configScope="runtime"
+          onExpandChange={(_expanded) => {
+            if (onInputHeightChange) {
+              setTimeout(onInputHeightChange, 0);
+            }
+          }}
+          resetConfig={() => {
+            // Use setTimeout to move outside of React's render cycle
+            setTimeout(() => {
+              const defaultConfig = selectedSkill?.tplConfig ?? {};
+              form.setFieldValue('tplConfig', defaultConfig);
+            }, 0);
+          }}
+          onFormValuesChange={(_, allValues) => {
+            // Debounce form value changes to prevent cascading updates
+            const newConfig = allValues.tplConfig;
+            if (JSON.stringify(newConfig) !== JSON.stringify(tplConfig)) {
+              handleTplConfigChange(newConfig);
+            }
+          }}
         />
+      );
+    }, [
+      selectedSkill?.configSchema,
+      selectedSkill?.name,
+      selectedSkill?.tplConfig,
+      form,
+      formErrors,
+      tplConfig,
+      setTplConfig,
+      onInputHeightChange,
+      handleTplConfigChange,
+    ]);
 
+    const renderContent = () => (
+      <>
         <ContextManager
-          className="px-0.5"
+          className={classNames({
+            'py-2': isList,
+          })}
           contextItems={contextItems}
           setContextItems={setContextItems}
         />
@@ -171,32 +273,12 @@ export const ChatPanel = memo(
           onUploadImage={handleImageUpload}
         />
 
-        {selectedSkill?.configSchema?.items?.length > 0 && setTplConfig && (
-          <ConfigManager
-            key={selectedSkill?.name}
-            form={form}
-            formErrors={formErrors}
-            setFormErrors={setFormErrors}
-            schema={selectedSkill?.configSchema}
-            tplConfig={tplConfig}
-            fieldPrefix="tplConfig"
-            configScope="runtime"
-            onExpandChange={(_expanded) => {
-              if (onInputHeightChange) {
-                setTimeout(onInputHeightChange, 0);
-              }
-            }}
-            resetConfig={() => {
-              const defaultConfig = selectedSkill?.tplConfig ?? {};
-              form.setFieldValue('tplConfig', defaultConfig);
-            }}
-            onFormValuesChange={(_, allValues) => {
-              handleTplConfigChange(allValues.tplConfig);
-            }}
-          />
-        )}
+        {configManagerComponent}
 
         <ChatActions
+          className={classNames({
+            'py-2': isList,
+          })}
           query={query}
           model={modelInfo}
           setModel={setModelInfo}
@@ -207,6 +289,38 @@ export const ChatPanel = memo(
           runtimeConfig={runtimeConfig}
           setRuntimeConfig={setRuntimeConfig}
         />
+      </>
+    );
+
+    if (isList) {
+      return (
+        <div className="relative w-full p-2" data-cy="launchpad-chat-panel">
+          <div
+            className={cn(
+              'ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden',
+              'border border-gray-100 border-solid',
+            )}
+          >
+            <SelectedSkillHeader
+              skill={selectedSkill}
+              setSelectedSkill={setSelectedSkill}
+              onClose={() => setSelectedSkill(null)}
+            />
+            {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
+            <div className={cn('px-3')}>{renderContent()}</div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`flex flex-col gap-3 h-full p-3 box-border ${className}`}>
+        <NodeHeader
+          readonly={readonly}
+          selectedSkillName={selectedSkill?.name}
+          setSelectedSkill={setSelectedSkill}
+        />
+        {renderContent()}
       </div>
     );
   },

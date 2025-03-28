@@ -131,7 +131,7 @@ export const EnhancedSkillResponse = memo(
           clearTimeout(retryTimeoutRef.current);
         }
       };
-    }, [resultId, node, getNodes, getEdges, findThreadHistory]);
+    }, [resultId, node, getNodes, getEdges, findThreadHistory, debouncedUpdateContextItems]);
 
     // Scroll to bottom effect
     useEffect(() => {
@@ -144,7 +144,7 @@ export const EnhancedSkillResponse = memo(
       }
     }, [messages]);
 
-    // Handler for image upload
+    // Handler for image upload - memoized to prevent recreation on each render
     const handleImageUpload = useCallback(async (file: File) => {
       // Mock implementation - in a real app, this would upload the image and return data
       const mockImageData = {
@@ -160,7 +160,7 @@ export const EnhancedSkillResponse = memo(
       return mockImageData;
     }, []);
 
-    // Handler for send message - Fixed to properly clear the query
+    // Handler for send message - memoized for stability
     const handleSendMessage = useCallback(() => {
       if (!canvasId || !query.trim()) return;
 
@@ -253,50 +253,75 @@ export const EnhancedSkillResponse = memo(
       addNode,
     ]);
 
-    // Handler for setting selected skill
+    // Handler for setting selected skill - memoized to ensure referential stability
     const handleSetSelectedSkill = useCallback((skill: Skill | null) => {
       setSelectedSkillName(skill?.name);
     }, []);
 
-    // Custom wrapper for setQuery to ensure updates are reflected
+    // Memoized query setter to prevent unnecessary re-renders
     const handleSetQuery = useCallback((newQuery: string) => {
       setQuery(newQuery);
     }, []);
+
+    // Memoize the ChatPanel component to prevent unnecessary re-renders
+    const chatPanelComponent = useMemo(
+      () => (
+        <ChatPanel
+          mode="list"
+          readonly={readonly}
+          query={query}
+          setQuery={handleSetQuery}
+          selectedSkill={selectedSkill}
+          setSelectedSkill={handleSetSelectedSkill}
+          contextItems={contextItems}
+          setContextItems={setContextItems}
+          modelInfo={modelInfo}
+          setModelInfo={setModelInfo}
+          runtimeConfig={runtimeConfig}
+          setRuntimeConfig={setRuntimeConfig}
+          tplConfig={tplConfig}
+          setTplConfig={setTplConfig}
+          handleSendMessage={handleSendMessage}
+          handleAbortAction={abortAction}
+          handleUploadImage={handleImageUpload}
+          onInputHeightChange={() => {
+            // Adjust container height if needed
+          }}
+          className="w-full"
+        />
+      ),
+      [
+        readonly,
+        query,
+        handleSetQuery,
+        selectedSkill,
+        handleSetSelectedSkill,
+        contextItems,
+        setContextItems,
+        modelInfo,
+        setModelInfo,
+        runtimeConfig,
+        setRuntimeConfig,
+        tplConfig,
+        setTplConfig,
+        handleSendMessage,
+        abortAction,
+        handleImageUpload,
+      ],
+    );
+
+    // Memoize the LinearThreadContent component
+    const threadContentComponent = useMemo(
+      () => <LinearThreadContent messages={messages} contentHeight={contentHeight} />,
+      [messages, contentHeight],
+    );
 
     return (
       <div ref={containerRef} className={cn('flex flex-col h-full w-full', className)}>
         <div className="flex flex-1 overflow-hidden">
           <div className="flex flex-col w-full">
-            <LinearThreadContent
-              messages={messages}
-              contentHeight={contentHeight}
-              className="mb-4"
-            />
-
-            <div className="mt-auto border-t border-gray-200 pt-4">
-              <ChatPanel
-                readonly={readonly}
-                query={query}
-                setQuery={handleSetQuery}
-                selectedSkill={selectedSkill}
-                setSelectedSkill={handleSetSelectedSkill}
-                contextItems={contextItems}
-                setContextItems={setContextItems}
-                modelInfo={modelInfo}
-                setModelInfo={setModelInfo}
-                runtimeConfig={runtimeConfig}
-                setRuntimeConfig={setRuntimeConfig}
-                tplConfig={tplConfig}
-                setTplConfig={setTplConfig}
-                handleSendMessage={handleSendMessage}
-                handleAbortAction={abortAction}
-                handleUploadImage={handleImageUpload}
-                onInputHeightChange={() => {
-                  // Adjust container height if needed
-                }}
-                className="w-full"
-              />
-            </div>
+            {threadContentComponent}
+            {chatPanelComponent}
           </div>
         </div>
       </div>
