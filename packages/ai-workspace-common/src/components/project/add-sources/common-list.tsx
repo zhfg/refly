@@ -25,7 +25,7 @@ interface CommonListProps {
   existingItems: string[];
   onSelectedItemsChange: (selectedItems: SelectedItems[]) => void;
   fetchData: FetchDataFn;
-  entityType: 'document' | 'resource';
+  entityType: 'document' | 'resource' | 'canvas';
   scrollableId: string;
   idField: string;
 }

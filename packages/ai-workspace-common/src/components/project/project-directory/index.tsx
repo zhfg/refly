@@ -1,5 +1,5 @@
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { Layout } from 'antd';
+import { Divider, Layout } from 'antd';
 import { useState, useMemo, useEffect } from 'react';
 import { useGetProjectDetail } from '@refly-packages/ai-workspace-common/queries';
 import { Document, Resource } from '@refly/openapi-schema';
@@ -84,6 +84,9 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
             setProjectData({ ...projectData, ...data });
           }}
         />
+
+        <Divider className="my-2" />
+
         <CanvasMenu
           canvasList={canvasList}
           projectId={projectId}

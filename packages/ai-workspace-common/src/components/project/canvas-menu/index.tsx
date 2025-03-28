@@ -1,25 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Collapse,
-  Button,
-  List,
-  Empty,
-  Typography,
-  Dropdown,
-  Input,
-  Popconfirm,
-  message,
-  Checkbox,
-} from 'antd';
-import {
-  IconCanvas,
-  IconPlus,
-  IconSearch,
-  IconClose,
-  IconDelete,
-  IconRemove,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Collapse, Button, List, Empty, Typography, Dropdown, Checkbox, message } from 'antd';
+import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { iconClassName } from '@refly-packages/ai-workspace-common/components/project/project-directory';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 import cn from 'classnames';
@@ -27,15 +9,27 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SiderData } from '@refly-packages/ai-workspace-common/stores/sider';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import HeaderActions from '@refly-packages/ai-workspace-common/components/common/header-actions';
+import { AddSources } from '@refly-packages/ai-workspace-common/components/project/add-sources';
 
 const { Text } = Typography;
 
 interface AddCanvasDropdownProps {
   debouncedCreateCanvas: () => void;
   children?: React.ReactNode;
+  projectId: string;
+  onUpdatedCanvasList?: () => void;
+  canvasList: SiderData[];
 }
-const AddCanvasDropdown = ({ debouncedCreateCanvas, children }: AddCanvasDropdownProps) => {
+const AddCanvasDropdown = ({
+  debouncedCreateCanvas,
+  children,
+  projectId,
+  onUpdatedCanvasList,
+  canvasList,
+}: AddCanvasDropdownProps) => {
   const { t } = useTranslation();
+  const [addSourcesVisible, setAddSourcesVisible] = useState(false);
 
   const items = [
     {
@@ -49,24 +43,37 @@ const AddCanvasDropdown = ({ debouncedCreateCanvas, children }: AddCanvasDropdow
       key: 'addExistingCanvas',
       label: t('project.action.addExistingCanvas'),
       onClick: () => {
-        console.log('addExistingCanvas');
+        setAddSourcesVisible(true);
       },
     },
   ];
 
   return (
-    <Dropdown menu={{ items }}>
-      {children || (
-        <Button
-          type="default"
-          size="small"
-          className="text-xs text-gray-600"
-          icon={<IconPlus size={12} className="flex items-center justify-center" />}
-        >
-          {t('project.action.addCanvas')}
-        </Button>
-      )}
-    </Dropdown>
+    <>
+      <Dropdown menu={{ items }}>
+        {children || (
+          <Button
+            type="default"
+            size="small"
+            className="text-xs text-gray-600"
+            icon={<IconPlus size={12} className="flex items-center justify-center" />}
+          >
+            {t('project.action.addCanvas')}
+          </Button>
+        )}
+      </Dropdown>
+      <AddSources
+        domain="canvas"
+        visible={addSourcesVisible}
+        setVisible={setAddSourcesVisible}
+        projectId={projectId}
+        existingItems={canvasList?.map((canvas) => canvas.id) || []}
+        onSuccess={() => {
+          onUpdatedCanvasList?.();
+        }}
+        defaultActiveKey="canvas"
+      />
+    </>
   );
 };
 
@@ -162,102 +169,28 @@ export const CanvasMenu = ({
     [isMultiSelectMode, navigate, projectId, toggleCanvasSelection],
   );
 
-  const headerActions = useMemo(() => {
-    if (isSearchMode || isMultiSelectMode) {
-      return (
-        <>
-          {isMultiSelectMode && (
-            <div className="flex items-center justify-between gap-2 mt-2">
-              <div className="text-xs text-gray-500">
-                {t('project.sourceList.selectedCount', { count: selectedCanvases.length })}
-              </div>
-              <div className="flex items-center gap-2">
-                <Popconfirm
-                  title={t('project.sourceList.deleteConfirm')}
-                  onConfirm={deleteSelectedCanvases}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<IconDelete className={cn(iconClassName, 'text-red-500')} />}
-                  />
-                </Popconfirm>
-
-                <Popconfirm
-                  title={t('project.sourceList.removeConfirm')}
-                  onConfirm={removeSelectedCanvasesFromProject}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<IconRemove className={cn(iconClassName, 'text-gray-500')} />}
-                  />
-                </Popconfirm>
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
-                  onClick={exitMultiSelectMode}
-                />
-              </div>
-            </div>
-          )}
-
-          {isSearchMode && (
-            <div className="flex items-center gap-2 w-full justify-between mt-2">
-              <Input
-                autoFocus
-                type="text"
-                className="text-xs px-2 py-1 border border-gray-200 rounded-md flex-grow focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder={t('project.sourceList.searchPlaceholder')}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-              />
-              <Button
-                type="text"
-                size="small"
-                icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
-                onClick={toggleSearchMode}
-              />
-            </div>
-          )}
-        </>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-2">
-        <AddCanvasDropdown debouncedCreateCanvas={debouncedCreateCanvas}>
-          <Button
-            type="text"
-            size="small"
-            icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
-          />
-        </AddCanvasDropdown>
+  const addButtonNode = useMemo(
+    () => (
+      <AddCanvasDropdown
+        debouncedCreateCanvas={debouncedCreateCanvas}
+        projectId={projectId}
+        onUpdatedCanvasList={onUpdatedCanvasList}
+        canvasList={canvasList}
+      >
         <Button
           type="text"
           size="small"
-          icon={<IconSearch className={cn(iconClassName, 'text-gray-500')} />}
-          onClick={toggleSearchMode}
+          icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
         />
-      </div>
-    );
-  }, [
-    isMultiSelectMode,
-    isSearchMode,
-    searchValue,
-    selectedCanvases.length,
-    deleteSelectedCanvases,
-    exitMultiSelectMode,
-    removeSelectedCanvasesFromProject,
-    toggleSearchMode,
-    debouncedCreateCanvas,
-    t,
-  ]);
+      </AddCanvasDropdown>
+    ),
+    [debouncedCreateCanvas, projectId, onUpdatedCanvasList, canvasList],
+  );
+
+  const itemCountText = useMemo(
+    () => t('project.canvasCount', { canvasCount: canvasList.length }),
+    [canvasList.length, t],
+  );
 
   return (
     <Collapse
@@ -268,22 +201,27 @@ export const CanvasMenu = ({
       items={[
         {
           key: 'canvas',
-          label: <span className="text-sm font-medium">{t('project.canvas')}</span>,
+          label: (
+            <div className="flex items-center gap-2 text-sm">
+              <IconCanvas size={20} className="flex items-center justify-center text-gray-500" />
+              {t('project.canvas')}
+            </div>
+          ),
           children: (
             <div className="flex flex-col">
-              <div
-                className={`mb-2 px-3 ${
-                  isMultiSelectMode || isSearchMode ? '' : 'flex justify-between items-center'
-                }`}
-              >
-                <div className="text-[10px] text-gray-500">
-                  {t('project.canvasCount', {
-                    canvasCount: canvasList.length,
-                  })}
-                </div>
-
-                {headerActions}
-              </div>
+              <HeaderActions
+                isSearchMode={isSearchMode}
+                isMultiSelectMode={isMultiSelectMode}
+                searchValue={searchValue}
+                selectedItems={selectedCanvases}
+                onSearchChange={setSearchValue}
+                onToggleSearchMode={toggleSearchMode}
+                onExitMultiSelectMode={exitMultiSelectMode}
+                onDeleteSelected={deleteSelectedCanvases}
+                onRemoveSelected={removeSelectedCanvasesFromProject}
+                addButtonNode={addButtonNode}
+                itemCountText={itemCountText}
+              />
               <div className="max-h-[20vh] overflow-y-auto px-3">
                 <List
                   itemLayout="horizontal"
@@ -299,7 +237,12 @@ export const CanvasMenu = ({
                         }}
                         description={t('common.empty')}
                       >
-                        <AddCanvasDropdown debouncedCreateCanvas={debouncedCreateCanvas} />
+                        <AddCanvasDropdown
+                          debouncedCreateCanvas={debouncedCreateCanvas}
+                          projectId={projectId}
+                          onUpdatedCanvasList={onUpdatedCanvasList}
+                          canvasList={canvasList}
+                        />
                       </Empty>
                     ),
                   }}
@@ -307,7 +250,7 @@ export const CanvasMenu = ({
                     <List.Item
                       className={cn(
                         '!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer',
-                        canvasId === item.id ? 'bg-gray-50' : '',
+                        canvasId === item.id ? 'bg-gray-100' : '',
                         selectedCanvases.some((canvas) => canvas.id === item.id) && 'bg-gray-50',
                       )}
                       onMouseEnter={() => handleCanvasHover(item.id)}

@@ -2164,7 +2164,7 @@ const translations = {
     create: '创建项目',
     addSource: '添加资源',
     canvas: '画布',
-    source: '资源',
+    source: '文件',
     noDescription: '快来填写描述吧～',
     customInstructions: '预设提示词',
     createModal: {
@@ -2193,7 +2193,7 @@ const translations = {
       addExistingCanvas: '添加已有画布',
     },
     addSources: {
-      title: '添加资源',
+      title: '添加文件',
       selectAll: '全选',
     },
     sourceList: {

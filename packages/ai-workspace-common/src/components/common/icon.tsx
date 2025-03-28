@@ -43,7 +43,9 @@ import {
   LuChevronLeft,
   LuChevronRight,
   LuUserRound,
+  LuFileStack,
 } from 'react-icons/lu';
+
 import {
   RiErrorWarningLine,
   RiDoubleQuotesL,
@@ -166,6 +168,7 @@ export const IconLeft = LuChevronLeft;
 export const IconRight = LuChevronRight;
 export const IconUser = LuUserRound;
 export const IconRemove = MdOutlineRemoveCircleOutline;
+export const IconFiles = LuFileStack;
 
 export const IconChrome = ChromeIcon;
 export const ModelProviderIcons = {

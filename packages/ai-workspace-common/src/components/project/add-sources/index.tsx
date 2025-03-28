@@ -2,32 +2,50 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Tabs, Button } from 'antd';
 import { IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Documents } from './documents';
 import { Resources } from './resources';
+import { Canvases } from './canvases';
 import { useState, useCallback, useEffect } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import React from 'react';
 import './index.scss';
 
 interface AddSourcesProps {
+  domain: 'source' | 'canvas';
   visible: boolean;
   setVisible: (visible: boolean) => void;
   projectId: string;
   onSuccess?: () => void;
   existingItems: string[];
+  defaultActiveKey?: string;
 }
 
 export type SelectedItems = {
-  entityType: 'document' | 'resource';
+  entityType: 'document' | 'resource' | 'canvas';
   entityId: string;
 };
 
 const AddSourcesMemo = React.memo(
-  ({ visible, setVisible, projectId, onSuccess, existingItems }: AddSourcesProps) => {
+  ({
+    domain,
+    visible,
+    setVisible,
+    projectId,
+    onSuccess,
+    existingItems,
+    defaultActiveKey,
+  }: AddSourcesProps) => {
     const { t } = useTranslation();
     const [selectedItems, setSelectedItems] = useState<SelectedItems[]>([]);
     const [loading, setLoading] = useState(false);
-    const [activeKey, setActiveKey] = useState('document');
+    const [activeKey, setActiveKey] = useState(defaultActiveKey || 'document');
+
+    useEffect(() => {
+      if (defaultActiveKey) {
+        setActiveKey(defaultActiveKey);
+      }
+    }, [defaultActiveKey]);
 
     const handleOk = useCallback(async () => {
       if (!projectId) return;
@@ -72,7 +90,7 @@ const AddSourcesMemo = React.memo(
       console.log('selectedItems', selectedItems);
     }, [selectedItems]);
 
-    const tabs = [
+    const sourceTabs = [
       {
         key: 'document',
         label: t('common.document'),
@@ -94,6 +112,22 @@ const AddSourcesMemo = React.memo(
           <Resources
             visible={visible && activeKey === 'resource'}
             selectedItems={selectedItems.filter((item) => item.entityType === 'resource')}
+            onSelectedItemsChange={setSelectedItems}
+            existingItems={existingItems}
+          />
+        ),
+      },
+    ];
+
+    const canvasTabs = [
+      {
+        key: 'canvas',
+        label: t('common.canvas'),
+        icon: <IconCanvas style={{ transform: 'translateY(2px)' }} />,
+        children: (
+          <Canvases
+            visible={visible && activeKey === 'canvas'}
+            selectedItems={selectedItems.filter((item) => item.entityType === 'canvas')}
             onSelectedItemsChange={setSelectedItems}
             existingItems={existingItems}
           />
@@ -129,7 +163,11 @@ const AddSourcesMemo = React.memo(
           </Button>,
         ]}
       >
-        <Tabs items={tabs} activeKey={activeKey} onChange={handleTabChange} />
+        <Tabs
+          items={domain === 'source' ? sourceTabs : canvasTabs}
+          activeKey={activeKey}
+          onChange={handleTabChange}
+        />
       </Modal>
     );
   },

@@ -34,4 +34,11 @@
       border-width: 1px;
     }
   }
+
+  .ant-collapse-header {
+    &:hover {
+      background-color: #f5f7fa;
+      border-radius: 0 !important;
+    }
+  }
 }

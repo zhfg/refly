@@ -1,7 +1,7 @@
 import { Project } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button, Divider, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import {
   IconLeft,
   IconShare,
@@ -67,7 +67,7 @@ export const ProjectSettings = ({
         </div>
       </div>
 
-      <div className="py-5 cursor-pointer" onClick={handleEditSettings}>
+      <div className="pt-5 cursor-pointer" onClick={handleEditSettings}>
         <div className="flex items-center gap-3">
           <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
           <div className="flex flex-col">
@@ -75,12 +75,14 @@ export const ProjectSettings = ({
           </div>
         </div>
 
-        <Paragraph className="text-xs text-gray-400 py-2 pb-0 pt-3" ellipsis={{ rows: 1 }}>
+        <Paragraph
+          className="text-xs p-1 !my-2 bg-gray-50 text-gray-400 rounded-md"
+          ellipsis={{ rows: 1, tooltip: { placement: 'right' } }}
+        >
           {data?.description || t('project.noDescription')}
         </Paragraph>
 
-        <Divider className="my-2" />
-        <div className="flex items-center justify-between gap-2 font-medium text-xs text-gray-400">
+        <div className="flex items-center justify-between gap-2 text-xs text-gray-600">
           <span>{t('project.customInstructions')}</span>
           <Button
             type="text"
@@ -89,7 +91,10 @@ export const ProjectSettings = ({
           />
         </div>
         {data?.customInstructions && (
-          <Paragraph className="text-xs py-1 !mb-0" ellipsis={{ rows: 1 }}>
+          <Paragraph
+            className="text-xs p-1 mt-1 !mb-0 bg-gray-50 rounded-md"
+            ellipsis={{ rows: 1, tooltip: { placement: 'right' } }}
+          >
             {data?.customInstructions}
           </Paragraph>
         )}

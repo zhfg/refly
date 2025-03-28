@@ -2227,7 +2227,7 @@ const translations = {
     create: 'Create Project',
     addSource: 'Add Source',
     canvas: 'Canvas',
-    source: 'Source',
+    source: 'File',
     noDescription: 'Quickly fill in the description ~',
     customInstructions: 'Custom Instructions',
     createModal: {
@@ -2256,7 +2256,7 @@ const translations = {
       addExistingCanvas: 'Add Existing Canvas',
     },
     addSources: {
-      title: 'Add Sources',
+      title: 'Add Files',
       selectAll: 'Select All',
     },
     sourceList: {
