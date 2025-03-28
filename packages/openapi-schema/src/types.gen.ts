@@ -1820,6 +1820,10 @@ export type UpsertCanvasRequest = {
    */
   canvasId?: string;
   /**
+   * Project ID to bind with
+   */
+  projectId?: string;
+  /**
    * Minimap storage key
    */
   minimapStorageKey?: string;
@@ -1948,6 +1952,10 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
+   * Project ID to bind with
+   */
+  projectId?: string;
+  /**
    * Resource metadata
    */
   data?: ResourceMeta;
@@ -2030,6 +2038,10 @@ export type UpsertDocumentRequest = {
    * Document ID (only used for update)
    */
   docId?: string;
+  /**
+   * Project ID to bind with
+   */
+  projectId?: string;
   /**
    * Whether this document is read-only
    */

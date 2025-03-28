@@ -2318,6 +2318,10 @@ export const UpsertCanvasRequestSchema = {
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID to bind with',
+    },
     minimapStorageKey: {
       type: 'string',
       description: 'Minimap storage key',
@@ -2530,6 +2534,10 @@ export const UpsertResourceRequestSchema = {
       description: 'Resource ID (only used for update)',
       example: 'r-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID to bind with',
+    },
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
@@ -2715,6 +2723,10 @@ export const UpsertDocumentRequestSchema = {
       type: 'string',
       description: 'Document ID (only used for update)',
       example: 'd-g30e1b80b5g1itbemc0g5jj3',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID to bind with',
     },
     readOnly: {
       type: 'boolean',

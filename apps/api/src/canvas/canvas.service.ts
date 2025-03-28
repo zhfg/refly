@@ -339,6 +339,7 @@ export class CanvasService {
         uid: user.uid,
         canvasId,
         title: param.title,
+        projectId: param.projectId,
         stateStorageKey,
       },
     });
@@ -362,7 +363,7 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title, minimapStorageKey } = param;
+    const { canvasId, title, minimapStorageKey, projectId } = param;
 
     const canvas = await this.prisma.canvas.findUnique({
       where: { canvasId, uid: user.uid, deletedAt: null },
@@ -377,16 +378,20 @@ export class CanvasService {
     if (title !== undefined) {
       updates.title = title;
     }
+    if (projectId !== undefined) {
+      if (projectId) {
+        updates.project = { connect: { projectId } };
+      } else {
+        updates.project = { disconnect: true };
+      }
+    }
     if (minimapStorageKey !== undefined) {
       updates.minimapStorageKey = minimapStorageKey;
     }
 
-    const updatedCanvas = await this.prisma.$transaction(async (tx) => {
-      const canvas = await tx.canvas.update({
-        where: { canvasId, uid: user.uid, deletedAt: null },
-        data: updates,
-      });
-      return canvas;
+    const updatedCanvas = await this.prisma.canvas.update({
+      where: { canvasId, uid: user.uid, deletedAt: null },
+      data: updates,
     });
 
     if (!updatedCanvas) {
