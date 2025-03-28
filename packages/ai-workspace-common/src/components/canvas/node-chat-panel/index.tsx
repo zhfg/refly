@@ -334,7 +334,9 @@ export const ChatPanel = memo(
     }
 
     return (
-      <div className={`flex flex-col gap-3 h-full p-3 box-border ${className}`}>
+      <div
+        className={`flex flex-col gap-3 h-full p-3 box-border ${className} max-w-[1024px] mx-auto`}
+      >
         <NodeHeader
           readonly={readonly}
           selectedSkillName={selectedSkill?.name}

@@ -354,7 +354,7 @@ export const EnhancedSkillResponse = memo(
           onInputHeightChange={() => {
             // Adjust container height if needed
           }}
-          className="w-full"
+          className="w-full max-w-[1024px] mx-auto"
         />
       ),
       [
@@ -386,7 +386,7 @@ export const EnhancedSkillResponse = memo(
     return (
       <div ref={containerRef} className={cn('flex flex-col h-full w-full', className)}>
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full max-w-[1024px] mx-auto">
             {threadContentComponent}
             {chatPanelComponent}
           </div>
