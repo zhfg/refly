@@ -79,7 +79,7 @@ export const EnhancedSkillResponse = memo(
           const edges = getEdges();
 
           // Check if we have enough data loaded
-          if (nodes.length === 0 || edges.length === 0) {
+          if (nodes.length === 0 && edges.length === 0) {
             // Clear any existing timeout
             if (retryTimeoutRef.current) {
               clearTimeout(retryTimeoutRef.current);
