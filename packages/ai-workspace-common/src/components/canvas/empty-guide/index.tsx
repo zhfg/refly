@@ -11,8 +11,14 @@ export const EmptyGuide = ({ canvasId }: { canvasId: string }) => {
   }));
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[70%]">
-      <div className="flex items-center justify-center text-gray-500 text-center">
+    <div
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[70%]"
+      style={{ pointerEvents: 'none' }}
+    >
+      <div
+        className="flex items-center justify-center text-gray-500 text-center"
+        style={{ pointerEvents: 'auto' }}
+      >
         <div className="text-[20px]">{t('canvas.emptyText')}</div>
         <Button
           icon={<IconTemplate className="-mr-1 flex items-center justify-center" />}
