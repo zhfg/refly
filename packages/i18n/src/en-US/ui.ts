@@ -1127,7 +1127,7 @@ const translations = {
       },
     },
     reflyPilot: {
-      title: 'Refly Pilot',
+      title: 'Ask AI',
       newConversation: 'New conversation',
       clearConversation: 'Clear conversation',
     },

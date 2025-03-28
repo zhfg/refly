@@ -14,6 +14,7 @@ import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { useExportCanvasAsImage } from '@refly-packages/ai-workspace-common/hooks/use-export-canvas-as-image';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const ToolbarButtons = memo(
   ({
@@ -59,11 +60,11 @@ export const ToolbarButtons = memo(
     };
 
     const pilotButtonConfig = {
-      title: t(`canvas.toolbar.${showReflyPilot ? 'hideReflyPilot' : 'showReflyPilot'}`, {
-        defaultValue: showReflyPilot ? 'Hide Refly Pilot' : 'Show Refly Pilot',
+      title: t(`canvas.toolbar.${showReflyPilot ? 'hideLaunchpad' : 'showLaunchpad'}`, {
+        defaultValue: showReflyPilot ? 'Hide Ask AI' : 'Show Ask AI',
       }),
-      description: t('canvas.toolbar.toggleReflyPilotDescription', {
-        defaultValue: 'Toggle the visibility of Refly Pilot',
+      description: t('canvas.toolbar.toggleLaunchpadTitle', {
+        defaultValue: 'Toggle the visibility of Ask AI',
       }),
       placement: 'bottom' as const,
     };
@@ -82,14 +83,16 @@ export const ToolbarButtons = memo(
         type="text"
         icon={
           <span
-            className="flex items-center justify-center text-xs font-semibold"
-            style={{ color: showReflyPilot ? '#000' : '#9CA3AF' }}
+            className={`flex items-center justify-center text-xs font-semibold ${
+              showReflyPilot ? 'text-green-600' : 'text-gray-500'
+            }`}
           >
-            Ask AI
+            <IconAskAI className="w-3 h-3 mr-1" />
+            {t('canvas.reflyPilot.title', { defaultValue: 'Ask AI' })}
           </span>
         }
         onClick={() => setShowReflyPilot(!showReflyPilot)}
-        className="!w-14 h-6 flex items-center justify-center"
+        className="!w-16 h-6 flex items-center justify-center"
       />
     );
 

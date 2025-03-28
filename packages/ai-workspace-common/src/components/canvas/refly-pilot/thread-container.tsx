@@ -13,6 +13,7 @@ import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export interface ThreadContainerProps {
   className?: string;
@@ -46,11 +47,13 @@ const ThreadHeader = memo(
     return (
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white rounded-t-lg">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-500 shadow-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-medium">P</span>
+          <div className="w-6 h-6 rounded bg-primary-600 shadow-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-medium flex items-center justify-center">
+              <IconAskAI className="w-3 h-3" />
+            </span>
           </div>
           <span className="text-sm font-medium leading-normal">
-            {t('canvas.reflyPilot.title', { defaultValue: 'Refly Pilot' })}
+            {t('canvas.reflyPilot.title', { defaultValue: 'Ask AI' })}
           </span>
         </div>
         <div className="flex items-center gap-2">
