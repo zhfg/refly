@@ -205,10 +205,17 @@ const ProjectList = () => {
     pageSize: 12,
   });
 
-  const handleCardClick = (project: Project) => {
+  const getProjectDetail = async (projectId: string) => {
+    const res = await getClient().getProjectDetail({
+      query: { projectId },
+    });
+    return res?.data?.data;
+  };
+
+  const handleCardClick = async (project: Project) => {
+    const projectDetail = await getProjectDetail(project.projectId);
+    const canvasId = projectDetail?.canvases?.[0]?.canvasId || 'empty';
     setShowLibraryModal(false);
-    const canvases = project.canvases || [];
-    const canvasId = canvases?.[0]?.canvasId || 'empty';
     navigate(`/project/${project.projectId}?canvasId=${canvasId}`);
   };
 

@@ -2203,6 +2203,7 @@ const translations = {
       searchPlaceholder: '输入关键词搜索...',
       sourceCount: '{{resourceCount}} 个资源 · {{documentCount}} 个文档',
     },
+    canvasCount: '{{canvasCount}} 个画布',
   },
 };
 

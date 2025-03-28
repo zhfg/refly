@@ -2266,6 +2266,7 @@ const translations = {
       searchPlaceholder: 'Search Sources...',
       sourceCount: '{{resourceCount}} resources · {{documentCount}} documents',
     },
+    canvasCount: '{{canvasCount}} canvases',
   },
 };
 

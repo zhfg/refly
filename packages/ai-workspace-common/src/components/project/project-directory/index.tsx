@@ -8,6 +8,7 @@ import { SourcesMenu } from '@refly-packages/ai-workspace-common/components/proj
 import { ProjectSettings } from '@refly-packages/ai-workspace-common/components/project/project-settings';
 import cn from 'classnames';
 import './index.scss';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 export const iconClassName = 'w-4 h-4 flex items-center justify-center';
 export interface sourceObject extends Document, Resource {
@@ -21,7 +22,9 @@ interface ProjectDirectoryProps {
 }
 
 export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) => {
-  const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
+  const { getCanvasList } = useHandleSiderData(true);
+  const { collapse, setCollapse, canvasList } = useSiderStoreShallow((state) => ({
+    canvasList: state.canvasList,
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
@@ -34,7 +37,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   });
   const data = projectDetail?.data;
   const [projectData, setProjectData] = useState(data);
-  const canvases = data?.canvases || [];
+
   const documents = data?.documents || [];
   const resources = data?.resources || [];
 
@@ -82,10 +85,10 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           }}
         />
         <CanvasMenu
-          canvasList={canvases}
+          canvasList={canvasList}
           projectId={projectId}
           onUpdatedCanvasList={() => {
-            refetch();
+            getCanvasList();
           }}
         />
         <SourcesMenu

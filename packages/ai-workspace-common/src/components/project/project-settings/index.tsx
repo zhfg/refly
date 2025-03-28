@@ -41,7 +41,7 @@ export const ProjectSettings = ({
           size="small"
           type="text"
           icon={<IconLeft className={iconClassName} />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
         >
           返回
         </Button>
