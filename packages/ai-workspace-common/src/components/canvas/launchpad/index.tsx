@@ -82,6 +82,7 @@ export const LaunchPad = memo(
           'ai-copilot-operation-container',
           inReflyPilot && 'embedded-launchpad w-full',
           className,
+          'w-full',
         )}
         data-cy="launchpad"
       >

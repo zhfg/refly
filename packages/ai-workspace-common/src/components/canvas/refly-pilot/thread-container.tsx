@@ -1,12 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useState, forwardRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, forwardRef, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { cn } from '@refly-packages/utils/cn';
 import {
   IconClose,
-  IconExpand,
-  IconShrink,
+  IconWideMode,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { RefreshCw } from 'lucide-react';
 import { LinearThreadContent } from './linear-thread';
 import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -30,11 +30,15 @@ const ThreadHeader = memo(
     onClose,
     onMaximize,
     isMaximized,
+    onWideMode,
+    isWideMode,
     onClearConversation,
   }: {
     onClose: () => void;
     onMaximize: () => void;
     isMaximized: boolean;
+    onWideMode: () => void;
+    isWideMode: boolean;
     onClearConversation: () => void;
   }) => {
     const { t } = useTranslation();
@@ -53,7 +57,7 @@ const ThreadHeader = memo(
           <Button
             type="text"
             size="small"
-            className="flex items-center text-gray-600 h-7 px-2"
+            className="flex items-center text-gray-500 h-7 px-2"
             onClick={onClearConversation}
             icon={<RefreshCw className="w-3.5 h-3.5 mr-1" />}
           >
@@ -62,15 +66,23 @@ const ThreadHeader = memo(
           <Button
             type="text"
             size="small"
-            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
-            onClick={onMaximize}
+            className={`flex items-center justify-center p-0 w-7 h-7 ${isWideMode ? 'text-primary-600' : 'text-gray-500 hover:text-gray-600'} min-w-0`}
+            onClick={onWideMode}
           >
-            {isMaximized ? <IconShrink className="w-4 h-4" /> : <IconExpand className="w-4 h-4" />}
+            <IconWideMode className="w-4 h-4" />
           </Button>
           <Button
             type="text"
             size="small"
-            className="flex items-center justify-center p-0 w-7 h-7 text-gray-400 hover:text-gray-600 min-w-0"
+            className={`flex items-center justify-center p-0 w-7 h-7 ${isMaximized ? 'text-primary-600' : 'text-gray-500 hover:text-gray-600'} min-w-0`}
+            onClick={onMaximize}
+          >
+            {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            className="flex items-center justify-center p-0 w-7 h-7 text-gray-500 hover:text-gray-600 min-w-0"
             onClick={onClose}
           >
             <IconClose className="w-4 h-4" />
@@ -96,7 +108,9 @@ export const ThreadContainer = memo(
     } = props;
 
     const [isMaximized, setIsMaximized] = useState(false);
+    const [isWideMode, setIsWideMode] = useState(false);
     const [contentHeight, setContentHeight] = useState('auto');
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Get context panel store to manage context items
     const { setContextItems } = useContextPanelStoreShallow((state) => ({
@@ -109,6 +123,21 @@ export const ThreadContainer = memo(
       setContextItems,
     });
 
+    // Add ESC key handler to exit fullscreen
+    useEffect(() => {
+      const handleEscKey = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && isMaximized) {
+          setIsMaximized(false);
+        }
+      };
+
+      document.addEventListener('keydown', handleEscKey);
+
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
+    }, [isMaximized]);
+
     const handleClose = useCallback(() => {
       if (onClose) {
         onClose();
@@ -117,16 +146,48 @@ export const ThreadContainer = memo(
 
     const handleMaximize = useCallback(() => {
       setIsMaximized(!isMaximized);
-    }, [isMaximized]);
+      if (isWideMode && !isMaximized) {
+        setIsWideMode(false);
+      }
+    }, [isMaximized, isWideMode]);
+
+    const handleWideMode = useCallback(() => {
+      setIsWideMode(!isWideMode);
+      if (isMaximized && !isWideMode) {
+        setIsMaximized(false);
+      }
+    }, [isWideMode, isMaximized]);
 
     const containerStyles = useMemo(
       () => ({
-        width: isMaximized ? '840px' : '420px',
-        transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+        height: isMaximized ? '100vh' : 'calc(100vh - 72px)',
+        width: isMaximized ? 'calc(100vw)' : isWideMode ? '840px' : '420px',
+        position: isMaximized ? ('fixed' as const) : ('relative' as const),
+        top: isMaximized ? 0 : null,
+        right: isMaximized ? 0 : null,
+        zIndex: isMaximized ? 50 : 10,
+        transition: isMaximized
+          ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+          : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column' as const,
-        height: 'calc(100vh - 72px)',
+        borderRadius: isMaximized ? 0 : '0.5rem',
       }),
+      [isMaximized, isWideMode],
+    );
+
+    const containerClassName = useMemo(
+      () => `
+        flex-shrink-0 
+        bg-white 
+        shadow-lg 
+        border 
+        border-gray-200 
+        flex 
+        flex-col
+        will-change-transform
+        ${isMaximized ? 'fixed' : 'rounded-lg'}
+      `,
       [isMaximized],
     );
 
@@ -137,7 +198,7 @@ export const ThreadContainer = memo(
         const viewportHeight = window.innerHeight;
         const headerHeight = 52; // Header height
         const launchpadHeight = 180; // Approximate height of launchpad + margins
-        const topOffset = 72; // Top offset from viewport
+        const topOffset = isMaximized ? 0 : 72; // No offset when maximized
 
         // Calculate content height
         const availableHeight = viewportHeight - topOffset - headerHeight - launchpadHeight;
@@ -145,7 +206,9 @@ export const ThreadContainer = memo(
         if (messages.length === 0) {
           setContentHeight('auto');
         } else {
-          setContentHeight(`${Math.max(300, availableHeight)}px`);
+          // Make content area taller when maximized
+          const minHeight = isMaximized ? 500 : 300;
+          setContentHeight(`${Math.max(minHeight, availableHeight)}px`);
         }
       };
 
@@ -158,7 +221,7 @@ export const ThreadContainer = memo(
       return () => {
         window.removeEventListener('resize', updateDimensions);
       };
-    }, [messages.length]);
+    }, [messages.length, isMaximized]);
 
     // Update context when resultId changes or component mounts
     useEffect(() => {
@@ -172,32 +235,56 @@ export const ThreadContainer = memo(
       }
     }, [resultId, debouncedUpdateContextItems]);
 
+    // Scroll to bottom effect for messages
+    useEffect(() => {
+      if (containerRef.current && messages.length > 0) {
+        setTimeout(() => {
+          if (containerRef.current) {
+            const messageContainer = containerRef.current.querySelector('.message-container');
+            if (messageContainer) {
+              messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+          }
+        }, 100);
+      }
+    }, [messages]);
+
+    const outerContainerStyles = useMemo(
+      () => ({
+        marginLeft: 'auto', // Right-align the container to match NodePreview
+      }),
+      [],
+    );
+
     return (
       <div
         ref={ref}
-        className={cn(
-          'flex-shrink-0 bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col',
-          className,
-        )}
-        style={containerStyles}
+        className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow-lg bg-transparent"
+        style={outerContainerStyles}
       >
-        <ThreadHeader
-          onClose={handleClose}
-          onMaximize={handleMaximize}
-          isMaximized={isMaximized}
-          onClearConversation={onClearConversation}
-        />
+        <div className={cn(containerClassName, className)} style={containerStyles}>
+          <div className="pointer-events-auto">
+            <ThreadHeader
+              onClose={handleClose}
+              onMaximize={handleMaximize}
+              isMaximized={isMaximized}
+              onWideMode={handleWideMode}
+              isWideMode={isWideMode}
+              onClearConversation={onClearConversation}
+            />
+          </div>
 
-        <LinearThreadContent messages={messages} contentHeight={contentHeight} />
+          <LinearThreadContent messages={messages} contentHeight={contentHeight} />
 
-        <div className="mt-auto border-t border-gray-200">
-          <LaunchPad
-            visible={true}
-            inReflyPilot={true}
-            onAddMessage={onAddMessage}
-            onGenerateMessageIds={onGenerateMessageIds}
-            className="w-full"
-          />
+          <div className="mt-auto border-t border-gray-200 w-full max-w-[1024px] mx-auto">
+            <LaunchPad
+              visible={true}
+              inReflyPilot={true}
+              onAddMessage={onAddMessage}
+              onGenerateMessageIds={onGenerateMessageIds}
+              className="w-full max-w-[1024px] mx-auto"
+            />
+          </div>
         </div>
       </div>
     );
