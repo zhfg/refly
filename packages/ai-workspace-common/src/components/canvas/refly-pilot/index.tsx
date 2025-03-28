@@ -9,6 +9,9 @@ export const ReflyPilot = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { canvasId } = useCanvasContext();
 
+  // Use the reset hook to handle canvas ID changes
+  const { resetReflyPilot } = useReflyPilotReset(canvasId);
+
   const { setShowReflyPilot, linearThreadMessages, addLinearThreadMessage } = useCanvasStoreShallow(
     (state) => ({
       setShowReflyPilot: state.setShowReflyPilot,
@@ -17,9 +20,6 @@ export const ReflyPilot = memo(() => {
       clearLinearThreadMessages: state.clearLinearThreadMessages,
     }),
   );
-
-  // Use the reset hook to handle canvas ID changes
-  const { resetReflyPilot } = useReflyPilotReset(canvasId);
 
   // Extract the last message resultId for context updates
   const lastMessageResultId = useMemo(() => {

@@ -3,6 +3,7 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 
 /**
  * Hook to handle resetting Refly Pilot state when canvas ID changes
@@ -13,6 +14,10 @@ export const useReflyPilotReset = (canvasId: string) => {
 
   const { clearLinearThreadMessages } = useCanvasStoreShallow((state) => ({
     clearLinearThreadMessages: state.clearLinearThreadMessages,
+  }));
+
+  const { setSelectedSkill } = useSkillStoreShallow((state) => ({
+    setSelectedSkill: state.setSelectedSkill,
   }));
 
   const { setContextItems } = useContextPanelStoreShallow((state) => ({
@@ -48,6 +53,9 @@ export const useReflyPilotReset = (canvasId: string) => {
 
       // Close recommend questions panel
       setRecommendQuestionsOpen(false);
+
+      // Clear selected skill
+      setSelectedSkill(null);
 
       // Update previous canvas ID
       prevCanvasIdRef.current = canvasId;

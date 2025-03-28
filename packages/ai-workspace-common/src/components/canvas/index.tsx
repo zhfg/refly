@@ -60,6 +60,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -217,6 +218,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       });
     }
   };
+
+  // Use the reset hook to handle canvas ID changes
+  useReflyPilotReset(canvasId);
 
   useEffect(() => {
     return () => {
