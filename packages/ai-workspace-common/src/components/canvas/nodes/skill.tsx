@@ -246,7 +246,13 @@ export const SkillNode = memo(
     const handleSendMessage = useCallback(() => {
       const node = getNode(id);
       const data = node?.data as CanvasNodeData<SkillNodeMeta>;
-      const { query = '', contextItems = [] } = data?.metadata ?? {};
+      const {
+        query = '',
+        contextItems = [],
+        selectedSkill,
+        modelInfo,
+        runtimeConfig,
+      } = data?.metadata ?? {};
 
       const tplConfig = form.getFieldValue('tplConfig');
 
@@ -273,9 +279,16 @@ export const SkillNode = memo(
               title: query,
               entityId: resultId,
               metadata: {
+                ...data?.metadata,
                 status: 'executing',
                 contextItems,
                 tplConfig,
+                selectedSkill,
+                modelInfo,
+                runtimeConfig,
+                structuredData: {
+                  query,
+                },
               },
             },
             position: node.position,

@@ -253,6 +253,13 @@ export const ChatPanel = ({
           metadata: {
             status: 'executing',
             contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
+            selectedSkill,
+            modelInfo: selectedModel,
+            runtimeConfig,
+            tplConfig,
+            structuredData: {
+              query,
+            },
           },
         },
         id: nodeId,
