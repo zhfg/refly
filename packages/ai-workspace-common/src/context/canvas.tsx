@@ -288,6 +288,9 @@ export const CanvasProvider = ({
     if (readonly) return;
 
     return () => {
+      // Force clear the nodes and edges
+      setState({ nodes: [], edges: [] });
+
       const providers = providerCache.get(canvasId);
       if (providers) {
         if (providers.remote.status === 'connected') {
