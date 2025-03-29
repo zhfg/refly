@@ -839,7 +839,7 @@ const translations = {
     file: 'File',
   },
   canvas: {
-    emptyText: 'Double-click canvas to ask AI, or select ',
+    emptyText: 'Double-click canvas to open menu or select ',
     shareNotFound: 'Canvas Not Found',
     shareNotFoundHint:
       "The shared canvas you're trying to access could not be found. It might have been deleted or the link may be incorrect.",

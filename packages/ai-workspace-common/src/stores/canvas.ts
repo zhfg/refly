@@ -109,7 +109,7 @@ const defaultCanvasState = () => ({
   nodeSizeMode: 'compact' as const,
   autoLayout: false,
   showTemplates: true,
-  showReflyPilot: true,
+  showReflyPilot: false,
   linearThreadMessages: [],
 });
 
