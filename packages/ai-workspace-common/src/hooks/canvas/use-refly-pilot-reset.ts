@@ -12,8 +12,9 @@ import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores
 export const useReflyPilotReset = (canvasId: string) => {
   const prevCanvasIdRef = useRef<string | null>(null);
 
-  const { clearLinearThreadMessages } = useCanvasStoreShallow((state) => ({
+  const { clearLinearThreadMessages, setTplConfig } = useCanvasStoreShallow((state) => ({
     clearLinearThreadMessages: state.clearLinearThreadMessages,
+    setTplConfig: state.setTplConfig,
   }));
 
   const { setSelectedSkill } = useSkillStoreShallow((state) => ({
@@ -57,6 +58,9 @@ export const useReflyPilotReset = (canvasId: string) => {
       // Clear selected skill
       setSelectedSkill(null);
 
+      // Clear tplConfig
+      setTplConfig(null);
+
       // Update previous canvas ID
       prevCanvasIdRef.current = canvasId;
     }
@@ -66,6 +70,8 @@ export const useReflyPilotReset = (canvasId: string) => {
     setContextItems,
     setNewQAText,
     setRecommendQuestionsOpen,
+    setSelectedSkill,
+    setTplConfig,
   ]);
 
   return {
@@ -74,6 +80,8 @@ export const useReflyPilotReset = (canvasId: string) => {
       setContextItems([]);
       setNewQAText('');
       setRecommendQuestionsOpen(false);
+      setSelectedSkill(null);
+      setTplConfig(null);
     },
   };
 };

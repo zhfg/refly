@@ -14,16 +14,23 @@ import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { SkillTemplateConfig } from '@refly/openapi-schema';
 
 export interface ThreadContainerProps {
   className?: string;
   resultId?: string;
   standalone?: boolean;
   messages: LinearThreadMessage[];
-  onAddMessage: (message: { id: string; resultId: string; nodeId: string; data: any }) => void;
+  onAddMessage: (
+    message: { id: string; resultId: string; nodeId: string; data?: any },
+    query?: string,
+    contextItems?: any[],
+  ) => void;
   onClearConversation: () => void;
   onGenerateMessageIds: () => { resultId: string; nodeId: string };
   onClose?: () => void;
+  tplConfig?: SkillTemplateConfig | null;
+  onUpdateTplConfig?: (config: SkillTemplateConfig | null) => void;
 }
 
 const ThreadHeader = memo(
@@ -108,6 +115,8 @@ export const ThreadContainer = memo(
       onClearConversation,
       onGenerateMessageIds,
       onClose,
+      tplConfig,
+      onUpdateTplConfig,
     } = props;
 
     const [isMaximized, setIsMaximized] = useState(false);
@@ -286,6 +295,8 @@ export const ThreadContainer = memo(
               onAddMessage={onAddMessage}
               onGenerateMessageIds={onGenerateMessageIds}
               className="w-full max-w-[1024px] mx-auto"
+              tplConfig={tplConfig}
+              onUpdateTplConfig={onUpdateTplConfig}
             />
           </div>
         </div>

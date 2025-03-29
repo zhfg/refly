@@ -54,6 +54,7 @@ export interface CanvasState {
   showTemplates: boolean;
   showReflyPilot: boolean;
   linearThreadMessages: LinearThreadMessage[];
+  tplConfig: Record<string, any> | null;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -82,6 +83,7 @@ export interface CanvasState {
   removeLinearThreadMessage: (id: string) => void;
   removeLinearThreadMessageByNodeId: (nodeId: string) => void;
   clearLinearThreadMessages: () => void;
+  setTplConfig: (config: Record<string, any> | null) => void;
   clearState: () => void;
 }
 
@@ -111,6 +113,7 @@ const defaultCanvasState = () => ({
   showTemplates: true,
   showReflyPilot: false,
   linearThreadMessages: [],
+  tplConfig: null,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -295,6 +298,10 @@ export const useCanvasStore = create<CanvasState>()(
       clearLinearThreadMessages: () =>
         set((state) => {
           state.linearThreadMessages = [];
+        }),
+      setTplConfig: (config) =>
+        set((state) => {
+          state.tplConfig = config;
         }),
       clearState: () => set(defaultCanvasState()),
     })),

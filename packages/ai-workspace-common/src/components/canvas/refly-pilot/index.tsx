@@ -4,22 +4,37 @@ import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { ThreadContainer } from './thread-container';
 import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
+import { SkillTemplateConfig } from '@refly/openapi-schema';
 
 export const ReflyPilot = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { canvasId } = useCanvasContext();
+  const tplConfigRef = useRef<SkillTemplateConfig | null>(null);
 
   // Use the reset hook to handle canvas ID changes
   const { resetReflyPilot } = useReflyPilotReset(canvasId);
 
-  const { setShowReflyPilot, linearThreadMessages, addLinearThreadMessage } = useCanvasStoreShallow(
-    (state) => ({
-      setShowReflyPilot: state.setShowReflyPilot,
-      linearThreadMessages: state.linearThreadMessages,
-      addLinearThreadMessage: state.addLinearThreadMessage,
-      clearLinearThreadMessages: state.clearLinearThreadMessages,
-    }),
-  );
+  const {
+    setShowReflyPilot,
+    linearThreadMessages,
+    addLinearThreadMessage,
+    tplConfig,
+    setTplConfig,
+  } = useCanvasStoreShallow((state) => ({
+    setShowReflyPilot: state.setShowReflyPilot,
+    linearThreadMessages: state.linearThreadMessages,
+    addLinearThreadMessage: state.addLinearThreadMessage,
+    clearLinearThreadMessages: state.clearLinearThreadMessages,
+    tplConfig: state.tplConfig,
+    setTplConfig: state.setTplConfig,
+  }));
+
+  // Update tplConfigRef whenever tplConfig changes
+  useEffect(() => {
+    if (tplConfig && JSON.stringify(tplConfig) !== JSON.stringify(tplConfigRef.current)) {
+      tplConfigRef.current = tplConfig;
+    }
+  }, [tplConfig]);
 
   // Extract the last message resultId for context updates
   const lastMessageResultId = useMemo(() => {
@@ -40,14 +55,25 @@ export const ReflyPilot = memo(() => {
 
   // Handler for adding new messages
   const handleAddMessage = useCallback(
-    (message: { id: string; resultId: string; nodeId: string; data?: any }) => {
-      // Create the full message with timestamp
+    (
+      message: { id: string; resultId: string; nodeId: string; data?: any },
+      query = '',
+      contextItems = [],
+    ) => {
+      // Create the full message with timestamp and additional data
       const fullMessage = {
         id: message.id,
         resultId: message.resultId,
         nodeId: message.nodeId,
         timestamp: Date.now(),
-        data: message.data || { title: '', entityId: message.resultId },
+        data: message.data || {
+          title: query,
+          entityId: message.resultId,
+          metadata: {
+            contextItems,
+            tplConfig: tplConfigRef.current,
+          },
+        },
       };
 
       // Add message to the global store
@@ -71,6 +97,18 @@ export const ReflyPilot = memo(() => {
     setShowReflyPilot(false);
   }, [setShowReflyPilot]);
 
+  // Handler for updating tplConfig
+  const handleUpdateTplConfig = useCallback(
+    (config: SkillTemplateConfig | null) => {
+      // Only update if config has changed
+      if (JSON.stringify(config) !== JSON.stringify(tplConfigRef.current)) {
+        tplConfigRef.current = config;
+        setTplConfig(config);
+      }
+    },
+    [setTplConfig],
+  );
+
   return (
     <ThreadContainer
       ref={containerRef}
@@ -81,6 +119,8 @@ export const ReflyPilot = memo(() => {
       onClearConversation={resetReflyPilot}
       onGenerateMessageIds={handleGenerateMessageIds}
       onClose={handleClose}
+      tplConfig={tplConfig}
+      onUpdateTplConfig={handleUpdateTplConfig}
     />
   );
 });

@@ -34,7 +34,7 @@ import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-up
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { omit } from '@refly-packages/utils/index';
 import { cn } from '@refly-packages/utils/cn';
-import { ActionStatus } from '@refly/openapi-schema';
+import { ActionStatus, SkillTemplateConfig } from '@refly/openapi-schema';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -84,16 +84,20 @@ interface ChatPanelProps {
   embeddedMode?: boolean;
   onAddMessage?: (
     message: { id: string; resultId: string; nodeId: string; data?: any },
-    query: string,
-    contextItems: any[],
+    query?: string,
+    contextItems?: any[],
   ) => void;
   onGenerateMessageIds?: () => { resultId: string; nodeId: string };
+  tplConfig?: SkillTemplateConfig | null;
+  onUpdateTplConfig?: (config: SkillTemplateConfig | null) => void;
 }
 
 export const ChatPanel = ({
   embeddedMode = false,
   onAddMessage,
   onGenerateMessageIds,
+  tplConfig: initialTplConfig,
+  onUpdateTplConfig,
 }: ChatPanelProps) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
@@ -145,8 +149,12 @@ export const ChatPanel = ({
       for (const item of selectedSkill?.configSchema?.items || []) {
         const key = item.key;
 
+        // Priority 0: Use external tplConfig if provided
+        if (initialTplConfig && initialTplConfig[key] !== undefined) {
+          newConfig[key] = initialTplConfig[key];
+        }
         // Priority 1: Check if the key exists in selectedSkill.tplConfig
-        if (selectedSkill?.tplConfig && selectedSkill.tplConfig[key] !== undefined) {
+        else if (selectedSkill?.tplConfig && selectedSkill.tplConfig[key] !== undefined) {
           newConfig[key] = selectedSkill.tplConfig[key];
         }
         // Priority 2: Fall back to schema default value
@@ -162,7 +170,7 @@ export const ChatPanel = ({
       // Set the form value with the properly prioritized config
       form.setFieldValue('tplConfig', newConfig);
     }
-  }, [selectedSkill, form]);
+  }, [selectedSkill, form, initialTplConfig]);
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -180,6 +188,11 @@ export const ChatPanel = ({
     }
 
     const tplConfig = form?.getFieldValue('tplConfig');
+
+    // Update external tplConfig if available
+    if (onUpdateTplConfig) {
+      onUpdateTplConfig(tplConfig);
+    }
 
     const { selectedSkill } = useSkillStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
@@ -387,6 +400,14 @@ export const ChatPanel = ({
         form={form}
         formErrors={formErrors}
         setFormErrors={setFormErrors}
+        tplConfig={initialTplConfig}
+        onFormValuesChange={(_, allValues) => {
+          // Debounce form value changes to prevent cascading updates
+          const newConfig = allValues.tplConfig;
+          if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
+            onUpdateTplConfig?.(newConfig);
+          }
+        }}
         schema={selectedSkill?.configSchema}
         fieldPrefix="tplConfig"
         configScope="runtime"

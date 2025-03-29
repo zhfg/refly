@@ -12,13 +12,20 @@ import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/st
 // types
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/recommend-questions-panel';
+import { SkillTemplateConfig } from '@refly/openapi-schema';
 
 interface LaunchPadProps {
   visible?: boolean;
   inReflyPilot?: boolean;
   className?: string;
-  onAddMessage?: (message: { id: string; resultId: string; nodeId: string; data?: any }) => void;
+  onAddMessage?: (
+    message: { id: string; resultId: string; nodeId: string; data?: any },
+    query?: string,
+    contextItems?: any[],
+  ) => void;
   onGenerateMessageIds?: () => { resultId: string; nodeId: string };
+  tplConfig?: SkillTemplateConfig | null;
+  onUpdateTplConfig?: (config: SkillTemplateConfig | null) => void;
 }
 
 export const LaunchPad = memo(
@@ -28,6 +35,8 @@ export const LaunchPad = memo(
     className,
     onAddMessage,
     onGenerateMessageIds,
+    tplConfig,
+    onUpdateTplConfig,
   }: LaunchPadProps) => {
     // stores
     const contextPanelStore = useContextPanelStoreShallow((state) => ({
@@ -68,9 +77,11 @@ export const LaunchPad = memo(
           embeddedMode={inReflyPilot}
           onAddMessage={onAddMessage}
           onGenerateMessageIds={onGenerateMessageIds}
+          tplConfig={tplConfig}
+          onUpdateTplConfig={onUpdateTplConfig}
         />
       );
-    }, [inReflyPilot, onAddMessage, onGenerateMessageIds]);
+    }, [inReflyPilot, onAddMessage, onGenerateMessageIds, tplConfig, onUpdateTplConfig]);
 
     if (!visible) {
       return null;
@@ -101,5 +112,7 @@ export const LaunchPad = memo(
     prevProps.visible === nextProps.visible &&
     prevProps.inReflyPilot === nextProps.inReflyPilot &&
     prevProps.onAddMessage === nextProps.onAddMessage &&
-    prevProps.onGenerateMessageIds === nextProps.onGenerateMessageIds,
+    prevProps.onGenerateMessageIds === nextProps.onGenerateMessageIds &&
+    prevProps.tplConfig === nextProps.tplConfig &&
+    prevProps.onUpdateTplConfig === nextProps.onUpdateTplConfig,
 );
