@@ -47,7 +47,7 @@ export const EmptyGuide = ({ canvasId }: { canvasId: string }) => {
             onClick={() => setShowReflyPilot(!showReflyPilot)}
             data-cy="canvas-ask-ai-button"
           >
-            {t('canvas.skill.askAI')}
+            {t('canvas.reflyPilot.title')}
           </Button>
         </div>
       </div>

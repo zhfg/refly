@@ -1103,7 +1103,7 @@ const translations = {
       },
     },
     reflyPilot: {
-      title: '问 AI',
+      title: '问问 AI',
       newConversation: '新会话',
       clearConversation: '清空会话',
       welcome: {

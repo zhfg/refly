@@ -1,6 +1,6 @@
 import { memo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Avatar } from 'antd';
+import { Avatar, Divider } from 'antd';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
@@ -82,18 +82,21 @@ export const LinearThreadContent = memo(
           <EmptyThreadWelcome />
         ) : (
           <div className="flex flex-col divide-y">
-            {messages.map((message) => (
-              <div key={message.id}>
-                <MemoizedSkillResponseNodePreview
-                  node={{
-                    id: message.nodeId,
-                    type: 'skillResponse',
-                    position: { x: 0, y: 0 },
-                    data: message.data,
-                  }}
-                  resultId={message.resultId}
-                />
-              </div>
+            {messages.map((message, index) => (
+              <>
+                <div key={message.id}>
+                  <MemoizedSkillResponseNodePreview
+                    node={{
+                      id: message.nodeId,
+                      type: 'skillResponse',
+                      position: { x: 0, y: 0 },
+                      data: message.data,
+                    }}
+                    resultId={message.resultId}
+                  />
+                </div>
+                {index !== messages?.length ? <Divider key={`divider-${index}`} /> : null}
+              </>
             ))}
           </div>
         )}
