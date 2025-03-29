@@ -42,6 +42,8 @@ export const ReflyPilot = memo(() => {
     return lastMessage?.resultId;
   }, [linearThreadMessages]);
 
+  console.log('lastMessageResultId', lastMessageResultId, linearThreadMessages);
+
   // Scroll to bottom effect
   useEffect(() => {
     if (containerRef.current) {

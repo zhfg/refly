@@ -95,6 +95,8 @@ export const useContextUpdateByResultId = ({
   const updateContextItemsFromResultId = useCallback(() => {
     if (!resultId) return;
 
+    console.log('updateContextItemsFromResultId', resultId);
+
     // Find the node associated with this resultId
     const nodes = getNodes();
     const currentNode = nodes.find(
@@ -117,23 +119,23 @@ export const useContextUpdateByResultId = ({
     }
 
     // Get current node's context items and filter out those that are in thread history
+    // Also filter out any existing items with withHistory flag to prevent duplicates
     const finalContextItems: IContextItem[] = [];
-    const currentContextItems = currentNode.data?.metadata?.contextItems;
+    const currentContextItems = currentNode.data?.metadata?.contextItems || [];
 
-    if (currentContextItems && currentContextItems.length > 0) {
-      for (const item of currentContextItems) {
-        // Skip items that are already in thread history
-        if (!historyEntityIds.has(item.entityId)) {
-          finalContextItems.push(item);
-        }
+    // First add context items that aren't part of thread history and don't have withHistory flag
+    for (const item of currentContextItems) {
+      // Skip items that are already in thread history or have withHistory flag
+      if (!historyEntityIds.has(item.entityId) && !item.metadata?.withHistory) {
+        finalContextItems.push(item);
       }
     }
 
     // Only add the last node from thread history as context item with withHistory flag
+    // Skip if the last history node is the current node itself
     if (threadHistory.length > 0) {
       const lastHistoryNode = threadHistory[threadHistory.length - 1];
       if (lastHistoryNode?.data?.entityId && lastHistoryNode.type) {
-        // Skip if this node is already the current node
         finalContextItems.push({
           entityId: String(lastHistoryNode.data.entityId),
           type: lastHistoryNode.type as CanvasNodeType,
