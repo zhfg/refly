@@ -30,7 +30,7 @@ const EmptyThreadWelcome = memo(() => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-8 text-gray-700">
-      <div className="w-full max-w-lg mx-auto rounded-xl overflow-hidden p-6 border border-gray-100 transition-all duration-300 hover:shadow-md">
+      <div className="w-full max-w-lg mx-auto rounded-xl overflow-hidden p-6">
         <div className="flex items-center justify-center mb-6">
           <div className="relative">
             <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary-300 to-primary-600 opacity-75 blur-sm" />
