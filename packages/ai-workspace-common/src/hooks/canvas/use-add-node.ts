@@ -19,6 +19,8 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { useNodePosition } from './use-node-position';
 import { purgeContextItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
@@ -44,11 +46,10 @@ export const useAddNode = () => {
   const { setCenter, getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
   const { calculatePosition, layoutBranchAndUpdatePositions } = useNodePosition();
-
-  const { setNodes, setEdges, addNodePreview } = useCanvasStoreShallow((state) => ({
+  const { previewNode } = useNodePreviewControl({ canvasId });
+  const { setNodes, setEdges } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
     setEdges: state.setEdges,
-    addNodePreview: state.addNodePreview,
   }));
 
   const reactFlowInstance = useReactFlow();
@@ -235,7 +236,7 @@ export const useAddNode = () => {
         (newNode.type === 'resource' && shouldPreview) ||
         (['skillResponse', 'codeArtifact', 'website'].includes(newNode.type) && shouldPreview)
       ) {
-        addNodePreview(canvasId, newNode);
+        previewNode(newNode as unknown as CanvasNode);
         locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: newNode.id });
       }
     },
@@ -246,7 +247,7 @@ export const useAddNode = () => {
       edgeStyles,
       setSelectedNode,
       setNodeCenter,
-      addNodePreview,
+      previewNode,
       t,
       calculatePosition,
       layoutBranchAndUpdatePositions,

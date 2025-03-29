@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Editor, { Monaco, loader } from '@monaco-editor/react';
-import { CodeArtifactType } from '../types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 import debounce from 'lodash.debounce';
 import { useTranslation } from 'react-i18next';
 import './monaco-editor.scss';
@@ -158,7 +158,8 @@ const MonacoEditor = ({
       const model = editorRef.current.getModel();
       if (model && model.getValue() !== content) {
         // Use setValueUnflushed for better performance when setting content
-        model.setValueUnflushed(content);
+        console.log('model', model);
+        model.setValueUnflushed?.(content);
       }
     }
   }, [content, isEditorReady]);

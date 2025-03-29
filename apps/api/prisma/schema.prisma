@@ -462,6 +462,33 @@ model Document {
   @@map("documents")
 }
 
+model CodeArtifact {
+  /// Primary key
+  pk                BigInt    @id @default(autoincrement())
+  /// Code artifact id
+  artifactId        String    @unique @map("artifact_id")
+  /// UID
+  uid               String    @map("uid")
+  /// Title
+  title             String    @default("") @map("title")
+  /// Type
+  type              String?   @map("type")
+  /// Language
+  language          String?   @map("language")
+  /// Code content storage key
+  storageKey        String    @map("storage_key")
+  /// Preview storage key
+  previewStorageKey String?   @map("preview_storage_key")
+  /// Create timestamp
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@map("code_artifacts")
+}
+
 model ShareRecord {
   /// Primary key
   pk               BigInt    @id @default(autoincrement())

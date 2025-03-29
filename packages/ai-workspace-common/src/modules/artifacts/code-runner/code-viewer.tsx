@@ -4,7 +4,7 @@ import { Button, Tooltip, Divider, message, Select } from 'antd';
 import Renderer from './render';
 import MonacoEditor from './render/MonacoEditor';
 import { useTranslation } from 'react-i18next';
-import { CodeArtifactType } from './types';
+import { CodeArtifactType } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
@@ -193,37 +193,11 @@ export default memo(
         const loadingMessage = message.loading(t('codeArtifact.sharing'), 0);
 
         try {
-          // Prepare the JSON content
-          const fileContent = JSON.stringify({
-            content: editorContent,
-            type,
-            title,
-            language,
-          });
-
-          // Create a blob with the JSON content
-          const jsonBlob = new Blob([fileContent], { type: 'application/json' });
-
-          // Upload the file
-          const { data: uploadData, error: uploadError } = await getClient().upload({
-            body: {
-              file: jsonBlob,
-              visibility: 'public',
-            },
-          });
-
-          if (uploadError || !uploadData?.data?.storageKey) {
-            throw new Error(
-              typeof uploadError === 'string' ? uploadError : 'Failed to upload code',
-            );
-          }
-
           // Create the share
           const { data, error } = await getClient().createShare({
             body: {
               entityId,
               entityType: 'codeArtifact',
-              shareDataStorageKey: uploadData.data.storageKey,
             },
           });
 

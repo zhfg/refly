@@ -1,4 +1,4 @@
-import { useState, memo, useCallback, useEffect } from 'react';
+import { useState, memo, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CanvasNode,
@@ -6,15 +6,19 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import CodeViewerLayout from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer-layout';
 import CodeViewer from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/code-viewer';
-import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { ConfigScope, Skill } from '@refly/openapi-schema';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/types';
+import { ConfigScope, Skill, CodeArtifactType, CodeArtifact } from '@refly/openapi-schema';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { fullscreenEmitter } from '@refly-packages/ai-workspace-common/events/fullscreen';
+import { codeArtifactEmitter } from '@refly-packages/ai-workspace-common/events/codeArtifact';
+import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useDebouncedCallback } from 'use-debounce';
+import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface CodeArtifactNodePreviewProps {
   node: CanvasNode<CodeArtifactNodeMeta>;
@@ -24,76 +28,75 @@ interface CodeArtifactNodePreviewProps {
 const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNodePreviewProps) => {
   const { t } = useTranslation();
   const [isShowingCodeViewer, setIsShowingCodeViewer] = useState(true);
-  const setNodeDataByEntity = useSetNodeDataByEntity();
   const { addNode } = useAddNode();
   const { readonly: canvasReadOnly } = useCanvasContext();
+  const isLogin = useUserStoreShallow((state) => state.isLogin);
+
   // Use activeTab from node metadata with fallback to 'code'
   const { activeTab = 'code', type = 'text/html', language = 'html' } = node.data?.metadata || {};
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
   const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
-  const data = node?.data;
 
-  // Sync local state with node metadata changes
+  const status = node?.data?.metadata?.status;
+  const entityId = node?.data?.entityId ?? '';
+  const shareId = node?.data?.metadata?.shareId ?? '';
+
+  const { data: remoteData, isLoading: isRemoteLoading } = useGetCodeArtifactDetail(
+    {
+      query: {
+        artifactId,
+      },
+    },
+    null,
+    { enabled: isLogin && !shareId && artifactId && status?.startsWith('finish') },
+  );
+  const { data: shareData, loading: isShareLoading } = useFetchShareData<CodeArtifact>(shareId);
+
+  const isLoading = isRemoteLoading || isShareLoading;
+
+  const artifactData = useMemo(
+    () => shareData || remoteData?.data || null,
+    [shareData, remoteData],
+  );
+  const [content, setContent] = useState(artifactData?.content ?? '');
+
   useEffect(() => {
-    // Only update if activeTab changes and is different from current state
-    const metadataActiveTab = node.data?.metadata?.activeTab as 'code' | 'preview';
-    if (metadataActiveTab && metadataActiveTab !== currentTab) {
-      setCurrentTab(metadataActiveTab);
-    }
+    const handleContentUpdate = (data: { artifactId: string; content: string }) => {
+      if (data.artifactId === artifactId && status === 'generating') {
+        setContent(data.content);
+      }
+    };
 
-    // Update type if it changes in metadata
-    const metadataType = node.data?.metadata?.type as CodeArtifactType;
-    if (metadataType && metadataType !== currentType) {
-      setCurrentType(metadataType);
+    const handleStatusUpdate = (data: { artifactId: string; status: 'finish' | 'generating' }) => {
+      if (data.artifactId === artifactId) {
+        setCurrentTab(data.status === 'finish' ? 'preview' : 'code');
+      }
+    };
+
+    codeArtifactEmitter.on('contentUpdate', handleContentUpdate);
+    codeArtifactEmitter.on('statusUpdate', handleStatusUpdate);
+
+    return () => {
+      codeArtifactEmitter.off('contentUpdate', handleContentUpdate);
+      codeArtifactEmitter.off('statusUpdate', handleStatusUpdate);
+    };
+  }, [status, artifactId]);
+
+  useEffect(() => {
+    if (artifactData) {
+      setContent(artifactData.content);
     }
-  }, [node.data?.metadata?.activeTab, node.data?.metadata?.type]);
+  }, [artifactData]);
 
   // Update node data when tab changes
-  const handleTabChange = useCallback(
-    (tab: 'code' | 'preview') => {
-      setCurrentTab(tab);
+  const handleTabChange = useCallback((tab: 'code' | 'preview') => {
+    setCurrentTab(tab);
+  }, []);
 
-      // if (node.data?.entityId) {
-      //   setNodeDataByEntity(
-      //     {
-      //       type: 'codeArtifact',
-      //       entityId: node.data.entityId,
-      //     },
-      //     {
-      //       metadata: {
-      //         ...node.data?.metadata,
-      //         activeTab: tab,
-      //       },
-      //     },
-      //   );
-      // }
-    },
-    [node.data?.entityId, node.data?.metadata, setNodeDataByEntity],
-  );
-
-  const handleTypeChange = useCallback(
-    (newType: CodeArtifactType) => {
-      // Update local state first
-      setCurrentType(newType);
-
-      // Ensure newType is a valid CodeArtifactType
-      // if (data?.entityId && newType) {
-      //   setNodeDataByEntity(
-      //     {
-      //       type: 'codeArtifact',
-      //       entityId: data.entityId,
-      //     },
-      //     {
-      //       metadata: {
-      //         ...data?.metadata,
-      //         type: newType,
-      //       },
-      //     },
-      //   );
-      // }
-    },
-    [data?.entityId, data?.metadata, setNodeDataByEntity, setCurrentType],
-  );
+  const handleTypeChange = useCallback((newType: CodeArtifactType) => {
+    // Update local state first
+    setCurrentType(newType);
+  }, []);
 
   const handleRequestFix = useCallback(
     (errorMessage: string) => {
@@ -159,7 +162,7 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
           },
         },
         // Connect the skill node to the code artifact node
-        [{ type: 'codeArtifact', entityId: node.data?.entityId ?? '' }],
+        [{ type: 'codeArtifact', entityId }],
         false,
         true,
       );
@@ -171,22 +174,25 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     setIsShowingCodeViewer(false);
   }, []);
 
+  const updateRemoteArtifact = useDebouncedCallback(async (newCode: string) => {
+    await getClient().updateCodeArtifact({
+      body: {
+        artifactId,
+        content: newCode,
+      },
+    });
+  }, 500);
+
   // Handle code changes
   const handleCodeChange = useCallback(
-    (newCode: string) => {
-      if (data?.entityId) {
-        setNodeDataByEntity(
-          {
-            type: 'codeArtifact',
-            entityId: data.entityId,
-          },
-          {
-            contentPreview: newCode,
-          },
-        );
+    async (newCode: string) => {
+      setContent(newCode);
+
+      if (status !== 'generating' && !canvasReadOnly) {
+        updateRemoteArtifact(newCode);
       }
     },
-    [data?.entityId, setNodeDataByEntity],
+    [status, canvasReadOnly],
   );
 
   if (!artifactId) {
@@ -199,9 +205,13 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
     );
   }
 
-  // Determine which content to show - prefer action result store content, fallback to document content
-  const content = node?.data?.contentPreview || '';
-  const isGenerating = node.data?.metadata?.status === 'generating';
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full grow items-center justify-center">
+        <div className="text-gray-500">{t('codeArtifact.shareLoading')}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full bg-white rounded px-4">
@@ -211,8 +221,8 @@ const CodeArtifactNodePreviewComponent = ({ node, artifactId }: CodeArtifactNode
             code={content}
             language={language}
             title={node.data?.title || t('codeArtifact.defaultTitle', 'Code Artifact')}
-            entityId={node.data?.entityId ?? ''}
-            isGenerating={isGenerating}
+            entityId={entityId}
+            isGenerating={status === 'generating'}
             activeTab={currentTab}
             onTabChange={handleTabChange}
             onTypeChange={handleTypeChange}
@@ -232,7 +242,6 @@ export const CodeArtifactNodePreview = memo(
   CodeArtifactNodePreviewComponent,
   (prevProps, nextProps) =>
     prevProps.artifactId === nextProps.artifactId &&
-    prevProps.node?.data?.contentPreview === nextProps.node?.data?.contentPreview &&
     prevProps.node?.data?.metadata?.status === nextProps.node?.data?.metadata?.status &&
     prevProps.node?.data?.metadata?.language === nextProps.node?.data?.metadata?.language &&
     prevProps.node?.data?.metadata?.activeTab === nextProps.node?.data?.metadata?.activeTab &&

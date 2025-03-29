@@ -18,7 +18,7 @@ import {
 
 import { PreviewChatInput } from './preview-chat-input';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { EditChatInput } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/edit-chat-input';
 import { cn } from '@refly-packages/utils/cn';
@@ -31,6 +31,7 @@ import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { processContentPreview } from '@refly-packages/ai-workspace-common/utils/content';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -73,7 +74,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
   }));
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
 
@@ -83,6 +84,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const { canvasId, readonly } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
+  const { resetFailedState } = useActionPolling();
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
@@ -195,6 +197,18 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   }, [node, deleteNode]);
 
   const handleRetry = useCallback(() => {
+    // Reset failed state before retrying
+    resetFailedState(resultId);
+
+    // Update node status immediately to show "waiting" state
+    patchNodeData(node.id, {
+      ...node.data,
+      metadata: {
+        ...node.data?.metadata,
+        status: 'waiting',
+      },
+    });
+
     invokeAction(
       {
         resultId,
@@ -209,7 +223,16 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
         entityType: 'canvas',
       },
     );
-  }, [resultId, title, canvasId, invokeAction]);
+  }, [
+    resultId,
+    title,
+    canvasId,
+    invokeAction,
+    resetFailedState,
+    patchNodeData,
+    node.id,
+    node.data,
+  ]);
 
   useEffect(() => {
     const handleLocateToPreview = (event: { id: string; type?: 'editResponse' }) => {

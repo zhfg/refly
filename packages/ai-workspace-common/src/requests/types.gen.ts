@@ -1002,6 +1002,24 @@ export type Artifact = {
    * Artifact status
    */
   status?: ArtifactStatus;
+  /**
+   * Artifact content
+   */
+  content?: string;
+  /**
+   * Artifact metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Artifact creation time
+   */
+  createdAt?: string;
+  /**
+   * Artifact update time
+   */
+  updatedAt?: string;
 };
 
 /**
@@ -1070,6 +1088,45 @@ export type ActionStep = {
    * Token usage
    */
   tokenUsage?: Array<TokenUsageItem>;
+};
+
+/**
+ * Code artifact type
+ */
+export type CodeArtifactType =
+  | 'application/refly.artifacts.react'
+  | 'image/svg+xml'
+  | 'application/refly.artifacts.mermaid'
+  | 'text/markdown'
+  | 'application/refly.artifacts.code'
+  | 'text/html';
+
+/**
+ * Code artifact
+ */
+export type CodeArtifact = {
+  /**
+   * Artifact type
+   */
+  type: CodeArtifactType;
+  /**
+   * Artifact ID
+   */
+  artifactId: string;
+  /**
+   * Artifact title
+   */
+  title: string;
+  /**
+   * Code artifact content
+   */
+  content?: string;
+  /**
+   * Code artifact language
+   */
+  language?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 /**
@@ -2090,6 +2147,45 @@ export type ShareRecord = {
   updatedAt?: string;
 };
 
+export type UpsertCodeArtifactRequest = {
+  /**
+   * Code artifact ID (not needed for creation)
+   */
+  artifactId?: string;
+  /**
+   * Code artifact title
+   */
+  title?: string;
+  /**
+   * Code artifact type
+   */
+  type?: string;
+  /**
+   * Code artifact content
+   */
+  content?: string;
+  /**
+   * Code artifact language
+   */
+  language?: string;
+  /**
+   * Code artifact preview storage key
+   */
+  previewStorageKey?: string;
+  /**
+   * Whether to create the code artifact if it does not exist
+   */
+  createIfNotExists?: boolean;
+};
+
+export type UpsertCodeArtifactResponse = BaseResponse & {
+  data?: CodeArtifact;
+};
+
+export type GetCodeArtifactDetailResponse = BaseResponse & {
+  data?: CodeArtifact;
+};
+
 export type CreateShareRequest = {
   /**
    * Entity type
@@ -2760,6 +2856,10 @@ export type UpdateUserSettingsRequest = {
    * User avatar
    */
   avatar?: string;
+  /**
+   * User avatar storage key
+   */
+  avatarStorageKey?: string;
   /**
    * UI locale
    */
@@ -3739,6 +3839,35 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
+
+export type GetCodeArtifactDetailData = {
+  query: {
+    /**
+     * Artifact ID
+     */
+    artifactId: string;
+  };
+};
+
+export type GetCodeArtifactDetailResponse2 = GetCodeArtifactDetailResponse;
+
+export type GetCodeArtifactDetailError = unknown;
+
+export type CreateCodeArtifactData = {
+  body: UpsertCodeArtifactRequest;
+};
+
+export type CreateCodeArtifactResponse = UpsertCodeArtifactResponse;
+
+export type CreateCodeArtifactError = unknown;
+
+export type UpdateCodeArtifactData = {
+  body: UpsertCodeArtifactRequest;
+};
+
+export type UpdateCodeArtifactResponse = UpsertCodeArtifactResponse;
+
+export type UpdateCodeArtifactError = unknown;
 
 export type CreateShareData = {
   body: CreateShareRequest;

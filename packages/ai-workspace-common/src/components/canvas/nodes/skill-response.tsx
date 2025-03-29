@@ -270,7 +270,7 @@ export const SkillResponseNode = memo(
       version,
     } = metadata ?? {};
 
-    const { startPolling } = useActionPolling();
+    const { startPolling, resetFailedState } = useActionPolling();
 
     useEffect(() => {
       if (
@@ -340,10 +340,16 @@ export const SkillResponseNode = memo(
 
       updateSize({ width: 288, height: 'auto' });
 
+      // Reset failed state if the action previously failed
+      if (data?.metadata?.status === 'failed') {
+        resetFailedState(entityId);
+      }
+
       patchNodeData(id, {
         ...data,
         contentPreview: '',
         metadata: {
+          ...data?.metadata,
           status: 'waiting',
         },
       });
@@ -360,7 +366,19 @@ export const SkillResponseNode = memo(
           entityId: canvasId,
         },
       );
-    }, [data, entityId, canvasId, id, title, t, updateSize, invokeAction, patchNodeData, readonly]);
+    }, [
+      data,
+      entityId,
+      canvasId,
+      id,
+      title,
+      t,
+      updateSize,
+      invokeAction,
+      patchNodeData,
+      readonly,
+      resetFailedState,
+    ]);
 
     const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {

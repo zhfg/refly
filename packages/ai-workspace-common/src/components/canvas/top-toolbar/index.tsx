@@ -147,7 +147,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
                 icon={<LuBookCopy className="flex items-center" />}
                 onClick={handleDuplicate}
               >
-                {t('common.duplicate')}
+                {t('template.duplicateCanvas')}
               </Button>
               <Button
                 type="primary"
