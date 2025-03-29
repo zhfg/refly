@@ -2225,7 +2225,7 @@ const translations = {
   },
   project: {
     create: 'Create Project',
-    addSource: 'Add Source',
+    addSource: 'Add File',
     canvas: 'Canvas',
     source: 'File',
     noDescription: 'Quickly fill in the description ~',
