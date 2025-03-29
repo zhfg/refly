@@ -1103,9 +1103,20 @@ const translations = {
       },
     },
     reflyPilot: {
-      title: '问问 AI',
+      title: '问 AI',
       newConversation: '新会话',
       clearConversation: '清空会话',
+      welcome: {
+        title: '你好，{{name}}!',
+        subtitle: '今天我能帮您做什么？',
+        suggestions: [
+          '总结这篇文章',
+          '为我的项目生成创意',
+          '帮我写一篇博客',
+          '解释这个概念',
+          '为我起草一封电子邮件',
+        ],
+      },
     },
   },
   resource: {

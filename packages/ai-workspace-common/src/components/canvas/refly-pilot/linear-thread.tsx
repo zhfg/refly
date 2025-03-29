@@ -1,6 +1,10 @@
 import { memo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Avatar } from 'antd';
 import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { AiOutlineUser } from 'react-icons/ai';
 
 interface LinearThreadContentProps {
   messages: LinearThreadMessage[];
@@ -17,6 +21,41 @@ const MemoizedSkillResponseNodePreview = memo(SkillResponseNodePreview, (prevPro
 });
 
 MemoizedSkillResponseNodePreview.displayName = 'MemoizedSkillResponseNodePreview';
+
+const EmptyThreadWelcome = memo(() => {
+  const { t } = useTranslation();
+  const { userProfile } = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+  }));
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6 py-8 text-gray-700">
+      <div className="w-full max-w-lg mx-auto rounded-xl overflow-hidden p-6 border border-gray-100 transition-all duration-300 hover:shadow-md">
+        <div className="flex items-center justify-center mb-6">
+          <div className="relative">
+            <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary-300 to-primary-600 opacity-75 blur-sm" />
+            <Avatar
+              size={64}
+              src={userProfile?.avatar}
+              className="relative border-2 border-white shadow-md"
+              icon={<AiOutlineUser />}
+            />
+          </div>
+        </div>
+
+        <h3 className="text-xl font-semibold text-center text-gray-800 mb-1">
+          {t('canvas.reflyPilot.welcome.title', { name: userProfile?.nickname || '' })}
+        </h3>
+
+        <p className="text-base text-center text-gray-600 mb-6">
+          {t('canvas.reflyPilot.welcome.subtitle')}
+        </p>
+      </div>
+    </div>
+  );
+});
+
+EmptyThreadWelcome.displayName = 'EmptyThreadWelcome';
 
 export const LinearThreadContent = memo(
   ({ messages, contentHeight, className = '' }: LinearThreadContentProps) => {
@@ -36,13 +75,11 @@ export const LinearThreadContent = memo(
     return (
       <div
         ref={messagesContainerRef}
-        className={`flex-grow overflow-auto preview-container ${className}`}
+        className={`flex-grow overflow-auto message-container ${className}`}
         style={{ height: contentHeight, width: '100%' }}
       >
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full p-4 text-gray-500">
-            <p className="text-sm">No messages yet</p>
-          </div>
+          <EmptyThreadWelcome />
         ) : (
           <div className="flex flex-col divide-y">
             {messages.map((message) => (

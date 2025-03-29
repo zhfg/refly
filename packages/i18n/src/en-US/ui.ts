@@ -1130,6 +1130,17 @@ const translations = {
       title: 'Ask AI',
       newConversation: 'New conversation',
       clearConversation: 'Clear conversation',
+      welcome: {
+        title: 'Hello, {{name}}!',
+        subtitle: 'What can I help you with today?',
+        suggestions: [
+          'Summarize this article',
+          'Generate ideas for my project',
+          'Help me write a blog post',
+          'Explain this concept',
+          'Draft an email for me',
+        ],
+      },
     },
   },
   resource: {
