@@ -92,6 +92,8 @@ export const SkillNode = memo(
     } = metadata;
     const skill = useFindSkill(selectedSkill?.name);
 
+    console.log('tplConfig', tplConfig);
+
     const [localQuery, setLocalQuery] = useState(query);
 
     // Check if node has any connections

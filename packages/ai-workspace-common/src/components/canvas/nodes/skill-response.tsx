@@ -443,7 +443,12 @@ export const SkillResponseNode = memo(
 
     const handleAskAI = useCallback(() => {
       const { metadata } = data;
-      const { actionMeta, modelInfo, contextItems: responseContextItems = [] } = metadata;
+      const {
+        actionMeta,
+        modelInfo,
+        contextItems: responseContextItems = [],
+        tplConfig,
+      } = metadata;
 
       // Create new context items array that includes both the response and its context
       const mergedContextItems = [
@@ -483,9 +488,11 @@ export const SkillResponseNode = memo(
               title: 'Skill',
               entityId: genSkillID(),
               metadata: {
+                ...metadata,
                 contextItems: mergedContextItems,
                 selectedSkill: actionMeta,
                 modelInfo,
+                tplConfig,
               },
             },
           },
