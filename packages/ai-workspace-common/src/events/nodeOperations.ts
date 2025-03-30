@@ -11,6 +11,11 @@ export type Events = {
     shouldPreview?: boolean;
     needSetCenter?: boolean;
   };
+  jumpToDescendantNode: {
+    entityId: string;
+    descendantNodeType: CanvasNodeType;
+    shouldPreview?: boolean;
+  };
 };
 
 export const nodeOperationsEmitter = mitt<Events>();
