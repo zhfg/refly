@@ -81,7 +81,7 @@ export const LinearThreadContent = memo(
         {messages.length === 0 ? (
           <EmptyThreadWelcome />
         ) : (
-          <div className="flex flex-col divide-y">
+          <div className="flex flex-col divide-y max-w-[1024px] mx-auto">
             {messages.map((message, index) => (
               <>
                 <div key={message.id}>
@@ -95,7 +95,9 @@ export const LinearThreadContent = memo(
                     resultId={message.resultId}
                   />
                 </div>
-                {index !== messages?.length ? <Divider key={`divider-${index}`} /> : null}
+                {index !== messages?.length ? (
+                  <Divider key={`divider-${index}`} className="max-w-[1024px] mx-auto" />
+                ) : null}
               </>
             ))}
           </div>
