@@ -212,57 +212,6 @@ export const ChatPanel = memo(
       }
     }, [readonly]);
 
-    const configManagerComponent = useMemo(() => {
-      if (!selectedSkill?.configSchema?.items?.length || !setTplConfig) {
-        return null;
-      }
-
-      // Create a stable key based on skill and config content
-      const configKey = `${selectedSkill?.name}-${Object.keys(initialTplConfig).length}`;
-
-      return (
-        <ConfigManager
-          key={configKey}
-          form={form}
-          formErrors={formErrors}
-          setFormErrors={setFormErrors}
-          schema={selectedSkill?.configSchema}
-          tplConfig={initialTplConfig}
-          fieldPrefix="tplConfig"
-          configScope="runtime"
-          onExpandChange={(_expanded) => {
-            if (onInputHeightChange) {
-              setTimeout(onInputHeightChange, 0);
-            }
-          }}
-          resetConfig={() => {
-            // Use setTimeout to move outside of React's render cycle
-            setTimeout(() => {
-              const defaultConfig = selectedSkill?.tplConfig ?? {};
-              form.setFieldValue('tplConfig', defaultConfig);
-            }, 0);
-          }}
-          onFormValuesChange={(_, allValues) => {
-            // Debounce form value changes to prevent cascading updates
-            const newConfig = allValues.tplConfig;
-            if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
-              handleTplConfigChange(newConfig);
-            }
-          }}
-        />
-      );
-    }, [
-      selectedSkill?.configSchema,
-      selectedSkill?.name,
-      selectedSkill?.tplConfig,
-      form,
-      formErrors,
-      initialTplConfig,
-      setTplConfig,
-      onInputHeightChange,
-      handleTplConfigChange,
-    ]);
-
     const renderContent = () => (
       <>
         <ContextManager
@@ -293,7 +242,37 @@ export const ChatPanel = memo(
           onUploadImage={handleImageUpload}
         />
 
-        {configManagerComponent}
+        {selectedSkill?.configSchema?.items?.length && setTplConfig ? (
+          <ConfigManager
+            key={`${selectedSkill?.name}-${Object.keys(initialTplConfig).length}`}
+            form={form}
+            formErrors={formErrors}
+            setFormErrors={setFormErrors}
+            schema={selectedSkill?.configSchema}
+            tplConfig={initialTplConfig}
+            fieldPrefix="tplConfig"
+            configScope="runtime"
+            onExpandChange={(_expanded) => {
+              if (onInputHeightChange) {
+                setTimeout(onInputHeightChange, 0);
+              }
+            }}
+            resetConfig={() => {
+              // Use setTimeout to move outside of React's render cycle
+              setTimeout(() => {
+                const defaultConfig = selectedSkill?.tplConfig ?? {};
+                form.setFieldValue('tplConfig', defaultConfig);
+              }, 0);
+            }}
+            onFormValuesChange={(_, allValues) => {
+              // Debounce form value changes to prevent cascading updates
+              const newConfig = allValues.tplConfig;
+              if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
+                handleTplConfigChange(newConfig);
+              }
+            }}
+          />
+        ) : null}
 
         <ChatActions
           className={classNames({
