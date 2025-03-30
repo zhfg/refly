@@ -113,10 +113,15 @@ export const CanvasProvider = ({
   // Set canvas data from API response when in readonly mode
   useEffect(() => {
     if (readonly && canvasData) {
+      const { nodeLookup, parentLookup, connectionLookup, edgeLookup } = getState();
       const { nodes, edges } = canvasData;
       const internalState = getInternalState({
         nodes: nodes && Array.isArray(nodes) ? (nodes as unknown as Node[]) : [],
         edges: edges && Array.isArray(edges) ? (edges as unknown as Edge[]) : [],
+        nodeLookup,
+        parentLookup,
+        connectionLookup,
+        edgeLookup,
       });
       setState(internalState);
     }
