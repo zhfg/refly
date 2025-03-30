@@ -122,6 +122,7 @@ const PreCode = React.memo(
         language: artifactLanguage,
         type: artifactType,
         title,
+        connectTo: [{ type: 'skillResponse', entityId: id }],
       });
     }, [language, codeType, id, t, codeContent, isInteractive, isMermaid]);
 
