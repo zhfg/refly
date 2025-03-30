@@ -20,6 +20,8 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useNodesData } from '@xyflow/react';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { detectActualTypeFromType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
 
 interface CodeArtifactNodePreviewProps {
   nodeId: string;
@@ -31,6 +33,7 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
   const { addNode } = useAddNode();
   const { readonly: canvasReadOnly } = useCanvasContext();
   const isLogin = useUserStoreShallow((state) => state.isLogin);
+  const setNodeDataByEntity = useSetNodeDataByEntity();
 
   const { data } = useNodesData<CanvasNode<CodeArtifactNodeMeta>>(nodeId) ?? {};
 
@@ -46,6 +49,10 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
 
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
   const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
+
+  console.log('data', data);
+  console.log('currentType', currentType);
+  console.log('currentTab', currentTab);
 
   const { data: remoteData, isLoading: isRemoteLoading } = useGetCodeArtifactDetail(
     {
@@ -67,6 +74,18 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
   const [content, setContent] = useState(artifactData?.content ?? '');
 
   useEffect(() => {
+    if (type !== currentType) {
+      setCurrentType(detectActualTypeFromType(type));
+    }
+  }, [type]);
+
+  useEffect(() => {
+    if (activeTab !== currentTab) {
+      setCurrentTab(activeTab);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
     const handleContentUpdate = (data: { artifactId: string; content: string }) => {
       if (data.artifactId === artifactId) {
         setContent(data.content);
@@ -78,11 +97,25 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
       status: 'finish' | 'generating';
       type: CodeArtifactType;
     }) => {
+      console.log('handleStatusUpdate', data);
       if (data.artifactId === artifactId) {
         setCurrentTab(data.status === 'finish' ? 'preview' : 'code');
 
         if (data?.type !== currentType) {
-          setCurrentType(data?.type);
+          setCurrentType(detectActualTypeFromType(data?.type));
+        }
+
+        // Save to node metadata when status updates
+        if (artifactId) {
+          setNodeDataByEntity(
+            { type: 'codeArtifact', entityId: artifactId },
+            {
+              metadata: {
+                activeTab: data.status === 'finish' ? 'preview' : 'code',
+                type: detectActualTypeFromType(data?.type),
+              },
+            },
+          );
         }
       }
     };
@@ -94,7 +127,7 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
       codeArtifactEmitter.off('contentUpdate', handleContentUpdate);
       codeArtifactEmitter.off('statusUpdate', handleStatusUpdate);
     };
-  }, [status, artifactId]);
+  }, [status, artifactId, currentType, setNodeDataByEntity]);
 
   useEffect(() => {
     if (artifactData) {
@@ -103,14 +136,36 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
   }, [artifactData]);
 
   // Update node data when tab changes
-  const handleTabChange = useCallback((tab: 'code' | 'preview') => {
-    setCurrentTab(tab);
-  }, []);
+  const handleTabChange = useCallback(
+    (tab: 'code' | 'preview') => {
+      setCurrentTab(tab);
 
-  const handleTypeChange = useCallback((newType: CodeArtifactType) => {
-    // Update local state first
-    setCurrentType(newType);
-  }, []);
+      // Save tab change to node metadata
+      if (artifactId) {
+        setNodeDataByEntity(
+          { type: 'codeArtifact', entityId: artifactId },
+          { metadata: { activeTab: tab } },
+        );
+      }
+    },
+    [artifactId, setNodeDataByEntity],
+  );
+
+  const handleTypeChange = useCallback(
+    (newType: CodeArtifactType) => {
+      // Update local state first
+      setCurrentType(newType);
+
+      // Save type change to node metadata
+      if (artifactId) {
+        setNodeDataByEntity(
+          { type: 'codeArtifact', entityId: artifactId },
+          { metadata: { type: newType } },
+        );
+      }
+    },
+    [artifactId, setNodeDataByEntity],
+  );
 
   const handleRequestFix = useCallback(
     (errorMessage: string) => {
@@ -204,17 +259,23 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
 
       if (status !== 'generating' && !canvasReadOnly) {
         updateRemoteArtifact(newCode);
+
+        // Optionally save content to node metadata for persistence
+        if (artifactId) {
+          setNodeDataByEntity(
+            { type: 'codeArtifact', entityId: artifactId },
+            { metadata: { localContent: newCode } },
+          );
+        }
       }
     },
-    [status, canvasReadOnly],
+    [status, canvasReadOnly, artifactId, updateRemoteArtifact, setNodeDataByEntity],
   );
 
   if (!artifactId) {
     return (
       <div className="h-full flex items-center justify-center bg-white rounded p-3">
-        <span className="text-gray-500">
-          {t('codeArtifact.noSelection', 'No code artifact selected')}
-        </span>
+        <span className="text-gray-500">{t('codeArtifact.noSelection')}</span>
       </div>
     );
   }

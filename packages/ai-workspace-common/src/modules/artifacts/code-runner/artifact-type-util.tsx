@@ -85,8 +85,8 @@ export const detectActualTypeFromType = (type: CodeArtifactType): CodeArtifactTy
 
   if (
     lowerContent.includes('mermaid') ||
-    lowerContent.includes('graph ') ||
-    lowerContent.includes('flowchart ')
+    lowerContent.includes('graph') ||
+    lowerContent.includes('flowchart')
   ) {
     return typeMapping.mermaid.mime;
   }
