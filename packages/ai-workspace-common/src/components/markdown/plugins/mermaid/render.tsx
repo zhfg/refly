@@ -294,6 +294,7 @@ const MermaidComponent = memo(
         title: `Mermaid Diagram (${diagramTitle})`,
         language: 'mermaid',
         type: 'application/refly.artifacts.mermaid',
+        connectTo: [{ type: 'skillResponse', entityId: id }],
       });
     }, [mermaidCode, diagramTitle, addNode, id, t, isInteractive]);
 
