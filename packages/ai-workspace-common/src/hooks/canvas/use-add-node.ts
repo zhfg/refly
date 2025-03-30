@@ -48,7 +48,7 @@ export const useAddNode = () => {
 
   const addNode = useCallback(
     (
-      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
+      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition; id?: string },
       connectTo?: CanvasNodeFilter[],
       shouldPreview = true,
       needSetCenter = false,
@@ -118,27 +118,9 @@ export const useAddNode = () => {
         type: node.type,
         data: enrichedData,
         position: newPosition,
-        selected: true,
+        selected: false,
+        id: node?.id,
       });
-
-      // Apply style based on nodeSizeMode
-      // if (nodeSizeMode === 'compact') {
-      //   newNode.style = {
-      //     ...newNode.style,
-      //     width: '288px',
-      //     height: 'auto',
-      //     maxHeight: '384px',
-      //   };
-      // } else if (nodeSizeMode === 'adaptive') {
-      //   // Safely access originalWidth with type checking
-      //   const width = (newNode.data.metadata as any)?.originalWidth || 288;
-      //   newNode.style = {
-      //     ...newNode.style,
-      //     width: `${width}px`,
-      //     height: 'auto',
-      //     maxHeight: undefined,
-      //   };
-      // }
 
       // Create updated nodes array with the new node
       const updatedNodes = deduplicateNodes([
@@ -170,37 +152,44 @@ export const useAddNode = () => {
         }
       }
 
-      // Update nodes and edges
+      // Update nodes to ensure they exist first
       adoptUserNodes(updatedNodes, nodeLookup, parentLookup, {
         elevateNodesOnSelect: false,
       });
-      setState({ nodes: updatedNodes, edges: updatedEdges });
+      setState({ nodes: updatedNodes });
 
-      // Apply branch layout if we're connecting to existing nodes
-      if (sourceNodes?.length > 0) {
-        // Use setTimeout to ensure the new node and edges are added before layout
-        setTimeout(() => {
-          // const { autoLayout } = useCanvasStore.getState();
-          const autoLayout = false;
-          if (!autoLayout) {
-            if (needSetCenter) {
-              setNodeCenter(newNode.id);
+      // Then update edges with a slight delay to ensure nodes are registered first
+      // This helps prevent the race condition where edges are created but nodes aren't ready
+      setTimeout(() => {
+        // Update edges separately
+        setState({ edges: updatedEdges });
+
+        // Apply branch layout if we're connecting to existing nodes
+        if (sourceNodes?.length > 0) {
+          // Use setTimeout to ensure the new node and edges are added before layout
+          setTimeout(() => {
+            // const { autoLayout } = useCanvasStore.getState();
+            const autoLayout = false;
+            if (!autoLayout) {
+              if (needSetCenter) {
+                setNodeCenter(newNode.id);
+              }
+
+              return;
             }
 
-            return;
-          }
-
-          layoutBranchAndUpdatePositions(
-            sourceNodes,
-            updatedNodes,
-            updatedEdges,
-            {},
-            { needSetCenter: needSetCenter, targetNodeId: newNode.id },
-          );
-        }, 0);
-      } else if (needSetCenter) {
-        setNodeCenter(newNode.id);
-      }
+            layoutBranchAndUpdatePositions(
+              sourceNodes,
+              updatedNodes,
+              updatedEdges,
+              {},
+              { needSetCenter: needSetCenter, targetNodeId: newNode.id },
+            );
+          }, 50);
+        } else if (needSetCenter) {
+          setNodeCenter(newNode.id);
+        }
+      }, 10);
 
       if (
         newNode.type === 'document' ||

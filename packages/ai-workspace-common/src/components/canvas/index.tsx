@@ -14,7 +14,6 @@ import {
 } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 import { nodeTypes, CanvasNode } from './nodes';
-import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreviewContainer } from './node-preview';
@@ -63,6 +62,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
 import HelperLines from './common/helper-line/index';
 
 const GRID_SIZE = 10;
@@ -181,10 +181,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }
   }, [canvasId, truncateAllNodesContent]);
 
-  const { showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
+  const { showPreview } = useCanvasStoreShallow((state) => ({
     showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
   }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } =
@@ -237,6 +235,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     },
     [setLocalSettings, isLogin, updateSettings],
   );
+
+  // Use the reset hook to handle canvas ID changes
+  useReflyPilotReset(canvasId);
 
   useEffect(() => {
     return () => {
@@ -452,7 +453,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
 
             if (previewContainer && targetPreview) {
-              targetPreview.scrollIntoView({
+              targetPreview?.scrollIntoView?.({
                 behavior: 'smooth',
                 block: 'nearest',
                 inline: 'center',
@@ -581,16 +582,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Memoize nodes and edges
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedEdges = useMemo(() => edges, [edges]);
-
-  // Memoize LaunchPad component
-  const memoizedLaunchPad = useMemo(
-    () => (
-      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-        <LaunchPad visible={!readonly && showLaunchpad} />
-      </div>
-    ),
-    [readonly, showLaunchpad],
-  );
 
   // Memoize MiniMap styles
   const miniMapStyles = useMemo(
@@ -927,8 +918,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             changeMode={toggleInteractionMode}
             readonly={readonly}
           />
-
-          {memoizedLaunchPad}
         </div>
 
         {/* Display the not found overlay when shareNotFound is true */}
@@ -937,9 +926,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         {showPreview && (
           <div
             ref={previewContainerRef}
-            className="absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container"
+            className="absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container z-20"
             style={{
-              maxWidth: showMaxRatio ? '900px' : '440px',
+              maxWidth: 'calc(100% - 12px)',
             }}
             onScroll={(e) => updateIndicators(e.currentTarget)}
           >
