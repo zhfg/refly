@@ -336,6 +336,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = memo(
                 source="skillResponsePreview"
                 query={node.data?.title || ''}
                 disabled={readonly}
+                showIcon
                 updateTitle={handleTitleUpdate}
               />
             ) : (

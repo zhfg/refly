@@ -3,6 +3,7 @@ import {
   ActionStep,
   ActionStepMeta,
   Artifact,
+  CodeArtifactType,
   Entity,
   InvokeSkillRequest,
   SkillEvent,
@@ -32,6 +33,7 @@ import { ARTIFACT_TAG_CLOSED_REGEX, getArtifactContentAndAttributes } from '@ref
 import { useFindWebsite } from './use-find-website';
 import { codeArtifactEmitter } from '@refly-packages/ai-workspace-common/events/codeArtifact';
 import { useReactFlow } from '@xyflow/react';
+import { detectActualTypeFromType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -127,6 +129,8 @@ export const useInvokeAction = () => {
         (node) => node.data?.entityId === artifact.entityId && node.type === artifact.type,
       );
 
+      const actualType = detectActualTypeFromType(type as CodeArtifactType);
+
       // If node doesn't exist, create it
       if (!existingNode) {
         addNode(
@@ -139,7 +143,7 @@ export const useInvokeAction = () => {
               metadata: {
                 status: 'generating',
                 language: language || 'typescript', // Use extracted language or default
-                type: type || '', // Use extracted type if available
+                type: actualType || 'text/markdown', // Use extracted type if available
                 title: title || artifact?.title || '',
               },
             },
@@ -159,6 +163,7 @@ export const useInvokeAction = () => {
         codeArtifactEmitter.emit('statusUpdate', {
           artifactId: artifact.entityId,
           status: 'finish',
+          type: actualType || 'text/markdown',
         });
       }
 

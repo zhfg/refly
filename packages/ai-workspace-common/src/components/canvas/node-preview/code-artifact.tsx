@@ -73,9 +73,17 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
       }
     };
 
-    const handleStatusUpdate = (data: { artifactId: string; status: 'finish' | 'generating' }) => {
+    const handleStatusUpdate = (data: {
+      artifactId: string;
+      status: 'finish' | 'generating';
+      type: CodeArtifactType;
+    }) => {
       if (data.artifactId === artifactId) {
         setCurrentTab(data.status === 'finish' ? 'preview' : 'code');
+
+        if (data?.type !== currentType) {
+          setCurrentType(data?.type);
+        }
       }
     };
 
