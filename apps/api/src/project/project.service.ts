@@ -43,11 +43,6 @@ export class ProjectService {
         uid: user.uid,
         deletedAt: null,
       },
-      include: {
-        canvases: true,
-        documents: true,
-        resources: true,
-      },
     });
 
     if (!project) {

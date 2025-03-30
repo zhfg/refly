@@ -412,18 +412,6 @@ export type Project = {
    */
   coverUrl?: string;
   /**
-   * Canvases
-   */
-  canvases?: Array<Canvas>;
-  /**
-   * Resources
-   */
-  resources?: Array<Resource>;
-  /**
-   * Documents
-   */
-  documents?: Array<Document>;
-  /**
    * Custom instructions for the project
    */
   customInstructions?: string;
@@ -1782,6 +1770,10 @@ export type DuplicateCanvasRequest = {
    * Custom canvas title
    */
   title?: string;
+  /**
+   * Project ID to bind with
+   */
+  projectId?: string;
   /**
    * Whether to duplicate entities within the canvas
    */
@@ -3619,6 +3611,10 @@ export type ListCanvasesData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Related project ID
+     */
+    projectId?: string;
   };
 };
 
@@ -3777,6 +3773,10 @@ export type ListResourcesData = {
      */
     pageSize?: number;
     /**
+     * Related project ID
+     */
+    projectId?: string;
+    /**
      * Resource ID
      */
     resourceId?: string;
@@ -3896,6 +3896,10 @@ export type ListDocumentsData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Related project ID
+     */
+    projectId?: string;
   };
 };
 

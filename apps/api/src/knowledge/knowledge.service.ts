@@ -112,12 +112,25 @@ export class KnowledgeService {
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { resourceId, resourceType, page = 1, pageSize = 10, order = 'creationDesc' } = param;
+    const {
+      resourceId,
+      resourceType,
+      projectId,
+      page = 1,
+      pageSize = 10,
+      order = 'creationDesc',
+    } = param;
 
     const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
 
     const resources = await this.prisma.resource.findMany({
-      where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
+      where: {
+        resourceId: resourceIdFilter,
+        resourceType,
+        uid: user.uid,
+        deletedAt: null,
+        projectId,
+      },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
@@ -781,7 +794,7 @@ export class KnowledgeService {
   }
 
   async listDocuments(user: User, param: ListDocumentsData['query']) {
-    const { page = 1, pageSize = 10, order = 'creationDesc' } = param;
+    const { page = 1, pageSize = 10, order = 'creationDesc', projectId } = param;
 
     const orderBy: Prisma.DocumentOrderByWithRelationInput = {};
     if (order === 'creationAsc') {
@@ -794,6 +807,7 @@ export class KnowledgeService {
       where: {
         uid: user.uid,
         deletedAt: null,
+        projectId,
       },
       skip: (page - 1) * pageSize,
       take: pageSize,

@@ -51,12 +51,13 @@ export class CanvasService {
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
-    const { page, pageSize } = param;
+    const { page = 1, pageSize = 10, projectId } = param;
 
     const canvases = await this.prisma.canvas.findMany({
       where: {
         uid: user.uid,
         deletedAt: null,
+        projectId,
       },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * pageSize,
@@ -169,7 +170,7 @@ export class CanvasService {
     param: DuplicateCanvasRequest,
     options?: { checkOwnership?: boolean },
   ) {
-    const { title, canvasId, duplicateEntities } = param;
+    const { title, canvasId, projectId, duplicateEntities } = param;
 
     const canvas = await this.prisma.canvas.findFirst({
       where: { canvasId, deletedAt: null, uid: options?.checkOwnership ? user.uid : undefined },
@@ -213,6 +214,7 @@ export class CanvasService {
         title: newTitle,
         status: 'duplicating',
         stateStorageKey,
+        projectId,
       },
     });
 

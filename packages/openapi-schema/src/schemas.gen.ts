@@ -479,27 +479,6 @@ export const ProjectSchema = {
       type: 'string',
       description: 'Project cover URL',
     },
-    canvases: {
-      type: 'array',
-      description: 'Canvases',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
-    resources: {
-      type: 'array',
-      description: 'Resources',
-      items: {
-        $ref: '#/components/schemas/Resource',
-      },
-    },
-    documents: {
-      type: 'array',
-      description: 'Documents',
-      items: {
-        $ref: '#/components/schemas/Document',
-      },
-    },
     customInstructions: {
       type: 'string',
       description: 'Custom instructions for the project',
@@ -2267,6 +2246,10 @@ export const DuplicateCanvasRequestSchema = {
     title: {
       type: 'string',
       description: 'Custom canvas title',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID to bind with',
     },
     duplicateEntities: {
       type: 'boolean',
