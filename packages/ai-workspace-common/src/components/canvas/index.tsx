@@ -53,7 +53,6 @@ import { CustomEdge } from './edges/custom-edge';
 import NotFoundOverlay from './NotFoundOverlay';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 import { useDragToCreateNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-drag-create-node';
-import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -64,6 +63,7 @@ import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-up
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
 import HelperLines from './common/helper-line/index';
+import { useListenNodeOperationEvents } from '@refly-packages/ai-workspace-common/hooks/canvas/use-listen-node-events';
 
 const GRID_SIZE = 10;
 
@@ -821,18 +821,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
 
   // Add event listener for node operations
-  useEffect(() => {
-    const handleAddNode = ({ node, connectTo, shouldPreview, needSetCenter }) => {
-      if (readonly) return;
-      addNode(node, connectTo, shouldPreview, needSetCenter);
-    };
-
-    nodeOperationsEmitter.on('addNode', handleAddNode);
-
-    return () => {
-      nodeOperationsEmitter.off('addNode', handleAddNode);
-    };
-  }, [addNode, handleNodePreview, reactFlowInstance, readonly]);
+  useListenNodeOperationEvents();
 
   return (
     <Spin

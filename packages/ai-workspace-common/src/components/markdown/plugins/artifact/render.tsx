@@ -1,17 +1,9 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiCode } from 'react-icons/fi';
-import { IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { MarkdownElementProps } from '../../types/index';
-import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
-import {
-  CanvasNode,
-  CodeArtifactNodeMeta,
-} from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { MarkdownMode } from '../../types';
-import { useReactFlow } from '@xyflow/react';
-import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 
 interface CanvasProps extends MarkdownElementProps {
   identifier: string;
@@ -19,65 +11,22 @@ interface CanvasProps extends MarkdownElementProps {
   type: string;
   language: string;
   mode?: MarkdownMode;
+  handleClick?: () => void;
 }
 
 const Render = memo<CanvasProps>((props: CanvasProps) => {
   const { title, id, mode = 'interactive' } = props;
   const { t } = useTranslation();
-  const { getNodes, getEdges } = useReactFlow();
 
   const isInteractive = mode === 'interactive';
 
-  // Only use canvas context if in interactive mode
-  const canvasContext = isInteractive ? useCanvasContext() : { canvasId: undefined };
-  const canvasId = canvasContext?.canvasId;
-
-  // Access flow data to get the artifact node
-  const [isGenerating, artifactNode] = useMemo<
-    [boolean, CanvasNode<CodeArtifactNodeMeta> | null]
-  >(() => {
-    const nodes = getNodes() as CanvasNode[];
-    const thisNode = nodes.find((node) => node.data?.entityId === id);
-
-    if (!thisNode) return [false, null];
-
-    // Find the descendant nodes that are code artifacts and pick the latest one
-    const edges = getEdges();
-    const descendantNodeIds = edges
-      .filter((edge) => edge.source === thisNode.id)
-      .map((edge) => edge.target);
-    const descendantNodes = nodes
-      .filter((node) => descendantNodeIds.includes(node.id))
-      .filter((node) => node.type === 'codeArtifact')
-      .sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
-    const artifactNode: CanvasNode<CodeArtifactNodeMeta> | null = descendantNodes[0];
-
-    return [
-      ['executing', 'waiting'].includes(artifactNode?.data?.metadata?.status ?? ''),
-      artifactNode,
-    ];
-  }, [getNodes, getEdges, id]);
-
-  // Only use canvas store if in interactive mode and not readonly
-  const { previewNode } = useNodePreviewControl({ canvasId });
-  const addNodePreview = isInteractive ? previewNode : undefined;
-
   const handleClick = useCallback(() => {
-    if (!artifactNode || !canvasId || !isInteractive || !addNodePreview) return;
-
-    let nodeIdForEvent: string | undefined; // Track the node ID to use in the locate event
-
-    if (artifactNode) {
-      // Use the existing node's information for the preview
-      nodeIdForEvent = artifactNode.id;
-      addNodePreview(artifactNode as unknown as CanvasNode);
-    }
-
-    if (nodeIdForEvent) {
-      // Emit the locate event with the correct node ID
-      locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: nodeIdForEvent });
-    }
-  }, [artifactNode, canvasId, isInteractive, addNodePreview]);
+    nodeOperationsEmitter.emit('jumpToDescendantNode', {
+      entityId: id,
+      descendantNodeType: 'codeArtifact',
+      shouldPreview: true,
+    });
+  }, [id]);
 
   // Determine the cursor style based on mode
   const cursorStyle = isInteractive ? 'cursor-pointer' : 'cursor-default';
@@ -96,20 +45,16 @@ const Render = memo<CanvasProps>((props: CanvasProps) => {
         <div className="flex-1 flex items-center p-3">
           <div className="flex-1 flex flex-col">
             <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-800">
-                {!title && isGenerating
-                  ? t('artifact.generating', 'Code artifact is generating...')
-                  : title || 'Code Artifact'}
-              </span>
+              <span className="text-sm font-medium text-gray-800">{title || 'Code Artifact'}</span>
             </div>
 
             <div className="flex items-center text-xs text-gray-500 mt-0.5">
               <span className="mr-2">
-                {artifactNode && isInteractive
+                {handleClick && isInteractive
                   ? t('artifact.openComponent', 'Click to view code component')
                   : t('artifact.codeArtifact', 'Code artifact')}
               </span>
-              {isGenerating && <IconLoading className="w-2.5 h-2.5 text-gray-500 animate-spin" />}
+              {/* {isGenerating && <IconLoading className="w-2.5 h-2.5 text-gray-500 animate-spin" />} */}
             </div>
           </div>
 
