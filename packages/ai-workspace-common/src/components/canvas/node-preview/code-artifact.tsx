@@ -50,10 +50,6 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
   const [currentTab, setCurrentTab] = useState<'code' | 'preview'>(activeTab as 'code' | 'preview');
   const [currentType, setCurrentType] = useState<CodeArtifactType>(type as CodeArtifactType);
 
-  console.log('data', data);
-  console.log('currentType', currentType);
-  console.log('currentTab', currentTab);
-
   const { data: remoteData, isLoading: isRemoteLoading } = useGetCodeArtifactDetail(
     {
       query: {
@@ -97,7 +93,6 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
       status: 'finish' | 'generating';
       type: CodeArtifactType;
     }) => {
-      console.log('handleStatusUpdate', data);
       if (data.artifactId === artifactId) {
         setCurrentTab(data.status === 'finish' ? 'preview' : 'code');
 

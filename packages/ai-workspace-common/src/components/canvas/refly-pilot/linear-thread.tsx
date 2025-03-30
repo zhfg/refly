@@ -83,8 +83,8 @@ export const LinearThreadContent = memo(
         ) : (
           <div className="flex flex-col divide-y max-w-[1024px] mx-auto">
             {messages.map((message, index) => (
-              <>
-                <div key={message.id}>
+              <div key={`message-wrapper-${message.id}`}>
+                <div key={`message-content-${message.id}`}>
                   <MemoizedSkillResponseNodePreview
                     node={{
                       id: message.nodeId,
@@ -95,10 +95,10 @@ export const LinearThreadContent = memo(
                     resultId={message.resultId}
                   />
                 </div>
-                {index !== messages?.length ? (
-                  <Divider key={`divider-${index}`} className="max-w-[1024px] mx-auto" />
-                ) : null}
-              </>
+                {index !== messages.length - 1 && (
+                  <Divider key={`divider-${message.id}`} className="max-w-[1024px] mx-auto" />
+                )}
+              </div>
             ))}
           </div>
         )}

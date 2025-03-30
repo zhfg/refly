@@ -160,7 +160,6 @@ export const useInvokeAction = () => {
       // Check if artifact is closed using the ARTIFACT_TAG_CLOSED_REGEX
       const isArtifactClosed = ARTIFACT_TAG_CLOSED_REGEX.test(content);
       if (isArtifactClosed) {
-        console.log('isArtifactClosed', type, actualType);
         codeArtifactEmitter.emit('statusUpdate', {
           artifactId: artifact.entityId,
           status: 'finish',
