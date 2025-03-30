@@ -2,19 +2,11 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import { persist } from 'zustand/middleware';
-import { Edge } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import {
   CanvasNodeData,
   ResponseNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
-
-interface CanvasData {
-  nodes: CanvasNode<any>[];
-  edges: Edge[];
-  title: string;
-  initialFitViewCompleted?: boolean;
-}
 
 interface NodePreviewData {
   metadata?: Record<string, unknown>;
@@ -40,9 +32,9 @@ export interface LinearThreadMessage {
 }
 
 export interface CanvasState {
-  data: Record<string, CanvasData>;
   config: Record<string, CanvasConfig>;
   currentCanvasId: string | null;
+  initialFitViewCompleted?: boolean;
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
@@ -56,10 +48,7 @@ export interface CanvasState {
   linearThreadMessages: LinearThreadMessage[];
   tplConfig: Record<string, any> | null;
 
-  setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
-  setEdges: (canvasId: string, edges: Edge[]) => void;
-  setTitle: (canvasId: string, title: string) => void;
-  setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
+  setInitialFitViewCompleted: (completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
   addNodePreview: (canvasId: string, node: NodePreview) => void;
@@ -87,21 +76,14 @@ export interface CanvasState {
   clearState: () => void;
 }
 
-const defaultCanvasData: () => CanvasData = () => ({
-  nodes: [],
-  edges: [],
-  title: '',
-  initialFitViewCompleted: false,
-});
-
 const defaultCanvasConfig: () => CanvasConfig = () => ({
   nodePreviews: [],
 });
 
 const defaultCanvasState = () => ({
-  data: {},
   config: {},
   currentCanvasId: null,
+  initialFitViewCompleted: false,
   showPreview: true,
   showMaxRatio: true,
   showLaunchpad: true,
@@ -123,7 +105,6 @@ export const useCanvasStore = create<CanvasState>()(
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
-          delete state.data[canvasId];
           delete state.config[canvasId];
         }),
       setCurrentCanvasId: (canvasId) =>
@@ -142,25 +123,9 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showLaunchpad = show;
         }),
-      setNodes: (canvasId, nodes) =>
+      setInitialFitViewCompleted: (completed) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].nodes = nodes;
-        }),
-      setEdges: (canvasId, edges) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].edges = edges;
-        }),
-      setTitle: (canvasId, title) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].title = title;
-        }),
-      setInitialFitViewCompleted: (canvasId, completed) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].initialFitViewCompleted = completed;
+          state.initialFitViewCompleted = completed;
         }),
       setCanvasLocalSynced: (canvasId, syncedAt) =>
         set((state) => {
@@ -237,7 +202,16 @@ export const useCanvasStore = create<CanvasState>()(
           state.config[canvasId] ??= defaultCanvasConfig();
           state.config[canvasId].nodePreviews ??= [];
           state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.map((n) =>
-            n.id === node.id ? { ...n, ...node } : n,
+            n.id === node.id
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    ...(node.data || {}),
+                  },
+                  ...(node.data ? {} : node),
+                }
+              : n,
           );
         }),
       reorderNodePreviews: (canvasId, sourceIndex, targetIndex) =>
