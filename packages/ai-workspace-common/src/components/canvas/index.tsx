@@ -446,7 +446,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
 
             if (previewContainer && targetPreview) {
-              targetPreview.scrollIntoView({
+              targetPreview?.scrollIntoView?.({
                 behavior: 'smooth',
                 block: 'nearest',
                 inline: 'center',
