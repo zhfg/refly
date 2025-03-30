@@ -139,6 +139,9 @@ import type {
   DeleteProjectData,
   DeleteProjectError,
   DeleteProjectResponse,
+  DeleteProjectItemsData,
+  DeleteProjectItemsError,
+  DeleteProjectItemsResponse,
   GetCodeArtifactDetailData,
   GetCodeArtifactDetailError,
   GetCodeArtifactDetailResponse2,
@@ -977,6 +980,23 @@ export const deleteProject = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<DeleteProjectResponse, DeleteProjectError, ThrowOnError>({
     ...options,
     url: '/project/delete',
+  });
+};
+
+/**
+ * Delete items in project
+ * Delete items in a project
+ */
+export const deleteProjectItems = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteProjectItemsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    DeleteProjectItemsResponse,
+    DeleteProjectItemsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/project/deleteItems',
   });
 };
 

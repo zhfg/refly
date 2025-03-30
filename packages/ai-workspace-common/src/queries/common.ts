@@ -30,6 +30,7 @@ import {
   deleteLabelClass,
   deleteLabelInstance,
   deleteProject,
+  deleteProjectItems,
   deleteReferences,
   deleteResource,
   deleteShare,
@@ -598,6 +599,12 @@ export type DeleteProjectMutationResult = Awaited<ReturnType<typeof deleteProjec
 export const useDeleteProjectKey = 'DeleteProject';
 export const UseDeleteProjectKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteProjectKey,
+  ...(mutationKey ?? []),
+];
+export type DeleteProjectItemsMutationResult = Awaited<ReturnType<typeof deleteProjectItems>>;
+export const useDeleteProjectItemsKey = 'DeleteProjectItems';
+export const UseDeleteProjectItemsKeyFn = (mutationKey?: Array<unknown>) => [
+  useDeleteProjectItemsKey,
   ...(mutationKey ?? []),
 ];
 export type CreateCodeArtifactMutationResult = Awaited<ReturnType<typeof createCodeArtifact>>;

@@ -2969,6 +2969,24 @@ export const DeleteProjectRequestSchema = {
   },
 } as const;
 
+export const DeleteProjectItemsRequestSchema = {
+  type: 'object',
+  required: ['projectId', 'items'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+    items: {
+      type: 'array',
+      description: 'Item list',
+      items: {
+        $ref: '#/components/schemas/Entity',
+      },
+    },
+  },
+} as const;
+
 export const SkillEventTypeSchema = {
   type: 'string',
   description: 'Skill event type',

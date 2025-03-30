@@ -2171,6 +2171,17 @@ export type DeleteProjectRequest = {
   projectId: string;
 };
 
+export type DeleteProjectItemsRequest = {
+  /**
+   * Project ID
+   */
+  projectId: string;
+  /**
+   * Item list
+   */
+  items: Array<Entity>;
+};
+
 /**
  * Skill event type
  */
@@ -4030,6 +4041,14 @@ export type DeleteProjectData = {
 export type DeleteProjectResponse = BaseResponse;
 
 export type DeleteProjectError = unknown;
+
+export type DeleteProjectItemsData = {
+  body: DeleteProjectItemsRequest;
+};
+
+export type DeleteProjectItemsResponse = BaseResponse;
+
+export type DeleteProjectItemsError = unknown;
 
 export type GetCodeArtifactDetailData = {
   query: {

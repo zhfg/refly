@@ -30,6 +30,7 @@ import {
   deleteLabelClass,
   deleteLabelInstance,
   deleteProject,
+  deleteProjectItems,
   deleteReferences,
   deleteResource,
   deleteShare,
@@ -148,6 +149,8 @@ import {
   DeleteLabelInstanceError,
   DeleteProjectData,
   DeleteProjectError,
+  DeleteProjectItemsData,
+  DeleteProjectItemsError,
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteResourceData,
@@ -1249,6 +1252,23 @@ export const useDeleteProject = <
   useMutation<TData, TError, Options<DeleteProjectData, true>, TContext>({
     mutationKey: Common.UseDeleteProjectKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteProject(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDeleteProjectItems = <
+  TData = Common.DeleteProjectItemsMutationResult,
+  TError = DeleteProjectItemsError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DeleteProjectItemsData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DeleteProjectItemsData, true>, TContext>({
+    mutationKey: Common.UseDeleteProjectItemsKeyFn(mutationKey),
+    mutationFn: (clientOptions) => deleteProjectItems(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateCodeArtifact = <

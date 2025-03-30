@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma.service';
 import {
   DeleteProjectRequest,
+  DeleteProjectItemsRequest,
   UpdateProjectItemsRequest,
   UpsertProjectRequest,
   User,
@@ -9,12 +10,17 @@ import {
 import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 import { genProjectID } from '@refly-packages/utils';
 import { MiscService } from '@/misc/misc.service';
+import { KnowledgeService } from '@/knowledge/knowledge.service';
+import { CanvasService } from '@/canvas/canvas.service';
+import pLimit from 'p-limit';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly prisma: PrismaService,
-    private miscService: MiscService,
+    private readonly knowledgeService: KnowledgeService,
+    private readonly canvasService: CanvasService,
+    private readonly miscService: MiscService,
   ) {}
 
   async listProjects(user: User) {
@@ -211,5 +217,28 @@ export class ProjectService {
         deletedAt: new Date(),
       },
     });
+  }
+
+  async deleteProjectItems(user: User, body: DeleteProjectItemsRequest) {
+    const { items } = body;
+
+    const limit = pLimit(5);
+    await Promise.all(
+      items.map((item) =>
+        limit(async () => {
+          switch (item.entityType) {
+            case 'canvas':
+              await this.canvasService.deleteCanvas(user, { canvasId: item.entityId });
+              break;
+            case 'document':
+              await this.knowledgeService.deleteDocument(user, { docId: item.entityId });
+              break;
+            case 'resource':
+              await this.knowledgeService.deleteResource(user, item.entityId);
+              break;
+          }
+        }),
+      ),
+    );
   }
 }

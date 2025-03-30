@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
 import {
   BaseResponse,
+  DeleteProjectItemsRequest,
   DeleteProjectRequest,
   GetProjectDetailResponse,
   ListProjectResponse,
@@ -73,6 +74,16 @@ export class ProjectController {
     @Body() body: DeleteProjectRequest,
   ): Promise<BaseResponse> {
     await this.projectService.deleteProject(user, body);
+    return buildSuccessResponse();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('deleteItems')
+  async deleteProjectItems(
+    @LoginedUser() user: User,
+    @Body() body: DeleteProjectItemsRequest,
+  ): Promise<BaseResponse> {
+    await this.projectService.deleteProjectItems(user, body);
     return buildSuccessResponse();
   }
 }

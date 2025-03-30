@@ -1062,6 +1062,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
+  /project/deleteItems:
+    post:
+      tags:
+        - project
+      summary: Delete items in project
+      description: Delete items in a project
+      operationId: deleteProjectItems
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteProjectItemsRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /codeArtifact/detail:
     get:
       tags:
@@ -4192,6 +4212,20 @@ components:
           type: string
           description: Project ID to delete
           example: p-g30e1b80b5g1itbemc0g5jj3
+    DeleteProjectItemsRequest:
+      type: object
+      required:
+        - projectId
+        - items
+      properties:
+        projectId:
+          type: string
+          description: Project ID
+        items:
+          type: array
+          description: Item list
+          items:
+            $ref: '#/components/schemas/Entity'
     SkillEventType:
       type: string
       description: Skill event type
