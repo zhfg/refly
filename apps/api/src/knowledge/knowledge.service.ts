@@ -46,6 +46,7 @@ import {
   QUEUE_SYNC_STORAGE_USAGE,
   QUEUE_CLEAR_CANVAS_ENTITY,
   streamToBuffer,
+  QUEUE_POST_DELETE_KNOWLEDGE_ENTITY,
 } from '@/utils';
 import {
   genResourceID,
@@ -58,6 +59,7 @@ import {
   DocumentDetail,
   ExtendedReferenceModel,
   FinalizeResourceParam,
+  PostDeleteKnowledgeEntityJobData,
   ResourcePrepareResult,
 } from './knowledge.dto';
 import { pick } from '../utils';
@@ -94,6 +96,8 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
     @InjectQueue(QUEUE_CLEAR_CANVAS_ENTITY) private canvasQueue: Queue<DeleteCanvasNodesJobData>,
+    @InjectQueue(QUEUE_POST_DELETE_KNOWLEDGE_ENTITY)
+    private postDeleteKnowledgeQueue: Queue<PostDeleteKnowledgeEntityJobData>,
   ) {}
 
   async syncStorageUsage(user: User) {
@@ -763,21 +767,32 @@ export class KnowledgeService {
       throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
-    await this.prisma.$transaction([
-      this.prisma.resource.update({
-        where: { resourceId, uid, deletedAt: null },
-        data: { deletedAt: new Date() },
-      }),
-      this.prisma.labelInstance.updateMany({
-        where: { entityType: 'resource', entityId: resourceId, uid, deletedAt: null },
-        data: { deletedAt: new Date() },
-      }),
-    ]);
+    await this.prisma.resource.update({
+      where: { resourceId, uid, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.syncStorageUsage(user);
+
+    await this.postDeleteKnowledgeQueue.add('postDeleteKnowledgeEntity', {
+      uid,
+      entityId: resourceId,
+      entityType: 'resource',
+    });
+  }
+
+  async postDeleteResource(user: User, resourceId: string) {
+    const resource = await this.prisma.resource.findFirst({
+      where: { resourceId, uid: user.uid, deletedAt: { not: null } },
+    });
+    if (!resource) {
+      this.logger.warn(`Deleted resource ${resourceId} not found`);
+      return;
+    }
 
     const cleanups: Promise<any>[] = [
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
-      this.syncStorageUsage(user),
       this.canvasQueue.add('deleteNodes', {
         entities: [{ entityId: resourceId, entityType: 'resource' }],
       }),
@@ -956,18 +971,34 @@ export class KnowledgeService {
       throw new DocumentNotFoundError();
     }
 
-    await this.prisma.$transaction([
-      this.prisma.document.update({
-        where: { docId },
-        data: { deletedAt: new Date() },
-      }),
-      this.prisma.labelInstance.updateMany({
-        where: { entityType: 'document', entityId: docId, uid, deletedAt: null },
-        data: { deletedAt: new Date() },
-      }),
-    ]);
+    await this.prisma.document.update({
+      where: { docId },
+      data: { deletedAt: new Date() },
+    });
+
+    await this.syncStorageUsage(user);
+
+    await this.postDeleteKnowledgeQueue.add('postDeleteKnowledgeEntity', {
+      uid,
+      entityId: docId,
+      entityType: 'document',
+    });
+  }
+
+  async postDeleteDocument(user: User, docId: string) {
+    const doc = await this.prisma.document.findFirst({
+      where: { docId, deletedAt: { not: null } },
+    });
+    if (!doc) {
+      this.logger.warn(`Deleted document ${docId} not found`);
+      return;
+    }
 
     const cleanups: Promise<any>[] = [
+      this.prisma.labelInstance.updateMany({
+        where: { entityType: 'document', entityId: docId, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
       this.ragService.deleteDocumentNodes(user, docId),
       this.elasticsearch.deleteDocument(docId),
       this.canvasQueue.add('deleteNodes', {
@@ -984,9 +1015,6 @@ export class KnowledgeService {
     }
 
     await Promise.all(cleanups);
-
-    // Sync storage usage after all the cleanups
-    await this.syncStorageUsage(user);
   }
 
   /**
