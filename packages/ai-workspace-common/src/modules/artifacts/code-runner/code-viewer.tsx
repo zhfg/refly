@@ -8,49 +8,11 @@ import { CodeArtifactType } from '@refly/openapi-schema';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
-
-// Function to get simple type description
-const getSimpleTypeDescription = (type: CodeArtifactType): string => {
-  const typeMap: Record<CodeArtifactType, string> = {
-    'application/refly.artifacts.react': 'React',
-    'image/svg+xml': 'SVG',
-    'application/refly.artifacts.mermaid': 'Mermaid',
-    'text/markdown': 'Markdown',
-    'application/refly.artifacts.code': 'Code',
-    'text/html': 'HTML',
-  };
-  return typeMap[type] ?? type;
-};
-
-// Function to get all available artifact types with labels
-const getArtifactTypeOptions = () => {
-  const typeMap: Record<CodeArtifactType, string> = {
-    'application/refly.artifacts.react': 'React',
-    'image/svg+xml': 'SVG',
-    'application/refly.artifacts.mermaid': 'Mermaid',
-    'text/markdown': 'Markdown',
-    'application/refly.artifacts.code': 'Code',
-    'text/html': 'HTML',
-  };
-
-  return Object.entries(typeMap).map(([value, label]) => ({
-    value: value as CodeArtifactType,
-    label,
-  }));
-};
-
-// Function to get file extension based on artifact type
-const getFileExtensionFromType = (type: CodeArtifactType): string => {
-  const extensionMap: Record<CodeArtifactType, string> = {
-    'application/refly.artifacts.react': 'tsx',
-    'image/svg+xml': 'svg',
-    'application/refly.artifacts.mermaid': 'mmd',
-    'text/markdown': 'md',
-    'application/refly.artifacts.code': '', // Will be determined by language
-    'text/html': 'html',
-  };
-  return extensionMap[type] ?? '';
-};
+import {
+  getFileExtensionFromType,
+  getArtifactTypeOptions,
+  getSimpleTypeDescription,
+} from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
 
 export default memo(
   function CodeViewer({

@@ -1269,6 +1269,7 @@ const translations = {
     sharing: '分享代码中...',
     shareLoading: '加载分享代码中...',
     noCodeFound: '暂无代码内容',
+    noSelection: '未选择代码组件',
     shareSuccess: '分享链接已复制到剪贴板! ',
     shareError: '分享代码失败',
     errorCopySuccess: '错误信息已复制到剪贴板',
