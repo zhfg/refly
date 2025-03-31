@@ -11,7 +11,7 @@ import { CreateProjectModal } from '@refly-packages/ai-workspace-common/componen
 import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
 import { IconRight } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-
+import { SlPicture } from 'react-icons/sl';
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
   source,
@@ -68,7 +68,13 @@ export const ProjectSettings = ({
 
       <div className="pt-5 cursor-pointer" onClick={handleEditSettings}>
         <div className="flex items-center gap-3">
-          <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
+          {data?.coverUrl ? (
+            <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
+          ) : (
+            <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
+              <SlPicture size={24} className="text-gray-500" />
+            </div>
+          )}
 
           <div className="flex flex-col">
             <span className="text-sm">{data?.name || t('common.untitled')}</span>

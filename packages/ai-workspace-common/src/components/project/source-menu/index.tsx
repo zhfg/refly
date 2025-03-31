@@ -260,7 +260,7 @@ export const SourcesMenu = ({
                                     tooltip: true,
                                   }}
                                 >
-                                  {item.title}
+                                  {item.title || t('common.untitled')}
                                 </Text>
                               </div>
                               <div

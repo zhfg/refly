@@ -18,7 +18,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from './storageLimit';
 import { getAvailableFileCount } from '@refly/utils/quota';
-
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 const { TextArea } = Input;
 
 export const ImportFromWeblink = () => {
@@ -31,7 +31,8 @@ export const ImportFromWeblink = () => {
       setImportResourceModalVisible: state.setImportResourceModalVisible,
       insertNodePosition: state.insertNodePosition,
     }));
-
+  const { projectId } = useGetProjectCanvasId();
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
@@ -109,6 +110,7 @@ export const ImportFromWeblink = () => {
 
     const batchCreateResourceData: UpsertResourceRequest[] = scrapeLinks.map((link) => {
       return {
+        projectId: currentProjectId,
         resourceType: 'weblink',
         title: link?.title,
         data: {
@@ -225,7 +227,11 @@ export const ImportFromWeblink = () => {
           <p className="font-bold whitespace-nowrap text-md text-[#00968f]">
             {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
           </p>
-          <StorageLimit resourceCount={scrapeLinks?.length || 0} />
+          <StorageLimit
+            resourceCount={scrapeLinks?.length || 0}
+            projectId={currentProjectId}
+            onSelectProject={setCurrentProjectId}
+          />
         </div>
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">

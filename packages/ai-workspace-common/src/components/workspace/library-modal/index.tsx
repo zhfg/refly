@@ -49,9 +49,9 @@ export const LibraryModal = (props: LibraryModalProps) => {
             <Tooltip title={t('project.create')}>
               <Button
                 type="text"
-                icon={<IconPlus />}
+                icon={<IconPlus size={16} className="text-gray-600" />}
                 size="small"
-                className="ml-1"
+                className="ml-1 rounded-full"
                 onClick={() => {
                   setCreateProjectModalVisible(true);
                 }}

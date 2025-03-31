@@ -11,6 +11,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from '@refly-packages/ai-workspace-common/components/import-resource/intergrations/storageLimit';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -31,6 +32,10 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+
+  const { projectId } = useGetProjectCanvasId();
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
@@ -65,6 +70,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
 
     if (props.importActionMode === ImportActionMode.CREATE_RESOURCE) {
       const batchCreateResourceData: UpsertResourceRequest[] = selectedItems.map((item) => ({
+        projectId: currentProjectId,
         resourceType: 'weblink',
         title: item.title,
         data: {
@@ -152,7 +158,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           <p className="footer-count text-item">
             {t('resource.import.linkCount', { count: selectedItems.length })}
           </p>
-          <StorageLimit resourceCount={selectedItems.length} />
+          <StorageLimit
+            resourceCount={selectedItems.length}
+            projectId={currentProjectId}
+            onSelectProject={setCurrentProjectId}
+          />
         </div>
         <div className="footer-action">
           <Button onClick={handleClose}>{t('common.cancel')}</Button>

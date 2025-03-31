@@ -12,11 +12,18 @@ import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/us
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { useNavigate } from 'react-router-dom';
 
-export const iconClassName = 'w-4 h-4 flex items-center justify-center';
-export interface sourceObject extends Document, Resource {
-  entityType: 'document' | 'resource';
-  entityId: string;
-}
+export const iconClassName =
+  'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center hover:text-gray-700';
+
+export type sourceObject =
+  | ({
+      entityType: 'document';
+      entityId: string;
+    } & Document)
+  | ({
+      entityType: 'resource';
+      entityId: string;
+    } & Resource);
 
 interface ProjectDirectoryProps {
   projectId: string;

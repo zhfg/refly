@@ -17,6 +17,7 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { GrUnlock } from 'react-icons/gr';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 const { Dragger } = Upload;
 
@@ -46,6 +47,9 @@ export const ImportFromFile = () => {
   const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }));
+
+  const { projectId } = useGetProjectCanvasId();
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
 
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage, fileParsingUsage } = useSubscriptionUsage();
@@ -139,6 +143,7 @@ export const ImportFromFile = () => {
 
     const { data } = await getClient().batchCreateResource({
       body: fileList.map((file) => ({
+        projectId: currentProjectId,
         resourceType: 'file',
         title: file.title,
         storageKey: file.storageKey,
@@ -250,7 +255,11 @@ export const ImportFromFile = () => {
           <p className="font-bold whitespace-nowrap text-md text-[#00968f]">
             {t('resource.import.fileCount', { count: fileList?.length || 0 })}
           </p>
-          <StorageLimit resourceCount={fileList?.length || 0} />
+          <StorageLimit
+            resourceCount={fileList?.length || 0}
+            projectId={currentProjectId}
+            onSelectProject={setCurrentProjectId}
+          />
         </div>
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">

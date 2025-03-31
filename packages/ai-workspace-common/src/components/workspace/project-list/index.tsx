@@ -26,6 +26,7 @@ import { Project } from '@refly/openapi-schema';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useNavigate } from 'react-router-dom';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { SlPicture } from 'react-icons/sl';
 
 export const ActionDropdown = ({
   project,
@@ -143,15 +144,20 @@ const ProjectCard = ({
       onClick={handleClick}
     >
       <div className="h-36 px-4 py-3 overflow-hidden">
-        {project?.coverUrl && (
+        {project?.coverUrl ? (
           <Image src={project?.coverUrl} alt={project?.name || t('common.untitled')} />
+        ) : (
+          <div className="flex items-center justify-center h-full flex-col">
+            <SlPicture size={48} className="text-gray-300" />
+            <div className="mt-2 text-gray-300">{t('project.waitingUploadCover')}</div>
+          </div>
         )}
       </div>
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
-          <IconProject color="#6172F3" size={22} />
-          <div className="flex-1 min-w-0">
+          <IconProject className="ntext-gray-500" size={24} />
+          <div className="flex-1 mi-w-0">
             <Typography.Text className="text-sm font-medium w-48" ellipsis={{ tooltip: true }}>
               {project?.name || t('common.untitled')}
             </Typography.Text>

@@ -1211,6 +1211,7 @@ const translations = {
       downloadExtension: '下载插件',
       viewDocs: '查看文档',
       recommendedPlatforms: '推荐平台',
+      selectProject: '选择项目',
     },
     wait_parse: '内容解析中',
     parse_failed: '解析失败',
@@ -2186,6 +2187,7 @@ const translations = {
     source: '文件',
     noDescription: '快来填写描述吧～',
     customInstructions: '预设提示词',
+    waitingUploadCover: '暂未上传封面',
     createModal: {
       createTitle: '创建项目',
       editTitle: '编辑项目',

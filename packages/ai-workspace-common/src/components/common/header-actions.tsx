@@ -12,7 +12,8 @@ import {
 
 import cn from 'classnames';
 
-export const iconClassName = 'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center';
+export const iconClassName =
+  'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center hover:text-gray-700';
 
 export interface HeaderActionsProps {
   source?: 'source' | 'canvas';

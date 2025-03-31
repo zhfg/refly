@@ -1237,6 +1237,7 @@ const translations = {
       downloadExtension: 'Download Extension',
       viewDocs: 'View Documentation',
       recommendedPlatforms: 'Recommended Platforms',
+      selectProject: 'Select Project',
     },
     wait_parse: 'Parsing',
     parse_failed: 'Parse Failed',
@@ -2249,6 +2250,7 @@ const translations = {
     source: 'File',
     noDescription: 'Quickly fill in the description ~',
     customInstructions: 'Custom Instructions',
+    waitingUploadCover: 'Waiting for upload cover',
     createModal: {
       createTitle: 'Create Project',
       editTitle: 'Edit Project',
