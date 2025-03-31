@@ -91,11 +91,13 @@ export const CanvasMenu = ({
   canvasList,
   projectId,
   onUpdatedCanvasList,
+  onRemoveCanvases,
   isFetching,
 }: {
   canvasList: SiderData[];
   projectId: string;
   onUpdatedCanvasList?: () => void;
+  onRemoveCanvases?: (canvasIds: string[]) => void;
   isFetching: boolean;
 }) => {
   const { t } = useTranslation();
@@ -150,10 +152,23 @@ export const CanvasMenu = ({
     setHoveredCanvasId(null);
   }, []);
 
-  const deleteSelectedCanvases = useCallback(() => {
-    message.success(`已删除 ${selectedCanvases.length} 个画布`);
-    exitMultiSelectMode();
-  }, [selectedCanvases, exitMultiSelectMode]);
+  const deleteSelectedCanvases = useCallback(async () => {
+    const { data } = await getClient().deleteProjectItems({
+      body: {
+        projectId,
+        items: selectedCanvases.map((item) => ({
+          entityType: 'canvas',
+          entityId: item.id,
+        })),
+      },
+    });
+    if (data?.success) {
+      setSelectedCanvases([]);
+      setHoveredCanvasId(null);
+      message.success(t('project.action.deleteItemsSuccess'));
+      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
+    }
+  }, [selectedCanvases, exitMultiSelectMode, onRemoveCanvases]);
 
   const removeSelectedCanvasesFromProject = useCallback(async () => {
     const res = await getClient().updateProjectItems({
@@ -170,9 +185,9 @@ export const CanvasMenu = ({
       setSelectedCanvases([]);
       setHoveredCanvasId(null);
       message.success(t('project.action.removeItemsSuccess'));
-      onUpdatedCanvasList?.();
+      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
     }
-  }, [selectedCanvases, projectId, t, onUpdatedCanvasList]);
+  }, [selectedCanvases, projectId, t, onRemoveCanvases]);
 
   const handleCanvasClick = useCallback(
     (canvasId: string, canvas: SiderData) => {

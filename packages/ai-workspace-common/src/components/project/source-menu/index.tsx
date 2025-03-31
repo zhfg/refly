@@ -83,7 +83,7 @@ export const SourcesMenu = ({
     if (data?.success) {
       setSelectedSources([]);
       setHoveredSourceId(null);
-      message.success(t('project.action.removeItemsSuccess'));
+      message.success(t('project.action.deleteItemsSuccess'));
       onUpdatedItems?.();
     }
   }, [selectedSources, exitMultiSelectMode]);

@@ -13,6 +13,8 @@ import { ProjectSettings } from '@refly-packages/ai-workspace-common/components/
 import cn from 'classnames';
 import './index.scss';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { useNavigate } from 'react-router-dom';
 
 export const iconClassName = 'w-4 h-4 flex items-center justify-center';
 export interface sourceObject extends Document, Resource {
@@ -27,7 +29,8 @@ interface ProjectDirectoryProps {
 
 export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) => {
   const { getCanvasList, isLoadingCanvas } = useHandleSiderData(true);
-
+  const { canvasId } = useGetProjectCanvasId();
+  const navigate = useNavigate();
   const { collapse, setCollapse, canvasList } = useSiderStoreShallow((state) => ({
     canvasList: state.canvasList,
     collapse: state.collapse,
@@ -84,6 +87,17 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     Promise.all([refetchDocuments(), refetchResources()]);
   }, [refetchDocuments, refetchResources]);
 
+  const handleRemoveCanvases = useCallback(
+    async (canvasIds: string[]) => {
+      await getCanvasList(true);
+      if (canvasIds.includes(canvasId)) {
+        const newCanvasId = canvasList.length > 0 ? canvasList[0].id : 'empty';
+        navigate(`/project/${projectId}?canvasId=${newCanvasId}`);
+      }
+    },
+    [getCanvasList, refetchFiles],
+  );
+
   useEffect(() => {
     setProjectData(data);
   }, [data]);
@@ -115,6 +129,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           onUpdatedCanvasList={() => {
             getCanvasList(true);
           }}
+          onRemoveCanvases={handleRemoveCanvases}
         />
         <SourcesMenu
           isFetching={isFetchingDocuments || isFetchingResources}

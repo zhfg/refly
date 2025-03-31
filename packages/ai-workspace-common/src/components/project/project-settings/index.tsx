@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Typography } from 'antd';
 import {
   IconLeft,
-  IconShare,
   IconMoreHorizontal,
   IconEdit,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -43,14 +42,9 @@ export const ProjectSettings = ({
           icon={<IconLeft className={iconClassName} />}
           onClick={() => navigate('/')}
         >
-          返回
+          {t('common.goBack')}
         </Button>
         <div className="flex items-center gap-2">
-          <Button
-            type="text"
-            size="small"
-            icon={<IconShare className={cn(iconClassName, 'text-gray-500')} />}
-          />
           <Button
             type="text"
             size="small"
@@ -92,7 +86,7 @@ export const ProjectSettings = ({
         </div>
         {data?.customInstructions && (
           <Paragraph
-            className="text-xs p-1 mt-1 !mb-0 bg-gray-50 rounded-md"
+            className="text-xs p-1 mt-1 !mb-0 bg-gray-50 text-gray-400 rounded-md"
             ellipsis={{ rows: 1, tooltip: { placement: 'right' } }}
           >
             {data?.customInstructions}
