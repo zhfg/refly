@@ -28,7 +28,7 @@ interface ProjectDirectoryProps {
 }
 
 export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) => {
-  const { getCanvasList, isLoadingCanvas } = useHandleSiderData(true);
+  const { getCanvasList, updateCanvasList, isLoadingCanvas } = useHandleSiderData(true);
   const { canvasId } = useGetProjectCanvasId();
   const navigate = useNavigate();
   const { collapse, setCollapse, canvasList } = useSiderStoreShallow((state) => ({
@@ -89,13 +89,24 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
 
   const handleRemoveCanvases = useCallback(
     async (canvasIds: string[]) => {
-      await getCanvasList(true);
+      const newCanvasList = canvasList.filter((item) => !canvasIds.includes(item.id));
+      updateCanvasList(newCanvasList);
       if (canvasIds.includes(canvasId)) {
-        const newCanvasId = canvasList.length > 0 ? canvasList[0].id : 'empty';
+        const newCanvasId = newCanvasList.length > 0 ? newCanvasList[0].id : 'empty';
         navigate(`/project/${projectId}?canvasId=${newCanvasId}`);
       }
     },
-    [getCanvasList, refetchFiles],
+    [updateCanvasList, canvasId, canvasList, navigate, projectId],
+  );
+
+  const handleAddCanvases = useCallback(
+    async (canvasIds: string[]) => {
+      getCanvasList(true);
+      if (canvasIds?.[0]) {
+        navigate(`/project/${projectId}?canvasId=${canvasIds[0]}`);
+      }
+    },
+    [getCanvasList, navigate, projectId],
   );
 
   useEffect(() => {
@@ -126,9 +137,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           isFetching={isLoadingCanvas}
           canvasList={canvasList}
           projectId={projectId}
-          onUpdatedCanvasList={() => {
-            getCanvasList(true);
-          }}
+          onAddCanvasesSuccess={handleAddCanvases}
           onRemoveCanvases={handleRemoveCanvases}
         />
         <SourcesMenu

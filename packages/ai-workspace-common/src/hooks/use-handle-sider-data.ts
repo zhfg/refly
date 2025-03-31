@@ -51,5 +51,5 @@ export const useHandleSiderData = (initData?: boolean) => {
     }
   }, [projectId]);
 
-  return { loadSiderData, getCanvasList, canvasList, isLoadingCanvas };
+  return { loadSiderData, getCanvasList, canvasList, isLoadingCanvas, updateCanvasList };
 };

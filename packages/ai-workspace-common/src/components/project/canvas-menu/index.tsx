@@ -28,14 +28,14 @@ interface AddCanvasDropdownProps {
   debouncedCreateCanvas: () => void;
   children?: React.ReactNode;
   projectId: string;
-  onUpdatedCanvasList?: () => void;
+  onAddCanvasesSuccess?: (canvasIds?: string[]) => void;
   canvasList: SiderData[];
 }
 const AddCanvasDropdown = ({
   debouncedCreateCanvas,
   children,
   projectId,
-  onUpdatedCanvasList,
+  onAddCanvasesSuccess,
   canvasList,
 }: AddCanvasDropdownProps) => {
   const { t } = useTranslation();
@@ -78,8 +78,8 @@ const AddCanvasDropdown = ({
         setVisible={setAddSourcesVisible}
         projectId={projectId}
         existingItems={canvasList?.map((canvas) => canvas.id) || []}
-        onSuccess={() => {
-          onUpdatedCanvasList?.();
+        onSuccess={(canvasIds) => {
+          onAddCanvasesSuccess?.(canvasIds);
         }}
         defaultActiveKey="canvas"
       />
@@ -90,13 +90,13 @@ const AddCanvasDropdown = ({
 export const CanvasMenu = ({
   canvasList,
   projectId,
-  onUpdatedCanvasList,
+  onAddCanvasesSuccess,
   onRemoveCanvases,
   isFetching,
 }: {
   canvasList: SiderData[];
   projectId: string;
-  onUpdatedCanvasList?: () => void;
+  onAddCanvasesSuccess?: (canvasIds?: string[]) => void;
   onRemoveCanvases?: (canvasIds: string[]) => void;
   isFetching: boolean;
 }) => {
@@ -106,7 +106,7 @@ export const CanvasMenu = ({
   const navigate = useNavigate();
   const { debouncedCreateCanvas } = useCreateCanvas({
     projectId,
-    afterCreateSuccess: onUpdatedCanvasList,
+    afterCreateSuccess: onAddCanvasesSuccess,
   });
 
   const [hoveredCanvasId, setHoveredCanvasId] = useState<string | null>(null);
@@ -163,10 +163,10 @@ export const CanvasMenu = ({
       },
     });
     if (data?.success) {
+      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
       setSelectedCanvases([]);
       setHoveredCanvasId(null);
       message.success(t('project.action.deleteItemsSuccess'));
-      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
     }
   }, [selectedCanvases, exitMultiSelectMode, onRemoveCanvases]);
 
@@ -182,10 +182,10 @@ export const CanvasMenu = ({
     });
     const { data } = res || {};
     if (data?.success) {
+      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
       setSelectedCanvases([]);
       setHoveredCanvasId(null);
       message.success(t('project.action.removeItemsSuccess'));
-      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
     }
   }, [selectedCanvases, projectId, t, onRemoveCanvases]);
 
@@ -205,7 +205,7 @@ export const CanvasMenu = ({
       <AddCanvasDropdown
         debouncedCreateCanvas={debouncedCreateCanvas}
         projectId={projectId}
-        onUpdatedCanvasList={onUpdatedCanvasList}
+        onAddCanvasesSuccess={onAddCanvasesSuccess}
         canvasList={canvasList}
       >
         <Button
@@ -215,7 +215,7 @@ export const CanvasMenu = ({
         />
       </AddCanvasDropdown>
     ),
-    [debouncedCreateCanvas, projectId, onUpdatedCanvasList, canvasList],
+    [debouncedCreateCanvas, projectId, onAddCanvasesSuccess, canvasList],
   );
 
   const itemCountText = useMemo(
@@ -276,7 +276,7 @@ export const CanvasMenu = ({
                           <AddCanvasDropdown
                             debouncedCreateCanvas={debouncedCreateCanvas}
                             projectId={projectId}
-                            onUpdatedCanvasList={onUpdatedCanvasList}
+                            onAddCanvasesSuccess={onAddCanvasesSuccess}
                             canvasList={canvasList}
                           />
                         </Empty>

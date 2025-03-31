@@ -16,7 +16,7 @@ interface AddSourcesProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
   projectId: string;
-  onSuccess?: () => void;
+  onSuccess?: (canvasIds?: string[]) => void;
   existingItems: string[];
   defaultActiveKey?: string;
 }
@@ -65,9 +65,11 @@ const AddSourcesMemo = React.memo(
             operation: 'add',
           },
         });
+        onSuccess?.(
+          selectedItems.filter((item) => item.entityType === 'canvas').map((item) => item.entityId),
+        );
         setVisible(false);
         setSelectedItems([]);
-        onSuccess?.();
       } catch (error) {
         console.error('Failed to add sources to project', error);
       } finally {
