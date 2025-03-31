@@ -14,6 +14,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { StorageLimit } from './storageLimit';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { useUpdateSourceList } from '@refly-packages/ai-workspace-common/hooks/canvas/use-update-source-list';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -28,6 +29,7 @@ export const ImportFromText = () => {
     }));
   const { projectId } = useGetProjectCanvasId();
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+  const { updateSourceList } = useUpdateSourceList();
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
   const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
@@ -80,6 +82,7 @@ export const ImportFromText = () => {
         },
         position: insertNodePosition,
       });
+      updateSourceList([data?.data], currentProjectId);
     }
   };
 

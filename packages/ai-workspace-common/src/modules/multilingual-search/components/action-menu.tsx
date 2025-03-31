@@ -12,6 +12,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { StorageLimit } from '@refly-packages/ai-workspace-common/components/import-resource/intergrations/storageLimit';
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { useUpdateSourceList } from '@refly-packages/ai-workspace-common/hooks/canvas/use-update-source-list';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -35,6 +36,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
 
   const { projectId } = useGetProjectCanvasId();
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+  const { updateSourceList } = useUpdateSourceList();
 
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
@@ -118,6 +120,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
             position: nodePosition,
           });
         });
+        updateSourceList(Array.isArray(data?.data) ? data.data : [], currentProjectId);
       }
     } else if (props.importActionMode === ImportActionMode.ADD_NODE) {
       for (const item of selectedItems) {

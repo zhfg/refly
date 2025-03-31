@@ -18,6 +18,7 @@ import { GrUnlock } from 'react-icons/gr';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { useUpdateSourceList } from '@refly-packages/ai-workspace-common/hooks/canvas/use-update-source-list';
 
 const { Dragger } = Upload;
 
@@ -50,6 +51,7 @@ export const ImportFromFile = () => {
 
   const { projectId } = useGetProjectCanvasId();
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+  const { updateSourceList } = useUpdateSourceList();
 
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage, fileParsingUsage } = useSubscriptionUsage();
@@ -190,6 +192,8 @@ export const ImportFromFile = () => {
         position: nodePosition,
       });
     }
+
+    updateSourceList(Array.isArray(data.data) ? (data.data as Resource[]) : [], currentProjectId);
   };
 
   const canImportCount = getAvailableFileCount(storageUsage);

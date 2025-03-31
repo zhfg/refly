@@ -79,6 +79,11 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     setProjectData(data);
   }, [data]);
 
+  useEffect(() => {
+    getCanvasList(true);
+    getSourceList();
+  }, [projectId]);
+
   return (
     <Layout.Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}

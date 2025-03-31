@@ -79,6 +79,7 @@ export const useHandleSiderData = (initData?: boolean) => {
   const getSourceList = async () => {
     const resources = await getResourceList();
     const documents = await getDocumentList();
+
     const docs = (documents || []).map((item) => ({
       ...item,
       entityId: item.docId,
