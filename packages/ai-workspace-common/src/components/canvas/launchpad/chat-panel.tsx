@@ -35,6 +35,7 @@ import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/e
 import { omit } from '@refly-packages/utils/index';
 import { cn } from '@refly-packages/utils/cn';
 import { ActionStatus, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -90,6 +91,7 @@ interface ChatPanelProps {
   onGenerateMessageIds?: () => { resultId: string; nodeId: string };
   tplConfig?: SkillTemplateConfig | null;
   onUpdateTplConfig?: (config: SkillTemplateConfig | null) => void;
+  resultId?: string;
 }
 
 export const ChatPanel = ({
@@ -98,6 +100,7 @@ export const ChatPanel = ({
   onGenerateMessageIds,
   tplConfig: initialTplConfig,
   onUpdateTplConfig,
+  resultId = ContextTarget.Global,
 }: ChatPanelProps) => {
   const { t } = useTranslation();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
@@ -126,6 +129,11 @@ export const ChatPanel = ({
     setSelectedModel: state.setSelectedModel,
   }));
 
+  // Get setActiveResultId from context panel store
+  const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
+    setActiveResultId: state.setActiveResultId,
+  }));
+
   const [form] = Form.useForm();
 
   // hooks
@@ -134,6 +142,11 @@ export const ChatPanel = ({
   const { addNode } = useAddNode();
   const { invokeAction, abortAction } = useInvokeAction();
   const { handleUploadImage } = useUploadImage();
+
+  // Handle input focus
+  const handleInputFocus = useCallback(() => {
+    setActiveResultId(resultId);
+  }, [resultId, setActiveResultId]);
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -173,6 +186,9 @@ export const ChatPanel = ({
   }, [selectedSkill, form, initialTplConfig]);
 
   const handleSendMessage = (userInput?: string) => {
+    // Set active resultId when sending a message
+    setActiveResultId(resultId);
+
     const error = handleFilterErrorTip();
     if (error) {
       return;
@@ -201,7 +217,7 @@ export const ChatPanel = ({
     const { contextItems } = useContextPanelStore.getState();
 
     // Generate new message IDs using the provided function
-    const { resultId, nodeId } = onGenerateMessageIds?.() ?? {
+    const { resultId: newResultId, nodeId } = onGenerateMessageIds?.() ?? {
       resultId: genActionResultID(),
       nodeId: genUniqueId(),
     };
@@ -211,11 +227,11 @@ export const ChatPanel = ({
       onAddMessage(
         {
           id: resultId,
-          resultId,
+          resultId: newResultId,
           nodeId,
           data: {
             title: query,
-            entityId: resultId,
+            entityId: newResultId,
             metadata: {
               status: 'executing' as ActionStatus,
               contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
@@ -240,7 +256,7 @@ export const ChatPanel = ({
     invokeAction(
       {
         query,
-        resultId,
+        resultId: newResultId,
         selectedSkill,
         modelInfo: selectedModel,
         contextItems,
@@ -262,7 +278,7 @@ export const ChatPanel = ({
         type: 'skillResponse',
         data: {
           title: query,
-          entityId: resultId,
+          entityId: newResultId,
           metadata: {
             status: 'executing',
             contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
@@ -312,6 +328,9 @@ export const ChatPanel = ({
   );
 
   const handleImageUpload = async (file: File) => {
+    // Set active resultId when uploading an image
+    setActiveResultId(resultId);
+
     const nodeData = await handleUploadImage(file, canvasId);
     if (nodeData) {
       setContextItems([
@@ -354,6 +373,7 @@ export const ChatPanel = ({
               autoCompletionPlacement={'topLeft'}
               handleSendMessage={handleSendMessage}
               onUploadImage={handleImageUpload}
+              onFocus={handleInputFocus}
             />
           </div>
 

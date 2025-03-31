@@ -12,9 +12,15 @@ import { LinearThreadContent } from './linear-thread';
 import { LinearThreadMessage } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 import { LaunchPad } from '@refly-packages/ai-workspace-common/components/canvas/launchpad';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  ContextTarget,
+  IContextItem,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { SkillTemplateConfig } from '@refly/openapi-schema';
+import { contextEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/context';
 
 export interface ThreadContainerProps {
   className?: string;
@@ -125,8 +131,9 @@ export const ThreadContainer = memo(
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Get context panel store to manage context items
-    const { setContextItems } = useContextPanelStoreShallow((state) => ({
+    const { setContextItems, setActiveResultId } = useContextPanelStoreShallow((state) => ({
       setContextItems: state.setContextItems,
+      setActiveResultId: state.setActiveResultId,
     }));
 
     // Use our custom hook instead of the local implementation
@@ -134,6 +141,24 @@ export const ThreadContainer = memo(
       resultId,
       setContextItems,
     });
+
+    // Listen for context events for the global pilot
+    useEffect(() => {
+      const handleAddToContext = (data: { contextItem: IContextItem; resultId: string }) => {
+        if (data.resultId === ContextTarget.Global) {
+          const { contextItems } = useContextPanelStore.getState();
+          setContextItems([...contextItems, data.contextItem]);
+        }
+      };
+
+      // Register event listeners
+      contextEmitter.on('addToContext', handleAddToContext);
+
+      // Cleanup
+      return () => {
+        contextEmitter.off('addToContext', handleAddToContext);
+      };
+    }, [setActiveResultId]);
 
     // Add ESC key handler to exit fullscreen
     useEffect(() => {
