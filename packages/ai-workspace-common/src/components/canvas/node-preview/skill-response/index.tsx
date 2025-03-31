@@ -271,7 +271,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
           />
           <PreviewChatInput
             enabled={!editMode}
-            readonly
+            readonly={readonly}
             contextItems={contextItems}
             query={title}
             actionMeta={actionMeta}
