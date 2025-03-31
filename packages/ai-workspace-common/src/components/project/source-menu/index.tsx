@@ -70,9 +70,22 @@ export const SourcesMenu = ({
     }
   }, [isSearchMode]);
 
-  const deleteSelectedSources = useCallback(() => {
-    message.success(`已删除 ${selectedSources.length} 个来源`);
-    exitMultiSelectMode();
+  const deleteSelectedSources = useCallback(async () => {
+    const { data } = await getClient().deleteProjectItems({
+      body: {
+        projectId,
+        items: selectedSources.map((item) => ({
+          entityType: item.entityType,
+          entityId: item.entityId,
+        })),
+      },
+    });
+    if (data?.success) {
+      setSelectedSources([]);
+      setHoveredSourceId(null);
+      message.success(t('project.action.removeItemsSuccess'));
+      onUpdatedItems?.();
+    }
   }, [selectedSources, exitMultiSelectMode]);
 
   const removeSelectedSourcesFromProject = useCallback(async () => {

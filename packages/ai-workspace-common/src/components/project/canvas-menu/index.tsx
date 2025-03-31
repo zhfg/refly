@@ -1,6 +1,16 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Collapse, Button, List, Empty, Typography, Dropdown, Checkbox, message } from 'antd';
+import {
+  Collapse,
+  Button,
+  List,
+  Empty,
+  Typography,
+  Dropdown,
+  Checkbox,
+  message,
+  Skeleton,
+} from 'antd';
 import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { iconClassName } from '@refly-packages/ai-workspace-common/components/project/project-directory';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
@@ -81,7 +91,13 @@ export const CanvasMenu = ({
   canvasList,
   projectId,
   onUpdatedCanvasList,
-}: { canvasList: SiderData[]; projectId: string; onUpdatedCanvasList?: () => void }) => {
+  isFetching,
+}: {
+  canvasList: SiderData[];
+  projectId: string;
+  onUpdatedCanvasList?: () => void;
+  isFetching: boolean;
+}) => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const canvasId = searchParams.get('canvasId');
@@ -223,68 +239,74 @@ export const CanvasMenu = ({
                 itemCountText={itemCountText}
               />
               <div className="max-h-[20vh] overflow-y-auto px-3">
-                <List
-                  itemLayout="horizontal"
-                  split={false}
-                  dataSource={filteredCanvasList}
-                  locale={{
-                    emptyText: (
-                      <Empty
-                        className="text-xs my-2 "
-                        image={null}
-                        imageStyle={{
-                          display: 'none',
-                        }}
-                        description={t('common.empty')}
-                      >
-                        <AddCanvasDropdown
-                          debouncedCreateCanvas={debouncedCreateCanvas}
-                          projectId={projectId}
-                          onUpdatedCanvasList={onUpdatedCanvasList}
-                          canvasList={canvasList}
-                        />
-                      </Empty>
-                    ),
-                  }}
-                  renderItem={(item) => (
-                    <List.Item
-                      className={cn(
-                        '!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer',
-                        canvasId === item.id ? 'bg-gray-100' : '',
-                        selectedCanvases.some((canvas) => canvas.id === item.id) && 'bg-gray-50',
-                      )}
-                      onMouseEnter={() => handleCanvasHover(item.id)}
-                      onMouseLeave={() => handleCanvasHover(null)}
-                      onClick={() => handleCanvasClick(item.id, item)}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
-                          <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
-                          <Text className="w-[120px] text-[13px] text-gray-700 truncate">
-                            {item.name || t('common.untitled')}
-                          </Text>
-                        </div>
-                        <div
-                          className={cn(
-                            'flex items-center gap-1 transition-opacity duration-200',
-                            isMultiSelectMode || hoveredCanvasId === item.id
-                              ? 'opacity-100'
-                              : 'opacity-0',
-                          )}
+                {isFetching ? (
+                  <div className="flex justify-center h-full pt-4">
+                    <Skeleton active paragraph={{ rows: 8 }} title={false} />
+                  </div>
+                ) : (
+                  <List
+                    itemLayout="horizontal"
+                    split={false}
+                    dataSource={filteredCanvasList}
+                    locale={{
+                      emptyText: (
+                        <Empty
+                          className="text-xs my-2 "
+                          image={null}
+                          imageStyle={{
+                            display: 'none',
+                          }}
+                          description={t('common.empty')}
                         >
-                          <Checkbox
-                            checked={selectedCanvases.some((canvas) => canvas.id === item.id)}
-                            onChange={() => toggleCanvasSelection(item)}
-                            onClick={(e) => e.stopPropagation()}
+                          <AddCanvasDropdown
+                            debouncedCreateCanvas={debouncedCreateCanvas}
+                            projectId={projectId}
+                            onUpdatedCanvasList={onUpdatedCanvasList}
+                            canvasList={canvasList}
                           />
-                          {!isMultiSelectMode && (
-                            <CanvasActionDropdown canvasId={item.id} canvasName={item.name} />
-                          )}
+                        </Empty>
+                      ),
+                    }}
+                    renderItem={(item) => (
+                      <List.Item
+                        className={cn(
+                          '!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer',
+                          canvasId === item.id ? 'bg-gray-100' : '',
+                          selectedCanvases.some((canvas) => canvas.id === item.id) && 'bg-gray-50',
+                        )}
+                        onMouseEnter={() => handleCanvasHover(item.id)}
+                        onMouseLeave={() => handleCanvasHover(null)}
+                        onClick={() => handleCanvasClick(item.id, item)}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
+                            <Text className="w-[120px] text-[13px] text-gray-700 truncate">
+                              {item.name || t('common.untitled')}
+                            </Text>
+                          </div>
+                          <div
+                            className={cn(
+                              'flex items-center gap-1 transition-opacity duration-200',
+                              isMultiSelectMode || hoveredCanvasId === item.id
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )}
+                          >
+                            <Checkbox
+                              checked={selectedCanvases.some((canvas) => canvas.id === item.id)}
+                              onChange={() => toggleCanvasSelection(item)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            {!isMultiSelectMode && (
+                              <CanvasActionDropdown canvasId={item.id} canvasName={item.name} />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </List.Item>
-                  )}
-                />
+                      </List.Item>
+                    )}
+                  />
+                )}
               </div>
             </div>
           ),

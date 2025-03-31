@@ -4,6 +4,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 const DATA_NUM = 6;
+const DATA_NUM_CANVAS_FOR_PROJECT = 1000;
 
 export const useHandleSiderData = (initData?: boolean) => {
   const { projectId } = useGetProjectCanvasId();
@@ -15,19 +16,8 @@ export const useHandleSiderData = (initData?: boolean) => {
   const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
 
   const requestCanvasList = async () => {
-    if (projectId) {
-      const { data: res, error } = await getClient().getProjectDetail({
-        query: { projectId },
-      });
-      if (error) {
-        console.error('getProjectDetail error', error);
-        return [];
-      }
-      const canvases = res?.data?.canvases || [];
-      return canvases;
-    }
     const { data: res, error } = await getClient().listCanvases({
-      query: { page: 1, pageSize: DATA_NUM },
+      query: { page: 1, pageSize: projectId ? DATA_NUM_CANVAS_FOR_PROJECT : DATA_NUM, projectId },
     });
     if (error) {
       console.error('getCanvasList error', error);

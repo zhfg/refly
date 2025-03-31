@@ -1,7 +1,11 @@
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Divider, Layout } from 'antd';
-import { useState, useMemo, useEffect } from 'react';
-import { useGetProjectDetail } from '@refly-packages/ai-workspace-common/queries';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import {
+  useGetProjectDetail,
+  useListResources,
+  useListDocuments,
+} from '@refly-packages/ai-workspace-common/queries';
 import { Document, Resource } from '@refly/openapi-schema';
 import { CanvasMenu } from '@refly-packages/ai-workspace-common/components/project/canvas-menu';
 import { SourcesMenu } from '@refly-packages/ai-workspace-common/components/project/source-menu';
@@ -22,24 +26,38 @@ interface ProjectDirectoryProps {
 }
 
 export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) => {
-  const { getCanvasList } = useHandleSiderData(true);
+  const { getCanvasList, isLoadingCanvas } = useHandleSiderData(true);
+
   const { collapse, setCollapse, canvasList } = useSiderStoreShallow((state) => ({
     canvasList: state.canvasList,
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  const {
-    data: projectDetail,
-    refetch,
-    isFetching,
-  } = useGetProjectDetail({ query: { projectId } }, null, {
+
+  const { data: projectDetail } = useGetProjectDetail({ query: { projectId } }, null, {
     enabled: !!projectId,
   });
   const data = projectDetail?.data;
   const [projectData, setProjectData] = useState(data);
 
-  const documents = data?.documents || [];
-  const resources = data?.resources || [];
+  const {
+    data: documentsResponse,
+    refetch: refetchDocuments,
+    isFetching: isFetchingDocuments,
+  } = useListDocuments({ query: { projectId, page: 1, pageSize: 1000 } }, null, {
+    enabled: !!projectId,
+  });
+
+  const {
+    data: resourcesResponse,
+    refetch: refetchResources,
+    isFetching: isFetchingResources,
+  } = useListResources({ query: { projectId, page: 1, pageSize: 1000 } }, null, {
+    enabled: !!projectId,
+  });
+
+  const documents = documentsResponse?.data || [];
+  const resources = resourcesResponse?.data || [];
 
   const mergedSources = useMemo(() => {
     const docs = (documents || []).map((item) => ({
@@ -62,6 +80,10 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     });
   }, [documents, resources]);
 
+  const refetchFiles = useCallback(() => {
+    Promise.all([refetchDocuments(), refetchResources()]);
+  }, [refetchDocuments, refetchResources]);
+
   useEffect(() => {
     setProjectData(data);
   }, [data]);
@@ -80,7 +102,6 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           setCollapse={setCollapse}
           data={projectData}
           onUpdate={(data) => {
-            console.log('data', data);
             setProjectData({ ...projectData, ...data });
           }}
         />
@@ -88,20 +109,21 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
         <Divider className="my-2" />
 
         <CanvasMenu
+          isFetching={isLoadingCanvas}
           canvasList={canvasList}
           projectId={projectId}
           onUpdatedCanvasList={() => {
-            getCanvasList();
+            getCanvasList(true);
           }}
         />
         <SourcesMenu
-          isFetching={isFetching}
+          isFetching={isFetchingDocuments || isFetchingResources}
           sourceList={mergedSources as sourceObject[]}
           projectId={projectId}
           documentCount={documents?.length || 0}
           resourceCount={resources?.length || 0}
           onUpdatedItems={() => {
-            refetch();
+            refetchFiles();
           }}
         />
       </div>
