@@ -155,14 +155,22 @@ const MenuItemContent = (props: {
   collapse?: boolean;
   position?: 'left' | 'right';
   hoverContent?: HoverContent;
+  canvasId?: string;
 }) => {
-  const { position = 'left', type, hoverContent } = props;
+  const { position = 'left', type, hoverContent, canvasId } = props;
   const { hoverCardEnabled } = useHoverCard();
 
   const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
     setShowCanvasListModal: state.setShowCanvasListModal,
   }));
+
+  const { debouncedCreateCanvas } = useCreateCanvas({
+    projectId: null,
+    afterCreateSuccess: () => {
+      setShowLibraryModal(true);
+    },
+  });
 
   const { setVisible } = useCanvasTemplateModal((state) => ({
     setVisible: state.setVisible,
@@ -172,7 +180,11 @@ const MenuItemContent = (props: {
     if (type === 'Canvas') {
       setShowCanvasListModal(true);
     } else if (type === 'Library') {
-      setShowLibraryModal(true);
+      if (canvasId && canvasId !== 'empty') {
+        setShowLibraryModal(true);
+      } else {
+        debouncedCreateCanvas();
+      }
     } else if (type === 'Template') {
       setVisible(true);
     }
@@ -330,6 +342,14 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
 
   const defaultOpenKeys = useMemo(() => ['Canvas', 'Library', 'Template'], []);
 
+  const canvasId = location.pathname.split('/').pop();
+  const { debouncedCreateCanvas } = useCreateCanvas({
+    projectId: null,
+    afterCreateSuccess: () => {
+      setShowLibraryModal(true);
+    },
+  });
+
   interface SiderCenterProps {
     key: string;
     name: string;
@@ -375,7 +395,12 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     const settingsTab = searchParams.get('settingsTab');
 
     if (shouldOpenLibrary === 'true' && userProfile?.uid) {
-      setShowLibraryModal(true);
+      if (canvasId && canvasId !== 'empty') {
+        setShowLibraryModal(true);
+      } else {
+        debouncedCreateCanvas();
+      }
+
       // Remove the parameter from URL
       searchParams.delete('openLibrary');
       const newSearch = searchParams.toString();
@@ -435,6 +460,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                       className="[&_.arco-menu-icon-suffix_.arco-icon-down]:z-[1] [&_.arco-menu-icon-suffix_.arco-icon-down]:rotate-90 [&_.arco-menu-inline-header]:pr-0"
                       title={
                         <MenuItemContent
+                          canvasId={canvasId}
                           type={item.key}
                           icon={item.icon}
                           title={t(`loggedHomePage.siderMenu.${item.name}`)}

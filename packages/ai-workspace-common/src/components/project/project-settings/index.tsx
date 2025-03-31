@@ -12,6 +12,9 @@ import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/w
 import { IconRight } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { SlPicture } from 'react-icons/sl';
+import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
   source,
@@ -30,6 +33,14 @@ export const ProjectSettings = ({
   const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const { projectId, canvasId } = useGetProjectCanvasId();
+
+  const { debouncedCreateCanvas } = useCreateCanvas({
+    projectId: projectId,
+    afterCreateSuccess: () => {
+      setShowLibraryModal(true);
+    },
+  });
 
   const handleEditSettings = () => {
     setCreateProjectModalVisible(true);
@@ -86,7 +97,11 @@ export const ProjectSettings = ({
               icon={<IconRight className={cn(iconClassName, 'text-gray-500')} />}
               onClick={(e) => {
                 e.stopPropagation();
-                setShowLibraryModal(true);
+                if (canvasId && canvasId !== 'empty') {
+                  setShowLibraryModal(true);
+                } else {
+                  debouncedCreateCanvas();
+                }
               }}
             />
           </Tooltip>
