@@ -26,7 +26,7 @@ import { Project } from '@refly/openapi-schema';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useNavigate } from 'react-router-dom';
 
-const ActionDropdown = ({
+export const ActionDropdown = ({
   project,
   afterDelete,
   setEditProjectModalVisible,
@@ -71,7 +71,7 @@ const ActionDropdown = ({
         <Popconfirm
           placement="bottomLeft"
           title={t('project.action.deleteConfirm', {
-            name: project.name || t('common.untitled'),
+            name: project?.name || t('common.untitled'),
           })}
           onConfirm={handleDelete}
           onCancel={(e?: React.MouseEvent) => {
@@ -142,8 +142,8 @@ const ProjectCard = ({
       onClick={handleClick}
     >
       <div className="h-36 px-4 py-3 overflow-hidden">
-        {project.coverUrl && (
-          <Image src={project.coverUrl} alt={project.name || t('common.untitled')} />
+        {project?.coverUrl && (
+          <Image src={project?.coverUrl} alt={project?.name || t('common.untitled')} />
         )}
       </div>
       <Divider className="m-0 text-gray-200" />
@@ -152,10 +152,10 @@ const ProjectCard = ({
           <IconProject color="#6172F3" size={22} />
           <div className="flex-1 min-w-0">
             <Typography.Text className="text-sm font-medium w-48" ellipsis={{ tooltip: true }}>
-              {project.name || t('common.untitled')}
+              {project?.name || t('common.untitled')}
             </Typography.Text>
             <p className="text-xs text-gray-500">
-              {time(project.updatedAt, language as LOCALE)
+              {time(project?.updatedAt, language as LOCALE)
                 .utc()
                 .fromNow()}
             </p>
@@ -171,11 +171,11 @@ const ProjectCard = ({
 
       <CreateProjectModal
         mode="edit"
-        projectId={project.projectId}
-        title={project.name}
-        description={project.description}
-        instructions={project.customInstructions}
-        coverPicture={project.coverUrl}
+        projectId={project?.projectId}
+        title={project?.name}
+        description={project?.description}
+        instructions={project?.customInstructions}
+        coverPicture={project?.coverUrl}
         visible={editProjectModalVisible}
         setVisible={setEditProjectModalVisible}
         onSuccess={() => {
@@ -185,8 +185,11 @@ const ProjectCard = ({
     </div>
   );
 };
-
-const ProjectList = () => {
+interface ProjectListProps {
+  refresh: boolean;
+  setRefresh: (refresh: boolean) => void;
+}
+const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
@@ -205,18 +208,17 @@ const ProjectList = () => {
     pageSize: 12,
   });
 
-  const getProjectDetail = async (projectId: string) => {
-    const res = await getClient().getProjectDetail({
-      query: { projectId },
+  const getProjectCanvases = async (projectId: string) => {
+    const res = await getClient().listCanvases({
+      query: { projectId, page: 1, pageSize: 1000 },
     });
-    return res?.data?.data;
+    return res?.data?.data || [];
   };
 
   const handleCardClick = async (project: Project) => {
-    const projectDetail = await getProjectDetail(project.projectId);
-    const canvasId = projectDetail?.canvases?.[0]?.canvasId || 'empty';
+    const canvases = await getProjectCanvases(project.projectId);
     setShowLibraryModal(false);
-    navigate(`/project/${project.projectId}?canvasId=${canvasId}`);
+    navigate(`/project/${project.projectId}?canvasId=${canvases?.[0]?.canvasId || 'empty'}`);
   };
 
   const projectCards = useMemo(() => {
@@ -244,6 +246,13 @@ const ProjectList = () => {
       setDataList([]);
     }
   }, [showLibraryModal]);
+
+  useEffect(() => {
+    if (refresh) {
+      reload();
+      setRefresh(false);
+    }
+  }, [refresh]);
 
   const emptyState = (
     <div className="h-full flex items-center justify-center">

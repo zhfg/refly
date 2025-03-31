@@ -6,7 +6,6 @@ import { Document, Resource } from '@refly/openapi-schema';
 import { Button, Checkbox, Skeleton, List, Empty, Collapse, Typography, message } from 'antd';
 import {
   IconDocument,
-  IconMoreHorizontal,
   IconPlus,
   IconFiles,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -244,9 +243,9 @@ export const SourcesMenu = ({
                                   onChange={() => toggleSourceSelection(item)}
                                   onClick={(e) => e.stopPropagation()}
                                 />
-                                {!isMultiSelectMode && (
+                                {/* {!isMultiSelectMode && (
                                   <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
-                                )}
+                                )} */}
                               </div>
                             </div>
                           </List.Item>

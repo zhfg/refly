@@ -4,15 +4,18 @@ import { DocumentList } from '../document-list';
 import { ResourceList } from '../resource-list';
 import { ProjectList } from '../project-list';
 
-import { Modal, Tabs } from 'antd';
+import { Modal, Tabs, Button, Tooltip } from 'antd';
 import './index.scss';
 import {
   IconDocument,
   IconLibrary,
   IconProject,
   IconResource,
+  IconPlus,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
+import { useState, useMemo } from 'react';
 
 interface LibraryModalProps {
   visible: boolean;
@@ -22,45 +25,95 @@ interface LibraryModalProps {
 export const LibraryModal = (props: LibraryModalProps) => {
   const { visible, setVisible } = props;
   const { t } = useTranslation();
-  const tabs = [
-    {
-      key: 'project',
-      label: t('common.project'),
-      icon: <IconProject style={{ transform: 'translateY(2px)' }} />,
-      children: <ProjectList />,
-    },
-    {
-      key: 'document',
-      label: t('common.document'),
-      icon: <IconDocument style={{ transform: 'translateY(2px)' }} />,
-      children: <DocumentList />,
-    },
-    {
-      key: 'resource',
-      label: t('common.resource'),
-      icon: <IconResource style={{ transform: 'translateY(2px)' }} />,
-      children: <ResourceList />,
-    },
-  ];
+  const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
 
   const activeKey = useKnowledgeBaseStoreShallow((state) => state.libraryModalActiveKey);
+  const updateLibraryModalActiveKey = useKnowledgeBaseStoreShallow(
+    (state) => state.updateLibraryModalActiveKey,
+  );
+
+  const [refreshProjectList, setRefreshProjectList] = useState(false);
+
+  const tabs = useMemo(
+    () => [
+      {
+        key: 'project',
+        label: (
+          <div className="flex items-center justify-between w-full">
+            <span className="flex items-center">
+              <IconProject />
+              <span className="ml-1">{t('common.project')}</span>
+            </span>
+            <Tooltip title={t('project.create')}>
+              <Button
+                type="text"
+                icon={<IconPlus />}
+                size="small"
+                className="ml-1"
+                onClick={() => {
+                  setCreateProjectModalVisible(true);
+                }}
+              />
+            </Tooltip>
+          </div>
+        ),
+        children: <ProjectList refresh={refreshProjectList} setRefresh={setRefreshProjectList} />,
+      },
+      {
+        key: 'document',
+        label: (
+          <span className="flex items-center">
+            <IconDocument />
+            <span className="ml-1">{t('common.document')}</span>
+          </span>
+        ),
+        children: <DocumentList />,
+      },
+      {
+        key: 'resource',
+        label: (
+          <span className="flex items-center">
+            <IconResource />
+            <span className="ml-1">{t('common.resource')}</span>
+          </span>
+        ),
+        children: <ResourceList />,
+      },
+    ],
+    [activeKey, t, refreshProjectList],
+  );
 
   return (
-    <Modal
-      className="library-modal"
-      centered
-      title={
-        <span className="flex items-center gap-2 text-lg font-medium">
-          <IconLibrary /> {t('common.library')}
-        </span>
-      }
-      width={1200}
-      footer={null}
-      open={visible}
-      onCancel={() => setVisible(false)}
-      focusTriggerAfterClose={false}
-    >
-      <Tabs defaultActiveKey={activeKey} items={tabs} />
-    </Modal>
+    <>
+      <Modal
+        className="library-modal"
+        centered
+        title={
+          <span className="flex items-center gap-2 text-lg font-medium">
+            <IconLibrary /> {t('common.library')}
+          </span>
+        }
+        width={1200}
+        footer={null}
+        open={visible}
+        onCancel={() => setVisible(false)}
+        focusTriggerAfterClose={false}
+      >
+        <Tabs
+          defaultActiveKey={activeKey}
+          items={tabs}
+          onChange={(key) => updateLibraryModalActiveKey(key)}
+        />
+      </Modal>
+
+      <CreateProjectModal
+        mode="create"
+        visible={createProjectModalVisible}
+        setVisible={setCreateProjectModalVisible}
+        onSuccess={() => {
+          setRefreshProjectList(true);
+        }}
+      />
+    </>
   );
 };

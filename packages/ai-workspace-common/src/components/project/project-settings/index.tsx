@@ -2,16 +2,13 @@ import { Project } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button, Typography } from 'antd';
-import {
-  IconLeft,
-  IconMoreHorizontal,
-  IconEdit,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconLeft, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { iconClassName } from '@refly-packages/ai-workspace-common/components/project/project-directory';
 import cn from 'classnames';
 import { useState } from 'react';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
+import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
 
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
@@ -45,10 +42,12 @@ export const ProjectSettings = ({
           {t('common.goBack')}
         </Button>
         <div className="flex items-center gap-2">
-          <Button
-            type="text"
-            size="small"
-            icon={<IconMoreHorizontal className={cn(iconClassName, 'text-gray-500')} />}
+          <ActionDropdown
+            project={data}
+            afterDelete={() => {
+              navigate('/', { replace: true });
+            }}
+            setEditProjectModalVisible={setCreateProjectModalVisible}
           />
           {source === 'sider' && (
             <Button
