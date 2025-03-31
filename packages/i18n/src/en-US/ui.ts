@@ -2243,6 +2243,7 @@ const translations = {
   },
   project: {
     create: 'Create Project',
+    viewAllProjects: 'View All Projects',
     addSource: 'Add File',
     canvas: 'Canvas',
     source: 'File',

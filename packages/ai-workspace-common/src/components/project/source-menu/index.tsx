@@ -14,7 +14,100 @@ import { sourceObject } from '@refly-packages/ai-workspace-common/components/pro
 import cn from 'classnames';
 import HeaderActions from '@refly-packages/ai-workspace-common/components/common/header-actions';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
+import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
+
 const { Text } = Typography;
+
+// export const ActionDropdown = ({
+//   projectId,
+// }: {
+//   projectId: string;
+// }) => {
+//   const { t } = useTranslation();
+//   const [popupVisible, setPopupVisible] = useState(false);
+//   const handleDelete = async (e: React.MouseEvent) => {
+//     e.stopPropagation();
+//     const res = await getClient().deleteProject({
+//       body: {
+//         projectId: project.projectId,
+//       },
+//     });
+//     if (res?.data?.success) {
+//       message.success(t('project.action.deleteSuccess'));
+//       afterDelete?.();
+//     }
+//   };
+
+//   const handleEdit = () => {
+//     console.log('handleEdit');
+//     setEditProjectModalVisible(true);
+//   };
+
+//   const items: MenuProps['items'] = [
+//     {
+//       label: (
+//         <div className="flex items-center flex-grow">
+//           <IconEdit size={16} className="mr-2" />
+//           {t('workspace.deleteDropdownMenu.edit')}
+//         </div>
+//       ),
+//       key: 'edit',
+//       onClick: handleEdit,
+//     },
+//     {
+//       label: (
+//         <Popconfirm
+//           placement="bottomLeft"
+//           title={t('project.action.deleteConfirm', {
+//             name: project?.name || t('common.untitled'),
+//           })}
+//           onConfirm={handleDelete}
+//           onCancel={(e?: React.MouseEvent) => {
+//             e?.stopPropagation();
+//             setPopupVisible(false);
+//           }}
+//           okText={t('common.confirm')}
+//           cancelText={t('common.cancel')}
+//           overlayStyle={{ maxWidth: '300px' }}
+//         >
+//           <div
+//             className="flex items-center text-red-600 flex-grow"
+//             onClick={(e) => e.stopPropagation()}
+//           >
+//             <IconDelete size={16} className="mr-2" />
+//             {t('workspace.deleteDropdownMenu.delete')}
+//           </div>
+//         </Popconfirm>
+//       ),
+//       key: 'delete',
+//     },
+//   ];
+
+//   const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+//     if (info.source === 'trigger') {
+//       setPopupVisible(open);
+//     }
+//   };
+
+//   return (
+//     <div className="relative" onClick={(e) => e.stopPropagation()}>
+//       <Dropdown
+//         trigger={['click']}
+//         open={popupVisible}
+//         onOpenChange={handleOpenChange}
+//         menu={{ items }}
+//       >
+//         <Button
+//           type="text"
+//           icon={<IconMoreHorizontal />}
+//           onClick={(e) => {
+//             e.stopPropagation();
+//           }}
+//         />
+//       </Dropdown>
+//     </div>
+//   );
+// };
 
 export const SourcesMenu = ({
   sourceList,
@@ -69,6 +162,14 @@ export const SourcesMenu = ({
     }
   }, [isSearchMode]);
 
+  const exitSearchMode = useCallback(() => {
+    setIsSearchMode(false);
+    setSearchValue('');
+    setSelectedSources([]);
+    setHoveredSourceId(null);
+    setIsMultiSelectMode(false);
+  }, []);
+
   const deleteSelectedSources = useCallback(async () => {
     const { data } = await getClient().deleteProjectItems({
       body: {
@@ -80,8 +181,7 @@ export const SourcesMenu = ({
       },
     });
     if (data?.success) {
-      setSelectedSources([]);
-      setHoveredSourceId(null);
+      exitSearchMode();
       message.success(t('project.action.deleteItemsSuccess'));
       onUpdatedItems?.();
     }
@@ -99,12 +199,30 @@ export const SourcesMenu = ({
     });
     const { data } = res || {};
     if (data?.success) {
-      setSelectedSources([]);
-      setHoveredSourceId(null);
+      exitSearchMode();
       message.success(t('project.action.removeItemsSuccess'));
       onUpdatedItems?.();
     }
   }, [selectedSources, projectId, t, onUpdatedItems]);
+
+  const addSelectedSourcesToCanvas = useCallback(async () => {
+    if (selectedSources.length > 0) {
+      for (const item of selectedSources) {
+        nodeOperationsEmitter.emit('addNode', {
+          node: {
+            type: item.entityType,
+            data: {
+              title: item.title,
+              entityId: item.entityId,
+            },
+          },
+          needSetCenter: true,
+          shouldPreview: true,
+        });
+      }
+    }
+    exitSearchMode();
+  }, [selectedSources]);
 
   const filteredSourceList = useMemo(() => {
     if (!searchValue) return sourceList;
@@ -156,6 +274,7 @@ export const SourcesMenu = ({
             children: (
               <div className="h-full flex flex-col">
                 <HeaderActions
+                  source="source"
                   isSearchMode={isSearchMode}
                   isMultiSelectMode={isMultiSelectMode}
                   searchValue={searchValue}
@@ -166,6 +285,7 @@ export const SourcesMenu = ({
                   onDeleteSelected={deleteSelectedSources}
                   onRemoveSelected={removeSelectedSourcesFromProject}
                   onAddItem={handleAddSource}
+                  onAddSelectedSourcesToCanvas={addSelectedSourcesToCanvas}
                   itemCountText={itemCountText}
                 />
                 <div className="flex-grow overflow-y-auto px-3">

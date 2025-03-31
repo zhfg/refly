@@ -12,6 +12,7 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { getAvailableFileCount } from '@refly-packages/utils/quota';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useReactFlow } from '@xyflow/react';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -20,6 +21,7 @@ export const useCreateDocument = () => {
   const { addNode } = useAddNode();
   const { getNodes } = useReactFlow();
   const { storageUsage, refetchUsage } = useSubscriptionUsage();
+  const { projectId } = useGetProjectCanvasId();
 
   const { setStorageExceededModalVisible } = useSubscriptionStoreShallow((state) => ({
     setStorageExceededModalVisible: state.setStorageExceededModalVisible,
@@ -58,6 +60,7 @@ export const useCreateDocument = () => {
       setIsCreating(true);
       const { data, error } = await getClient().createDocument({
         body: {
+          projectId,
           title,
           initialContent: parsedContent,
         },
@@ -133,6 +136,7 @@ export const useCreateDocument = () => {
       setIsCreating(true);
       const { data, error } = await getClient().createDocument({
         body: {
+          projectId,
           title,
         },
       });
@@ -182,6 +186,7 @@ export const useCreateDocument = () => {
       setIsCreating(true);
       const { data, error } = await getClient().createDocument({
         body: {
+          projectId,
           title: newTitle,
           initialContent: content,
         },

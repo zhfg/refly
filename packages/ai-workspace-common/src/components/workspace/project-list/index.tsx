@@ -25,6 +25,7 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { Project } from '@refly/openapi-schema';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useNavigate } from 'react-router-dom';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 export const ActionDropdown = ({
   project,
@@ -197,6 +198,7 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
     showLibraryModal: state.showLibraryModal,
     setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const { projectId } = useGetProjectCanvasId();
 
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -226,7 +228,12 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
       <ProjectCard
         key={item.projectId}
         project={item}
-        onDelete={() => setDataList(dataList.filter((n) => n.projectId !== item.projectId))}
+        onDelete={() => {
+          setDataList(dataList.filter((n) => n.projectId !== item.projectId));
+          if (projectId === item.projectId) {
+            navigate('/');
+          }
+        }}
         reload={reload}
         handleClick={() => handleCardClick(item)}
       />

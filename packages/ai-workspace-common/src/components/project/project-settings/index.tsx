@@ -1,7 +1,7 @@
 import { Project } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button, Typography } from 'antd';
+import { Button, Tooltip, Typography } from 'antd';
 import { IconLeft, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { iconClassName } from '@refly-packages/ai-workspace-common/components/project/project-directory';
 import cn from 'classnames';
@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
+import { IconRight } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
@@ -21,14 +23,19 @@ export const ProjectSettings = ({
   setCollapse: (collapse: boolean) => void;
   data: Project;
   onUpdate: (data: Project) => void;
+  libraryModalVisible: boolean;
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
+  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
+    setShowLibraryModal: state.setShowLibraryModal,
+  }));
 
   const handleEditSettings = () => {
     setCreateProjectModalVisible(true);
   };
+
   return (
     <div className="px-3">
       <div className="flex justify-between items-center">
@@ -63,9 +70,21 @@ export const ProjectSettings = ({
       <div className="pt-5 cursor-pointer" onClick={handleEditSettings}>
         <div className="flex items-center gap-3">
           <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
+
           <div className="flex flex-col">
             <span className="text-sm">{data?.name || t('common.untitled')}</span>
           </div>
+          <Tooltip title={t('project.viewAllProjects')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<IconRight className={cn(iconClassName, 'text-gray-500')} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLibraryModal(true);
+              }}
+            />
+          </Tooltip>
         </div>
 
         <Paragraph

@@ -4,15 +4,18 @@ import { Popconfirm, Button, Input } from 'antd';
 import {
   IconDelete,
   IconRemove,
-  IconClose,
   IconPlus,
   IconSearch,
+  IconExit,
+  IconEdit,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+
 import cn from 'classnames';
 
 export const iconClassName = 'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center';
 
 export interface HeaderActionsProps {
+  source?: 'source' | 'canvas';
   isSearchMode: boolean;
   isMultiSelectMode: boolean;
   searchValue: string;
@@ -23,11 +26,13 @@ export interface HeaderActionsProps {
   onDeleteSelected: () => void;
   onRemoveSelected: () => void;
   onAddItem?: () => void;
+  onAddSelectedSourcesToCanvas?: () => void;
   addButtonNode?: ReactNode;
   itemCountText?: string;
 }
 
 const HeaderActions = ({
+  source,
   isSearchMode,
   isMultiSelectMode,
   searchValue,
@@ -38,6 +43,7 @@ const HeaderActions = ({
   onDeleteSelected,
   onRemoveSelected,
   onAddItem,
+  onAddSelectedSourcesToCanvas,
   addButtonNode,
   itemCountText,
 }: HeaderActionsProps) => {
@@ -52,7 +58,7 @@ const HeaderActions = ({
               <div className="text-xs text-gray-500">
                 {t('project.sourceList.selectedCount', { count: selectedItems?.length ?? 0 })}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Popconfirm
                   title={t('project.sourceList.deleteConfirm')}
                   onConfirm={onDeleteSelected}
@@ -78,10 +84,20 @@ const HeaderActions = ({
                     icon={<IconRemove className={cn(iconClassName, 'text-gray-500')} />}
                   />
                 </Popconfirm>
+
+                {source === 'source' && (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<IconEdit className={cn(iconClassName, 'text-gray-500')} />}
+                    onClick={() => onAddSelectedSourcesToCanvas?.()}
+                  />
+                )}
+
                 <Button
                   type="text"
                   size="small"
-                  icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
+                  icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
                   onClick={onExitMultiSelectMode}
                 />
               </div>
@@ -89,7 +105,7 @@ const HeaderActions = ({
           )}
 
           {isSearchMode && (
-            <div className="flex items-center gap-2 w-full justify-between mt-2">
+            <div className="flex items-center gap-1 w-full justify-between mt-2">
               <Input
                 autoFocus
                 type="text"
@@ -101,7 +117,7 @@ const HeaderActions = ({
               <Button
                 type="text"
                 size="small"
-                icon={<IconClose className={cn(iconClassName, 'text-gray-500')} />}
+                icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
                 onClick={onToggleSearchMode}
               />
             </div>
@@ -111,7 +127,7 @@ const HeaderActions = ({
     }
 
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {addButtonNode ? (
           addButtonNode
         ) : (

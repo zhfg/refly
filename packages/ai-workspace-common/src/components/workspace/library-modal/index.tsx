@@ -16,6 +16,7 @@ import {
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useState, useMemo } from 'react';
+import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 interface LibraryModalProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export const LibraryModal = (props: LibraryModalProps) => {
   const { visible, setVisible } = props;
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
+  const { projectId } = useGetProjectCanvasId();
 
   const activeKey = useKnowledgeBaseStoreShallow((state) => state.libraryModalActiveKey);
   const updateLibraryModalActiveKey = useKnowledgeBaseStoreShallow(
@@ -59,7 +61,7 @@ export const LibraryModal = (props: LibraryModalProps) => {
         ),
         children: <ProjectList refresh={refreshProjectList} setRefresh={setRefreshProjectList} />,
       },
-      {
+      !projectId && {
         key: 'document',
         label: (
           <span className="flex items-center">
@@ -69,7 +71,7 @@ export const LibraryModal = (props: LibraryModalProps) => {
         ),
         children: <DocumentList />,
       },
-      {
+      !projectId && {
         key: 'resource',
         label: (
           <span className="flex items-center">

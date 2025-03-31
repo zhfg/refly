@@ -60,7 +60,7 @@ const AddCanvasDropdown = ({
 
   return (
     <>
-      <Dropdown menu={{ items }}>
+      <Dropdown menu={{ items }} trigger={['click']}>
         {children || (
           <Button
             type="default"

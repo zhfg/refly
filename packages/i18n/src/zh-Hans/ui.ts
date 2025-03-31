@@ -2180,6 +2180,7 @@ const translations = {
   },
   project: {
     create: '创建项目',
+    viewAllProjects: '查看所有项目',
     addSource: '添加文件',
     canvas: '画布',
     source: '文件',
