@@ -3,6 +3,7 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
+import { CanvasNodeFilter } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
 export const useCreateCodeArtifact = () => {
   const { t } = useTranslation();
@@ -14,8 +15,9 @@ export const useCreateCodeArtifact = () => {
       language?: string;
       type?: string;
       title?: string;
+      connectTo?: CanvasNodeFilter[];
     }) => {
-      const { codeContent, position, language, type, title } = params ?? {};
+      const { codeContent, position, language, type, title, connectTo } = params ?? {};
 
       // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
       const stopLoading = message.loading(t('codeArtifact.creating'));
@@ -46,6 +48,7 @@ export const useCreateCodeArtifact = () => {
           },
           position: position,
         },
+        connectTo: connectTo,
         shouldPreview: true,
         needSetCenter: true,
       });

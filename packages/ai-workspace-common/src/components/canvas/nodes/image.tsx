@@ -67,6 +67,16 @@ export const ImageNode = memo(
       defaultHeight: 'auto',
     });
 
+    // Ensure containerStyle has valid height value
+    const safeContainerStyle = useMemo(() => {
+      const style = { ...containerStyle };
+      // If height is NaN, set it to 'auto'
+      if (typeof style.height === 'number' && Number.isNaN(style.height)) {
+        style.height = 'auto';
+      }
+      return style;
+    }, [containerStyle]);
+
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
       onHoverStart();
@@ -184,7 +194,7 @@ export const ImageNode = memo(
       <div className={isOperating && isHovered ? 'nowheel' : ''}>
         <div
           ref={targetRef}
-          style={isPreview ? { width: 288, height: 200 } : containerStyle}
+          style={isPreview ? { width: 288, height: 200 } : safeContainerStyle}
           onClick={onNodeClick}
           className={classNames({
             'nodrag nopan select-text': isOperating,
