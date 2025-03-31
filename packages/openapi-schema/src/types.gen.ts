@@ -3002,6 +3002,10 @@ export type UpdateUserSettingsRequest = {
    */
   avatar?: string;
   /**
+   * User avatar storage key
+   */
+  avatarStorageKey?: string;
+  /**
    * UI locale
    */
   uiLocale?: string;

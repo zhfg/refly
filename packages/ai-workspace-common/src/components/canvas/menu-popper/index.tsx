@@ -1,6 +1,6 @@
-import { Button, Divider, message } from 'antd';
+import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState, memo } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
@@ -23,7 +23,7 @@ import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useCreateCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/use-create-code-artifact';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -45,7 +45,7 @@ interface MenuPopperProps {
   setOpen: (open: boolean) => void;
 }
 
-export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => {
+export const MenuPopper: FC<MenuPopperProps> = memo(({ open, position, setOpen }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -232,40 +232,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     );
   };
 
-  const createCodeArtifactNode = async (position: { x: number; y: number }) => {
-    // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
-    const stopLoading = message.loading(t('codeArtifact.creating'));
-    const { data, error } = await getClient().createCodeArtifact({
-      body: {
-        title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
-        language: 'typescript',
-        type: 'text/html',
-      },
-    });
-    stopLoading();
-
-    if (!data?.success || error) {
-      return;
-    }
-
-    addNode(
-      {
-        type: 'codeArtifact',
-        data: {
-          title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
-          entityId: data?.data?.artifactId,
-          metadata: {
-            status: 'finish',
-            language: 'typescript',
-          },
-        },
-        position: position,
-      },
-      [],
-      true,
-      true,
-    );
-  };
+  const createCodeArtifactNode = useCreateCodeArtifact();
 
   const createWebsiteNode = (position: { x: number; y: number }) => {
     addNode(
@@ -303,7 +270,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
         setOpen(false);
         break;
       case 'createCodeArtifact':
-        createCodeArtifactNode(position);
+        createCodeArtifactNode({ position });
         setOpen(false);
         break;
       case 'createWebsite':
@@ -442,4 +409,6 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       </div>
     )
   );
-};
+});
+
+MenuPopper.displayName = 'MenuPopper';

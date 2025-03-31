@@ -15,6 +15,7 @@ import { MiscModule } from '@/misc/misc.module';
 import { SubscriptionModule } from '@/subscription/subscription.module';
 import { KnowledgeModule } from '@/knowledge/knowledge.module';
 import { ActionModule } from '@/action/action.module';
+import { CodeArtifactModule } from '@/code-artifact/code-artifact.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ActionModule } from '@/action/action.module';
     MiscModule,
     KnowledgeModule,
     ActionModule,
+    CodeArtifactModule,
     SubscriptionModule,
     BullModule.registerQueue({
       name: QUEUE_DELETE_KNOWLEDGE_ENTITY,

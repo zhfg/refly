@@ -107,4 +107,30 @@ export class CodeArtifactService {
       content,
     };
   }
+
+  async duplicateCodeArtifact(user: User, artifactId: string) {
+    const { uid } = user;
+    const artifact = await this.prisma.codeArtifact.findUnique({
+      where: { artifactId, uid, deletedAt: null },
+    });
+
+    const newArtifactId = genCodeArtifactID();
+    const newStorageKey = `code-artifact/${newArtifactId}`;
+
+    const newArtifact = await this.prisma.codeArtifact.create({
+      data: {
+        artifactId: newArtifactId,
+        title: artifact.title,
+        type: artifact.type,
+        language: artifact.language,
+        storageKey: newStorageKey,
+        uid,
+      },
+    });
+
+    const contentStream = await this.minio.client.getObject(artifact.storageKey);
+    await this.minio.client.putObject(newStorageKey, contentStream);
+
+    return newArtifact;
+  }
 }

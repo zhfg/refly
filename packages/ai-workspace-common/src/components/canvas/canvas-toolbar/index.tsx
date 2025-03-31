@@ -28,8 +28,9 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { ToolButton, type ToolbarItem } from './tool-button';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
-import { genMemoID, genSkillID, genCodeArtifactID } from '@refly-packages/utils/id';
+import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
+import { useCreateCodeArtifact } from '@refly-packages/ai-workspace-common/hooks/use-create-code-artifact';
 
 interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
@@ -322,28 +323,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect, nodeLength }) =
     );
   }, [addNode, t]);
 
-  const createCodeArtifactNode = useCallback(() => {
-    // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
-    const codeArtifactId = genCodeArtifactID();
-    addNode(
-      {
-        type: 'codeArtifact',
-        data: {
-          title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
-          entityId: codeArtifactId,
-          contentPreview: '',
-          metadata: {
-            status: 'finish',
-            language: 'typescript',
-            activeTab: 'code',
-          },
-        },
-      },
-      [],
-      true,
-      true,
-    );
-  }, [addNode, t]);
+  const createCodeArtifactNode = useCreateCodeArtifact();
 
   const createWebsiteNode = useCallback(() => {
     addNode(

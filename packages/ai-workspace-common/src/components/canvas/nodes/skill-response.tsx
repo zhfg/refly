@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Divider, Input, message, Typography } from 'antd';
 import type { InputRef } from 'antd';
 import { CanvasNode, SkillResponseNodeProps } from './shared/types';
-import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { CustomHandle } from './shared/custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { getNodeCommonStyles } from './index';
@@ -36,7 +36,6 @@ import {
   createNodeEventName,
   cleanupNodeEvents,
 } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -53,8 +52,9 @@ import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canv
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import cn from 'classnames';
 import { ReasoningContentPreview } from './shared/reasoning-content-preview';
-import { useUpdateSkillResponseTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-skill-response-title';
+import { useUpdateNodeTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-node-title';
 import { truncateContent } from '@refly-packages/ai-workspace-common/utils/content';
+import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas';
 
 const POLLING_WAIT_TIME = 15000;
 
@@ -224,13 +224,12 @@ export const SkillResponseNode = memo(
     const { draggingNodeId } = useEditorPerformance();
     const isDragging = draggingNodeId === id;
 
-    const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
-      edges: state.data[state.currentCanvasId]?.edges ?? [],
+    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
     }));
-    const updateSkillResponseTitle = useUpdateSkillResponseTitle();
-    const patchNodeData = usePatchNodeData();
-    const { getNode } = useReactFlow();
+    const { setNodeData } = useNodeData();
+    const { getNode, getEdges } = useReactFlow();
+    const updateNodeTitle = useUpdateNodeTitle();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
     const targetRef = useRef<HTMLDivElement>(null);
@@ -243,7 +242,7 @@ export const SkillResponseNode = memo(
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
-    const node = useMemo(() => getNode(id), [id, getNode]);
+    const node = getNode(id);
 
     const { containerStyle, handleResize, updateSize } = useNodeSize({
       id,
@@ -310,6 +309,7 @@ export const SkillResponseNode = memo(
     const query = title;
 
     // Check if node has any connections
+    const edges = getEdges();
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
 
@@ -345,7 +345,7 @@ export const SkillResponseNode = memo(
         resetFailedState(entityId);
       }
 
-      patchNodeData(id, {
+      setNodeData(id, {
         ...data,
         contentPreview: '',
         metadata: {
@@ -375,7 +375,7 @@ export const SkillResponseNode = memo(
       t,
       updateSize,
       invokeAction,
-      patchNodeData,
+      setNodeData,
       readonly,
       resetFailedState,
     ]);
@@ -461,35 +461,65 @@ export const SkillResponseNode = memo(
 
     const handleAskAI = useCallback(() => {
       const { metadata } = data;
-      const { actionMeta, modelInfo } = metadata;
-      addNode(
+      const {
+        actionMeta,
+        modelInfo,
+        contextItems: responseContextItems = [],
+        tplConfig,
+      } = metadata;
+
+      // Create new context items array that includes both the response and its context
+      const mergedContextItems = [
         {
-          type: 'skill',
-          data: {
-            title: 'Skill',
-            entityId: genSkillID(),
-            metadata: {
-              contextItems: [
-                {
-                  type: 'skillResponse',
-                  title: data.title,
-                  entityId: data.entityId,
-                  metadata: {
-                    ...data.metadata,
-                    withHistory: true,
-                  },
-                },
-              ],
-              selectedSkill: actionMeta,
-              modelInfo,
-            },
+          type: 'skillResponse' as CanvasNodeType,
+          title: data.title,
+          entityId: data.entityId,
+          metadata: {
+            withHistory: true,
           },
         },
-        [{ type: 'skillResponse', entityId: data.entityId }],
-        false,
-        true,
-      );
-    }, [data, addNode]); // Add new handler for compare run
+        // Include the original context items from the response
+        ...responseContextItems.map((item) => ({
+          ...item,
+          metadata: {
+            ...item.metadata,
+            withHistory: undefined,
+          },
+        })),
+      ];
+
+      // Create node connect filters - include both the response and its context items
+      const connectFilters = [
+        { type: 'skillResponse' as CanvasNodeType, entityId: data.entityId },
+        ...responseContextItems.map((item) => ({
+          type: item.type as CanvasNodeType,
+          entityId: item.entityId,
+        })),
+      ];
+
+      // Add a small delay to avoid race conditions with context items
+      setTimeout(() => {
+        addNode(
+          {
+            type: 'skill',
+            data: {
+              title: 'Skill',
+              entityId: genSkillID(),
+              metadata: {
+                ...metadata,
+                contextItems: mergedContextItems,
+                selectedSkill: actionMeta,
+                modelInfo,
+                tplConfig,
+              },
+            },
+          },
+          connectFilters,
+          false,
+          true,
+        );
+      }, 10);
+    }, [data, addNode]);
 
     const handleCloneAskAI = useCallback(async () => {
       // Fetch action result to get context
@@ -536,7 +566,7 @@ export const SkillResponseNode = memo(
       if (newTitle === query) {
         return;
       }
-      updateSkillResponseTitle(newTitle, data.entityId, id);
+      updateNodeTitle(newTitle, data.entityId, id, 'skillResponse');
     };
 
     // Update size when content changes

@@ -2,15 +2,11 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import { persist } from 'zustand/middleware';
-import { Edge } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-
-interface CanvasData {
-  nodes: CanvasNode<any>[];
-  edges: Edge[];
-  title: string;
-  initialFitViewCompleted?: boolean;
-}
+import {
+  CanvasNodeData,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 
 interface NodePreviewData {
   metadata?: Record<string, unknown>;
@@ -27,10 +23,18 @@ interface CanvasConfig {
   nodePreviews: NodePreview[];
 }
 
+export interface LinearThreadMessage {
+  id: string;
+  resultId: string;
+  nodeId: string;
+  timestamp: number;
+  data: CanvasNodeData<ResponseNodeMeta>;
+}
+
 export interface CanvasState {
-  data: Record<string, CanvasData>;
   config: Record<string, CanvasConfig>;
   currentCanvasId: string | null;
+  initialFitViewCompleted?: boolean;
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
@@ -40,11 +44,11 @@ export interface CanvasState {
   nodeSizeMode: 'compact' | 'adaptive';
   autoLayout: boolean;
   showTemplates: boolean;
+  showReflyPilot: boolean;
+  linearThreadMessages: LinearThreadMessage[];
+  tplConfig: Record<string, any> | null;
 
-  setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
-  setEdges: (canvasId: string, edges: Edge[]) => void;
-  setTitle: (canvasId: string, title: string) => void;
-  setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
+  setInitialFitViewCompleted: (completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
   addNodePreview: (canvasId: string, node: NodePreview) => void;
@@ -63,24 +67,23 @@ export interface CanvasState {
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
   setAutoLayout: (enabled: boolean) => void;
   setShowTemplates: (show: boolean) => void;
+  setShowReflyPilot: (show: boolean) => void;
+  addLinearThreadMessage: (message: Omit<LinearThreadMessage, 'timestamp'>) => void;
+  removeLinearThreadMessage: (id: string) => void;
+  removeLinearThreadMessageByNodeId: (nodeId: string) => void;
+  clearLinearThreadMessages: () => void;
+  setTplConfig: (config: Record<string, any> | null) => void;
   clearState: () => void;
 }
-
-const defaultCanvasData: () => CanvasData = () => ({
-  nodes: [],
-  edges: [],
-  title: '',
-  initialFitViewCompleted: false,
-});
 
 const defaultCanvasConfig: () => CanvasConfig = () => ({
   nodePreviews: [],
 });
 
 const defaultCanvasState = () => ({
-  data: {},
   config: {},
   currentCanvasId: null,
+  initialFitViewCompleted: false,
   showPreview: true,
   showMaxRatio: true,
   showLaunchpad: true,
@@ -90,6 +93,9 @@ const defaultCanvasState = () => ({
   nodeSizeMode: 'compact' as const,
   autoLayout: false,
   showTemplates: true,
+  showReflyPilot: false,
+  linearThreadMessages: [],
+  tplConfig: null,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -99,7 +105,6 @@ export const useCanvasStore = create<CanvasState>()(
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
-          delete state.data[canvasId];
           delete state.config[canvasId];
         }),
       setCurrentCanvasId: (canvasId) =>
@@ -118,25 +123,9 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showLaunchpad = show;
         }),
-      setNodes: (canvasId, nodes) =>
+      setInitialFitViewCompleted: (completed) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].nodes = nodes;
-        }),
-      setEdges: (canvasId, edges) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].edges = edges;
-        }),
-      setTitle: (canvasId, title) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].title = title;
-        }),
-      setInitialFitViewCompleted: (canvasId, completed) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasData();
-          state.data[canvasId].initialFitViewCompleted = completed;
+          state.initialFitViewCompleted = completed;
         }),
       setCanvasLocalSynced: (canvasId, syncedAt) =>
         set((state) => {
@@ -213,7 +202,16 @@ export const useCanvasStore = create<CanvasState>()(
           state.config[canvasId] ??= defaultCanvasConfig();
           state.config[canvasId].nodePreviews ??= [];
           state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.map((n) =>
-            n.id === node.id ? { ...n, ...node } : n,
+            n.id === node.id
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    ...(node.data || {}),
+                  },
+                  ...(node.data ? {} : node),
+                }
+              : n,
           );
         }),
       reorderNodePreviews: (canvasId, sourceIndex, targetIndex) =>
@@ -248,6 +246,37 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showTemplates = show;
         }),
+      setShowReflyPilot: (show) =>
+        set((state) => {
+          state.showReflyPilot = show;
+        }),
+      addLinearThreadMessage: (message) =>
+        set((state) => {
+          state.linearThreadMessages.push({
+            ...message,
+            timestamp: Date.now(),
+          });
+        }),
+      removeLinearThreadMessage: (id) =>
+        set((state) => {
+          state.linearThreadMessages = state.linearThreadMessages.filter(
+            (message) => message.id !== id,
+          );
+        }),
+      removeLinearThreadMessageByNodeId: (nodeId) =>
+        set((state) => {
+          state.linearThreadMessages = state.linearThreadMessages.filter(
+            (message) => message.nodeId !== nodeId,
+          );
+        }),
+      clearLinearThreadMessages: () =>
+        set((state) => {
+          state.linearThreadMessages = [];
+        }),
+      setTplConfig: (config) =>
+        set((state) => {
+          state.tplConfig = config;
+        }),
       clearState: () => set(defaultCanvasState()),
     })),
     {
@@ -259,6 +288,8 @@ export const useCanvasStore = create<CanvasState>()(
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
+        showReflyPilot: state.showReflyPilot,
+        linearThreadMessages: state.linearThreadMessages,
       }),
     },
   ),

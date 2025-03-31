@@ -5,7 +5,6 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useNavigate } from 'react-router-dom';
 import { useSiderStore } from '@refly-packages/ai-workspace-common/stores/sider';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const CANVAS_NUM = 6;
 
@@ -16,9 +15,6 @@ export const useCreateCanvas = ({
   const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setTitle } = useCanvasStoreShallow((state) => ({
-    setTitle: state.setTitle,
-  }));
 
   const createCanvas = async (canvasTitle: string) => {
     setIsCreating(true);
@@ -56,7 +52,6 @@ export const useCreateCanvas = ({
           ...canvasList,
         ].slice(0, CANVAS_NUM),
       );
-      setTitle(canvasId, canvasTitle);
 
       message.success(t('canvas.action.addSuccess'));
       if (projectId) {

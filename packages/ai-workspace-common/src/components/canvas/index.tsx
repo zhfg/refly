@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
-import { Modal, Result } from 'antd';
+import { Modal, Result, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
@@ -9,10 +9,11 @@ import {
   useReactFlow,
   Node,
   Edge,
+  useStore,
   useStoreApi,
 } from '@xyflow/react';
+import { useShallow } from 'zustand/react/shallow';
 import { nodeTypes, CanvasNode } from './nodes';
-import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreviewContainer } from './node-preview';
@@ -51,7 +52,6 @@ import { CustomEdge } from './edges/custom-edge';
 import NotFoundOverlay from './NotFoundOverlay';
 import { NODE_MINI_MAP_COLORS } from './nodes/shared/colors';
 import { useDragToCreateNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-drag-create-node';
-import { message } from 'antd';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -61,7 +61,11 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { EmptyGuide } from './empty-guide';
+import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
 import HelperLines from './common/helper-line/index';
+import { useListenNodeOperationEvents } from '@refly-packages/ai-workspace-common/hooks/canvas/use-listen-node-events';
+
+const GRID_SIZE = 10;
 
 const selectionStyles = `
   .react-flow__selection {
@@ -150,11 +154,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const { addNode } = useAddNode();
-  const { nodes, edges } = useCanvasStoreShallow((state) => ({
-    nodes: state.data[canvasId]?.nodes ?? [],
-    edges: state.data[canvasId]?.edges ?? [],
-  }));
-
+  const { nodes, edges } = useStore(
+    useShallow((state) => ({
+      nodes: state.nodes,
+      edges: state.edges,
+    })),
+  );
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
   const {
@@ -176,10 +181,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }
   }, [canvasId, truncateAllNodesContent]);
 
-  const { showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
+  const { showPreview } = useCanvasStoreShallow((state) => ({
     showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
   }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } =
@@ -207,38 +210,45 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { handleNodePreview } = useNodePreviewControl({ canvasId });
 
   const interactionMode = useUserStore.getState().localSettings.canvasMode;
-  const { localSettings, setLocalSettings } = useUserStore.getState();
-  const { mutate: updateSettings } = useUpdateSettings();
-  const { isLogin } = useUserStoreShallow((state) => ({
+  const { isLogin, setLocalSettings } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
+    setLocalSettings: state.setLocalSettings,
   }));
+  const { mutate: updateSettings } = useUpdateSettings();
 
-  const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
-    setLocalSettings({
-      ...localSettings,
-      canvasMode: mode,
-    });
-    if (isLogin) {
-      updateSettings({
-        body: {
-          preferences: {
-            operationMode: mode,
-          },
-        },
+  const toggleInteractionMode = useCallback(
+    (mode: 'mouse' | 'touchpad') => {
+      const { localSettings } = useUserStore.getState();
+      setLocalSettings({
+        ...localSettings,
+        canvasMode: mode,
       });
-    }
-  };
+      if (isLogin) {
+        updateSettings({
+          body: {
+            preferences: {
+              operationMode: mode,
+            },
+          },
+        });
+      }
+    },
+    [setLocalSettings, isLogin, updateSettings],
+  );
+
+  // Use the reset hook to handle canvas ID changes
+  useReflyPilotReset(canvasId);
 
   useEffect(() => {
     return () => {
-      setInitialFitViewCompleted(canvasId, false);
+      setInitialFitViewCompleted(false);
     };
   }, [canvasId, setInitialFitViewCompleted]);
 
   useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
     const timeoutId = setTimeout(() => {
-      const { initialFitViewCompleted } = useCanvasStore.getState().data[canvasId] ?? {};
+      const { initialFitViewCompleted } = useCanvasStore.getState();
       if (nodes?.length > 0 && !initialFitViewCompleted) {
         reactFlowInstance.fitView({
           padding: 0.2,
@@ -246,7 +256,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           minZoom: 0.1,
           maxZoom: 1,
         });
-        setInitialFitViewCompleted(canvasId, true);
+        setInitialFitViewCompleted(true);
       }
     }, 100);
 
@@ -443,7 +453,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
 
             if (previewContainer && targetPreview) {
-              targetPreview.scrollIntoView({
+              targetPreview?.scrollIntoView?.({
                 behavior: 'smooth',
                 block: 'nearest',
                 inline: 'center',
@@ -515,6 +525,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         case 'website':
           menuNodeType = 'website';
           break;
+        case 'image':
+          menuNodeType = 'image';
+          break;
         default:
           return; // Don't show context menu for unknown node types
       }
@@ -572,16 +585,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Memoize nodes and edges
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedEdges = useMemo(() => edges, [edges]);
-
-  // Memoize LaunchPad component
-  const memoizedLaunchPad = useMemo(
-    () => (
-      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-        <LaunchPad visible={!readonly && showLaunchpad} />
-      </div>
-    ),
-    [readonly, showLaunchpad],
-  );
 
   // Memoize MiniMap styles
   const miniMapStyles = useMemo(
@@ -811,6 +814,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     );
   }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
 
+  // Add event listener for node operations
+  useListenNodeOperationEvents();
+
   return (
     <Spin
       className="w-full h-full"
@@ -855,6 +861,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           )}
           <ReactFlow
             {...flowConfig}
+            snapToGrid={true}
+            snapGrid={[GRID_SIZE, GRID_SIZE]}
             edgeTypes={edgeTypes}
             panOnScroll={interactionMode === 'touchpad'}
             panOnDrag={interactionMode === 'mouse'}
@@ -902,8 +910,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             changeMode={toggleInteractionMode}
             readonly={readonly}
           />
-
-          {memoizedLaunchPad}
         </div>
 
         {/* Display the not found overlay when shareNotFound is true */}
@@ -912,14 +918,14 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         {showPreview && (
           <div
             ref={previewContainerRef}
-            className="absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container"
+            className="absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container z-20"
             style={{
-              maxWidth: showMaxRatio ? '900px' : '440px',
+              maxWidth: 'calc(100% - 12px)',
             }}
             onScroll={(e) => updateIndicators(e.currentTarget)}
           >
             <div className="relative h-full overflow-y-hidden">
-              <NodePreviewContainer canvasId={canvasId} nodes={nodes} />
+              <NodePreviewContainer canvasId={canvasId} nodes={nodes as unknown as CanvasNode[]} />
             </div>
           </div>
         )}
@@ -984,11 +990,11 @@ export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
 
   return (
     <EditorPerformanceProvider>
-      <CanvasProvider readonly={readonly} canvasId={canvasId}>
-        <ReactFlowProvider>
+      <ReactFlowProvider>
+        <CanvasProvider readonly={readonly} canvasId={canvasId}>
           <Flow canvasId={canvasId} />
-        </ReactFlowProvider>
-      </CanvasProvider>
+        </CanvasProvider>
+      </ReactFlowProvider>
     </EditorPerformanceProvider>
   );
 };

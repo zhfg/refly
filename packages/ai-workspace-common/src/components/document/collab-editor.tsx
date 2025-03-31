@@ -326,8 +326,20 @@ export const CollaborativeEditor = memo(
         }
 
         const isFocused = editor.isFocused;
-
         const { activeDocumentId } = useDocumentStore.getState();
+
+        if (content === '\n' && !isFocused) {
+          editor
+            ?.chain()
+            .focus(0)
+            .insertContentAt(0, { type: 'paragraph' })
+            .setTextSelection(1)
+            .run();
+
+          documentActions.setActiveDocumentId(docId);
+          return;
+        }
+
         if (activeDocumentId !== docId) {
           return;
         }

@@ -4216,7 +4216,10 @@ export const UpdateUserSettingsRequestSchema = {
     avatar: {
       type: 'string',
       description: 'User avatar',
-      example: 'https://example.com/avatar.png',
+    },
+    avatarStorageKey: {
+      type: 'string',
+      description: 'User avatar storage key',
     },
     uiLocale: {
       type: 'string',

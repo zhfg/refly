@@ -839,7 +839,7 @@ const translations = {
     file: 'File',
   },
   canvas: {
-    emptyText: 'Double-click canvas to ask AI, or select ',
+    emptyText: 'Double-click canvas to open menu or select ',
     shareNotFound: 'Canvas Not Found',
     shareNotFoundHint:
       "The shared canvas you're trying to access could not be found. It might have been deleted or the link may be incorrect.",
@@ -1126,6 +1126,22 @@ const translations = {
         noUrlProvided: 'No website URL provided',
       },
     },
+    reflyPilot: {
+      title: 'Ask AI',
+      newConversation: 'New conversation',
+      clearConversation: 'Clear conversation',
+      welcome: {
+        title: 'Hello, {{name}}!',
+        subtitle: 'What can I help you with today?',
+        suggestions: [
+          'Summarize this article',
+          'Generate ideas for my project',
+          'Help me write a blog post',
+          'Explain this concept',
+          'Draft an email for me',
+        ],
+      },
+    },
   },
   resource: {
     multilingualSearch: {
@@ -1276,9 +1292,11 @@ const translations = {
     downloadError: 'Failed to download file',
     refreshing: 'Refreshing preview...',
     creating: 'Creating code artifact...',
+    loading: 'Loading code artifact...',
     sharing: 'Sharing code...',
     shareLoading: 'Loading shared code...',
     noCodeFound: 'No code content found to display',
+    noSelection: 'No code artifact selected',
     shareSuccess: 'Share link copied to clipboard!',
     shareError: 'Failed to share code!',
     errorCopySuccess: 'Error message copied to clipboard',

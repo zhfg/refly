@@ -28,6 +28,7 @@ import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-d
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { getShareLink } from '@refly-packages/ai-workspace-common/utils/share';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
 const StatusBar = memo(
   ({ docId }: { docId: string }) => {
@@ -242,6 +243,27 @@ const DocumentEditorHeader = memo(
       );
     };
 
+    useEffect(() => {
+      const handleSyncTitle = (data: { docId: string; title: string }) => {
+        if (data.docId === docId) {
+          syncTitleToYDoc(data.title);
+        }
+      };
+
+      editorEmitter.on('syncDocumentTitle', handleSyncTitle);
+
+      return () => {
+        editorEmitter.off('syncDocumentTitle', handleSyncTitle);
+      };
+    }, [docId, syncTitleToYDoc]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        editorEmitter.emit('insertBelow', '\n');
+      }
+    }, []);
+
     return (
       <div className="w-full">
         <div className="mx-0 mt-4 max-w-screen-lg">
@@ -252,6 +274,7 @@ const DocumentEditorHeader = memo(
             value={document?.title}
             style={{ paddingLeft: 6 }}
             onChange={onTitleChange}
+            onKeyDown={handleKeyDown}
           />
         </div>
       </div>

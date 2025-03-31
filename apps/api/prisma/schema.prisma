@@ -484,9 +484,9 @@ model CodeArtifact {
   /// Title
   title             String    @default("") @map("title")
   /// Type
-  type              String    @map("type")
+  type              String?   @map("type")
   /// Language
-  language          String    @map("language")
+  language          String?   @map("language")
   /// Code content storage key
   storageKey        String    @map("storage_key")
   /// Preview storage key
