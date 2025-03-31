@@ -78,21 +78,21 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
 
   const {
     showEdges,
-    showLaunchpad,
+    showReflyPilot,
     clickToPreview,
     nodeSizeMode,
-    setShowLaunchpad,
+    setShowReflyPilot,
     setClickToPreview,
     setNodeSizeMode,
     autoLayout,
     setAutoLayout,
   } = useCanvasStoreShallow((state) => ({
     showEdges: state.showEdges,
-    showLaunchpad: state.showLaunchpad,
+    showReflyPilot: state.showReflyPilot,
     clickToPreview: state.clickToPreview,
     nodeSizeMode: state.nodeSizeMode,
     setShowEdges: state.setShowEdges,
-    setShowLaunchpad: state.setShowLaunchpad,
+    setShowReflyPilot: state.setShowReflyPilot,
     setClickToPreview: state.setClickToPreview,
     setNodeSizeMode: state.setNodeSizeMode,
     autoLayout: state.autoLayout,
@@ -253,8 +253,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
       key: 'toggleLaunchpad',
       icon: IconAskAIInput,
       type: 'button',
-      active: showLaunchpad,
-      title: showLaunchpad
+      active: showReflyPilot,
+      title: showReflyPilot
         ? t('canvas.contextMenu.hideLaunchpad')
         : t('canvas.contextMenu.showLaunchpad'),
       description: t('canvas.contextMenu.toggleLaunchpadDescription'),
@@ -397,7 +397,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
 
       // Settings actions
       case 'toggleLaunchpad':
-        setShowLaunchpad(!showLaunchpad);
+        setShowReflyPilot(!showReflyPilot);
         setOpen(false);
         break;
       case 'toggleEdges':
