@@ -9,7 +9,10 @@ import { ModelInfo, Skill, SkillRuntimeConfig, SkillTemplateConfig } from '@refl
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
 import { ConfigManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/config-manager';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  IContextItem,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useTranslation } from 'react-i18next';
 import { IoClose } from 'react-icons/io5';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
@@ -19,6 +22,7 @@ import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/st
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { cn } from '@refly-packages/utils/cn';
 import classNames from 'classnames';
+import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 // Memoized Premium Banner Component
 const PremiumBanner = memo(() => {
@@ -128,7 +132,8 @@ export interface ChatPanelProps {
   handleUploadImage: (file: File) => Promise<any>;
   onInputHeightChange?: () => void;
   className?: string;
-  mode?: 'node' | 'list'; // Added mode prop to differentiate between node and list display
+  mode?: 'node' | 'list';
+  resultId?: string;
 }
 
 export const ChatPanel = memo(
@@ -151,13 +156,19 @@ export const ChatPanel = memo(
     handleUploadImage,
     onInputHeightChange,
     className = '',
-    mode = 'node', // Default to node mode
+    mode = 'node',
+    resultId,
   }: ChatPanelProps) => {
     const [form] = Form.useForm();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const chatInputRef = useRef<HTMLDivElement>(null);
     const userProfile = useUserStoreShallow((state) => state.userProfile);
     const isList = mode === 'list';
+
+    // Get setActiveResultId from context panel store
+    const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
+      setActiveResultId: state.setActiveResultId,
+    }));
 
     // Reset form when skill changes
     useEffect(() => {
@@ -184,6 +195,11 @@ export const ChatPanel = memo(
 
     const handleImageUpload = useCallback(
       async (file: File) => {
+        // Set as active when user interacts with this component
+        if (resultId) {
+          setActiveResultId(resultId);
+        }
+
         const nodeData = await handleUploadImage(file);
         if (nodeData) {
           setContextItems([
@@ -195,8 +211,17 @@ export const ChatPanel = memo(
           ]);
         }
       },
-      [contextItems, handleUploadImage, setContextItems],
+      [contextItems, handleUploadImage, setContextItems, resultId, setActiveResultId],
     );
+
+    // Handle input focus to set active resultId
+    const handleInputFocus = useCallback(() => {
+      if (resultId) {
+        setActiveResultId(resultId);
+      } else {
+        setActiveResultId(ContextTarget.Global);
+      }
+    }, [resultId, setActiveResultId]);
 
     // Add useEffect for auto focus
     useEffect(() => {
@@ -206,11 +231,22 @@ export const ChatPanel = memo(
             const textArea = chatInputRef.current.querySelector('textarea');
             if (textArea) {
               textArea.focus();
+              // Set active on initial focus
+              handleInputFocus();
             }
           }
         }, 100);
       }
-    }, [readonly]);
+    }, [readonly, handleInputFocus]);
+
+    // Handle send message with active resultId
+    const handleMessageSend = useCallback(() => {
+      // Set as active when sending a message
+      if (resultId) {
+        setActiveResultId(resultId);
+      }
+      handleSendMessage();
+    }, [handleSendMessage, resultId, setActiveResultId]);
 
     const renderContent = () => (
       <>
@@ -234,12 +270,13 @@ export const ChatPanel = memo(
           selectedSkillName={selectedSkill?.name}
           inputClassName="px-1 py-0"
           maxRows={20}
-          handleSendMessage={handleSendMessage}
+          handleSendMessage={handleMessageSend}
           handleSelectSkill={(skill) => {
             setQuery(query?.slice(0, -1));
             setSelectedSkill(skill);
           }}
           onUploadImage={handleImageUpload}
+          onFocus={handleInputFocus}
         />
 
         {selectedSkill?.configSchema?.items?.length && setTplConfig ? (
@@ -281,7 +318,7 @@ export const ChatPanel = memo(
           query={query}
           model={modelInfo}
           setModel={setModelInfo}
-          handleSendMessage={handleSendMessage}
+          handleSendMessage={handleMessageSend}
           handleAbort={handleAbortAction}
           onUploadImage={handleImageUpload}
           contextItems={contextItems}

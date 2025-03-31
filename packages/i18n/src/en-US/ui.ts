@@ -497,6 +497,7 @@ const translations = {
       gallery: 'Use Cases',
       useCases: 'Canvas Use Cases',
       artifacts: 'Artifacts Use Cases',
+      videoTutorials: 'Video Tutorials',
     },
     faq: {
       title: 'Frequently Asked Questions',

@@ -432,6 +432,7 @@ const translations = {
       product: '产品',
       price: '价格',
       docs: '文档',
+      videoTutorials: '视频教程',
       discord: 'Discord',
       priceTag: '五折',
       community: '用户交流群',
