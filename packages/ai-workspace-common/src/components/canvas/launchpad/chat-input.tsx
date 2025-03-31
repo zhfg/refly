@@ -22,6 +22,7 @@ interface ChatInputProps {
   handleSendMessage: () => void;
   handleSelectSkill?: (skill: Skill) => void;
   onUploadImage?: (file: File) => Promise<void>;
+  onFocus?: () => void;
 }
 
 const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
@@ -36,6 +37,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       handleSendMessage,
       handleSelectSkill,
       onUploadImage,
+      onFocus,
     },
     ref,
   ) => {
@@ -214,6 +216,13 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       [readonly, handleSearchListConfirm],
     );
 
+    // Handle focus event and propagate it upward
+    const handleFocus = useCallback(() => {
+      if (onFocus && !readonly) {
+        onFocus();
+      }
+    }, [onFocus, readonly]);
+
     return (
       <div
         ref={ref}
@@ -276,6 +285,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             ref={inputRef}
             autoFocus={!readonly}
             disabled={readonly}
+            onFocus={handleFocus}
             onBlur={() => {
               setTimeout(() => {
                 setShowSkillSelector(false);
@@ -328,7 +338,8 @@ export const ChatInput = memo(ChatInputComponent, (prevProps, nextProps) => {
     prevProps.query === nextProps.query &&
     prevProps.selectedSkillName === nextProps.selectedSkillName &&
     prevProps.handleSelectSkill === nextProps.handleSelectSkill &&
-    prevProps.onUploadImage === nextProps.onUploadImage
+    prevProps.onUploadImage === nextProps.onUploadImage &&
+    prevProps.onFocus === nextProps.onFocus
   );
 }) as typeof ChatInputComponent;
 

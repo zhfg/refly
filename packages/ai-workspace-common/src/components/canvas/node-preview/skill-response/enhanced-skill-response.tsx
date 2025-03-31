@@ -9,7 +9,10 @@ import { cn } from '@refly-packages/utils/cn';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { genActionResultID, genUniqueId } from '@refly-packages/utils/id';
 import { ChatPanel } from '@refly-packages/ai-workspace-common/components/canvas/node-chat-panel';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  IContextItem,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import {
   ModelInfo,
   Skill,
@@ -24,6 +27,7 @@ import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-c
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useContextUpdateByResultId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-debounced-context-update';
 import { useReactFlow } from '@xyflow/react';
+import { contextEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/context';
 
 interface EnhancedSkillResponseProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -51,6 +55,12 @@ export const EnhancedSkillResponse = memo(
       const lastMessage = messages?.[messages.length - 1];
       return lastMessage?.resultId;
     }, [messages]);
+
+    // Document store state for active result ID
+    const { activeResultId, setActiveResultId } = useContextPanelStoreShallow((state) => ({
+      activeResultId: state.activeResultId,
+      setActiveResultId: state.setActiveResultId,
+    }));
 
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +172,33 @@ export const EnhancedSkillResponse = memo(
         prevTplConfigRef.current = tplConfig;
       }
     }, [tplConfig]);
+
+    // Listen for context item events specific to this resultId
+    useEffect(() => {
+      // Handler for when a context item is added to this specific resultId
+      const handleAddToContext = (data: { contextItem: IContextItem; resultId: string }) => {
+        if (data.resultId === resultId) {
+          setContextItems((prevItems) => {
+            // Check if item already exists
+            const itemExists = prevItems.some(
+              (prevItem) => prevItem.entityId === data.contextItem.entityId,
+            );
+            if (itemExists) return prevItems;
+
+            // Add the new item
+            return [...prevItems, data.contextItem];
+          });
+        }
+      };
+
+      // Register event listeners
+      contextEmitter.on('addToContext', handleAddToContext);
+
+      // Cleanup
+      return () => {
+        contextEmitter.off('addToContext', handleAddToContext);
+      };
+    }, [resultId]);
 
     // Scroll to bottom effect
     useEffect(() => {
@@ -323,6 +360,12 @@ export const EnhancedSkillResponse = memo(
       },
       [setTplConfig],
     );
+    // Handle container click for activation
+    const handleContainerClick = useCallback(() => {
+      if (activeResultId !== resultId) {
+        setActiveResultId(resultId);
+      }
+    }, [activeResultId, resultId, setActiveResultId]);
 
     // Memoize the ChatPanel component to prevent unnecessary re-renders
     const chatPanelComponent = useMemo(
@@ -341,13 +384,7 @@ export const EnhancedSkillResponse = memo(
           runtimeConfig={runtimeConfig}
           setRuntimeConfig={setRuntimeConfig}
           tplConfig={tplConfig}
-          setTplConfig={(config) => {
-            console.log('EnhancedSkillResponse setting tplConfig', {
-              old: tplConfig,
-              new: config,
-            });
-            handleSetTplConfig(config);
-          }}
+          setTplConfig={handleSetTplConfig}
           handleSendMessage={handleSendMessage}
           handleAbortAction={abortAction}
           handleUploadImage={handleImageUpload}
@@ -355,6 +392,7 @@ export const EnhancedSkillResponse = memo(
             // Adjust container height if needed
           }}
           className="w-full max-w-[1024px] mx-auto"
+          resultId={resultId}
         />
       ),
       [
@@ -364,16 +402,14 @@ export const EnhancedSkillResponse = memo(
         selectedSkill,
         handleSetSelectedSkill,
         contextItems,
-        setContextItems,
         modelInfo,
-        setModelInfo,
         runtimeConfig,
-        setRuntimeConfig,
         tplConfig,
         handleSetTplConfig,
         handleSendMessage,
         abortAction,
         handleImageUpload,
+        resultId,
       ],
     );
 
@@ -384,7 +420,11 @@ export const EnhancedSkillResponse = memo(
     );
 
     return (
-      <div ref={containerRef} className={cn('flex flex-col h-full w-full', className)}>
+      <div
+        ref={containerRef}
+        className={cn('flex flex-col h-full w-full', className)}
+        onClick={handleContainerClick}
+      >
         <div className="flex flex-1 overflow-hidden">
           <div className="flex flex-col w-full max-w-[1024px] mx-auto">
             {threadContentComponent}
