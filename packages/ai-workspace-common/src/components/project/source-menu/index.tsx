@@ -1,7 +1,7 @@
 import { AddSources } from '@refly-packages/ai-workspace-common/components/project/add-sources';
 
 import { useTranslation } from 'react-i18next';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Document, Resource } from '@refly/openapi-schema';
 import { Button, Checkbox, Skeleton, List, Empty, Collapse, Typography, message } from 'antd';
 import {
@@ -17,97 +17,6 @@ import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/com
 import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 
 const { Text } = Typography;
-
-// export const ActionDropdown = ({
-//   projectId,
-// }: {
-//   projectId: string;
-// }) => {
-//   const { t } = useTranslation();
-//   const [popupVisible, setPopupVisible] = useState(false);
-//   const handleDelete = async (e: React.MouseEvent) => {
-//     e.stopPropagation();
-//     const res = await getClient().deleteProject({
-//       body: {
-//         projectId: project.projectId,
-//       },
-//     });
-//     if (res?.data?.success) {
-//       message.success(t('project.action.deleteSuccess'));
-//       afterDelete?.();
-//     }
-//   };
-
-//   const handleEdit = () => {
-//     console.log('handleEdit');
-//     setEditProjectModalVisible(true);
-//   };
-
-//   const items: MenuProps['items'] = [
-//     {
-//       label: (
-//         <div className="flex items-center flex-grow">
-//           <IconEdit size={16} className="mr-2" />
-//           {t('workspace.deleteDropdownMenu.edit')}
-//         </div>
-//       ),
-//       key: 'edit',
-//       onClick: handleEdit,
-//     },
-//     {
-//       label: (
-//         <Popconfirm
-//           placement="bottomLeft"
-//           title={t('project.action.deleteConfirm', {
-//             name: project?.name || t('common.untitled'),
-//           })}
-//           onConfirm={handleDelete}
-//           onCancel={(e?: React.MouseEvent) => {
-//             e?.stopPropagation();
-//             setPopupVisible(false);
-//           }}
-//           okText={t('common.confirm')}
-//           cancelText={t('common.cancel')}
-//           overlayStyle={{ maxWidth: '300px' }}
-//         >
-//           <div
-//             className="flex items-center text-red-600 flex-grow"
-//             onClick={(e) => e.stopPropagation()}
-//           >
-//             <IconDelete size={16} className="mr-2" />
-//             {t('workspace.deleteDropdownMenu.delete')}
-//           </div>
-//         </Popconfirm>
-//       ),
-//       key: 'delete',
-//     },
-//   ];
-
-//   const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-//     if (info.source === 'trigger') {
-//       setPopupVisible(open);
-//     }
-//   };
-
-//   return (
-//     <div className="relative" onClick={(e) => e.stopPropagation()}>
-//       <Dropdown
-//         trigger={['click']}
-//         open={popupVisible}
-//         onOpenChange={handleOpenChange}
-//         menu={{ items }}
-//       >
-//         <Button
-//           type="text"
-//           icon={<IconMoreHorizontal />}
-//           onClick={(e) => {
-//             e.stopPropagation();
-//           }}
-//         />
-//       </Dropdown>
-//     </div>
-//   );
-// };
 
 export const SourcesMenu = ({
   sourceList,
@@ -254,6 +163,12 @@ export const SourcesMenu = ({
       <ResourceIcon url={item?.data?.url} resourceType={item.resourceType} size={14} />
     );
   }, []);
+
+  useEffect(() => {
+    if (selectedSources?.length === 0) {
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedSources?.length]);
 
   return (
     <div className="flex-grow overflow-y-auto min-h-[150px] mt-1">

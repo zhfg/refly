@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Collapse,
@@ -222,6 +222,12 @@ export const CanvasMenu = ({
     () => t('project.canvasCount', { canvasCount: canvasList.length }),
     [canvasList.length, t],
   );
+
+  useEffect(() => {
+    if (selectedCanvases?.length === 0) {
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedCanvases?.length]);
 
   return (
     <Collapse

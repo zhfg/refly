@@ -1,11 +1,7 @@
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Divider, Layout } from 'antd';
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import {
-  useGetProjectDetail,
-  useListResources,
-  useListDocuments,
-} from '@refly-packages/ai-workspace-common/queries';
+import { useState, useEffect, useCallback } from 'react';
+import { useGetProjectDetail } from '@refly-packages/ai-workspace-common/queries';
 import { Document, Resource } from '@refly/openapi-schema';
 import { CanvasMenu } from '@refly-packages/ai-workspace-common/components/project/canvas-menu';
 import { SourcesMenu } from '@refly-packages/ai-workspace-common/components/project/source-menu';
@@ -28,7 +24,14 @@ interface ProjectDirectoryProps {
 }
 
 export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) => {
-  const { getCanvasList, updateCanvasList, isLoadingCanvas } = useHandleSiderData(true);
+  const {
+    getCanvasList,
+    updateCanvasList,
+    isLoadingCanvas,
+    sourceList,
+    loadingSource,
+    getSourceList,
+  } = useHandleSiderData(true);
   const { canvasId } = useGetProjectCanvasId();
   const navigate = useNavigate();
   const { collapse, setCollapse, canvasList } = useSiderStoreShallow((state) => ({
@@ -42,50 +45,6 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   });
   const data = projectDetail?.data;
   const [projectData, setProjectData] = useState(data);
-
-  const {
-    data: documentsResponse,
-    refetch: refetchDocuments,
-    isFetching: isFetchingDocuments,
-  } = useListDocuments({ query: { projectId, page: 1, pageSize: 1000 } }, null, {
-    enabled: !!projectId,
-  });
-
-  const {
-    data: resourcesResponse,
-    refetch: refetchResources,
-    isFetching: isFetchingResources,
-  } = useListResources({ query: { projectId, page: 1, pageSize: 1000 } }, null, {
-    enabled: !!projectId,
-  });
-
-  const documents = documentsResponse?.data || [];
-  const resources = resourcesResponse?.data || [];
-
-  const mergedSources = useMemo(() => {
-    const docs = (documents || []).map((item) => ({
-      ...item,
-      entityId: item.docId,
-      entityType: 'document',
-    }));
-    const res = (resources || []).map((item) => ({
-      ...item,
-      entityId: item.resourceId,
-      entityType: 'resource',
-    }));
-
-    const merged = [...docs, ...res];
-
-    return merged.sort((a, b) => {
-      const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-      return dateB - dateA;
-    });
-  }, [documents, resources]);
-
-  const refetchFiles = useCallback(() => {
-    Promise.all([refetchDocuments(), refetchResources()]);
-  }, [refetchDocuments, refetchResources]);
 
   const handleRemoveCanvases = useCallback(
     async (canvasIds: string[]) => {
@@ -141,13 +100,13 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
           onRemoveCanvases={handleRemoveCanvases}
         />
         <SourcesMenu
-          isFetching={isFetchingDocuments || isFetchingResources}
-          sourceList={mergedSources as sourceObject[]}
+          isFetching={loadingSource}
+          sourceList={sourceList}
           projectId={projectId}
-          documentCount={documents?.length || 0}
-          resourceCount={resources?.length || 0}
+          documentCount={sourceList.filter((item) => item.entityType === 'document').length || 0}
+          resourceCount={sourceList.filter((item) => item.entityType === 'resource').length || 0}
           onUpdatedItems={() => {
-            refetchFiles();
+            getSourceList();
           }}
         />
       </div>

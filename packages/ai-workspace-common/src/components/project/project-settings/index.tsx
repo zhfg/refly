@@ -23,7 +23,6 @@ export const ProjectSettings = ({
   setCollapse: (collapse: boolean) => void;
   data: Project;
   onUpdate: (data: Project) => void;
-  libraryModalVisible: boolean;
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();

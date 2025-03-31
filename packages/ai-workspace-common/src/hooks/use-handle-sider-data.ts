@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { sourceObject } from '@refly-packages/ai-workspace-common/components/project/project-directory';
 
 const DATA_NUM = 6;
 const DATA_NUM_CANVAS_FOR_PROJECT = 1000;
 
 export const useHandleSiderData = (initData?: boolean) => {
   const { projectId } = useGetProjectCanvasId();
-  const { canvasList, updateCanvasList } = useSiderStoreShallow((state) => ({
-    canvasList: state.canvasList,
-    updateCanvasList: state.setCanvasList,
-  }));
+  const { canvasList, updateCanvasList, sourceList, updateSourceList } = useSiderStoreShallow(
+    (state) => ({
+      canvasList: state.canvasList,
+      updateCanvasList: state.setCanvasList,
+      sourceList: state.sourceList,
+      updateSourceList: state.setSourceList,
+    }),
+  );
 
   const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
+  const [isLoadingResource, setIsLoadingResource] = useState(false);
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
 
   const requestCanvasList = async () => {
     const { data: res, error } = await getClient().listCanvases({
@@ -41,6 +48,63 @@ export const useHandleSiderData = (initData?: boolean) => {
     return formattedCanvases;
   };
 
+  const getResourceList = async () => {
+    if (isLoadingResource) return;
+    setIsLoadingResource(true);
+    const { data: res, error } = await getClient().listResources({
+      query: { page: 1, pageSize: 1000, projectId },
+    });
+    setIsLoadingResource(false);
+    if (error) {
+      console.error('getCanvasList error', error);
+      return [];
+    }
+    return res?.data || [];
+  };
+
+  const getDocumentList = async () => {
+    if (isLoadingDocument) return;
+    setIsLoadingDocument(true);
+    const { data: res, error } = await getClient().listDocuments({
+      query: { page: 1, pageSize: 1000, projectId },
+    });
+    setIsLoadingDocument(false);
+    if (error) {
+      console.error('getCanvasList error', error);
+      return [];
+    }
+    return res?.data || [];
+  };
+
+  const getSourceList = async () => {
+    const resources = await getResourceList();
+    const documents = await getDocumentList();
+    const docs = (documents || []).map((item) => ({
+      ...item,
+      entityId: item.docId,
+      entityType: 'document',
+    }));
+    const res = (resources || []).map((item) => ({
+      ...item,
+      entityId: item.resourceId,
+      entityType: 'resource',
+    }));
+
+    const merged = [...docs, ...res];
+
+    const sorted = merged.sort((a, b) => {
+      const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA;
+    });
+    updateSourceList(sorted as sourceObject[]);
+  };
+
+  const loadingSource = useMemo(
+    () => isLoadingResource || isLoadingDocument,
+    [isLoadingResource, isLoadingDocument],
+  );
+
   const loadSiderData = async (setLoading?: boolean) => {
     getCanvasList(setLoading);
   };
@@ -48,8 +112,20 @@ export const useHandleSiderData = (initData?: boolean) => {
   useEffect(() => {
     if (initData) {
       loadSiderData(true);
+      if (projectId) {
+        getSourceList();
+      }
     }
-  }, [projectId]);
+  }, []);
 
-  return { loadSiderData, getCanvasList, canvasList, isLoadingCanvas, updateCanvasList };
+  return {
+    loadSiderData,
+    getCanvasList,
+    canvasList,
+    isLoadingCanvas,
+    updateCanvasList,
+    sourceList,
+    loadingSource,
+    getSourceList,
+  };
 };
