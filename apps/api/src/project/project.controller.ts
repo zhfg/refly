@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Query, UseGuards, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Body,
+  DefaultValuePipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProjectService } from '@/project/project.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
@@ -25,8 +34,8 @@ export class ProjectController {
   @Get('list')
   async listProjects(
     @LoginedUser() user: User,
-    @Query('page') page: number,
-    @Query('pageSize') pageSize: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
     @Query('order') order: ListOrder,
   ): Promise<ListProjectResponse> {
     const projects = await this.projectService.listProjects(user, { page, pageSize, order });
