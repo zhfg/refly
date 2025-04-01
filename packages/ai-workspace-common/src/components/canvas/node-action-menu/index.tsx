@@ -92,8 +92,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
-  const { getNodeContent } = useGetNodeContent(node);
-  const content = getNodeContent() as string;
+  const { fetchNodeContent } = useGetNodeContent(node);
   const [localSizeMode, setLocalSizeMode] = useState(
     () => nodeData?.metadata?.sizeMode || 'adaptive',
   );
@@ -179,12 +178,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     onClose?.();
   }, [nodeId, onClose]);
 
-  const handleInsertToDoc = useCallback(() => {
+  const handleInsertToDoc = useCallback(async () => {
+    const content = (await fetchNodeContent()) as string;
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'insertToDoc'), {
       content,
     });
     onClose?.();
-  }, [nodeId, content, onClose]);
+  }, [nodeId, fetchNodeContent, onClose]);
 
   const handlePreview = useCallback(() => {
     if (nodeType === 'image') {
@@ -255,11 +255,12 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     onClose?.();
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
+    const content = (await fetchNodeContent()) as string;
     copyToClipboard(content || '');
     message.success(t('copilot.message.copySuccess'));
     onClose?.();
-  }, [content, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
+  }, [fetchNodeContent, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
 
   const handleEditQuery = useCallback(() => {
     previewNode(node);
@@ -288,12 +289,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     onClose?.();
   }, [nodeData, nodeType, createMemo, onClose]);
 
-  const handleDuplicateDocument = useCallback(() => {
+  const handleDuplicateDocument = useCallback(async () => {
+    const content = (await fetchNodeContent()) as string;
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'), {
       content,
     });
     onClose?.();
-  }, [nodeId, onClose, content]);
+  }, [nodeId, fetchNodeContent, onClose]);
 
   const getMenuItems = useCallback(
     (activeDocumentId: string): MenuItem[] => {

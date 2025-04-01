@@ -1,44 +1,65 @@
 import { Node } from '@xyflow/react';
-import {
-  useGetResourceDetail,
-  useGetDocumentDetail,
-  useGetActionResult,
-} from '@refly-packages/ai-workspace-common/queries';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export const useGetNodeContent = (node: Node) => {
-  const id = node?.data?.entityId as string;
-  const type = node?.type;
+  const fetchNodeContent = async (node: Node) => {
+    if (!node) return '';
 
-  const { data: document } = useGetDocumentDetail({ query: { docId: id } }, null, {
-    enabled: type === 'document' && !!id,
-  });
+    const id = node?.data?.entityId as string;
+    const type = node?.type;
+    const contentPreview = node?.data?.contentPreview;
 
-  const { data: resource } = useGetResourceDetail({ query: { resourceId: id } }, null, {
-    enabled: type === 'resource' && !!id,
-  });
+    if (!id || !type) return contentPreview || '';
 
-  const { data: actionResult } = useGetActionResult({ query: { resultId: id } }, null, {
-    enabled: type === 'skillResponse' && !!id,
-  });
+    try {
+      switch (type) {
+        case 'document': {
+          const { data, error } = await getClient().getDocumentDetail({ query: { docId: id } });
+          if (error) {
+            return contentPreview || '';
+          }
+          return data?.data?.content || contentPreview || '';
+        }
+        case 'resource': {
+          const { data, error } = await getClient().getResourceDetail({
+            query: { resourceId: id },
+          });
+          if (error) {
+            return contentPreview || '';
+          }
+          return data?.data?.content || contentPreview || '';
+        }
+        case 'skillResponse': {
+          const { data, error } = await getClient().getActionResult({ query: { resultId: id } });
+          if (error) {
+            return contentPreview || '';
+          }
+          return (
+            data?.data?.steps
+              ?.map((step) => step?.content || '')
+              .filter(Boolean)
+              .join('\n\n') ||
+            contentPreview ||
+            ''
+          );
+        }
 
-  const getNodeContent = () => {
-    switch (node.type) {
-      case 'document':
-        return document?.data?.content || node?.data?.contentPreview;
-      case 'resource':
-        return resource?.data?.content || node?.data?.contentPreview;
-      case 'skillResponse':
-        return (
-          actionResult?.data?.steps
-            ?.map((step) => step?.content || '')
-            .filter(Boolean)
-            .join('\n\n') || node?.data?.contentPreview
-        );
-      default:
-        return node?.data?.contentPreview;
+        case 'codeArtifact': {
+          const { data, error } = await getClient().getCodeArtifactDetail({
+            query: { artifactId: id },
+          });
+          if (error) {
+            return contentPreview || '';
+          }
+          return data?.data?.content || contentPreview || '';
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching node content:', error);
+      return contentPreview || '';
     }
   };
   return {
-    getNodeContent,
+    fetchNodeContent: () => fetchNodeContent(node),
   };
 };
