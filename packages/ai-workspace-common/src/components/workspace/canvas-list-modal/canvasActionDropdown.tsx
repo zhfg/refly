@@ -70,7 +70,9 @@ export const CanvasActionDropdown = memo((props: CanvasActionDropdown) => {
         afterDelete?.();
         refetchUsage();
         if (isDeleteFile && projectId) {
-          getSourceList();
+          setTimeout(() => {
+            getSourceList();
+          }, 1000);
         }
       }
     } finally {

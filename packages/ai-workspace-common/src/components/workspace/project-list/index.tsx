@@ -192,6 +192,33 @@ const ProjectCard = ({
     </div>
   );
 };
+
+const CreateCard = ({ reload }: { reload: () => void }) => {
+  const { t } = useTranslation();
+  const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
+  return (
+    <div className="bg-gray-50 rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200">
+      <div
+        className="flex items-center justify-center h-full w-full flex-col"
+        onClick={() => {
+          setCreateProjectModalVisible(true);
+        }}
+      >
+        <IconPlus className="text-gray-500" size={24} />
+        <div className="mt-2 text-gray-500 text-base">{t('project.create')}</div>
+      </div>
+      <CreateProjectModal
+        mode="create"
+        visible={createProjectModalVisible}
+        setVisible={setCreateProjectModalVisible}
+        onSuccess={() => {
+          reload();
+        }}
+      />
+    </div>
+  );
+};
+
 interface ProjectListProps {
   refresh: boolean;
   setRefresh: (refresh: boolean) => void;
@@ -303,6 +330,7 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
             scrollableTarget="resourceScrollableDiv"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              <CreateCard reload={reload} />
               {projectCards}
             </div>
           </InfiniteScroll>

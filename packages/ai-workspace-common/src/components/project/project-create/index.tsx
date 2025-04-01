@@ -8,6 +8,7 @@ import { MdLibraryBooks } from 'react-icons/md';
 
 import { BiSolidEdit } from 'react-icons/bi';
 import { Project } from '@refly/openapi-schema';
+
 interface CreateProjectModalProps {
   mode?: 'create' | 'edit';
   projectId?: string;

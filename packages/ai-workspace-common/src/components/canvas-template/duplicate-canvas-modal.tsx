@@ -5,7 +5,6 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
-// import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 type FieldType = {
   title: string;
@@ -47,7 +46,11 @@ export const DuplicateCanvasModal = memo(
           message.success(t('canvas.action.duplicateSuccess'));
           setVisible(false);
           getCanvasList();
-          navigate(`/canvas/${data.data.canvasId}`);
+          const newCanvasId = data.data.canvasId;
+          const url = projectId
+            ? `/project/${projectId}?canvasId=${newCanvasId}`
+            : `/canvas/${newCanvasId}`;
+          navigate(url);
         }
       });
     };

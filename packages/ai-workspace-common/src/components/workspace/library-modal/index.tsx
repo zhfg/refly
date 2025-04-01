@@ -4,17 +4,15 @@ import { DocumentList } from '../document-list';
 import { ResourceList } from '../resource-list';
 import { ProjectList } from '../project-list';
 
-import { Modal, Tabs, Button, Tooltip } from 'antd';
+import { Modal, Tabs } from 'antd';
 import './index.scss';
 import {
   IconDocument,
   IconLibrary,
   IconProject,
   IconResource,
-  IconPlus,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useState, useMemo } from 'react';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
@@ -26,7 +24,6 @@ interface LibraryModalProps {
 export const LibraryModal = (props: LibraryModalProps) => {
   const { visible, setVisible } = props;
   const { t } = useTranslation();
-  const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
   const { projectId } = useGetProjectCanvasId();
 
   const activeKey = useKnowledgeBaseStoreShallow((state) => state.libraryModalActiveKey);
@@ -46,17 +43,6 @@ export const LibraryModal = (props: LibraryModalProps) => {
               <IconProject />
               <span className="ml-1">{t('common.project')}</span>
             </span>
-            <Tooltip title={t('project.create')}>
-              <Button
-                type="text"
-                icon={<IconPlus size={16} className="text-gray-600" />}
-                size="small"
-                className="ml-1 rounded-full"
-                onClick={() => {
-                  setCreateProjectModalVisible(true);
-                }}
-              />
-            </Tooltip>
           </div>
         ),
         children: <ProjectList refresh={refreshProjectList} setRefresh={setRefreshProjectList} />,
@@ -107,15 +93,6 @@ export const LibraryModal = (props: LibraryModalProps) => {
           onChange={(key) => updateLibraryModalActiveKey(key)}
         />
       </Modal>
-
-      <CreateProjectModal
-        mode="create"
-        visible={createProjectModalVisible}
-        setVisible={setCreateProjectModalVisible}
-        onSuccess={() => {
-          setRefreshProjectList(true);
-        }}
-      />
     </>
   );
 };
