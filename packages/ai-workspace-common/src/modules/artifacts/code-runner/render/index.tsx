@@ -4,9 +4,8 @@ import HTMLRenderer from './html';
 import SVGRender from './svg';
 import ReactRenderer from './react';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { CodeArtifactType } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
-import MindMapViewer from '@refly-packages/ai-workspace-common/components/canvas/node-preview/mind-map/viewer';
-import { ReactFlowProvider } from '@xyflow/react';
+import { CodeArtifactType } from '@refly/openapi-schema';
+import MindMapRenderer from './mind-map';
 
 interface RendererProps {
   content: string;
@@ -49,26 +48,7 @@ const Renderer = memo<RendererProps>(
       }
 
       case 'application/refly.artifacts.mindmap': {
-        try {
-          const parsedData = JSON.parse(content);
-          return (
-            <div style={{ width, height }}>
-              <ReactFlowProvider>
-                <MindMapViewer
-                  data={parsedData}
-                  onNodeClick={(node) => console.log('Node clicked:', node)}
-                />
-              </ReactFlowProvider>
-            </div>
-          );
-        } catch (error) {
-          console.error('Failed to parse mind map data:', error);
-          return (
-            <div className="p-4 text-red-500">
-              Error: Invalid mind map data format. Please check your JSON structure.
-            </div>
-          );
-        }
+        return <MindMapRenderer content={content} width={width} height={height} />;
       }
 
       case 'text/html': {

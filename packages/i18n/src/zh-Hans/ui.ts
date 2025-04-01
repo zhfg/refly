@@ -841,6 +841,7 @@ const translations = {
       image: '图片',
       codeArtifact: '代码组件',
       website: '网站',
+      mindMap: '思维导图',
     },
     export: {
       success: '导出图片成功',
@@ -949,6 +950,8 @@ const translations = {
       copyLink: '复制链接',
       createWebsite: '创建网站节点',
       createWebsiteDescription: '创建一个网站节点以在画布中嵌入网站',
+      createMindMap: '创建思维导图节点',
+      createMindMapDescription: '创建一个思维导图节点以在画布中嵌入思维导图',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -1104,6 +1107,17 @@ const translations = {
       },
       mindMap: {
         defaultTitle: '思维导图',
+        edit: '编辑思维导图',
+        preview: '预览',
+        jsonData: '思维导图 JSON 数据',
+        jsonRequired: '请输入有效的 JSON 数据',
+        save: '保存并查看思维导图',
+        export: '导出思维导图',
+        clickToView: '点击查看思维导图',
+        compactMode: '思维导图紧凑模式',
+        nodesCount: '{{count}} 个节点',
+        invalidJson: 'JSON 结构无效',
+        exportFailed: '导出思维导图失败',
       },
     },
     reflyPilot: {
