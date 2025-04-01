@@ -21,6 +21,7 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
   const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
   const [nodeHeights, setNodeHeights] = useState<Map<string, number>>(new Map());
   const [operatingNodeId, setOperatingNodeId] = useState<string | null>(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
@@ -65,6 +66,7 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     nodeHeights,
     onNodeResize: handleNodeResize,
     operatingNodeId,
+    hoveredNodeId,
   });
 
   const handleNodeClick = useCallback(
@@ -111,6 +113,11 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     setOperatingNodeId(null);
   }, []);
 
+  // Handler for node hover events
+  const handleNodeHover = useCallback((nodeId: string | null) => {
+    setHoveredNodeId(nodeId);
+  }, []);
+
   return (
     <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
       <ReactFlow
@@ -139,6 +146,8 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
         selectionOnDrag={false}
         panOnDrag={!operatingNodeId}
         nodesFocusable={true}
+        onNodeMouseEnter={(_e, node) => handleNodeHover(node.id)}
+        onNodeMouseLeave={() => handleNodeHover(null)}
       >
         <Controls showInteractive={false} className="bg-white border border-gray-200 shadow-sm" />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#E5E7EB" />

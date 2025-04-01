@@ -236,7 +236,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={handleBgColorChange} />
         )}
 
-        {isHovered && !isEditing && !isOperating && (
+        {isHovered && (
           <div className="absolute -bottom-8 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
             <Button
               size="small"

@@ -13,6 +13,7 @@ interface MindMapDataProps {
   nodeHeights?: Map<string, number>;
   onNodeResize?: (nodeId: string, width: number, height: number) => void;
   operatingNodeId?: string | null;
+  hoveredNodeId?: string | null;
 }
 
 export const useMindMapData = ({
@@ -25,6 +26,7 @@ export const useMindMapData = ({
   nodeHeights = new Map(),
   onNodeResize,
   operatingNodeId = null,
+  hoveredNodeId = null,
 }: MindMapDataProps) => {
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -61,6 +63,7 @@ export const useMindMapData = ({
       const isRoot = level === 0 && !parentId;
       const colors = getNodeColor(level, isRoot);
       const isOperating = node.id === operatingNodeId;
+      const isHovered = node.id === hoveredNodeId;
 
       // Get node height from map or use default height based on content
       const nodeHeight = nodeHeights.get(node.id) || (hasChildren ? 80 : 60);
@@ -77,6 +80,7 @@ export const useMindMapData = ({
           childCount,
           isRoot,
           isOperating,
+          isHovered,
           onToggleExpand: handleToggleExpand,
           onLabelChange: handleLabelChange,
           onAddChild: handleAddChild,
@@ -90,8 +94,8 @@ export const useMindMapData = ({
           width: 400, // Fixed width for nodes
           height: nodeHeight, // Dynamic height
         },
-        // Set higher zIndex for operating nodes
-        zIndex: isOperating ? 1000 : 0,
+        // Set higher zIndex for hovered or operating nodes
+        zIndex: isHovered ? 1000 : isOperating ? 500 : 0,
       };
 
       nodes.push(reactFlowNode);
@@ -104,8 +108,10 @@ export const useMindMapData = ({
         childrenMap.set(parentId, siblings);
 
         // Create edge
+        const edgeId = `${parentId}-${node.id}`;
+
         edges.push({
-          id: `${parentId}-${node.id}`,
+          id: edgeId,
           source: parentId,
           target: node.id,
           sourceHandle: `${parentId}-source`,
@@ -157,6 +163,7 @@ export const useMindMapData = ({
     nodeHeights,
     onNodeResize,
     operatingNodeId,
+    hoveredNodeId, // Add hoveredNodeId to dependencies
   ]);
 
   return {
