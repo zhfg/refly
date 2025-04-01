@@ -141,6 +141,18 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     }
   }, [id, nodeData]);
 
+  // Run height recalculation after component mounts and editor is ready
+  useEffect(() => {
+    if (editor && contentRef.current) {
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      const timeoutId = setTimeout(() => {
+        recalculateNodeHeight();
+      }, 50); // Small delay to ensure content is rendered
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [editor, recalculateNodeHeight]);
+
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
     if (editor) {
