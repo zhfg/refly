@@ -4950,6 +4950,9 @@ components:
         target:
           description: Skill invocation target
           $ref: '#/components/schemas/Entity'
+        projectId:
+          type: string
+          description: Project ID
         resultId:
           type: string
           description: |

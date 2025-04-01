@@ -4011,6 +4011,10 @@ export const InvokeSkillRequestSchema = {
       description: 'Skill invocation target',
       $ref: '#/components/schemas/Entity',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
     resultId: {
       type: 'string',
       description: `Result ID associated with this invocation.

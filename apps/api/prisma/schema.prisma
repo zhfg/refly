@@ -134,6 +134,8 @@ model ActionResult {
   errors        String?      @map("errors")
   /// Locale setting
   locale        String?      @default("") @map("locale")
+  /// Project id
+  projectId     String?      @map("project_id")
   /// Action result status
   status        ActionStatus @default(waiting) @map("status")
   /// Duplicate from another action result id

@@ -2878,6 +2878,10 @@ export type InvokeSkillRequest = {
    */
   target?: Entity;
   /**
+   * Project ID
+   */
+  projectId?: string;
+  /**
    * Result ID associated with this invocation.
    * 1) If not provided, a new resultId will be generated.
    * 2) If there is no existing result with this resultId, it will be created and run.
