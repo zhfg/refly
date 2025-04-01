@@ -166,7 +166,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     setIsHovered(true);
     handleMouseEnter();
     if (typeof onHover === 'function') {
-      setTimeout(() => onHover(id), 0);
+      onHover(id);
     }
   }, [handleMouseEnter, onHover, id]);
 
@@ -174,7 +174,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     setIsHovered(false);
     handleMouseLeave();
     if (typeof onHover === 'function') {
-      setTimeout(() => onHover(null), 0);
+      onHover(null);
     }
   }, [handleMouseLeave, onHover]);
 
