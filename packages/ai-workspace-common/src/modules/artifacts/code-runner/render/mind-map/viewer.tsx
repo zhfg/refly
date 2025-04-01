@@ -1,17 +1,12 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import {
-  ReactFlow,
-  Node,
-  Edge,
-  Controls,
-  Position,
-  Background,
-  BackgroundVariant,
-} from '@xyflow/react';
+import React, { useState, useRef } from 'react';
+import { ReactFlow, Controls, Background, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { NodeData } from './types';
+import { nodeTypes } from './nodes';
+import { useMindMapOperation } from './hooks/use-mind-map-operation';
+import { useMindMapData } from './hooks/use-mind-map-data';
 
 interface MindMapProps {
   data: NodeData;
@@ -21,6 +16,10 @@ interface MindMapProps {
 const proOptions = { hideAttribution: true };
 
 export default function MindMap({ data, onNodeClick }: MindMapProps) {
+  const [mindMapData, setMindMapData] = useState<NodeData>(data);
+  const reactFlowInstance = useRef<any>(null);
+  const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
+
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
     const collectIds = (node: NodeData) => {
@@ -35,100 +34,70 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     return allIds;
   });
 
-  const { nodes, edges } = useMemo(() => {
-    const nodes: Node[] = [];
-    const edges: Edge[] = [];
-    let xOffset = 50;
-    const ySpacing = 120;
+  const { handleToggleExpand, handleLabelChange, handleAddChild, handleAddSibling } =
+    useMindMapOperation({
+      mindMapData,
+      setMindMapData,
+      expandedNodes,
+      setExpandedNodes,
+      lastAddedNodeId,
+      setLastAddedNodeId,
+    });
 
-    const processNode = (node: NodeData, level: number, parentId?: string) => {
-      const nodeWidth = 200;
-      const xSpacing = nodeWidth + 100;
-      const hasChildren = node.children && node.children.length > 0;
-      const isExpanded = expandedNodes.has(node.id);
+  const { nodes, edges } = useMindMapData({
+    mindMapData,
+    expandedNodes,
+    handleToggleExpand,
+    handleLabelChange,
+    handleAddChild,
+    handleAddSibling,
+  });
 
-      nodes.push({
-        id: node.id,
-        data: {
-          label: node.label,
-          hasChildren,
-        },
-        style: {
-          backgroundColor: '#ffffff',
-          borderColor: '#E4E4E7',
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 10,
-          width: 200,
-        },
-        className: `react-flow__node ${hasChildren ? 'cursor-pointer' : ''} rounded-lg border border-gray-200`,
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-        position: {
-          x: level * xSpacing,
-          y: xOffset * ySpacing,
-        },
-      });
-
-      if (parentId) {
-        edges.push({
-          id: `${parentId}-${node.id}`,
-          source: parentId,
-          target: node.id,
-          type: 'bezier',
-          style: {
-            stroke: '#DEDDDF',
-          },
-        });
-      }
-
-      if (isExpanded && node.children) {
-        for (const child of node.children) {
-          xOffset++;
-          processNode(child, level + 1, node.id);
-        }
-      }
-    };
-
-    processNode(data, 0);
-    return { nodes, edges };
-  }, [data, expandedNodes]);
-
-  const handleNodeClick = (_: React.MouseEvent, node: Node) => {
-    if (node.data.hasChildren) {
-      setExpandedNodes((prev) => {
-        const next = new Set(prev);
-        if (next.has(node.id)) {
-          next.delete(node.id);
-        } else {
-          next.add(node.id);
-        }
-        return next;
-      });
-    }
+  const handleNodeClick = (_: React.MouseEvent, node: any) => {
     // Find the original NodeData that matches this id
     const findNodeData = (id: string, root: NodeData): NodeData | undefined => {
       if (root.id === id) return root;
-      return root.children?.find((child) => findNodeData(id, child));
+      if (!root.children) return undefined;
+
+      for (const child of root.children) {
+        const found = findNodeData(id, child);
+        if (found) return found;
+      }
+
+      return undefined;
     };
 
-    const originalData = findNodeData(node.id, data);
+    const originalData = findNodeData(node.id, mindMapData);
     if (originalData) {
       onNodeClick(originalData);
     }
   };
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodeClick={handleNodeClick}
-      nodesDraggable={true}
-      fitView
-      proOptions={proOptions}
-    >
-      <Controls />
-      <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-    </ReactFlow>
+    <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodeClick={handleNodeClick}
+        nodesDraggable={true}
+        elementsSelectable={true}
+        nodeTypes={nodeTypes}
+        onInit={(instance) => {
+          reactFlowInstance.current = instance;
+        }}
+        fitView
+        fitViewOptions={{ padding: 0.2 }}
+        defaultEdgeOptions={{
+          type: 'step',
+          style: { stroke: '#94a3b8', strokeWidth: 1.5 },
+        }}
+        proOptions={proOptions}
+        minZoom={0.2}
+        maxZoom={1.5}
+      >
+        <Controls showInteractive={false} className="bg-white border border-gray-200 shadow-sm" />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#E5E7EB" />
+      </ReactFlow>
+    </div>
   );
 }
