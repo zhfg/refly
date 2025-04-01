@@ -97,6 +97,7 @@ export type ResponseNodeMeta = {
   actionMeta?: ActionMeta;
   artifacts?: Artifact[];
   currentLog?: ActionLog;
+  errors?: string[];
   structuredData?: Record<string, unknown>;
   selectedSkill?: Skill;
   contextItems?: IContextItem[];

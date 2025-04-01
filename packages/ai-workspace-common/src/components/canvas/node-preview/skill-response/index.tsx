@@ -32,6 +32,7 @@ import { processContentPreview } from '@refly-packages/ai-workspace-common/utils
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { useSkillError } from '@refly-packages/ai-workspace-common/hooks/use-skill-error';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
@@ -176,6 +177,8 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const tplConfig = result?.tplConfig ?? data?.metadata?.tplConfig;
   const runtimeConfig = result?.runtimeConfig ?? data?.metadata?.runtimeConfig;
 
+  const { errCode, errMsg } = useSkillError(result?.errors?.[0]);
+
   const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {
     // Prefer contextItems from node metadata
@@ -292,7 +295,9 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
           <div className="h-full w-full flex items-center justify-center">
             <Result
               status="500"
-              subTitle={t('canvas.skillResponse.executionFailed')}
+              subTitle={
+                errCode ? `[${errCode}] ${errMsg}` : t('canvas.skillResponse.executionFailed')
+              }
               extra={
                 <Button
                   disabled={readonly}
