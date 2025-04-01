@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ReactFlow, Controls, Background, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { NodeData } from './types';
@@ -19,6 +19,7 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
   const [mindMapData, setMindMapData] = useState<NodeData>(data);
   const reactFlowInstance = useRef<any>(null);
   const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
+  const [nodeHeights, setNodeHeights] = useState<Map<string, number>>(new Map());
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
@@ -44,6 +45,22 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
       setLastAddedNodeId,
     });
 
+  // Handle node resizing and trigger layout update
+  const handleNodeResize = useCallback((nodeId: string, _width: number, height: number) => {
+    setNodeHeights((prev) => {
+      const newHeights = new Map(prev);
+      newHeights.set(nodeId, height);
+      return newHeights;
+    });
+
+    // Allow time for state to update before re-rendering
+    // setTimeout(() => {
+    //   if (reactFlowInstance.current) {
+    //     reactFlowInstance.current.fitView({ padding: 0.2 });
+    //   }
+    // }, 50);
+  }, []);
+
   const { nodes, edges } = useMindMapData({
     mindMapData,
     expandedNodes,
@@ -51,6 +68,8 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     handleLabelChange,
     handleAddChild,
     handleAddSibling,
+    nodeHeights,
+    onNodeResize: handleNodeResize,
   });
 
   const handleNodeClick = (_: React.MouseEvent, node: any) => {

@@ -10,6 +10,8 @@ interface MindMapDataProps {
   handleLabelChange: (nodeId: string, label: string) => void;
   handleAddChild: (nodeId: string) => void;
   handleAddSibling: (nodeId: string) => void;
+  nodeHeights?: Map<string, number>;
+  onNodeResize?: (nodeId: string, width: number, height: number) => void;
 }
 
 export const useMindMapData = ({
@@ -19,6 +21,8 @@ export const useMindMapData = ({
   handleLabelChange,
   handleAddChild,
   handleAddSibling,
+  nodeHeights = new Map(),
+  onNodeResize,
 }: MindMapDataProps) => {
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -55,12 +59,16 @@ export const useMindMapData = ({
       const isRoot = level === 0 && !parentId;
       const colors = getNodeColor(level, isRoot);
 
+      // Get node height from map or use default height based on content
+      const nodeHeight = nodeHeights.get(node.id) || (hasChildren ? 80 : 60);
+
       // Create the node
       const reactFlowNode: Node = {
         id: node.id,
         type: 'custom',
         data: {
           label: node.label,
+          content: node.content || node.label,
           hasChildren,
           isExpanded,
           childCount,
@@ -69,13 +77,14 @@ export const useMindMapData = ({
           onLabelChange: handleLabelChange,
           onAddChild: handleAddChild,
           onAddSibling: handleAddSibling,
+          onResizeNode: onNodeResize,
           colors, // Pass colors to the node
           level, // Pass level information to node
         },
         position: { x: 0, y: 0 }, // Initial position will be set by layout algorithm
         measured: {
-          width: 220, // Default width for nodes
-          height: hasChildren ? 80 : 60, // Slightly taller for nodes with children
+          width: 400, // Fixed width for nodes
+          height: nodeHeight, // Dynamic height
         },
       };
 
@@ -124,7 +133,7 @@ export const useMindMapData = ({
     // Apply dagre layout algorithm
     const layoutOptions = {
       direction: 'LR', // Left to right layout
-      nodeSep: 120, // Node separation distance
+      nodeSep: 10, // Node separation distance
       rankSep: 250, // Rank separation distance (between levels)
       ranker: 'network-simplex', // Use network-simplex for better hierarchical layouts
     };
@@ -139,6 +148,8 @@ export const useMindMapData = ({
     handleLabelChange,
     handleAddChild,
     handleAddSibling,
+    nodeHeights,
+    onNodeResize,
   ]);
 
   return {

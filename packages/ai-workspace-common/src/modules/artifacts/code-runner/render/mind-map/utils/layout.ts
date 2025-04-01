@@ -2,22 +2,39 @@ import Dagre from '@dagrejs/dagre';
 
 export const getLayoutedElements = (nodes, edges, options) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: options.direction });
 
+  // Configure graph options
+  g.setGraph({
+    rankdir: options.direction,
+    nodesep: options.nodeSep || 10,
+    ranksep: options.rankSep || 150,
+    ranker: options.ranker || 'network-simplex',
+    marginx: 50,
+    marginy: 10,
+  });
+
+  // Add edges to graph
   for (const edge of edges) {
     g.setEdge(edge.source, edge.target);
   }
 
+  // Add nodes with dimensions to graph
   for (const node of nodes) {
+    // Add extra padding to node dimensions to prevent overlap
+    const nodeWidth = (node.measured?.width ?? 0) + 50; // Extra horizontal padding
+    const nodeHeight = (node.measured?.height ?? 0) + 10; // Extra vertical padding
+
     g.setNode(node.id, {
       ...node,
-      width: node.measured?.width ?? 0,
-      height: node.measured?.height ?? 0,
+      width: nodeWidth,
+      height: nodeHeight,
     });
   }
 
+  // Run the layout algorithm
   Dagre.layout(g);
 
+  // Map the positions back to the nodes
   return {
     nodes: nodes.map((node) => {
       const position = g.node(node.id);

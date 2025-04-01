@@ -32,6 +32,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [bgColor, setBgColor] = useState((nodeData?.colors?.bg || '#FFFFFF') as string);
   const nodeRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Use the hover effect hook for ReactFlow state updates
   const { handleMouseEnter, handleMouseLeave } = useMindMapHoverEffect(id);
@@ -93,6 +94,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     },
     onBlur: () => {
       setIsEditing(false);
+      recalculateNodeHeight();
     },
     editorProps: {
       attributes: {
@@ -109,6 +111,25 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       nodeData.onContentChange(id, markdown, jsonContent);
     }
   }, 200);
+
+  const recalculateNodeHeight = useCallback(() => {
+    if (contentRef.current && nodeRef.current) {
+      const contentHeight = contentRef.current.scrollHeight;
+      const newHeight = Math.max(60, contentHeight + 20); // Add padding
+
+      if (typeof nodeData.onResizeNode === 'function') {
+        nodeData.onResizeNode(id, 400, newHeight);
+      }
+    }
+  }, [id, nodeData]);
+
+  // Recalculate height when content changes
+  // useEffect(() => {
+  //   if (editor && !isEditing) {
+  //     // Wait for editor content to be fully rendered
+  //     setTimeout(recalculateNodeHeight, 0);
+  //   }
+  // }, [editor, recalculateNodeHeight, isEditing]);
 
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
@@ -166,7 +187,6 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
           width: '400px',
           height: 'auto',
           minHeight: '40px',
-          minWidth: '200px',
           transform: `scale(${isHovered ? 1.02 : 1})`,
           transition: 'all 0.2s ease',
         }}
@@ -176,7 +196,8 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       >
         <div className="flex flex-col h-full w-full p-3">
           <div
-            className="w-full h-full overflow-auto"
+            ref={contentRef}
+            className="w-full overflow-auto"
             style={{
               color: isRoot
                 ? 'rgb(30 64 175)'
@@ -187,11 +208,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
             {editor && (
               <EditorContent
                 editor={editor}
-                className={classNames(
-                  'text-xs rich-text-editor memo-node-editor',
-                  'h-full',
-                  'w-full',
-                )}
+                className={classNames('text-xs rich-text-editor memo-node-editor', 'w-full')}
               />
             )}
           </div>
