@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Node, Edge, MarkerType } from '@xyflow/react';
+import { Node, Edge } from '@xyflow/react';
 import { NodeData } from '../types';
 import { getLayoutedElements } from '../utils/layout';
 
@@ -122,12 +122,6 @@ export const useMindMapData = ({
             stroke: colors.border, // Match edge color to node border
           },
           animated: false,
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 15,
-            height: 15,
-            color: colors.border, // Match marker color to node border
-          },
         });
       }
 
