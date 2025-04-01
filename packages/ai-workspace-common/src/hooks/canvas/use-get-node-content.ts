@@ -20,6 +20,7 @@ export const useGetNodeContent = (node: Node) => {
           }
           return data?.data?.content || contentPreview || '';
         }
+
         case 'resource': {
           const { data, error } = await getClient().getResourceDetail({
             query: { resourceId: id },
@@ -29,6 +30,7 @@ export const useGetNodeContent = (node: Node) => {
           }
           return data?.data?.content || contentPreview || '';
         }
+
         case 'skillResponse': {
           const { data, error } = await getClient().getActionResult({ query: { resultId: id } });
           if (error) {
@@ -53,6 +55,9 @@ export const useGetNodeContent = (node: Node) => {
           }
           return data?.data?.content || contentPreview || '';
         }
+
+        default:
+          return contentPreview || '';
       }
     } catch (error) {
       console.error('Error fetching node content:', error);
