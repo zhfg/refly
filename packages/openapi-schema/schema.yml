@@ -2445,6 +2445,7 @@ components:
         updatedAt:
           type: string
           format: date-time
+          description: Project update time
     LabelClass:
       type: object
       description: Label class
@@ -5363,6 +5364,9 @@ components:
           description: Search mode
           $ref: '#/components/schemas/SearchMode'
           default: keyword
+        projectId:
+          type: string
+          description: Project ID
         limit:
           type: number
           description: Search result limit for each domain

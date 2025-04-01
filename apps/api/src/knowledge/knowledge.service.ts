@@ -591,7 +591,7 @@ export class KnowledgeService {
       url,
       createdAt: resource.createdAt.toJSON(),
       updatedAt: resource.updatedAt.toJSON(),
-      ...pick(updatedResource, ['title', 'uid']),
+      ...pick(updatedResource, ['title', 'uid', 'projectId']),
     });
 
     return updatedResource;
@@ -752,7 +752,7 @@ export class KnowledgeService {
       content: param.content || undefined,
       createdAt: updatedResource.createdAt.toJSON(),
       updatedAt: updatedResource.updatedAt.toJSON(),
-      ...pick(updatedResource, ['title', 'uid']),
+      ...pick(updatedResource, ['title', 'uid', 'projectId']),
     });
 
     return updatedResource;
@@ -933,7 +933,7 @@ export class KnowledgeService {
 
     await this.elasticsearch.upsertDocument({
       id: param.docId,
-      ...pick(doc, ['title', 'uid']),
+      ...pick(doc, ['title', 'uid', 'projectId']),
       content: param.initialContent,
       createdAt: doc.createdAt.toJSON(),
       updatedAt: doc.updatedAt.toJSON(),

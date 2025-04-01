@@ -491,6 +491,7 @@ export const ProjectSchema = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
+      description: 'Project update time',
     },
   },
 } as const;
@@ -4642,6 +4643,10 @@ export const SearchRequestSchema = {
       description: 'Search mode',
       $ref: '#/components/schemas/SearchMode',
       default: 'keyword',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
     },
     limit: {
       type: 'number',

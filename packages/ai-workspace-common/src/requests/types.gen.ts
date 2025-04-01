@@ -419,6 +419,9 @@ export type Project = {
    * Project creation time
    */
   createdAt?: string;
+  /**
+   * Project update time
+   */
   updatedAt?: string;
 };
 
@@ -3269,6 +3272,10 @@ export type SearchRequest = {
    * Search mode
    */
   mode?: SearchMode;
+  /**
+   * Project ID
+   */
+  projectId?: string;
   /**
    * Search result limit for each domain
    */

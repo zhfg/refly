@@ -374,6 +374,7 @@ export class CanvasService {
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
       uid: canvas.uid,
+      projectId: canvas.projectId,
     });
 
     return canvas;
@@ -451,6 +452,7 @@ export class CanvasService {
       title: updatedCanvas.title,
       updatedAt: updatedCanvas.updatedAt.toJSON(),
       uid: updatedCanvas.uid,
+      projectId: updatedCanvas.projectId,
     });
 
     return updatedCanvas;
