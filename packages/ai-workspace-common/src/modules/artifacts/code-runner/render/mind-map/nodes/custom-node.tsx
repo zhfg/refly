@@ -1,4 +1,4 @@
-import { useRef, memo, useState, useCallback, useEffect } from 'react';
+import { useRef, memo, useState, useCallback } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
 import { Button } from 'antd';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -39,12 +39,6 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   // Parent component hover handler
   const onHover = nodeData?.onHover;
 
-  // State for node dimensions
-  const [dimensions, setDimensions] = useState({
-    width: nodeData?.dimensions?.width || 200,
-    height: nodeData?.dimensions?.height || 40,
-  });
-
   // Make sure we have valid node data
   if (!nodeData || typeof nodeData !== 'object') {
     return <div className="p-2 text-red-500">Missing node data</div>;
@@ -58,34 +52,6 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     border: 'rgb(203, 213, 225)',
   };
   const level = nodeData?.level || 0;
-
-  // Handle editor dimensions when editing state changes
-  useEffect(() => {
-    if (isEditing) {
-      // Expand to editing size
-      setDimensions({
-        width: Math.max(dimensions.width, 300),
-        height: Math.max(dimensions.height, 100),
-      });
-    } else {
-      // Return to default compact size when not editing
-      setDimensions({
-        width: nodeData?.dimensions?.width || 200,
-        height: nodeData?.dimensions?.height || 40,
-      });
-    }
-  }, [isEditing]);
-
-  // Save dimensions to node data when they change
-  const saveDimensions = useCallback(() => {
-    if (typeof nodeData.onDimensionsChange === 'function') {
-      nodeData.onDimensionsChange(id, dimensions);
-    }
-  }, [id, dimensions, nodeData]);
-
-  useEffect(() => {
-    saveDimensions();
-  }, [dimensions, saveDimensions]);
 
   // Setup rich text editor
   const editor = useEditor({
@@ -197,11 +163,10 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         style={{
           borderColor: colors.border,
           backgroundColor: bgColor,
-          width: `${dimensions.width}px`,
-          height: `${dimensions.height}px`,
+          width: '400px',
+          height: 'auto',
           minHeight: '40px',
           minWidth: '200px',
-          maxWidth: isEditing ? '400px' : '220px',
           transform: `scale(${isHovered ? 1.02 : 1})`,
           transition: 'all 0.2s ease',
         }}
