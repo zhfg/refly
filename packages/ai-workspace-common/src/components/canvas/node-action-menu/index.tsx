@@ -93,6 +93,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
   const { getNodeContent } = useGetNodeContent(node);
+  const content = getNodeContent() as string;
   const [localSizeMode, setLocalSizeMode] = useState(
     () => nodeData?.metadata?.sizeMode || 'adaptive',
   );
@@ -180,10 +181,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const handleInsertToDoc = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'insertToDoc'), {
-      content: nodeData?.contentPreview,
+      content,
     });
     onClose?.();
-  }, [nodeId, nodeData?.contentPreview, onClose]);
+  }, [nodeId, content, onClose]);
 
   const handlePreview = useCallback(() => {
     if (nodeType === 'image') {
@@ -255,12 +256,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
   const handleCopy = useCallback(() => {
-    const content = getNodeContent();
-    console.log('content', content);
     copyToClipboard(content || '');
     message.success(t('copilot.message.copySuccess'));
     onClose?.();
-  }, [nodeData?.contentPreview, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
+  }, [content, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
 
   const handleEditQuery = useCallback(() => {
     previewNode(node);
@@ -290,9 +289,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeData, nodeType, createMemo, onClose]);
 
   const handleDuplicateDocument = useCallback(() => {
-    nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'));
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'), {
+      content,
+    });
     onClose?.();
-  }, [nodeId, onClose]);
+  }, [nodeId, onClose, content]);
 
   const getMenuItems = useCallback(
     (activeDocumentId: string): MenuItem[] => {
