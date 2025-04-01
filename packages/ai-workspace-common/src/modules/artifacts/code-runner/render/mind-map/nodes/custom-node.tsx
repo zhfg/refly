@@ -254,8 +254,9 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         {isHovered && (
           <div className="absolute -bottom-8 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
             <Button
+              type="text"
               size="small"
-              className="h-7 text-xs hover:!border-[#00968F] hover:!text-[#00968F]"
+              className="h-7 text-xs hover:!text-[#00968F]"
               onClick={(e) => {
                 e.stopPropagation();
                 if (typeof nodeData.onAddChild === 'function') {
@@ -267,8 +268,9 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
             </Button>
             {!isRoot && (
               <Button
+                type="text"
                 size="small"
-                className="h-7 text-xs hover:!border-[#00968F] hover:!text-[#00968F]"
+                className="h-7 text-xs hover:!text-[#00968F]"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (typeof nodeData.onAddSibling === 'function') {
@@ -277,6 +279,21 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                 }}
               >
                 + Sibling
+              </Button>
+            )}
+            {!isRoot && (
+              <Button
+                type="text"
+                size="small"
+                className="h-7 text-xs hover:!text-[#f43f5e]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof nodeData.onDeleteNode === 'function') {
+                    nodeData.onDeleteNode(id);
+                  }
+                }}
+              >
+                Delete
               </Button>
             )}
           </div>

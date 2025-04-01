@@ -54,6 +54,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
     handleColorChange,
     handleAddChild,
     handleAddSibling,
+    handleDeleteNode,
   } = useMindMapOperation({
     mindMapData,
     setMindMapData: updateMindMapData,
@@ -81,6 +82,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
     handleColorChange,
     handleAddChild,
     handleAddSibling,
+    handleDeleteNode,
     nodeHeights,
     onNodeResize: handleNodeResize,
     operatingNodeId,

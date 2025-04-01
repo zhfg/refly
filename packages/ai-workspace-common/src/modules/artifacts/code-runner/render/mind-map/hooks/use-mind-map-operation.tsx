@@ -188,6 +188,51 @@ export const useMindMapOperation = ({
     [mindMapData, setMindMapData, setExpandedNodes, setLastAddedNodeId],
   );
 
+  // Add handleDeleteNode function
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
+      // Don't delete the root node
+      if (nodeId === mindMapData.id || nodeId === 'root') {
+        return;
+      }
+
+      const deleteNodeById = (node: NodeData): NodeData => {
+        // If this node has children that include the target node
+        if (node.children) {
+          // Filter out the node to delete
+          const filteredChildren = node.children.filter((child) => child.id !== nodeId);
+
+          // If we removed a node, return the updated node
+          if (filteredChildren.length !== node.children.length) {
+            return {
+              ...node,
+              children: filteredChildren,
+            };
+          }
+
+          // Otherwise, recursively search in children
+          return {
+            ...node,
+            children: node.children.map(deleteNodeById),
+          };
+        }
+
+        return node;
+      };
+
+      const newData = deleteNodeById(mindMapData);
+      setMindMapData(newData);
+
+      // Remove the deleted node from expanded nodes
+      setExpandedNodes((prev) => {
+        const next = new Set(prev);
+        next.delete(nodeId);
+        return next;
+      });
+    },
+    [mindMapData, setMindMapData, setExpandedNodes],
+  );
+
   return {
     handleToggleExpand,
     handleLabelChange,
@@ -195,5 +240,6 @@ export const useMindMapOperation = ({
     handleColorChange,
     handleAddChild,
     handleAddSibling,
+    handleDeleteNode,
   };
 };

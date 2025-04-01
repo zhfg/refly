@@ -12,6 +12,7 @@ interface MindMapDataProps {
   handleColorChange?: (nodeId: string, colors: { bg: string; border: string }) => void;
   handleAddChild: (nodeId: string) => void;
   handleAddSibling: (nodeId: string) => void;
+  handleDeleteNode: (nodeId: string) => void;
   nodeHeights?: Map<string, number>;
   onNodeResize?: (nodeId: string, width: number, height: number) => void;
   operatingNodeId?: string | null;
@@ -27,6 +28,7 @@ export const useMindMapData = ({
   handleColorChange,
   handleAddChild,
   handleAddSibling,
+  handleDeleteNode,
   nodeHeights = new Map(),
   onNodeResize,
   operatingNodeId = null,
@@ -92,6 +94,7 @@ export const useMindMapData = ({
           onColorChange: handleColorChange,
           onAddChild: handleAddChild,
           onAddSibling: handleAddSibling,
+          onDeleteNode: handleDeleteNode,
           onResizeNode: onNodeResize,
           colors, // Pass colors to the node
           level, // Pass level information to node
@@ -163,6 +166,7 @@ export const useMindMapData = ({
     handleColorChange,
     handleAddChild,
     handleAddSibling,
+    handleDeleteNode,
     nodeHeights,
     onNodeResize,
     operatingNodeId,
