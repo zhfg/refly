@@ -12,6 +12,7 @@ import {
   getFileExtensionFromType,
   getArtifactTypeOptions,
   getSimpleTypeDescription,
+  shouldEditorBeReadonly,
 } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
 
 export default memo(
@@ -318,7 +319,12 @@ export default memo(
               content={editorContent}
               language={language}
               type={type as CodeArtifactType}
-              readOnly={readOnly || isGenerating || canvasReadOnly}
+              readOnly={
+                readOnly ||
+                isGenerating ||
+                canvasReadOnly ||
+                shouldEditorBeReadonly(type as CodeArtifactType)
+              }
               isGenerating={isGenerating}
               canvasReadOnly={canvasReadOnly}
               onChange={handleEditorChange}

@@ -159,3 +159,8 @@ export const getDefaultContentForType = (type: CodeArtifactType): string => {
   // Add other type defaults as needed
   return '';
 };
+
+// Add a function to check if an editor should be readonly based on artifact type
+export const shouldEditorBeReadonly = (type: CodeArtifactType): boolean => {
+  return type === 'application/refly.artifacts.mindmap';
+};
