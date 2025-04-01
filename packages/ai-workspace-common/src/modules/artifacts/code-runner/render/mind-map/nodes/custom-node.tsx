@@ -1,6 +1,7 @@
 import React, { useRef, memo } from 'react';
 import { useState } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
+import { Button } from 'antd';
 
 interface NodeColors {
   bg: string;
@@ -60,6 +61,13 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   // Determine if this is the root node
   const isRoot = id === 'root' || nodeData.isRoot;
 
+  // Determine the color for the toggle button
+  const buttonColor = nodeData.isExpanded
+    ? colors.border
+    : nodeData.childCount > 0
+      ? '#f97316'
+      : colors.border; // Orange color for nodes with children when collapsed
+
   return (
     <>
       <div
@@ -91,7 +99,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
             />
           ) : (
             <div
-              className={'mr-2 overflow-hidden text-ellipsis whitespace-nowrap font-medium'}
+              className="overflow-hidden text-ellipsis whitespace-nowrap font-medium"
               style={{
                 color: isRoot
                   ? 'rgb(30 64 175)'
@@ -101,40 +109,13 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
               {label}
             </div>
           )}
-
-          {hasChildren && (
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-              style={{
-                backgroundColor: `${colors.border}30`, // 30% opacity of border color
-                color: colors.border,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (typeof nodeData.onToggleExpand === 'function') {
-                  nodeData.onToggleExpand(id);
-                }
-              }}
-              title={
-                nodeData.isExpanded ? 'Collapse' : `Expand (${nodeData.childCount || 0} items)`
-              }
-            >
-              {nodeData.isExpanded ? (
-                <span>−</span>
-              ) : (
-                <span>+{nodeData.childCount > 0 ? nodeData.childCount : ''}</span>
-              )}
-            </button>
-          )}
         </div>
 
         {isHovered && !isEditing && (
           <div className="absolute -bottom-8 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-xs hover:bg-gray-200"
-              style={{ backgroundColor: `${colors.border}20` }}
+            <Button
+              size="small"
+              className="h-7 text-xs hover:!border-[#00968F] hover:!text-[#00968F]"
               onClick={(e) => {
                 e.stopPropagation();
                 if (typeof nodeData.onAddChild === 'function') {
@@ -143,12 +124,11 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
               }}
             >
               + Child
-            </button>
+            </Button>
             {!isRoot && (
-              <button
-                type="button"
-                className="rounded px-2 py-1 text-xs hover:bg-gray-200"
-                style={{ backgroundColor: `${colors.border}20` }}
+              <Button
+                size="small"
+                className="h-7 text-xs hover:!border-[#00968F] hover:!text-[#00968F]"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (typeof nodeData.onAddSibling === 'function') {
@@ -157,11 +137,55 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                 }}
               >
                 + Sibling
-              </button>
+              </Button>
             )}
           </div>
         )}
       </div>
+
+      {/* Expand/Collapse button positioned outside the node */}
+      {hasChildren && (
+        <div
+          className="absolute z-20"
+          style={{
+            top: '50%',
+            right: '-28px',
+            transform: 'translateY(-50%)',
+          }}
+        >
+          <Button
+            type="text"
+            size="small"
+            className="flex items-center justify-center rounded-full shadow-sm"
+            style={{
+              width: '20px',
+              height: '20px',
+              minWidth: '20px',
+              padding: '0',
+              backgroundColor: 'white',
+              color: buttonColor,
+              border: `1px solid ${buttonColor}30`,
+              fontSize: '12px',
+              lineHeight: '18px',
+              fontWeight: 'bold',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (typeof nodeData.onToggleExpand === 'function') {
+                nodeData.onToggleExpand(id);
+              }
+            }}
+            title={nodeData.isExpanded ? 'Collapse' : `Expand (${nodeData.childCount || 0} items)`}
+          >
+            {nodeData.isExpanded ? (
+              <span>−</span>
+            ) : (
+              <span>+{nodeData.childCount > 0 ? nodeData.childCount : ''}</span>
+            )}
+          </Button>
+        </div>
+      )}
+
       <Handle
         type="source"
         position={Position.Right}
