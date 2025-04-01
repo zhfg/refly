@@ -116,23 +116,37 @@ export const getDefaultContentForType = (type: CodeArtifactType): string => {
       {
         id: 'root',
         label: 'Main Topic',
+        content: 'Main Topic',
         children: [
           {
             id: 'child1',
             label: 'Subtopic 1',
+            content: 'Subtopic 1',
             children: [
-              { id: 'child1-1', label: 'Detail 1', children: [] },
-              { id: 'child1-2', label: 'Detail 2', children: [] },
+              {
+                id: 'child1-1',
+                label: 'Detail 1',
+                content: 'Detail 1',
+                children: [],
+              },
+              {
+                id: 'child1-2',
+                label: 'Detail 2',
+                content: 'Detail 2',
+                children: [],
+              },
             ],
           },
           {
             id: 'child2',
             label: 'Subtopic 2',
+            content: 'Subtopic 2',
             children: [],
           },
           {
             id: 'child3',
             label: 'Subtopic 3',
+            content: 'Subtopic 3',
             children: [],
           },
         ],

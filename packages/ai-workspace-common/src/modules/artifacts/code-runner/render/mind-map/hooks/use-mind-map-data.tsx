@@ -8,6 +8,8 @@ interface MindMapDataProps {
   expandedNodes: Set<string>;
   handleToggleExpand: (nodeId: string) => void;
   handleLabelChange: (nodeId: string, label: string) => void;
+  handleContentChange?: (nodeId: string, markdown: string, jsonContent: any) => void;
+  handleColorChange?: (nodeId: string, colors: { bg: string; border: string }) => void;
   handleAddChild: (nodeId: string) => void;
   handleAddSibling: (nodeId: string) => void;
   nodeHeights?: Map<string, number>;
@@ -21,6 +23,8 @@ export const useMindMapData = ({
   expandedNodes,
   handleToggleExpand,
   handleLabelChange,
+  handleContentChange,
+  handleColorChange,
   handleAddChild,
   handleAddSibling,
   nodeHeights = new Map(),
@@ -61,7 +65,7 @@ export const useMindMapData = ({
       const isExpanded = expandedNodes.has(node.id);
       const childCount = node.children?.length || 0;
       const isRoot = level === 0 && !parentId;
-      const colors = getNodeColor(level, isRoot);
+      const colors = node.colors || getNodeColor(level, isRoot);
       const isOperating = node.id === operatingNodeId;
       const isHovered = node.id === hoveredNodeId;
 
@@ -75,6 +79,7 @@ export const useMindMapData = ({
         data: {
           label: node.label,
           content: node.content || node.label,
+          richTextContent: node.richTextContent,
           hasChildren,
           isExpanded,
           childCount,
@@ -83,6 +88,8 @@ export const useMindMapData = ({
           isHovered,
           onToggleExpand: handleToggleExpand,
           onLabelChange: handleLabelChange,
+          onContentChange: handleContentChange,
+          onColorChange: handleColorChange,
           onAddChild: handleAddChild,
           onAddSibling: handleAddSibling,
           onResizeNode: onNodeResize,
@@ -152,6 +159,8 @@ export const useMindMapData = ({
     expandedNodes,
     handleToggleExpand,
     handleLabelChange,
+    handleContentChange,
+    handleColorChange,
     handleAddChild,
     handleAddSibling,
     nodeHeights,

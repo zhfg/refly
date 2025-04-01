@@ -11,17 +11,27 @@ import { useMindMapData } from './hooks/use-mind-map-data';
 interface MindMapProps {
   data: NodeData;
   onNodeClick: (node: NodeData) => void;
+  onChange?: (updatedData: NodeData) => void;
 }
 
 const proOptions = { hideAttribution: true };
 
-export default function MindMap({ data, onNodeClick }: MindMapProps) {
+export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const [mindMapData, setMindMapData] = useState<NodeData>(data);
   const reactFlowInstance = useRef<any>(null);
   const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
   const [nodeHeights, setNodeHeights] = useState<Map<string, number>>(new Map());
   const [operatingNodeId, setOperatingNodeId] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+
+  // Custom setMindMapData that also updates parent
+  const updateMindMapData = useCallback(
+    (newData: NodeData) => {
+      setMindMapData(newData);
+      onChange?.(newData);
+    },
+    [onChange],
+  );
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
@@ -37,15 +47,21 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     return allIds;
   });
 
-  const { handleToggleExpand, handleLabelChange, handleAddChild, handleAddSibling } =
-    useMindMapOperation({
-      mindMapData,
-      setMindMapData,
-      expandedNodes,
-      setExpandedNodes,
-      lastAddedNodeId,
-      setLastAddedNodeId,
-    });
+  const {
+    handleToggleExpand,
+    handleLabelChange,
+    handleContentChange,
+    handleColorChange,
+    handleAddChild,
+    handleAddSibling,
+  } = useMindMapOperation({
+    mindMapData,
+    setMindMapData: updateMindMapData,
+    expandedNodes,
+    setExpandedNodes,
+    lastAddedNodeId,
+    setLastAddedNodeId,
+  });
 
   // Handle node resizing and trigger layout update
   const handleNodeResize = useCallback((nodeId: string, _width: number, height: number) => {
@@ -61,6 +77,8 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     expandedNodes,
     handleToggleExpand,
     handleLabelChange,
+    handleContentChange,
+    handleColorChange,
     handleAddChild,
     handleAddSibling,
     nodeHeights,
@@ -140,7 +158,6 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
         proOptions={proOptions}
         minZoom={0.2}
         maxZoom={1.5}
-        // Add mouse events similar to Canvas.tsx
         panOnScroll={true}
         zoomOnScroll={true}
         selectionOnDrag={false}

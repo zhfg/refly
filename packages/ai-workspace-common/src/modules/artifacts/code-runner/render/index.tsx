@@ -15,10 +15,11 @@ interface RendererProps {
   onRequestFix?: (error: string) => void;
   width?: string;
   height?: string;
+  onChange?: (content: string, type: CodeArtifactType) => void;
 }
 
 const Renderer = memo<RendererProps>(
-  ({ content, type, title, language, onRequestFix, width = '100%', height = '100%' }) => {
+  ({ content, type, title, language, onRequestFix, width = '100%', height = '100%', onChange }) => {
     switch (type) {
       case 'application/refly.artifacts.react': {
         return (
@@ -48,7 +49,14 @@ const Renderer = memo<RendererProps>(
       }
 
       case 'application/refly.artifacts.mindmap': {
-        return <MindMapRenderer content={content} width={width} height={height} />;
+        return (
+          <MindMapRenderer
+            content={content}
+            width={width}
+            height={height}
+            onChange={onChange ? (newContent) => onChange(newContent, type) : undefined}
+          />
+        );
       }
 
       case 'text/html': {

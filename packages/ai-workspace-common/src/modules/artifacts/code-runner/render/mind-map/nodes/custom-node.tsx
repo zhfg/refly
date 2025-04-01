@@ -1,4 +1,4 @@
-import { useRef, memo, useState, useCallback } from 'react';
+import { useRef, memo, useState, useCallback, useEffect } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
 import { Button } from 'antd';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -30,7 +30,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   const nodeData = data as any;
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [bgColor, setBgColor] = useState((nodeData?.colors?.bg || '#FFFFFF') as string);
+  const [bgColor, setBgColor] = useState<string>('');
   const nodeRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isOperating = nodeData?.isOperating || false;
@@ -54,6 +54,13 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     border: 'rgb(203, 213, 225)',
   };
   const level = nodeData?.level || 0;
+
+  // Update bgColor from props, but only when needed to avoid render loops
+  useEffect(() => {
+    if (bgColor !== colors.bg) {
+      setBgColor(colors.bg);
+    }
+  }, [colors.bg]);
 
   // Define content update callback before editor initialization
   const onContentUpdate = useCallback(
@@ -104,8 +111,9 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         placeholder: 'Enter your content here...',
       }),
     ],
-    content: nodeData?.content || label,
-    editable: isEditing || isOperating,
+    // Use richTextContent if available, otherwise fallback to content or label
+    content: nodeData?.richTextContent || nodeData?.content || label,
+    editable: isEditing || isOperating, // Start with non-editable, will update in useEffect
     onUpdate: ({ editor }) => {
       handleContentUpdate(editor);
     },
@@ -121,11 +129,6 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       },
     },
   });
-
-  // Update editor's editable state when isOperating changes
-  if (editor && editor.isEditable !== (isEditing || isOperating)) {
-    editor.setEditable(isEditing || isOperating);
-  }
 
   const recalculateNodeHeight = useCallback(() => {
     if (contentRef.current && nodeRef.current) {
@@ -163,7 +166,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     setIsHovered(true);
     handleMouseEnter();
     if (typeof onHover === 'function') {
-      onHover(id);
+      setTimeout(() => onHover(id), 0);
     }
   }, [handleMouseEnter, onHover, id]);
 
@@ -171,7 +174,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     setIsHovered(false);
     handleMouseLeave();
     if (typeof onHover === 'function') {
-      onHover(null);
+      setTimeout(() => onHover(null), 0);
     }
   }, [handleMouseLeave, onHover]);
 

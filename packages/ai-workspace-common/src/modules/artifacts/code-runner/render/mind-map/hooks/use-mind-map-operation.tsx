@@ -49,6 +49,55 @@ export const useMindMapOperation = ({
     [mindMapData, setMindMapData],
   );
 
+  // Handle rich text content changes
+  const handleContentChange = useCallback(
+    (nodeId: string, markdown: string, jsonContent: any) => {
+      const updateNodeContent = (node: NodeData): NodeData => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            content: markdown,
+            richTextContent: jsonContent,
+          };
+        }
+        if (node.children) {
+          return {
+            ...node,
+            children: node.children.map(updateNodeContent),
+          };
+        }
+        return node;
+      };
+
+      setMindMapData(updateNodeContent(mindMapData));
+    },
+    [mindMapData, setMindMapData],
+  );
+
+  // Handle node color changes
+  const handleColorChange = useCallback(
+    (nodeId: string, colors: { bg: string; border: string }) => {
+      const updateNodeColor = (node: NodeData): NodeData => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            colors,
+          };
+        }
+        if (node.children) {
+          return {
+            ...node,
+            children: node.children.map(updateNodeColor),
+          };
+        }
+        return node;
+      };
+
+      setMindMapData(updateNodeColor(mindMapData));
+    },
+    [mindMapData, setMindMapData],
+  );
+
   const handleAddChild = useCallback(
     (nodeId: string) => {
       const newId = `node-${Date.now()}`;
@@ -142,6 +191,8 @@ export const useMindMapOperation = ({
   return {
     handleToggleExpand,
     handleLabelChange,
+    handleContentChange,
+    handleColorChange,
     handleAddChild,
     handleAddSibling,
   };
