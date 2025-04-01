@@ -1099,7 +1099,8 @@ export type CodeArtifactType =
   | 'application/refly.artifacts.mermaid'
   | 'text/markdown'
   | 'application/refly.artifacts.code'
-  | 'text/html';
+  | 'text/html'
+  | 'application/refly.artifacts.mindmap';
 
 /**
  * Code artifact
@@ -3380,7 +3381,8 @@ export type CanvasNodeType =
   | 'toolResponse'
   | 'memo'
   | 'group'
-  | 'image';
+  | 'image'
+  | 'mindMap';
 
 export type CanvasNodeData = {
   /**

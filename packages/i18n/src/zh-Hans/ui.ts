@@ -1102,6 +1102,9 @@ const translations = {
         edit: '编辑',
         noUrlProvided: '未提供网站 URL',
       },
+      mindMap: {
+        defaultTitle: '思维导图',
+      },
     },
     reflyPilot: {
       title: '问问 AI',

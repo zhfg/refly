@@ -7,6 +7,7 @@ const typeMapping: Record<string, { mime: CodeArtifactType; display: string }> =
   markdown: { mime: 'text/markdown', display: 'Markdown' },
   code: { mime: 'application/refly.artifacts.code', display: 'Code' },
   html: { mime: 'text/html', display: 'HTML' },
+  mindMap: { mime: 'application/refly.artifacts.mindmap', display: 'Mind Map' },
 };
 // Function to get simple type description with fuzzy matching
 export const getSimpleTypeDescription = (type: CodeArtifactType): string => {
@@ -53,6 +54,7 @@ export const getFileExtensionFromType = (type: CodeArtifactType): string => {
     python: 'py',
     css: 'css',
     java: 'java',
+    mindMap: 'json',
   };
 
   // Try exact match first
@@ -99,6 +101,47 @@ export const detectActualTypeFromType = (type: CodeArtifactType): CodeArtifactTy
     return typeMapping.html.mime;
   }
 
+  if (lowerContent.includes('mindmap')) {
+    return typeMapping.mindMap.mime;
+  }
+
   // Default to code if no specific type detected
   return typeMapping.code.mime;
+};
+
+// Add a function to get default content for an artifact type
+export const getDefaultContentForType = (type: CodeArtifactType): string => {
+  if (type === 'application/refly.artifacts.mindmap') {
+    return JSON.stringify(
+      {
+        id: 'root',
+        label: 'Main Topic',
+        children: [
+          {
+            id: 'child1',
+            label: 'Subtopic 1',
+            children: [
+              { id: 'child1-1', label: 'Detail 1', children: [] },
+              { id: 'child1-2', label: 'Detail 2', children: [] },
+            ],
+          },
+          {
+            id: 'child2',
+            label: 'Subtopic 2',
+            children: [],
+          },
+          {
+            id: 'child3',
+            label: 'Subtopic 3',
+            children: [],
+          },
+        ],
+      },
+      null,
+      2,
+    );
+  }
+
+  // Add other type defaults as needed
+  return '';
 };

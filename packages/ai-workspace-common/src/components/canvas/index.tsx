@@ -718,7 +718,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       const imageFile = files.find((file) => file.type.startsWith('image/'));
 
       if (imageFile) {
-        handleUploadImage(imageFile, canvasId, event);
+        handleUploadImage(imageFile, canvasId);
       }
     },
     [addNode, reactFlowInstance],

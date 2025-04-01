@@ -1126,6 +1126,9 @@ const translations = {
         edit: 'Edit',
         noUrlProvided: 'No website URL provided',
       },
+      mindMap: {
+        defaultTitle: 'Mind Map',
+      },
     },
     reflyPilot: {
       title: 'Ask AI',

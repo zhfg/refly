@@ -39,11 +39,13 @@ export const useCreateCodeArtifact = () => {
         node: {
           type: 'codeArtifact',
           data: {
-            title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
+            title: title ?? t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
             entityId: data?.data?.artifactId,
             metadata: {
               status: 'finish',
-              language: 'typescript',
+              language: language ?? 'typescript',
+              type: type ?? 'text/html',
+              activeTab: 'code',
             },
           },
           position: position,
