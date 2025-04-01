@@ -1142,6 +1142,9 @@ const translations = {
         nodesCount: '{{count}} nodes',
         invalidJson: 'Invalid JSON structure',
         exportFailed: 'Failed to export mind map',
+        addChild: 'Add Child Card',
+        addSibling: 'Add Sibling Card',
+        delete: 'Delete Card',
       },
     },
     reflyPilot: {

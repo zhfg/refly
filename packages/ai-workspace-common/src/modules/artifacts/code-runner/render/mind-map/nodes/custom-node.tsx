@@ -17,6 +17,8 @@ import { EditorInstance } from '@refly-packages/ai-workspace-common/components/e
 import classNames from 'classnames';
 import { MemoEditor } from '@refly-packages/ai-workspace-common/components/canvas/nodes/memo/memo-editor';
 import { useMindMapHoverEffect } from '../hooks/use-mind-map-hover';
+import { useTranslation } from 'react-i18next';
+import { IconPlus, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 import './custom-node.scss';
 
 interface NodeColors {
@@ -200,6 +202,8 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       ? '#f97316'
       : colors.border; // Orange color for nodes with children when collapsed
 
+  const { t } = useTranslation();
+
   return (
     <>
       <div
@@ -252,11 +256,12 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         )}
 
         {isHovered && (
-          <div className="absolute -bottom-8 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
+          <div className="absolute -bottom-9 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
             <Button
               type="text"
               size="small"
-              className="h-7 text-xs hover:!text-[#00968F]"
+              icon={<IconPlus className="w-3 h-3 mr-1" />}
+              className="h-7 text-xs hover:!text-[#00968F] flex items-center"
               onClick={(e) => {
                 e.stopPropagation();
                 if (typeof nodeData.onAddChild === 'function') {
@@ -264,13 +269,14 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                 }
               }}
             >
-              + Child
+              {t('canvas.nodes.mindMap.addChild')}
             </Button>
             {!isRoot && (
               <Button
                 type="text"
                 size="small"
-                className="h-7 text-xs hover:!text-[#00968F]"
+                icon={<IconPlus className="w-3 h-3 mr-1" />}
+                className="h-7 text-xs hover:!text-[#00968F] flex items-center"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (typeof nodeData.onAddSibling === 'function') {
@@ -278,14 +284,16 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                   }
                 }}
               >
-                + Sibling
+                {t('canvas.nodes.mindMap.addSibling')}
               </Button>
             )}
             {!isRoot && (
               <Button
                 type="text"
                 size="small"
-                className="h-7 text-xs hover:!text-[#f43f5e]"
+                danger
+                icon={<IconDelete className="w-3 h-3 mr-1" />}
+                className="h-7 text-xs flex items-center"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (typeof nodeData.onDeleteNode === 'function') {
@@ -293,7 +301,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                   }
                 }}
               >
-                Delete
+                {t('canvas.nodes.mindMap.delete')}
               </Button>
             )}
           </div>

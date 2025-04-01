@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ReactFlow, Controls, Background, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { NodeData } from './types';
 import { nodeTypes } from './nodes';
 import { useMindMapOperation } from './hooks/use-mind-map-operation';
 import { useMindMapData } from './hooks/use-mind-map-data';
+import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 
 interface MindMapProps {
   data: NodeData;
@@ -23,6 +24,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const [nodeHeights, setNodeHeights] = useState<Map<string, number>>(new Map());
   const [operatingNodeId, setOperatingNodeId] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const { setNodeCenter } = useNodePosition();
 
   // Custom setMindMapData that also updates parent
   const updateMindMapData = useCallback(
@@ -137,6 +139,17 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const handleNodeHover = useCallback((nodeId: string | null) => {
     setHoveredNodeId(nodeId);
   }, []);
+
+  // Focus on newly added node when lastAddedNodeId changes
+  useEffect(() => {
+    if (lastAddedNodeId) {
+      // Use setTimeout to ensure the node is rendered before attempting to focus
+      setTimeout(() => {
+        setNodeCenter(lastAddedNodeId, true);
+        setOperatingNodeId(lastAddedNodeId);
+      }, 100);
+    }
+  }, [lastAddedNodeId, setNodeCenter]);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">

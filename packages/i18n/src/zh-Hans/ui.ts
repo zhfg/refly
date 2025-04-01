@@ -1118,6 +1118,9 @@ const translations = {
         nodesCount: '{{count}} 个节点',
         invalidJson: 'JSON 结构无效',
         exportFailed: '导出思维导图失败',
+        addChild: '添加子卡片',
+        addSibling: '添加同级卡片',
+        delete: '删除卡片',
       },
     },
     reflyPilot: {
