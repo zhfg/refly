@@ -624,6 +624,7 @@ export class KnowledgeService {
           title,
           resourceType: resourceType as ResourceType,
           resourceId,
+          projectId: resource.projectId,
         },
       });
       updates.vectorSize = size;
@@ -737,6 +738,14 @@ export class KnowledgeService {
       where: { resourceId: param.resourceId, uid: user.uid },
       data: updates,
     });
+
+    // Update projectId for vector store
+    if (param.projectId !== undefined) {
+      await this.ragService.updateDocumentPayload(user, {
+        resourceId: updatedResource.resourceId,
+        metadata: { projectId: param.projectId },
+      });
+    }
 
     await this.elasticsearch.upsertResource({
       id: updatedResource.resourceId,
@@ -910,6 +919,7 @@ export class KnowledgeService {
           nodeType: 'document',
           docId: param.docId,
           title: param.title,
+          projectId: param.projectId,
         },
       });
       createInput.vectorSize = size;
@@ -918,7 +928,7 @@ export class KnowledgeService {
     const doc = await this.prisma.document.upsert({
       where: { docId: param.docId },
       create: createInput,
-      update: pick(param, ['title', 'readOnly']),
+      update: pick(param, ['title', 'readOnly', 'projectId']),
     });
 
     await this.elasticsearch.upsertDocument({

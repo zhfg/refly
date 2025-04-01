@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import pLimit from 'p-limit';
 import { PrismaService } from '@/common/prisma.service';
 import {
   DeleteProjectRequest,
@@ -12,13 +13,14 @@ import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 import { genProjectID } from '@refly-packages/utils';
 import { MiscService } from '@/misc/misc.service';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
+import { RAGService } from '@/rag/rag.service';
 import { CanvasService } from '@/canvas/canvas.service';
-import pLimit from 'p-limit';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly ragService: RAGService,
     private readonly knowledgeService: KnowledgeService,
     private readonly canvasService: CanvasService,
     private readonly miscService: MiscService,
@@ -178,25 +180,51 @@ export class ProjectService {
     const projectIdUpdate = { projectId: operation === 'add' ? projectId : null };
 
     await this.prisma.$transaction([
-      this.prisma.document.updateMany({
-        where: {
-          docId: { in: documentIds },
-        },
-        data: projectIdUpdate,
-      }),
-      this.prisma.resource.updateMany({
-        where: {
-          resourceId: { in: resourceIds },
-        },
-        data: projectIdUpdate,
-      }),
-      this.prisma.canvas.updateMany({
-        where: {
-          canvasId: { in: canvasIds },
-        },
-        data: projectIdUpdate,
-      }),
+      ...(documentIds.length > 0
+        ? [
+            this.prisma.document.updateMany({
+              where: {
+                docId: { in: documentIds },
+              },
+              data: projectIdUpdate,
+            }),
+          ]
+        : []),
+      ...(resourceIds.length > 0
+        ? [
+            this.prisma.resource.updateMany({
+              where: {
+                resourceId: { in: resourceIds },
+              },
+              data: projectIdUpdate,
+            }),
+          ]
+        : []),
+      ...(canvasIds.length > 0
+        ? [
+            this.prisma.canvas.updateMany({
+              where: {
+                canvasId: { in: canvasIds },
+              },
+              data: projectIdUpdate,
+            }),
+          ]
+        : []),
     ]);
+
+    if (documentIds.length > 0) {
+      await this.ragService.updateDocumentPayload(user, {
+        docId: documentIds,
+        metadata: { projectId },
+      });
+    }
+
+    if (resourceIds.length > 0) {
+      await this.ragService.updateDocumentPayload(user, {
+        resourceId: resourceIds,
+        metadata: { projectId },
+      });
+    }
   }
 
   async deleteProject(user: User, body: DeleteProjectRequest) {
