@@ -3997,6 +3997,23 @@ export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
 
+export type ListProjectsData = {
+  query?: {
+    /**
+     * Order by
+     */
+    order?: ListOrder;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+  };
+};
+
 export type ListProjectsResponse = ListProjectResponse;
 
 export type ListProjectsError = unknown;

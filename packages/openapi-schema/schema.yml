@@ -954,6 +954,27 @@ paths:
       summary: List projects
       description: List all projects
       operationId: listProjects
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: number
+            default: 10
+        - name: order
+          in: query
+          description: Order by
+          required: false
+          schema:
+            $ref: '#/components/schemas/ListOrder'
       responses:
         '200':
           description: Successful operation

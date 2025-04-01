@@ -207,6 +207,7 @@ import {
   ListLabelInstancesData,
   ListLabelInstancesError,
   ListModelsError,
+  ListProjectsData,
   ListProjectsError,
   ListResourcesData,
   ListResourcesError,
@@ -453,7 +454,7 @@ export const useListProjects = <
   TError = ListProjectsError,
   TQueryKey extends Array<unknown> = unknown[],
 >(
-  clientOptions: Options<unknown, true> = {},
+  clientOptions: Options<ListProjectsData, true> = {},
   queryKey?: TQueryKey,
   options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
 ) =>

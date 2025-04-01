@@ -7,6 +7,7 @@ import {
   DeleteProjectItemsRequest,
   DeleteProjectRequest,
   GetProjectDetailResponse,
+  ListOrder,
   ListProjectResponse,
   UpdateProjectItemsRequest,
   UpsertProjectRequest,
@@ -22,8 +23,13 @@ export class ProjectController {
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
-  async listProjects(@LoginedUser() user: User): Promise<ListProjectResponse> {
-    const projects = await this.projectService.listProjects(user);
+  async listProjects(
+    @LoginedUser() user: User,
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+    @Query('order') order: ListOrder,
+  ): Promise<ListProjectResponse> {
+    const projects = await this.projectService.listProjects(user, { page, pageSize, order });
     return buildSuccessResponse(projects.map(projectPO2DTO));
   }
 

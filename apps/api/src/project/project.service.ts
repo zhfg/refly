@@ -6,6 +6,7 @@ import {
   UpdateProjectItemsRequest,
   UpsertProjectRequest,
   User,
+  ListProjectsData,
 } from '@refly-packages/openapi-schema';
 import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 import { genProjectID } from '@refly-packages/utils';
@@ -23,15 +24,19 @@ export class ProjectService {
     private readonly miscService: MiscService,
   ) {}
 
-  async listProjects(user: User) {
+  async listProjects(user: User, params: ListProjectsData['query']) {
+    const { page = 1, pageSize = 10, order = 'creationDesc' } = params;
+
     const projects = await this.prisma.project.findMany({
       where: {
         uid: user.uid,
         deletedAt: null,
       },
       orderBy: {
-        updatedAt: 'desc',
+        pk: order === 'creationDesc' ? 'desc' : 'asc',
       },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
 
     return projects.map((project) => ({

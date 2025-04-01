@@ -122,6 +122,7 @@ import type {
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
+  ListProjectsData,
   ListProjectsError,
   ListProjectsResponse,
   GetProjectDetailData,
@@ -902,7 +903,7 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
  * List all projects
  */
 export const listProjects = <ThrowOnError extends boolean = false>(
-  options?: Options<unknown, ThrowOnError>,
+  options?: Options<ListProjectsData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).get<ListProjectsResponse, ListProjectsError, ThrowOnError>({
     ...options,

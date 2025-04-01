@@ -48,6 +48,7 @@ import {
   ListDocumentsData,
   ListLabelClassesData,
   ListLabelInstancesData,
+  ListProjectsData,
   ListResourcesData,
   ListSharesData,
   ListSkillInstancesData,
@@ -153,7 +154,7 @@ export const prefetchUseGetDocumentDetail = (
   });
 export const prefetchUseListProjects = (
   queryClient: QueryClient,
-  clientOptions: Options<unknown, true> = {},
+  clientOptions: Options<ListProjectsData, true> = {},
 ) =>
   queryClient.prefetchQuery({
     queryKey: Common.UseListProjectsKeyFn(clientOptions),
