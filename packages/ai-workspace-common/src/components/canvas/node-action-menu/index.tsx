@@ -44,6 +44,7 @@ import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { useGetNodeContent } from '@refly-packages/ai-workspace-common/hooks/canvas/use-get-node-content';
 
 interface MenuItem {
   key?: string;
@@ -91,6 +92,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
+  const { getNodeContent } = useGetNodeContent(node);
   const [localSizeMode, setLocalSizeMode] = useState(
     () => nodeData?.metadata?.sizeMode || 'adaptive',
   );
@@ -253,7 +255,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
   const handleCopy = useCallback(() => {
-    const content = nodeData?.contentPreview;
+    const content = getNodeContent();
+    console.log('content', content);
     copyToClipboard(content || '');
     message.success(t('copilot.message.copySuccess'));
     onClose?.();
