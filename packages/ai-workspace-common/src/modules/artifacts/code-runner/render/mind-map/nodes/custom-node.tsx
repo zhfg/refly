@@ -33,6 +33,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   const [bgColor, setBgColor] = useState((nodeData?.colors?.bg || '#FFFFFF') as string);
   const nodeRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const isOperating = nodeData?.isOperating || false;
 
   // Use the hover effect hook for ReactFlow state updates
   const { handleMouseEnter, handleMouseLeave } = useMindMapHoverEffect(id);
@@ -53,6 +54,22 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     border: 'rgb(203, 213, 225)',
   };
   const level = nodeData?.level || 0;
+
+  // Define content update callback before editor initialization
+  const onContentUpdate = useCallback(
+    (editor: EditorInstance) => {
+      const markdown = editor.storage.markdown.getMarkdown();
+      const jsonContent = editor.getJSON();
+
+      if (typeof nodeData.onContentChange === 'function') {
+        nodeData.onContentChange(id, markdown, jsonContent);
+      }
+    },
+    [id, nodeData],
+  );
+
+  // Throttle the content update callback
+  const handleContentUpdate = useThrottledCallback(onContentUpdate, 200);
 
   // Setup rich text editor
   const editor = useEditor({
@@ -88,12 +105,14 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       }),
     ],
     content: nodeData?.content || label,
-    editable: isEditing,
+    editable: isEditing || isOperating,
     onUpdate: ({ editor }) => {
-      onContentUpdate(editor);
+      handleContentUpdate(editor);
     },
     onBlur: () => {
-      setIsEditing(false);
+      if (!isOperating) {
+        setIsEditing(false);
+      }
       recalculateNodeHeight();
     },
     editorProps: {
@@ -103,14 +122,10 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     },
   });
 
-  const onContentUpdate = useThrottledCallback((editor: EditorInstance) => {
-    const markdown = editor.storage.markdown.getMarkdown();
-    const jsonContent = editor.getJSON();
-
-    if (typeof nodeData.onContentChange === 'function') {
-      nodeData.onContentChange(id, markdown, jsonContent);
-    }
-  }, 200);
+  // Update editor's editable state when isOperating changes
+  if (editor && editor.isEditable !== (isEditing || isOperating)) {
+    editor.setEditable(isEditing || isOperating);
+  }
 
   const recalculateNodeHeight = useCallback(() => {
     if (contentRef.current && nodeRef.current) {
@@ -123,20 +138,14 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     }
   }, [id, nodeData]);
 
-  // Recalculate height when content changes
-  // useEffect(() => {
-  //   if (editor && !isEditing) {
-  //     // Wait for editor content to be fully rendered
-  //     setTimeout(recalculateNodeHeight, 0);
-  //   }
-  // }, [editor, recalculateNodeHeight, isEditing]);
-
   const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
-    editor?.setEditable(true);
-    setTimeout(() => {
-      editor?.commands.focus();
-    }, 0);
+    if (editor) {
+      editor.setEditable(true);
+      setTimeout(() => {
+        editor.commands.focus();
+      }, 0);
+    }
   }, [editor]);
 
   const handleBgColorChange = useCallback(
@@ -180,15 +189,21 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     <>
       <div
         ref={nodeRef}
-        className={`rounded-lg border shadow-sm transition-all ${isHovered ? 'shadow-md' : ''}`}
+        className={classNames(
+          'rounded-lg border shadow-sm transition-all',
+          { 'shadow-xs border-gray-200': isHovered },
+          { 'nodrag nopan': isEditing || isOperating },
+          { nowheel: (isEditing || isOperating) && isHovered },
+          { 'select-text': isEditing || isOperating },
+        )}
         style={{
           borderColor: colors.border,
           backgroundColor: bgColor,
           width: '400px',
           height: 'auto',
           minHeight: '40px',
-          transform: `scale(${isHovered ? 1.02 : 1})`,
-          transition: 'all 0.2s ease',
+          zIndex: isHovered || isOperating ? 1000 : 0, // Set higher z-index when hovered or operating
+          boxShadow: isOperating ? '0 0 0 2px #00968F' : undefined, // Highlight when operating
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -202,24 +217,26 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
               color: isRoot
                 ? 'rgb(30 64 175)'
                 : `rgb(${55 + level * 10}, ${65 + level * 10}, ${75 + level * 10})`,
-              cursor: isEditing ? 'text' : 'pointer',
+              cursor: isEditing || isOperating ? 'text' : 'pointer',
             }}
           >
             {editor && (
               <EditorContent
                 editor={editor}
-                className={classNames('text-xs rich-text-editor memo-node-editor', 'w-full')}
+                className={classNames('text-xs rich-text-editor memo-node-editor', 'w-full', {
+                  'select-text': isEditing || isOperating,
+                })}
               />
             )}
           </div>
         </div>
 
-        {/* Editor menu bar - show when editing or hovering */}
-        {(isEditing || isHovered) && editor && (
+        {/* Editor menu bar - show when editing, operating, or hovering */}
+        {isEditing && isOperating && editor && (
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={handleBgColorChange} />
         )}
 
-        {isHovered && !isEditing && (
+        {isHovered && !isEditing && !isOperating && (
           <div className="absolute -bottom-8 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
             <Button
               size="small"

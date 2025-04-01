@@ -12,6 +12,7 @@ interface MindMapDataProps {
   handleAddSibling: (nodeId: string) => void;
   nodeHeights?: Map<string, number>;
   onNodeResize?: (nodeId: string, width: number, height: number) => void;
+  operatingNodeId?: string | null;
 }
 
 export const useMindMapData = ({
@@ -23,6 +24,7 @@ export const useMindMapData = ({
   handleAddSibling,
   nodeHeights = new Map(),
   onNodeResize,
+  operatingNodeId = null,
 }: MindMapDataProps) => {
   const { nodes, edges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -58,6 +60,7 @@ export const useMindMapData = ({
       const childCount = node.children?.length || 0;
       const isRoot = level === 0 && !parentId;
       const colors = getNodeColor(level, isRoot);
+      const isOperating = node.id === operatingNodeId;
 
       // Get node height from map or use default height based on content
       const nodeHeight = nodeHeights.get(node.id) || (hasChildren ? 80 : 60);
@@ -73,6 +76,7 @@ export const useMindMapData = ({
           isExpanded,
           childCount,
           isRoot,
+          isOperating,
           onToggleExpand: handleToggleExpand,
           onLabelChange: handleLabelChange,
           onAddChild: handleAddChild,
@@ -86,6 +90,8 @@ export const useMindMapData = ({
           width: 400, // Fixed width for nodes
           height: nodeHeight, // Dynamic height
         },
+        // Set higher zIndex for operating nodes
+        zIndex: isOperating ? 1000 : 0,
       };
 
       nodes.push(reactFlowNode);
@@ -150,6 +156,7 @@ export const useMindMapData = ({
     handleAddSibling,
     nodeHeights,
     onNodeResize,
+    operatingNodeId,
   ]);
 
   return {

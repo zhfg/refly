@@ -20,6 +20,7 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
   const reactFlowInstance = useRef<any>(null);
   const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
   const [nodeHeights, setNodeHeights] = useState<Map<string, number>>(new Map());
+  const [operatingNodeId, setOperatingNodeId] = useState<string | null>(null);
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
@@ -52,13 +53,6 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
       newHeights.set(nodeId, height);
       return newHeights;
     });
-
-    // Allow time for state to update before re-rendering
-    // setTimeout(() => {
-    //   if (reactFlowInstance.current) {
-    //     reactFlowInstance.current.fitView({ padding: 0.2 });
-    //   }
-    // }, 50);
   }, []);
 
   const { nodes, edges } = useMindMapData({
@@ -70,27 +64,52 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
     handleAddSibling,
     nodeHeights,
     onNodeResize: handleNodeResize,
+    operatingNodeId,
   });
 
-  const handleNodeClick = (_: React.MouseEvent, node: any) => {
-    // Find the original NodeData that matches this id
-    const findNodeData = (id: string, root: NodeData): NodeData | undefined => {
-      if (root.id === id) return root;
-      if (!root.children) return undefined;
-
-      for (const child of root.children) {
-        const found = findNodeData(id, child);
-        if (found) return found;
+  const handleNodeClick = useCallback(
+    (event: React.MouseEvent, node: any) => {
+      // If node is in edit mode, don't propagate click - let the editor handle it
+      if (node.id === operatingNodeId) {
+        const target = event.target as HTMLElement;
+        // Only stop propagation if clicking on editor content
+        if (target.closest('.ProseMirror') || target.closest('.select-text')) {
+          event.stopPropagation();
+          return;
+        }
       }
 
-      return undefined;
-    };
+      // Set operating node if clicking directly on node (not a button)
+      const target = event.target as HTMLElement;
+      if (!target.closest('button')) {
+        setOperatingNodeId(node.id);
+      }
 
-    const originalData = findNodeData(node.id, mindMapData);
-    if (originalData) {
-      onNodeClick(originalData);
-    }
-  };
+      // Find the original NodeData that matches this id
+      const findNodeData = (id: string, root: NodeData): NodeData | undefined => {
+        if (root.id === id) return root;
+        if (!root.children) return undefined;
+
+        for (const child of root.children) {
+          const found = findNodeData(id, child);
+          if (found) return found;
+        }
+
+        return undefined;
+      };
+
+      const originalData = findNodeData(node.id, mindMapData);
+      if (originalData) {
+        onNodeClick(originalData);
+      }
+    },
+    [mindMapData, onNodeClick, operatingNodeId],
+  );
+
+  // Reset operating node when clicking on the canvas
+  const handlePaneClick = useCallback(() => {
+    setOperatingNodeId(null);
+  }, []);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
@@ -98,6 +117,7 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
         nodes={nodes}
         edges={edges}
         onNodeClick={handleNodeClick}
+        onPaneClick={handlePaneClick}
         nodesDraggable={true}
         elementsSelectable={true}
         nodeTypes={nodeTypes}
@@ -113,6 +133,12 @@ export default function MindMap({ data, onNodeClick }: MindMapProps) {
         proOptions={proOptions}
         minZoom={0.2}
         maxZoom={1.5}
+        // Add mouse events similar to Canvas.tsx
+        panOnScroll={true}
+        zoomOnScroll={true}
+        selectionOnDrag={false}
+        panOnDrag={!operatingNodeId}
+        nodesFocusable={true}
       >
         <Controls showInteractive={false} className="bg-white border border-gray-200 shadow-sm" />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#E5E7EB" />
