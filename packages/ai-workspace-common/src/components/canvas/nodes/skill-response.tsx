@@ -381,9 +381,12 @@ export const SkillResponseNode = memo(
     ]);
 
     const insertToDoc = useInsertToDocument(entityId);
-    const handleInsertToDoc = useCallback(async () => {
-      await insertToDoc('insertBelow', content);
-    }, [insertToDoc, content]);
+    const handleInsertToDoc = useCallback(
+      async (content: string) => {
+        await insertToDoc('insertBelow', content);
+      },
+      [insertToDoc],
+    );
 
     const { deleteNode } = useDeleteNode();
 
@@ -582,7 +585,7 @@ export const SkillResponseNode = memo(
       // Create node-specific event handlers
       const handleNodeRerun = () => handleRerun();
       const handleNodeAddToContext = () => handleAddToContext();
-      const handleNodeInsertToDoc = () => handleInsertToDoc();
+      const handleNodeInsertToDoc = (content: string) => handleInsertToDoc(content);
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
       const handleNodeAskAI = () => handleAskAI();
@@ -593,7 +596,9 @@ export const SkillResponseNode = memo(
       nodeActionEmitter.on(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), (event) =>
+        handleNodeInsertToDoc(event.content),
+      );
       nodeActionEmitter.on(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
 
@@ -603,7 +608,9 @@ export const SkillResponseNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), (event) =>
+          handleNodeInsertToDoc(event.content),
+        );
         nodeActionEmitter.off(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
 

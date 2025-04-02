@@ -39,7 +39,6 @@ import Renderer from '@refly-packages/ai-workspace-common/modules/artifacts/code
 import { useGetCodeArtifactDetail } from '@refly-packages/ai-workspace-common/queries/queries';
 import { useFetchShareData } from '@refly-packages/ai-workspace-common/hooks/use-fetch-share-data';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useUpdateNodeTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-node-title';
 interface NodeContentProps {
   status: 'generating' | 'finish' | 'failed';
@@ -209,15 +208,12 @@ export const CodeArtifactNode = memo(
     }, [data]);
 
     const insertToDoc = useInsertToDocument(data.entityId);
-    const handleInsertToDoc = useCallback(async () => {
-      const { data: codeArtifact, error } = await getClient().getCodeArtifactDetail({
-        query: { artifactId: data.entityId },
-      });
-      if (!codeArtifact?.success || error) {
-        return;
-      }
-      await insertToDoc('insertBelow', codeArtifact?.data?.content);
-    }, [insertToDoc, data]);
+    const handleInsertToDoc = useCallback(
+      async (content: string) => {
+        await insertToDoc('insertBelow', content);
+      },
+      [insertToDoc],
+    );
 
     const handleAskAI = useCallback(() => {
       // Get the current model
@@ -278,20 +274,24 @@ export const CodeArtifactNode = memo(
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
-      const handleNodeInsertToDoc = () => handleInsertToDoc();
+      const handleNodeInsertToDoc = (content: string) => handleInsertToDoc(content);
       const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
-      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), (event) =>
+        handleNodeInsertToDoc(event.content),
+      );
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
-        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), (event) =>
+          handleNodeInsertToDoc(event.content),
+        );
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
