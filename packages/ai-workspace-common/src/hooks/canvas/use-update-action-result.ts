@@ -20,6 +20,7 @@ const generateFullNodeDataUpdates = (
     contentPreview: processContentPreview(payload.steps.map((s) => s?.content || '')),
     metadata: {
       status: payload.status,
+      errors: payload.errors,
       actionMeta: payload.actionMeta,
       modelInfo: payload.modelInfo,
       version: payload.version,
@@ -75,6 +76,11 @@ const generatePartialNodeDataUpdates = (payload: ActionResult, event?: SkillEven
     nodeData.metadata = {
       status: payload.status,
       tokenUsage: aggregateTokenUsage(steps.flatMap((s) => s.tokenUsage).filter(Boolean)),
+    };
+  } else if (eventType === 'error') {
+    nodeData.metadata = {
+      status: payload.status,
+      errors: payload.errors,
     };
   }
 

@@ -1107,7 +1107,8 @@ export class SkillService {
           event: 'error',
           resultId,
           version,
-          error: genBaseRespDataFromError(err),
+          error: genBaseRespDataFromError(err.message),
+          originError: err.message,
         });
       }
       result.errors.push(err.message);

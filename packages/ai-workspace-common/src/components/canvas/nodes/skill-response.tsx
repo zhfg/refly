@@ -55,6 +55,7 @@ import { ReasoningContentPreview } from './shared/reasoning-content-preview';
 import { useUpdateNodeTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-node-title';
 import { truncateContent } from '@refly-packages/ai-workspace-common/utils/content';
 import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { useSkillError } from '@refly-packages/ai-workspace-common/hooks/use-skill-error';
 
 const POLLING_WAIT_TIME = 15000;
 
@@ -239,6 +240,7 @@ export const SkillResponseNode = memo(
     const { canvasId, readonly } = useCanvasContext();
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
+    const { errMsg } = useSkillError(metadata?.errors?.[0]);
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
@@ -697,7 +699,7 @@ export const SkillResponseNode = memo(
                     >
                       <IconError className="h-4 w-4 text-red-500" />
                       <span className="text-xs text-red-500 max-w-48 truncate">
-                        {t('canvas.skillResponse.executionFailed')}
+                        {errMsg || t('canvas.skillResponse.executionFailed')}
                       </span>
                     </div>
                   )}
