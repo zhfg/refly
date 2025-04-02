@@ -2,6 +2,7 @@ import { memo, useState, useCallback } from 'react';
 import { BaseEdge, EdgeProps, getBezierPath, useReactFlow, Position } from '@xyflow/react';
 import { useEdgeStyles } from '../constants';
 import { IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useThrottledCallback } from 'use-debounce';
 import { Input } from 'antd';
 const { TextArea } = Input;
 interface CustomEdgeData {
@@ -64,28 +65,30 @@ export const CustomEdge = memo(
       [label],
     );
 
+    const updateEdgeData = useCallback(
+      (edgeId: string, label: string) => {
+        setEdges((eds) =>
+          eds.map((edge) =>
+            edge.id === edgeId ? { ...edge, data: { ...edge.data, label } } : edge,
+          ),
+        );
+      },
+      [setEdges],
+    );
+
+    const throttledUpdateEdgeData = useThrottledCallback(updateEdgeData, 300, {
+      leading: true,
+      trailing: true,
+    });
+
     const handleLabelChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setLabel(e.target.value);
-    }, []);
-
-    const updateEdgeData = useCallback((edgeId: string, data: Record<string, unknown>) => {
-      setEdges((eds) => {
-        const updatedEdges = eds.map((edge) => {
-          if (edge.id === edgeId) {
-            return { ...edge, data: { ...edge.data, ...data } };
-          }
-          return edge;
-        });
-        return updatedEdges;
-      });
+      throttledUpdateEdgeData(id, e.target.value);
     }, []);
 
     const handleLabelBlur = useCallback(() => {
       setIsEditing(false);
-      if (id) {
-        updateEdgeData(id, { label });
-      }
-    }, [id, label, updateEdgeData]);
+    }, []);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
@@ -93,7 +96,7 @@ export const CustomEdge = memo(
           e.preventDefault();
           setIsEditing(false);
           if (id) {
-            updateEdgeData(id, { label });
+            updateEdgeData(id, label);
           }
         }
       },
@@ -109,6 +112,17 @@ export const CustomEdge = memo(
 
     return (
       <>
+        <g onDoubleClick={handleEdgeDoubleClick}>
+          <path
+            className="react-flow__edge-path-selector"
+            d={edgePath}
+            fill="none"
+            strokeWidth={20}
+            stroke="transparent"
+          />
+          <BaseEdge path={edgePath} style={selected ? selectedStyle : edgeStyle} />
+        </g>
+
         {label || isEditing ? (
           <foreignObject
             width={120}
@@ -146,17 +160,6 @@ export const CustomEdge = memo(
             </div>
           </foreignObject>
         ) : null}
-
-        <g onDoubleClick={handleEdgeDoubleClick}>
-          <path
-            className="react-flow__edge-path-selector"
-            d={edgePath}
-            fill="none"
-            strokeWidth={20}
-            stroke="transparent"
-          />
-          <BaseEdge path={edgePath} style={selected ? selectedStyle : edgeStyle} />
-        </g>
 
         {selected && (
           <foreignObject
