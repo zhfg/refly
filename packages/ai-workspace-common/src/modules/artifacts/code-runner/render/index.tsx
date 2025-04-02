@@ -16,10 +16,21 @@ interface RendererProps {
   width?: string;
   height?: string;
   onChange?: (content: string, type: CodeArtifactType) => void;
+  readonly?: boolean;
 }
 
 const Renderer = memo<RendererProps>(
-  ({ content, type, title, language, onRequestFix, width = '100%', height = '100%', onChange }) => {
+  ({
+    content,
+    type,
+    title,
+    language,
+    onRequestFix,
+    width = '100%',
+    height = '100%',
+    onChange,
+    readonly,
+  }) => {
     switch (type) {
       case 'application/refly.artifacts.react': {
         return (
@@ -54,6 +65,7 @@ const Renderer = memo<RendererProps>(
             content={content}
             width={width}
             height={height}
+            readonly={readonly}
             onChange={onChange ? (newContent) => onChange(newContent, type) : undefined}
           />
         );

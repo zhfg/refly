@@ -6,6 +6,7 @@ export const useMindMapOperation = ({
   setMindMapData,
   setExpandedNodes,
   setLastAddedNodeId,
+  readonly = false,
 }: {
   mindMapData: NodeData;
   setMindMapData: (data: NodeData) => void;
@@ -13,6 +14,7 @@ export const useMindMapOperation = ({
   setExpandedNodes: React.Dispatch<React.SetStateAction<Set<string>>>;
   lastAddedNodeId: string;
   setLastAddedNodeId: (id: string) => void;
+  readonly?: boolean;
 }) => {
   const handleToggleExpand = useCallback(
     (nodeId: string) => {
@@ -31,6 +33,8 @@ export const useMindMapOperation = ({
 
   const handleLabelChange = useCallback(
     (nodeId: string, newLabel: string) => {
+      if (readonly) return;
+
       const updateNodeLabel = (node: NodeData): NodeData => {
         if (node.id === nodeId) {
           return { ...node, label: newLabel };
@@ -46,12 +50,14 @@ export const useMindMapOperation = ({
 
       setMindMapData(updateNodeLabel(mindMapData));
     },
-    [mindMapData, setMindMapData],
+    [mindMapData, setMindMapData, readonly],
   );
 
   // Handle rich text content changes
   const handleContentChange = useCallback(
     (nodeId: string, markdown: string, jsonContent: any) => {
+      if (readonly) return;
+
       const updateNodeContent = (node: NodeData): NodeData => {
         if (node.id === nodeId) {
           return {
@@ -71,12 +77,14 @@ export const useMindMapOperation = ({
 
       setMindMapData(updateNodeContent(mindMapData));
     },
-    [mindMapData, setMindMapData],
+    [mindMapData, setMindMapData, readonly],
   );
 
   // Handle node color changes
   const handleColorChange = useCallback(
     (nodeId: string, colors: { bg: string; border: string }) => {
+      if (readonly) return;
+
       const updateNodeColor = (node: NodeData): NodeData => {
         if (node.id === nodeId) {
           return {
@@ -95,11 +103,13 @@ export const useMindMapOperation = ({
 
       setMindMapData(updateNodeColor(mindMapData));
     },
-    [mindMapData, setMindMapData],
+    [mindMapData, setMindMapData, readonly],
   );
 
   const handleAddChild = useCallback(
     (nodeId: string) => {
+      if (readonly) return;
+
       const newId = `node-${Date.now()}`;
 
       const addChildToNode = (node: NodeData): NodeData => {
@@ -107,7 +117,10 @@ export const useMindMapOperation = ({
           const children = node.children || [];
           return {
             ...node,
-            children: [...children, { id: newId, label: 'New Node', children: [] }],
+            children: [
+              ...children,
+              { id: newId, label: 'New Node', content: 'New Node', children: [] },
+            ],
           };
         }
         if (node.children) {
@@ -133,18 +146,23 @@ export const useMindMapOperation = ({
       // Set the node to focus on after rerender
       setLastAddedNodeId(newId);
     },
-    [mindMapData, setMindMapData, setExpandedNodes, setLastAddedNodeId],
+    [mindMapData, setMindMapData, setExpandedNodes, setLastAddedNodeId, readonly],
   );
 
   const handleAddSibling = useCallback(
     (nodeId: string) => {
+      if (readonly) return;
+
       const newId = `node-${Date.now()}`;
 
       const findParentAndAddSibling = (node: NodeData): NodeData => {
         if (node.children?.some((child) => child.id === nodeId)) {
           return {
             ...node,
-            children: [...node.children, { id: newId, label: 'New Node', children: [] }],
+            children: [
+              ...node.children,
+              { id: newId, label: 'New Node', content: 'New Node', children: [] },
+            ],
           };
         }
         if (node.children) {
@@ -161,7 +179,11 @@ export const useMindMapOperation = ({
         const newRoot = {
           id: 'root',
           label: 'Root',
-          children: [mindMapData, { id: newId, label: 'New Node', children: [] }],
+          content: 'Root',
+          children: [
+            mindMapData,
+            { id: newId, label: 'New Node', content: 'New Node', children: [] },
+          ],
         };
         setMindMapData(newRoot);
         // Add the new root and new node to expanded nodes
@@ -185,12 +207,14 @@ export const useMindMapOperation = ({
       // Set the node to focus on after rerender
       setLastAddedNodeId(newId);
     },
-    [mindMapData, setMindMapData, setExpandedNodes, setLastAddedNodeId],
+    [mindMapData, setMindMapData, setExpandedNodes, setLastAddedNodeId, readonly],
   );
 
   // Add handleDeleteNode function
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
+      if (readonly) return;
+
       // Don't delete the root node
       if (nodeId === mindMapData.id || nodeId === 'root') {
         return;
@@ -230,7 +254,7 @@ export const useMindMapOperation = ({
         return next;
       });
     },
-    [mindMapData, setMindMapData, setExpandedNodes],
+    [mindMapData, setMindMapData, setExpandedNodes, readonly],
   );
 
   return {

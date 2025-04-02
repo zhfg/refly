@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { ReactFlow, Controls, Background, BackgroundVariant } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { NodeData } from './types';
@@ -13,11 +13,12 @@ interface MindMapProps {
   data: NodeData;
   onNodeClick: (node: NodeData) => void;
   onChange?: (updatedData: NodeData) => void;
+  readonly?: boolean;
 }
 
 const proOptions = { hideAttribution: true };
 
-export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
+export default function MindMap({ data, onNodeClick, onChange, readonly = false }: MindMapProps) {
   const [mindMapData, setMindMapData] = useState<NodeData>(data);
   const reactFlowInstance = useRef<any>(null);
   const [lastAddedNodeId, setLastAddedNodeId] = useState<string>('');
@@ -25,25 +26,42 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const [operatingNodeId, setOperatingNodeId] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const { setNodeCenter } = useNodePosition();
+  const dataRef = useRef<NodeData>(data);
+
+  // Update internal state only when data reference changes
+  useEffect(() => {
+    if (data !== dataRef.current) {
+      dataRef.current = data;
+      setMindMapData(data);
+    }
+  }, [data]);
 
   // Custom setMindMapData that also updates parent
   const updateMindMapData = useCallback(
     (newData: NodeData) => {
+      // Prevent circular updates by comparing with current data
+      if (JSON.stringify(newData) === JSON.stringify(mindMapData)) {
+        return;
+      }
+
       setMindMapData(newData);
+      dataRef.current = newData;
 
       // Notify parent of change with the updated node data
-      if (onChange) {
+      if (onChange && !readonly) {
         onChange(newData);
       }
     },
-    [onChange],
+    [onChange, mindMapData, readonly],
   );
 
+  // Initialize expanded nodes with memoization to avoid recalculation
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
     const allIds = new Set<string>();
     const collectIds = (node: NodeData) => {
+      if (!node?.id) return;
       allIds.add(node.id);
-      if (node.children) {
+      if (Array.isArray(node?.children)) {
         for (const child of node.children) {
           collectIds(child);
         }
@@ -68,6 +86,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
     setExpandedNodes,
     lastAddedNodeId,
     setLastAddedNodeId,
+    readonly,
   });
 
   // Handle node resizing and trigger layout update
@@ -93,12 +112,26 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
     onNodeResize: handleNodeResize,
     operatingNodeId,
     hoveredNodeId,
+    readonly,
   });
+
+  // Memoize the findNodeData function to improve performance
+  const findNodeData = useCallback((id: string, root: NodeData): NodeData | undefined => {
+    if (root?.id === id) return root;
+    if (!Array.isArray(root?.children)) return undefined;
+
+    for (const child of root.children) {
+      const found = findNodeData(id, child);
+      if (found) return found;
+    }
+
+    return undefined;
+  }, []);
 
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: any) => {
       // If node is in edit mode, don't propagate click - let the editor handle it
-      if (node?.id === operatingNodeId) {
+      if (node?.id === operatingNodeId && !readonly) {
         const target = event.target as HTMLElement;
         // Only stop propagation if clicking on editor content
         if (target.closest('.ProseMirror') || target.closest('.select-text')) {
@@ -107,31 +140,20 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
         }
       }
 
-      // Set operating node if clicking directly on node (not a button)
-      const target = event.target as HTMLElement;
-      if (!target.closest('button')) {
-        setOperatingNodeId(node?.id);
-      }
-
-      // Find the original NodeData that matches this id
-      const findNodeData = (id: string, root: NodeData): NodeData | undefined => {
-        if (root?.id === id) return root;
-        if (!root?.children) return undefined;
-
-        for (const child of root.children) {
-          const found = findNodeData(id, child);
-          if (found) return found;
+      // Set operating node if clicking directly on node (not a button), only in non-readonly mode
+      if (!readonly) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('button')) {
+          setOperatingNodeId(node?.id);
         }
-
-        return undefined;
-      };
+      }
 
       const originalData = findNodeData(node?.id, mindMapData);
       if (originalData) {
         onNodeClick(originalData);
       }
     },
-    [mindMapData, onNodeClick, operatingNodeId],
+    [mindMapData, onNodeClick, operatingNodeId, findNodeData, readonly],
   );
 
   // Reset operating node when clicking on the canvas
@@ -146,14 +168,28 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
 
   // Focus on newly added node when lastAddedNodeId changes
   useEffect(() => {
-    if (lastAddedNodeId) {
+    if (lastAddedNodeId && !readonly) {
       // Use setTimeout to ensure the node is rendered before attempting to focus
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
         setNodeCenter(lastAddedNodeId, true);
         setOperatingNodeId(lastAddedNodeId);
       }, 100);
+
+      return () => clearTimeout(timerId);
     }
-  }, [lastAddedNodeId, setNodeCenter]);
+  }, [lastAddedNodeId, setNodeCenter, readonly]);
+
+  // Memoize default edge options
+  const defaultEdgeOptions = useMemo(
+    () => ({
+      type: 'step',
+      style: { stroke: '#94a3b8', strokeWidth: 1.5 },
+    }),
+    [],
+  );
+
+  // Memoize flow options
+  const fitViewOptions = useMemo(() => ({ padding: 0.2 }), []);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
@@ -162,26 +198,23 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
         edges={edges}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}
-        nodesDraggable={true}
-        elementsSelectable={true}
+        nodesDraggable={!readonly}
+        elementsSelectable={!readonly}
         nodeTypes={nodeTypes}
         onInit={(instance) => {
           reactFlowInstance.current = instance;
         }}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        defaultEdgeOptions={{
-          type: 'step',
-          style: { stroke: '#94a3b8', strokeWidth: 1.5 },
-        }}
+        fitViewOptions={fitViewOptions}
+        defaultEdgeOptions={defaultEdgeOptions}
         proOptions={proOptions}
         minZoom={0.2}
         maxZoom={1.5}
         panOnScroll={true}
         zoomOnScroll={true}
         selectionOnDrag={false}
-        panOnDrag={!operatingNodeId}
-        nodesFocusable={true}
+        panOnDrag={!operatingNodeId || readonly}
+        nodesFocusable={!readonly}
         onNodeMouseEnter={(_e, node) => handleNodeHover(node.id)}
         onNodeMouseLeave={() => handleNodeHover(null)}
       >

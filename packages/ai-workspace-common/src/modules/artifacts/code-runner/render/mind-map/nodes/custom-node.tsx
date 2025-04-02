@@ -36,6 +36,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   const nodeRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isOperating = nodeData?.isOperating || false;
+  const readonly = nodeData?.readonly || false;
 
   // Use the hover effect hook for ReactFlow state updates
   const { handleMouseEnter, handleMouseLeave } = useMindMapHoverEffect(id);
@@ -67,6 +68,8 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   // Define content update callback before editor initialization
   const onContentUpdate = useCallback(
     (editor: EditorInstance) => {
+      if (readonly) return;
+
       const markdown = editor.storage.markdown.getMarkdown();
       const jsonContent = editor.getJSON();
 
@@ -74,7 +77,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         nodeData.onContentChange(id, markdown, jsonContent);
       }
     },
-    [id, nodeData],
+    [id, nodeData, readonly],
   );
 
   // Throttle the content update callback
@@ -115,7 +118,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     ],
     // Use richTextContent if available, otherwise fallback to content or label
     content: nodeData?.richTextContent || nodeData?.content || label,
-    editable: isEditing || isOperating, // Start with non-editable, will update in useEffect
+    editable: !readonly && (isEditing || isOperating), // Set to false in readonly mode
     onUpdate: ({ editor }) => {
       handleContentUpdate(editor);
     },
@@ -131,6 +134,13 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       },
     },
   });
+
+  // Update editor editability when readonly state changes
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!readonly && (isEditing || isOperating));
+    }
+  }, [editor, readonly, isEditing, isOperating]);
 
   const recalculateNodeHeight = useCallback(() => {
     if (contentRef.current && nodeRef.current) {
@@ -156,6 +166,8 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   }, [editor, recalculateNodeHeight]);
 
   const handleDoubleClick = useCallback(() => {
+    if (readonly) return;
+
     setIsEditing(true);
     if (editor) {
       editor.setEditable(true);
@@ -163,16 +175,18 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         editor.commands.focus();
       }, 0);
     }
-  }, [editor]);
+  }, [editor, readonly]);
 
   const handleBgColorChange = useCallback(
     (color: string) => {
+      if (readonly) return;
+
       setBgColor(color);
       if (typeof nodeData.onColorChange === 'function') {
         nodeData.onColorChange(id, { bg: color, border: colors.border });
       }
     },
-    [id, colors.border, nodeData],
+    [id, colors.border, nodeData, readonly],
   );
 
   // Combined hover handler
@@ -211,9 +225,10 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         className={classNames(
           'rounded-lg border shadow-sm transition-all',
           { 'shadow-xs border-gray-200': isHovered },
-          { 'nodrag nopan': isEditing || isOperating },
-          { nowheel: (isEditing || isOperating) && isHovered },
-          { 'select-text': isEditing || isOperating },
+          { 'nodrag nopan': !readonly && (isEditing || isOperating) },
+          { nowheel: !readonly && (isEditing || isOperating) && isHovered },
+          { 'select-text': !readonly && (isEditing || isOperating) },
+          { 'cursor-not-allowed': readonly },
         )}
         style={{
           borderColor: colors.border,
@@ -222,7 +237,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
           height: 'auto',
           minHeight: '40px',
           zIndex: isHovered || isOperating ? 1000 : 0, // Set higher z-index when hovered or operating
-          boxShadow: isOperating ? '0 0 0 2px #00968F' : undefined, // Highlight when operating
+          boxShadow: !readonly && isOperating ? '0 0 0 2px #00968F' : undefined, // Highlight when operating
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -236,14 +251,15 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
               color: isRoot
                 ? 'rgb(30 64 175)'
                 : `rgb(${55 + level * 10}, ${65 + level * 10}, ${75 + level * 10})`,
-              cursor: isEditing || isOperating ? 'text' : 'pointer',
+              cursor:
+                !readonly && (isEditing || isOperating) ? 'text' : readonly ? 'default' : 'pointer',
             }}
           >
             {editor && (
               <EditorContent
                 editor={editor}
                 className={classNames('text-xs rich-text-editor memo-node-editor', 'w-full', {
-                  'select-text': isEditing || isOperating,
+                  'select-text': !readonly && (isEditing || isOperating),
                 })}
               />
             )}
@@ -251,11 +267,12 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
         </div>
 
         {/* Editor menu bar - show when editing, operating, or hovering */}
-        {isEditing && isOperating && editor && (
+        {!readonly && isEditing && isOperating && editor && (
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={handleBgColorChange} />
         )}
 
-        {isHovered && (
+        {/* Action buttons - only show in non-readonly mode */}
+        {isHovered && !readonly && (
           <div className="absolute -bottom-9 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
             <Button
               type="text"
