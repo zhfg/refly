@@ -345,6 +345,7 @@ export default memo(
                         ? (newContent, _type) => handleEditorChange(newContent)
                         : undefined
                     }
+                    readonly={readOnly || canvasReadOnly}
                   />
                 </div>
               )}

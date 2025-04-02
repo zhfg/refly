@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import HTMLRenderer from './html';
 import SVGRender from './svg';
@@ -31,6 +31,12 @@ const Renderer = memo<RendererProps>(
     onChange,
     readonly,
   }) => {
+    // Memoize the onChange callback for mind map to prevent unnecessary re-renders
+    const memoizedMindMapOnChange = useMemo(() => {
+      if (!onChange || type !== 'application/refly.artifacts.mindmap') return undefined;
+      return (newContent: string) => onChange(newContent, type);
+    }, [onChange, type]);
+
     switch (type) {
       case 'application/refly.artifacts.react': {
         return (
@@ -66,7 +72,7 @@ const Renderer = memo<RendererProps>(
             width={width}
             height={height}
             readonly={readonly}
-            onChange={onChange ? (newContent) => onChange(newContent, type) : undefined}
+            onChange={memoizedMindMapOnChange}
           />
         );
       }
@@ -80,6 +86,19 @@ const Renderer = memo<RendererProps>(
         return <HTMLRenderer htmlContent={content} width={width} height={height} />;
       }
     }
+  },
+  (prevProps, nextProps) => {
+    // Custom equality check for more effective memoization
+    return (
+      prevProps.content === nextProps.content &&
+      prevProps.type === nextProps.type &&
+      prevProps.readonly === nextProps.readonly &&
+      prevProps.title === nextProps.title &&
+      prevProps.language === nextProps.language &&
+      prevProps.width === nextProps.width &&
+      prevProps.height === nextProps.height &&
+      prevProps.onChange === nextProps.onChange
+    );
   },
 );
 

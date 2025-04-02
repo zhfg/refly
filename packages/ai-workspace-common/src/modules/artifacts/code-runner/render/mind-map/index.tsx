@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import MindMapViewer from './viewer';
 import { ReactFlowProvider } from '@xyflow/react';
 import { NodeData } from './types';
@@ -51,11 +51,18 @@ export default function MindMapRenderer({
     { trailing: true }, // Ensure the last update is processed
   );
 
+  // Memoize the onChange handler to prevent recreating it on every render
+  const memoizedOnChange = useCallback(
+    (updatedData: NodeData) => {
+      handleMindMapChange(updatedData);
+    },
+    [handleMindMapChange],
+  );
+
   useEffect(() => {
     // Try parsing as YAML
     try {
       const yamlData = yaml.load(content) as NodeData;
-      console.log('yamlData', yamlData);
 
       // Basic validation
       if (!yamlData || typeof yamlData !== 'object') {
@@ -77,8 +84,11 @@ export default function MindMapRenderer({
         yamlData.content = 'Main Topic';
       }
 
-      // Only update state if parsing was successful
-      setParsedData(yamlData);
+      // Only update state if there's an actual change
+      if (JSON.stringify(yamlData) !== JSON.stringify(parsedData)) {
+        setParsedData(yamlData);
+        lastYamlString.current = content;
+      }
     } catch (err) {
       console.error('Failed to parse YAML:', err);
       // No need to set parse error - just don't update parsedData
@@ -98,7 +108,7 @@ export default function MindMapRenderer({
       <ReactFlowProvider>
         <MindMapViewer
           data={parsedData}
-          onChange={handleMindMapChange}
+          onChange={memoizedOnChange}
           onNodeClick={() => {}} // Empty handler since we don't need this functionality
           readonly={readonly}
         />
