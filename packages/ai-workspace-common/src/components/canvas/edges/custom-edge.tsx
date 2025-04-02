@@ -40,7 +40,7 @@ export const CustomEdge = memo(
       strokeWidth: 2,
       transition: 'stroke 0.2s, stroke-width 0.2s',
     };
-    const hoverStyle = data?.hover ? edgeStyles.hover : edgeStyles.default;
+    const edgeStyle = data?.hover ? edgeStyles.hover : edgeStyles.default;
 
     const [label, setLabel] = useState((data as CustomEdgeData)?.label ?? '');
     const reactFlowInstance = useReactFlow();
@@ -155,7 +155,7 @@ export const CustomEdge = memo(
             strokeWidth={20}
             stroke="transparent"
           />
-          <BaseEdge path={edgePath} style={selected ? selectedStyle : hoverStyle} />
+          <BaseEdge path={edgePath} style={selected ? selectedStyle : edgeStyle} />
         </g>
 
         {selected && (
