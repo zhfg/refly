@@ -59,7 +59,7 @@ const DocumentToc = memo(() => {
     return tocItems.map((item) => {
       return {
         ...item,
-        index: '', // 不再添加序号
+        index: '',
       };
     });
   };
