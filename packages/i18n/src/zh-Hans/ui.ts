@@ -803,6 +803,11 @@ const translations = {
     shareLoading: '正在加载共享文档...',
     notFound: '文档未找到',
     notFoundDesc: '您查找的文档不存在或已被删除。',
+    tableOfContents: '目录',
+    noHeadings: '未找到标题',
+    sharing: '正在分享文档...',
+    shareSuccess: '文档分享成功！链接已复制到剪贴板。',
+    shareError: '分享文档失败',
   },
   artifact: {
     generating: '生成中',
