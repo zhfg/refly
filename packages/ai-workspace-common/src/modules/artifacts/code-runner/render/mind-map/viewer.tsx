@@ -98,7 +98,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: any) => {
       // If node is in edit mode, don't propagate click - let the editor handle it
-      if (node.id === operatingNodeId) {
+      if (node?.id === operatingNodeId) {
         const target = event.target as HTMLElement;
         // Only stop propagation if clicking on editor content
         if (target.closest('.ProseMirror') || target.closest('.select-text')) {
@@ -110,13 +110,13 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
       // Set operating node if clicking directly on node (not a button)
       const target = event.target as HTMLElement;
       if (!target.closest('button')) {
-        setOperatingNodeId(node.id);
+        setOperatingNodeId(node?.id);
       }
 
       // Find the original NodeData that matches this id
       const findNodeData = (id: string, root: NodeData): NodeData | undefined => {
-        if (root.id === id) return root;
-        if (!root.children) return undefined;
+        if (root?.id === id) return root;
+        if (!root?.children) return undefined;
 
         for (const child of root.children) {
           const found = findNodeData(id, child);
@@ -126,7 +126,7 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
         return undefined;
       };
 
-      const originalData = findNodeData(node.id, mindMapData);
+      const originalData = findNodeData(node?.id, mindMapData);
       if (originalData) {
         onNodeClick(originalData);
       }

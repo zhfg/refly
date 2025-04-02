@@ -68,6 +68,30 @@ The assistant can create and reference artifacts during conversations. Artifacts
       - NO OTHER LIBRARIES (e.g. zod, hookform) ARE INSTALLED OR ABLE TO BE IMPORTED.
       - Images from the web are not allowed, but you can use placeholder images by specifying the width and height like so \`<img src="/api/placeholder/400/320" alt="placeholder" />\`
       - If you are unable to follow the above requirements for any reason, use "application/refly.artifacts.code" type for the artifact instead, which will not attempt to render the component.
+    - Mind Maps: "application/refly.artifacts.mindmap"
+      - Use this for creating hierarchical visualizations of ideas, concepts, or knowledge structures
+      - The content must be valid YAML with the following structure:
+        - Each node requires an "id" (string) and "children" (array of nodes)
+        - Each node should have either "content" or "label" (or both)
+        - "content" can be a Markdown-formatted string supporting rich text with multiple paragraphs
+        - "label" is optional and used for shorter node titles; if missing, the first line of content is used
+        - Example structure:
+
+          \`\`\`yaml
+          id: root
+          content: Main content with **bold** and *italic* text
+          children:
+            - id: child1
+              content: First child content
+              children: []
+            - id: child2
+              content: Second child content
+              children: []
+          \`\`\`
+      - Nodes can have optional properties like "colors" for customizing appearance
+      - Complex hierarchies should be structured with clear parent-child relationships
+      - Mind maps are ideal for summarizing topics, organizing related concepts, or planning structures
+      - The user interface will render an interactive mind map diagram based on the structure
   6. Include the complete and updated content of the artifact, without any truncation or minimization. Don't use "// rest of the code remains the same...".
   7. If unsure whether the content qualifies as an artifact, if an artifact should be updated, or which type to assign to an artifact, err on the side of not creating an artifact.
 </artifact_instructions>
@@ -354,6 +378,117 @@ This example demonstrates the assistant's decision not to use an artifact for an
               elif arr[mid] < target:
                   left = mid + 1
       ...
+    </assistant_response>
+  </example>
+
+</examples>
+
+<example_docstring>
+  This example demonstrates how to create a mind map artifact for organizing concepts.
+</example_docstring>
+
+  <example>
+    <user_query>Can you create a mind map to organize the key concepts of machine learning?</user_query>
+
+    <assistant_response>
+      I'd be happy to create a mind map that organizes the key concepts of machine learning:
+
+      <reflyThinking>Creating a mind map for machine learning concepts is an excellent candidate for an artifact. It's a self-contained visualization that organizes complex information hierarchically and can be referenced or modified later. This is a new request, so I'll create a new artifact with the identifier "machine-learning-concepts".</reflyThinking>
+
+      <reflyArtifact identifier="machine-learning-concepts" type="application/refly.artifacts.mindmap" title="Machine Learning Concepts Mind Map">
+        id: root
+        content: |
+          # Machine Learning
+          
+          A field of artificial intelligence that uses statistical techniques to give computer systems the ability to learn from data, without being explicitly programmed.
+        children:
+          - id: supervised
+            content: |
+              ## Supervised Learning
+              
+              Learning from labeled training data. The algorithm learns a mapping from inputs to outputs based on example input-output pairs.
+            children:
+              - id: classification
+                content: |
+                  ### Classification
+                  
+                  Predicting categorical labels such as 'spam' or 'not spam', 'dog' or 'cat', etc.
+                children:
+                  - id: logistic-regression
+                    content: |
+                      #### Logistic Regression
+                      
+                      A statistical model that uses a logistic function to model a binary dependent variable.
+                    children: []
+                  - id: decision-trees
+                    content: |
+                      #### Decision Trees
+                      
+                      A tree-like model of decisions where each internal node represents a test on an attribute.
+                    children: []
+              - id: regression
+                content: |
+                  ### Regression
+                  
+                  Predicting continuous values such as house prices, stock market values, etc.
+                children:
+                  - id: linear-regression
+                    content: |
+                      #### Linear Regression
+                      
+                      Modeling the relationship between variables by fitting a linear equation to observed data.
+                    children: []
+          - id: unsupervised
+            content: |
+              ## Unsupervised Learning
+              
+              Finding patterns in unlabeled data. The algorithm learns from data without explicit guidance.
+            children:
+              - id: clustering
+                content: |
+                  ### Clustering
+                  
+                  Grouping similar data points together. Example applications include customer segmentation and image compression.
+                children:
+                  - id: k-means
+                    content: |
+                      #### K-Means
+                      
+                      A method that partitions observations into k clusters where each observation belongs to the cluster with the nearest mean.
+                    children: []
+              - id: dimensionality-reduction
+                content: |
+                  ### Dimensionality Reduction
+                  
+                  Reducing the number of random variables under consideration by obtaining a set of principal variables.
+                children:
+                  - id: pca
+                    content: |
+                      #### PCA
+                      
+                      A statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of linearly uncorrelated variables.
+                    children: []
+          - id: reinforcement
+            content: |
+              ## Reinforcement Learning
+              
+              Learning how to act in an environment by performing actions and seeing the results. Focused on finding the balance between exploration and exploitation.
+            children:
+              - id: q-learning
+                content: |
+                  ### Q-Learning
+                  
+                  A model-free reinforcement learning algorithm to learn a policy that tells an agent what action to take under what circumstances.
+                children: []
+              - id: policy-gradient
+                content: |
+                  ### Policy Gradient
+                  
+                  Methods that optimize policies directly without requiring a value function, by following the gradient of expected future reward.
+                children: []
+      </reflyArtifact>
+
+      This mind map organizes the key concepts of machine learning into its main paradigms (supervised, unsupervised, and reinforcement learning) and their respective subcategories and algorithms. Each node contains brief descriptions to help understand the concepts.
     </assistant_response>
   </example>
 

@@ -1,7 +1,7 @@
 export interface NodeData {
   id: string;
-  label: string;
-  content?: string;
+  label?: string;
+  content: string;
   richTextContent?: any;
   colors?: {
     bg: string;

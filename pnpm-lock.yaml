@@ -640,6 +640,9 @@ importers:
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.10
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/lodash.throttle':
         specifier: ^4.1.9
         version: 4.1.9
@@ -694,6 +697,12 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+      jsonrepair:
+        specifier: ^3.12.0
+        version: 3.12.0
       katex:
         specifier: 0.15.6
         version: 0.15.6
@@ -1022,6 +1031,9 @@ importers:
       '@types/is-hotkey':
         specifier: ~0.1.7
         version: 0.1.10
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/lodash.throttle':
         specifier: ^4.1.9
         version: 4.1.9
@@ -1103,6 +1115,12 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+      jsonrepair:
+        specifier: ^3.12.0
+        version: 3.12.0
       katex:
         specifier: 0.15.6
         version: 0.15.6
@@ -1532,6 +1550,9 @@ importers:
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
+      jsonrepair:
+        specifier: ^3.12.0
+        version: 3.12.0
       linkify-it:
         specifier: ^5.0.0
         version: 5.0.0
@@ -9312,6 +9333,10 @@ packages:
 
   /@types/js-cookie@2.2.7:
     resolution: {integrity: sha512-aLkWa0C0vO5b4Sr798E26QgOkss68Un0bLjs7u9qxzPT5CG+8DuNTffWES58YzJs3hrVAOs1wonycqEBqNJubA==}
+    dev: false
+
+  /@types/js-yaml@4.0.9:
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
     dev: false
 
   /@types/json-schema@7.0.15:
