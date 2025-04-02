@@ -1121,6 +1121,7 @@ const translations = {
         addChild: '添加子卡片',
         addSibling: '添加同级卡片',
         delete: '删除卡片',
+        invalidMindMapData: '思维导图数据格式无效，请检查您的 JSON 结构',
       },
     },
     reflyPilot: {

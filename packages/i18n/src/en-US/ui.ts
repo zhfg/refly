@@ -1145,6 +1145,7 @@ const translations = {
         addChild: 'Add Child Card',
         addSibling: 'Add Sibling Card',
         delete: 'Delete Card',
+        invalidMindMapData: 'Invalid mind map data format. Please check your JSON structure.',
       },
     },
     reflyPilot: {
