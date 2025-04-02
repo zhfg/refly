@@ -2072,6 +2072,7 @@ const translations = {
       premium: '高级模型',
       standard: '标准模型',
       free: '免费模型',
+      freeModelHint: '免费模型可能存在不可用情况和使用限制，建议仅用于测试用途。',
       tokenUsed: '已使用 {{used}} / {{quota}}',
       upgrade: '升级',
       quotaExceeded: '额度已用尽，点击升级订阅',

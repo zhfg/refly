@@ -2107,6 +2107,8 @@ const translations = {
       premium: 'Pro Models',
       standard: 'Standard Models',
       free: 'Free Models',
+      freeModelHint:
+        'Free models are susceptible to downtime and usage restrictions. We recommend utilizing them solely for testing purposes.',
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
