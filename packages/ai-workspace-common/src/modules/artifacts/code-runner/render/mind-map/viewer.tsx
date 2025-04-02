@@ -218,7 +218,11 @@ export default function MindMap({ data, onNodeClick, onChange, readonly = false 
         onNodeMouseEnter={(_e, node) => handleNodeHover(node.id)}
         onNodeMouseLeave={() => handleNodeHover(null)}
       >
-        <Controls showInteractive={false} className="bg-white border border-gray-200 shadow-sm" />
+        <Controls
+          showInteractive={false}
+          className="bg-white border border-gray-200 shadow-sm"
+          position="bottom-right"
+        />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#E5E7EB" />
       </ReactFlow>
     </div>
