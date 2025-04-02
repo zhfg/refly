@@ -2135,7 +2135,7 @@ const translations = {
     },
     premiumBanner: {
       message: 'Need more requests? Get higher limits with Premium.',
-      upgrade: 'Upgrade Plan',
+      upgrade: 'Upgrade',
     },
   },
   hooks: {
