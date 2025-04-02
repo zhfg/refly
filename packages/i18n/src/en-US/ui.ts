@@ -814,6 +814,11 @@ const translations = {
     shareLoading: 'Loading shared document...',
     notFound: 'Document Not Found',
     notFoundDesc: 'The document you are looking for does not exist or has been removed.',
+    tableOfContents: 'Table of contents',
+    sharing: 'Sharing document...',
+    shareSuccess: 'Document shared successfully! Link copied to clipboard.',
+    shareError: 'Failed to share document',
+    noHeadings: 'No headings found',
   },
   artifact: {
     generating: 'Generating',

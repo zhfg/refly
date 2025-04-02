@@ -16,13 +16,13 @@ export interface TableOfContentsItem {
   id: string;
   itemIndex: number;
   textContent: string;
+  level: number;
 }
 
 interface DocumentData {
   document?: Document;
   documentCharsCount?: number;
   lastCursorPosRef?: number;
-  tocItems?: TableOfContentsItem[];
 }
 
 interface DocumentConfig {

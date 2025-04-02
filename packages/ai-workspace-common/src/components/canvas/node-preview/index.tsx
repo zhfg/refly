@@ -20,6 +20,7 @@ import { getFreshNodePreviews } from '@refly-packages/ai-workspace-common/utils/
 import { ReflyPilot } from '@refly-packages/ai-workspace-common/components/canvas/refly-pilot';
 import { EnhancedSkillResponse } from './skill-response/enhanced-skill-response';
 import { useReactFlow } from '@xyflow/react';
+import { useSearchParams } from 'react-router-dom';
 
 // DnD item type constant
 const ITEM_TYPE = 'node-preview';
@@ -115,7 +116,10 @@ export const DraggableNodePreview = memo(
     index: number;
     moveCard: (dragIndex: number, hoverIndex: number) => void;
   }) => {
-    const [isMaximized, setIsMaximized] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [isMaximized, setIsMaximized] = useState(() => {
+      return searchParams.get('isMaximized') === 'true';
+    });
     const [isWideMode, setIsWideMode] = useState(false);
     const previewRef = useRef<HTMLDivElement>(null);
     const dragRef = useRef<HTMLDivElement>(null);
@@ -125,6 +129,8 @@ export const DraggableNodePreview = memo(
       const handleEscKey = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isMaximized) {
           setIsMaximized(false);
+          searchParams.delete('isMaximized');
+          setSearchParams(searchParams);
         }
       };
 
@@ -141,11 +147,15 @@ export const DraggableNodePreview = memo(
 
     const handleClose = useCallback(() => {
       removePinnedNode(canvasId, node.id);
+      searchParams.delete('isMaximized');
+      setSearchParams(searchParams);
     }, [node.id, removePinnedNode, canvasId]);
 
     useEffect(() => {
       const handleFullScreenPreview = () => {
         setIsMaximized(true);
+        searchParams.set('isMaximized', 'true');
+        setSearchParams(searchParams);
       };
 
       const eventName = createNodeEventName(node.id, 'fullScreenPreview');
@@ -181,7 +191,14 @@ export const DraggableNodePreview = memo(
     );
 
     const handleMaximize = useCallback(() => {
-      setIsMaximized(!isMaximized);
+      const newIsMaximized = !isMaximized;
+      setIsMaximized(newIsMaximized);
+      if (newIsMaximized) {
+        searchParams.set('isMaximized', 'true');
+      } else {
+        searchParams.delete('isMaximized');
+      }
+      setSearchParams(searchParams);
     }, [isMaximized]);
 
     const handleWideMode = useCallback(() => {
@@ -411,7 +428,10 @@ export const NodePreviewContainer = memo(
 // but use the draggable container internally
 export const NodePreview = memo(
   ({ node, canvasId }: { node: CanvasNode<any>; canvasId: string }) => {
-    const [isMaximized, setIsMaximized] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [isMaximized, setIsMaximized] = useState(() => {
+      return searchParams.get('isMaximized') === 'true';
+    });
     const [isWideMode, setIsWideMode] = useState(false);
     const previewRef = useRef<HTMLDivElement>(null);
 
@@ -420,6 +440,8 @@ export const NodePreview = memo(
       const handleEscKey = (event: KeyboardEvent) => {
         if (event.key === 'Escape' && isMaximized) {
           setIsMaximized(false);
+          searchParams.delete('isMaximized');
+          setSearchParams(searchParams);
         }
       };
 
@@ -436,11 +458,15 @@ export const NodePreview = memo(
 
     const handleClose = useCallback(() => {
       removePinnedNode(canvasId, node.id);
+      searchParams.delete('isMaximized');
+      setSearchParams(searchParams);
     }, [node.id, removePinnedNode, canvasId]);
 
     useEffect(() => {
       const handleFullScreenPreview = () => {
         setIsMaximized(true);
+        searchParams.set('isMaximized', 'true');
+        setSearchParams(searchParams);
       };
 
       const eventName = createNodeEventName(node.id, 'fullScreenPreview');
@@ -476,7 +502,14 @@ export const NodePreview = memo(
     );
 
     const handleMaximize = useCallback(() => {
-      setIsMaximized(!isMaximized);
+      const newIsMaximized = !isMaximized;
+      setIsMaximized(newIsMaximized);
+      if (newIsMaximized) {
+        searchParams.set('isMaximized', 'true');
+      } else {
+        searchParams.delete('isMaximized');
+      }
+      setSearchParams(searchParams);
     }, [isMaximized]);
 
     const handleWideMode = useCallback(() => {
