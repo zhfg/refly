@@ -30,7 +30,11 @@ export default function MindMap({ data, onNodeClick, onChange }: MindMapProps) {
   const updateMindMapData = useCallback(
     (newData: NodeData) => {
       setMindMapData(newData);
-      onChange?.(newData);
+
+      // Notify parent of change with the updated node data
+      if (onChange) {
+        onChange(newData);
+      }
     },
     [onChange],
   );

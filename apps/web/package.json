@@ -53,6 +53,7 @@
     "katex": "0.15.6",
     "lodash.throttle": "^4.1.1",
     "lucide-react": "~0.454.0",
+    "marked": "^15.0.7",
     "md5": "^2.3.0",
     "modern-screenshot": "^4.6.0",
     "motion": "^12.4.5",
