@@ -18,7 +18,13 @@ import classNames from 'classnames';
 import { MemoEditor } from '@refly-packages/ai-workspace-common/components/canvas/nodes/memo/memo-editor';
 import { useMindMapHoverEffect } from '../hooks/use-mind-map-hover';
 import { useTranslation } from 'react-i18next';
-import { IconPlus, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconPlus,
+  IconDelete,
+  IconCopy,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { message } from 'antd';
 import './custom-node.scss';
 
 interface NodeColors {
@@ -37,6 +43,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isOperating = nodeData?.isOperating || false;
   const readonly = nodeData?.readonly || false;
+  const { t } = useTranslation();
 
   // Use the hover effect hook for ReactFlow state updates
   const { handleMouseEnter, handleMouseLeave } = useMindMapHoverEffect(id);
@@ -118,7 +125,7 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     ],
     // Use richTextContent if available, otherwise fallback to content or label
     content: nodeData?.richTextContent || nodeData?.content || label,
-    editable: !readonly && (isEditing || isOperating), // Set to false in readonly mode
+    editable: !readonly && (isEditing || isOperating), // Only allow editing when not in readonly mode and either editing or operating
     onUpdate: ({ editor }) => {
       handleContentUpdate(editor);
     },
@@ -206,6 +213,19 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     }
   }, [handleMouseLeave, onHover]);
 
+  // Handle copy node content
+  const handleCopyContent = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (editor) {
+        const markdown = editor.storage.markdown.getMarkdown();
+        copyToClipboard(markdown || '');
+        message.success(t('common.copy.success'));
+      }
+    },
+    [editor],
+  );
+
   // Determine if this is the root node
   const isRoot = id === 'root' || nodeData.isRoot;
 
@@ -216,8 +236,6 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
       ? '#f97316'
       : colors.border; // Orange color for nodes with children when collapsed
 
-  const { t } = useTranslation();
-
   return (
     <>
       <div
@@ -227,8 +245,8 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
           { 'shadow-xs border-gray-200': isHovered },
           { 'nodrag nopan': !readonly && (isEditing || isOperating) },
           { nowheel: !readonly && (isEditing || isOperating) && isHovered },
-          { 'select-text': !readonly && (isEditing || isOperating) },
-          { 'cursor-not-allowed': readonly },
+          { 'select-text': isEditing || isOperating || readonly }, // Always allow selection in readonly mode
+          { 'cursor-text': readonly }, // Use text cursor in readonly mode to indicate selectable content
         )}
         style={{
           borderColor: colors.border,
@@ -252,14 +270,18 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
                 ? 'rgb(30 64 175)'
                 : `rgb(${55 + level * 10}, ${65 + level * 10}, ${75 + level * 10})`,
               cursor:
-                !readonly && (isEditing || isOperating) ? 'text' : readonly ? 'default' : 'pointer',
+                !readonly && (isEditing || isOperating)
+                  ? 'text'
+                  : readonly
+                    ? 'text' // Use text cursor in readonly mode to indicate selectable content
+                    : 'pointer',
             }}
           >
             {editor && (
               <EditorContent
                 editor={editor}
                 className={classNames('text-xs rich-text-editor memo-node-editor', 'w-full', {
-                  'select-text': !readonly && (isEditing || isOperating),
+                  'select-text': isEditing || isOperating || readonly, // Always allow selection in readonly mode
                 })}
               />
             )}
@@ -271,55 +293,71 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={handleBgColorChange} />
         )}
 
-        {/* Action buttons - only show in non-readonly mode */}
-        {isHovered && !readonly && (
+        {/* Action buttons - show in both readonly and edit modes */}
+        {isHovered && (
           <div className="absolute -bottom-9 left-1/2 flex -translate-x-1/2 space-x-1 rounded-md bg-white p-1 shadow-md z-10">
+            {/* Copy button - always available */}
             <Button
               type="text"
               size="small"
-              icon={<IconPlus className="w-3 h-3 mr-1" />}
+              icon={<IconCopy className="w-3 h-3 mr-1" />}
               className="h-7 text-xs hover:!text-[#00968F] flex items-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (typeof nodeData.onAddChild === 'function') {
-                  nodeData.onAddChild(id);
-                }
-              }}
+              onClick={handleCopyContent}
             >
-              {t('canvas.nodes.mindMap.addChild')}
+              {t('common.copy.title')}
             </Button>
-            {!isRoot && (
-              <Button
-                type="text"
-                size="small"
-                icon={<IconPlus className="w-3 h-3 mr-1" />}
-                className="h-7 text-xs hover:!text-[#00968F] flex items-center"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (typeof nodeData.onAddSibling === 'function') {
-                    nodeData.onAddSibling(id);
-                  }
-                }}
-              >
-                {t('canvas.nodes.mindMap.addSibling')}
-              </Button>
-            )}
-            {!isRoot && (
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<IconDelete className="w-3 h-3 mr-1" />}
-                className="h-7 text-xs flex items-center"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (typeof nodeData.onDeleteNode === 'function') {
-                    nodeData.onDeleteNode(id);
-                  }
-                }}
-              >
-                {t('canvas.nodes.mindMap.delete')}
-              </Button>
+
+            {/* Other buttons - only in non-readonly mode */}
+            {!readonly && (
+              <>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconPlus className="w-3 h-3 mr-1" />}
+                  className="h-7 text-xs hover:!text-[#00968F] flex items-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (typeof nodeData.onAddChild === 'function') {
+                      nodeData.onAddChild(id);
+                    }
+                  }}
+                >
+                  {t('canvas.nodes.mindMap.addChild')}
+                </Button>
+                {!isRoot && (
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<IconPlus className="w-3 h-3 mr-1" />}
+                    className="h-7 text-xs hover:!text-[#00968F] flex items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof nodeData.onAddSibling === 'function') {
+                        nodeData.onAddSibling(id);
+                      }
+                    }}
+                  >
+                    {t('canvas.nodes.mindMap.addSibling')}
+                  </Button>
+                )}
+                {!isRoot && (
+                  <Button
+                    type="text"
+                    size="small"
+                    danger
+                    icon={<IconDelete className="w-3 h-3 mr-1" />}
+                    className="h-7 text-xs flex items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof nodeData.onDeleteNode === 'function') {
+                        nodeData.onDeleteNode(id);
+                      }
+                    }}
+                  >
+                    {t('canvas.nodes.mindMap.delete')}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         )}

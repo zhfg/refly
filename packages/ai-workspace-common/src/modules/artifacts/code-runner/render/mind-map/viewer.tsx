@@ -173,21 +173,19 @@ const MindMap = React.memo(
     const handleNodeClick = useCallback(
       (event: React.MouseEvent, node: any) => {
         // If node is in edit mode, don't propagate click - let the editor handle it
-        if (node?.id === operatingNodeId && !readonly) {
+        if ((node?.id === operatingNodeId || readonly) && event.target) {
           const target = event.target as HTMLElement;
-          // Only stop propagation if clicking on editor content
+          // Allow text selection in both operating and readonly mode
           if (target.closest('.ProseMirror') || target.closest('.select-text')) {
             event.stopPropagation();
             return;
           }
         }
 
-        // Set operating node if clicking directly on node (not a button), only in non-readonly mode
-        if (!readonly) {
-          const target = event.target as HTMLElement;
-          if (!target.closest('button')) {
-            setOperatingNodeId(node?.id);
-          }
+        // Set operating node if clicking directly on node (not a button), even in readonly mode for text selection
+        const target = event.target as HTMLElement;
+        if (!target.closest('button')) {
+          setOperatingNodeId(node?.id);
         }
 
         const originalData = findNodeData(node?.id, mindMapData);
@@ -241,7 +239,6 @@ const MindMap = React.memo(
           onNodeClick={handleNodeClick}
           onPaneClick={handlePaneClick}
           nodesDraggable={!readonly}
-          elementsSelectable={!readonly}
           nodeTypes={nodeTypes}
           onInit={(instance) => {
             reactFlowInstance.current = instance;
@@ -256,7 +253,6 @@ const MindMap = React.memo(
           zoomOnScroll={true}
           selectionOnDrag={false}
           panOnDrag={!operatingNodeId || readonly}
-          nodesFocusable={!readonly}
           onNodeMouseEnter={(_e, node) => handleNodeHover(node.id)}
           onNodeMouseLeave={() => handleNodeHover(null)}
         >
