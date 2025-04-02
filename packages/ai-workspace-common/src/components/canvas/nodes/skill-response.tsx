@@ -641,6 +641,8 @@ export const SkillResponseNode = memo(
       >
         <div
           ref={targetRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={classNames({
             'relative nodrag nopan select-text': isOperating,
           })}
@@ -651,11 +653,7 @@ export const SkillResponseNode = memo(
             <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
-          <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}
-          >
+          <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle

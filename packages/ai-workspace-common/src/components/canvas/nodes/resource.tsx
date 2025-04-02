@@ -318,6 +318,8 @@ export const ResourceNode = memo(
       <div className={classNames({ nowheel: isOperating && isHovered })}>
         <div
           ref={targetRef}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
           onClick={onNodeClick}
           className={classNames({
@@ -329,8 +331,6 @@ export const ResourceNode = memo(
           )}
 
           <div
-            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
             h-full
             flex flex-col
