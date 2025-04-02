@@ -99,6 +99,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const [isCreatingDocument, setIsCreatingDocument] = useState(false);
   const [cloneAskAIRunning, setCloneAskAIRunning] = useState(false);
+  const [beforeCopying, setBeforeCopying] = useState(false);
+  const [beforeInserting, setBeforeInserting] = useState(false);
+  const [beforeDuplicatingDocument, setBeforeDuplicatingDocument] = useState(false);
 
   useEffect(() => {
     setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
@@ -179,10 +182,12 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, onClose]);
 
   const handleInsertToDoc = useCallback(async () => {
+    setBeforeInserting(true);
     const content = (await fetchNodeContent()) as string;
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'insertToDoc'), {
       content,
     });
+    setBeforeInserting(false);
     onClose?.();
   }, [nodeId, fetchNodeContent, onClose]);
 
@@ -256,7 +261,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
   const handleCopy = useCallback(async () => {
+    setBeforeCopying(true);
     const content = (await fetchNodeContent()) as string;
+    setBeforeCopying(false);
     copyToClipboard(content || '');
     message.success(t('copilot.message.copySuccess'));
     onClose?.();
@@ -290,10 +297,12 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeData, nodeType, createMemo, onClose]);
 
   const handleDuplicateDocument = useCallback(async () => {
+    setBeforeDuplicatingDocument(true);
     const content = (await fetchNodeContent()) as string;
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'), {
       content,
     });
+    setBeforeDuplicatingDocument(false);
     onClose?.();
   }, [nodeId, fetchNodeContent, onClose]);
 
@@ -485,6 +494,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             key: 'insertToDoc',
             icon: FileInput,
             label: t('canvas.nodeActions.insertToDoc'),
+            loading: beforeInserting,
             onClick: handleInsertToDoc,
             type: 'button' as const,
             disabled: !activeDocumentId,
@@ -501,6 +511,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             key: 'insertToDoc',
             icon: FileInput,
             label: t('canvas.nodeActions.insertToDoc'),
+            loading: beforeInserting,
             onClick: handleInsertToDoc,
             type: 'button' as const,
             disabled: !activeDocumentId,
@@ -547,6 +558,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             key: 'insertToDoc',
             icon: FileInput,
             label: t('canvas.nodeActions.insertToDoc'),
+            loading: beforeInserting,
             onClick: handleInsertToDoc,
             type: 'button' as const,
             disabled: !activeDocumentId,
@@ -585,6 +597,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                       key: 'duplicateDocument',
                       icon: GrClone,
                       label: t('canvas.nodeActions.duplicateDocument'),
+                      loading: beforeDuplicatingDocument,
                       onClick: handleDuplicateDocument,
                       type: 'button' as const,
                       hoverContent: {
@@ -609,12 +622,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                     'https://static.refly.ai/onboarding/nodeAction/nodeAction-createEmptyMemo.webm',
                 },
               },
-              ...(nodeType !== 'image'
+              ...(!['image', 'website'].includes(nodeType)
                 ? [
                     {
                       key: 'copy',
                       icon: IconCopy,
                       label: t('canvas.nodeActions.copy'),
+                      loading: beforeCopying,
                       onClick: handleCopy,
                       type: 'button' as const,
                       hoverContent: {
@@ -733,6 +747,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     [
       cloneAskAIRunning,
       isCreatingDocument,
+      beforeInserting,
+      beforeCopying,
+      beforeDuplicatingDocument,
       nodeType,
       nodeData?.contentPreview,
       handleRerun,
