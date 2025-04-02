@@ -31,7 +31,8 @@ const MindMap = React.memo(
     const dataRef = useRef<NodeData>(data);
     const previousDataStringRef = useRef<string>(safeStringifyJSON(data));
     const updateCountRef = useRef<number>(0);
-    const isUpdatingRef = useRef<boolean>(false);
+
+    console.log('mindMapData', mindMapData);
 
     // Update internal state when data reference changes
     useEffect(() => {
@@ -47,37 +48,28 @@ const MindMap = React.memo(
     // Custom setMindMapData that also updates parent
     const updateMindMapData = useCallback(
       (newData: NodeData) => {
-        if (isUpdatingRef.current) {
-          return; // Prevent updates during an ongoing update cycle
+        const newDataString = safeStringifyJSON(newData);
+        const currentDataString = safeStringifyJSON(mindMapData);
+
+        // Prevent circular updates by comparing stringified data
+        if (newDataString === currentDataString) {
+          return;
         }
 
-        try {
-          isUpdatingRef.current = true;
-          const newDataString = safeStringifyJSON(newData);
-          const currentDataString = safeStringifyJSON(mindMapData);
+        // Limit number of internal updates to prevent infinite loops
+        // if (updateCountRef.current > 5) {
+        //   console.warn('Too many mind map updates, breaking potential infinite loop');
+        //   return;
+        // }
 
-          // Prevent circular updates by comparing stringified data
-          if (newDataString === currentDataString) {
-            return;
-          }
+        updateCountRef.current++;
+        setMindMapData(newData);
+        dataRef.current = newData;
+        previousDataStringRef.current = newDataString;
 
-          // Limit number of internal updates to prevent infinite loops
-          if (updateCountRef.current > 5) {
-            console.warn('Too many mind map updates, breaking potential infinite loop');
-            return;
-          }
-
-          updateCountRef.current++;
-          setMindMapData(newData);
-          dataRef.current = newData;
-          previousDataStringRef.current = newDataString;
-
-          // Notify parent of change with the updated node data
-          if (onChange && !readonly) {
-            onChange(newData);
-          }
-        } finally {
-          isUpdatingRef.current = false;
+        // Notify parent of change with the updated node data
+        if (onChange && !readonly) {
+          onChange(newData);
         }
       },
       [onChange, mindMapData, readonly],

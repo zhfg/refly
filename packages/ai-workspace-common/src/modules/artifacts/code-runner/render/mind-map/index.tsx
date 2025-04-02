@@ -3,7 +3,7 @@ import MindMapViewer from './viewer';
 import { ReactFlowProvider } from '@xyflow/react';
 import { NodeData } from './types';
 import { useThrottledCallback } from 'use-debounce';
-import * as yaml from 'js-yaml';
+import { jsonrepair } from 'jsonrepair';
 
 interface MindMapRendererProps {
   content: string;
@@ -22,8 +22,8 @@ export default function MindMapRenderer({
 }: MindMapRendererProps) {
   const [parsedData, setParsedData] = useState<NodeData | null>(null);
 
-  // Track the last YAML string to prevent duplicate updates
-  const lastYamlString = useRef<string>(content);
+  // Track the last JSON string to prevent duplicate updates
+  const lastJsonString = useRef<string>(content);
 
   // Throttle mind map updates to prevent too frequent updates
   const handleMindMapChange = useThrottledCallback(
@@ -31,24 +31,20 @@ export default function MindMapRenderer({
       if (!onChange || readonly) return;
 
       try {
-        // Convert the updated data to a YAML string
-        const yamlString = yaml.dump(updatedData, {
-          indent: 2,
-          lineWidth: -1, // Don't wrap lines
-          noRefs: true, // Don't use reference tags
-        });
+        console.log('updatedData', updatedData);
+        // Convert the updated data to a JSON string with pretty formatting
+        const jsonString = JSON.stringify(updatedData, null, 2);
 
-        // Only emit change if the YAML actually changed
-        if (yamlString !== lastYamlString.current) {
-          lastYamlString.current = yamlString;
-          onChange(yamlString);
+        // Only emit change if the JSON actually changed
+        if (jsonString !== lastJsonString.current) {
+          lastJsonString.current = jsonString;
+          onChange(jsonString);
         }
       } catch (err) {
-        console.error('Failed to stringify mind map data to YAML:', err);
+        console.error('Failed to stringify mind map data to JSON:', err);
       }
     },
     300, // 300ms throttle to prevent rapid updates
-    { trailing: true }, // Ensure the last update is processed
   );
 
   // Memoize the onChange handler to prevent recreating it on every render
@@ -60,45 +56,49 @@ export default function MindMapRenderer({
   );
 
   useEffect(() => {
-    // Try parsing as YAML
+    // Try parsing as JSON with repair for incomplete JSON
     try {
-      const yamlData = yaml.load(content) as NodeData;
+      if (!content) return;
+
+      // Use jsonrepair to fix potentially incomplete JSON
+      const repairedJson = jsonrepair(content);
+      const jsonData = JSON.parse(repairedJson) as NodeData;
 
       // Basic validation
-      if (!yamlData || typeof yamlData !== 'object') {
-        console.warn('Invalid YAML data structure');
+      if (!jsonData || typeof jsonData !== 'object') {
+        console.warn('Invalid JSON data structure');
         return;
       }
 
       // Ensure minimum required structure
-      if (!yamlData.id) {
-        yamlData.id = 'root';
+      if (!jsonData.id) {
+        jsonData.id = 'root';
       }
 
-      if (!Array.isArray(yamlData.children)) {
-        yamlData.children = [];
+      if (!Array.isArray(jsonData.children)) {
+        jsonData.children = [];
       }
 
-      if (!yamlData.label && !yamlData.content) {
-        yamlData.label = 'Main Topic';
-        yamlData.content = 'Main Topic';
+      if (!jsonData.label && !jsonData.content) {
+        jsonData.label = 'Main Topic';
+        jsonData.content = 'Main Topic';
       }
 
       // Only update state if there's an actual change
-      if (JSON.stringify(yamlData) !== JSON.stringify(parsedData)) {
-        setParsedData(yamlData);
-        lastYamlString.current = content;
+      if (JSON.stringify(jsonData) !== JSON.stringify(parsedData)) {
+        setParsedData(jsonData);
+        lastJsonString.current = content;
       }
     } catch (err) {
-      console.error('Failed to parse YAML:', err);
+      console.error('Failed to parse JSON:', err);
       // No need to set parse error - just don't update parsedData
     }
-  }, [content]);
+  }, [content, parsedData]);
 
   if (!parsedData) {
     return (
       <div className="flex items-center justify-center h-full p-4 text-gray-500 bg-gray-50">
-        Invalid mind map data format. Please check your YAML structure.
+        Invalid mind map data format. Please check your JSON structure.
       </div>
     );
   }
