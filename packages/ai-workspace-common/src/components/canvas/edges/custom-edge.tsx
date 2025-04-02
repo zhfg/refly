@@ -1,10 +1,12 @@
 import { memo, useState, useCallback } from 'react';
 import { BaseEdge, EdgeProps, getBezierPath, useReactFlow, Position } from '@xyflow/react';
+import { useEdgeStyles } from '../constants';
 import { IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Input } from 'antd';
 const { TextArea } = Input;
 interface CustomEdgeData {
   label?: string;
+  hover?: boolean;
 }
 
 const DeleteButton = ({ handleDelete }: { handleDelete: (e: React.MouseEvent) => void }) => {
@@ -19,7 +21,9 @@ const DeleteButton = ({ handleDelete }: { handleDelete: (e: React.MouseEvent) =>
 };
 
 export const CustomEdge = memo(
-  ({ sourceX, sourceY, targetX, targetY, style, selected, data, id }: EdgeProps) => {
+  ({ sourceX, sourceY, targetX, targetY, selected, data, id }: EdgeProps) => {
+    const edgeStyles = useEdgeStyles();
+
     const [edgePath, labelX, labelY] = getBezierPath({
       sourceX,
       sourceY,
@@ -36,6 +40,7 @@ export const CustomEdge = memo(
       strokeWidth: 2,
       transition: 'stroke 0.2s, stroke-width 0.2s',
     };
+    const hoverStyle = data?.hover ? edgeStyles.hover : edgeStyles.default;
 
     const [label, setLabel] = useState((data as CustomEdgeData)?.label ?? '');
     const reactFlowInstance = useReactFlow();
@@ -150,7 +155,7 @@ export const CustomEdge = memo(
             strokeWidth={20}
             stroke="transparent"
           />
-          <BaseEdge path={edgePath} style={selected ? selectedStyle : style} />
+          <BaseEdge path={edgePath} style={selected ? selectedStyle : hoverStyle} />
         </g>
 
         {selected && (
