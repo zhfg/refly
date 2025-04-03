@@ -12,6 +12,8 @@ import { ResetPasswordModal } from '@/components/reset-password-modal';
 import { usePublicAccessPage } from '@refly-packages/ai-workspace-common/hooks/use-is-share-page';
 
 import './index.scss';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 
 const Content = Layout.Content;
 
@@ -24,6 +26,10 @@ export const AppLayout = (props: AppLayoutProps) => {
   const userStore = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
     isLogin: state.isLogin,
+  }));
+  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
+    showLibraryModal: state.showLibraryModal,
+    setShowLibraryModal: state.setShowLibraryModal,
   }));
 
   const isPublicAccessPage = usePublicAccessPage();
@@ -55,6 +61,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         <VerificationModal />
         <ResetPasswordModal />
         <SubscribeModal />
+        <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
       </Layout>
     </ErrorBoundary>
   );

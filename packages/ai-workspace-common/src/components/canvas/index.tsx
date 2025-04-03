@@ -63,7 +63,6 @@ import { EmptyGuide } from './empty-guide';
 import { useReflyPilotReset } from '@refly-packages/ai-workspace-common/hooks/canvas/use-refly-pilot-reset';
 import HelperLines from './common/helper-line/index';
 import { useListenNodeOperationEvents } from '@refly-packages/ai-workspace-common/hooks/canvas/use-listen-node-events';
-import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 
 const GRID_SIZE = 10;
 
@@ -973,10 +972,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
   const { canvasId, readonly } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
-  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    showLibraryModal: state.showLibraryModal,
-    setShowLibraryModal: state.setShowLibraryModal,
-  }));
 
   useEffect(() => {
     if (readonly) {
@@ -995,7 +990,6 @@ export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
       <ReactFlowProvider>
         <CanvasProvider readonly={readonly} canvasId={canvasId}>
           <Flow canvasId={canvasId} />
-          <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
         </CanvasProvider>
       </ReactFlowProvider>
     </EditorPerformanceProvider>
