@@ -232,7 +232,7 @@ const MindMap = React.memo(
     const fitViewOptions = useMemo(() => ({ padding: 0.2 }), []);
 
     return (
-      <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50 bg-[#eef4f7]">
+      <div className="h-full w-full rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
         <ReactFlow
           nodes={nodes}
           edges={edges}
