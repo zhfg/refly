@@ -33,8 +33,6 @@ export const LibraryModal = (props: LibraryModalProps) => {
 
   const [refreshProjectList, setRefreshProjectList] = useState(false);
 
-  console.log('projectId', projectId);
-
   const tabs = useMemo(
     () => [
       {
