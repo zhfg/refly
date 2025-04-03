@@ -218,6 +218,8 @@ export const DocumentNode = memo(
       <div className={classNames({ nowheel: isOperating && isHovered })}>
         <div
           ref={targetRef}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           className={classNames({
             'relative nodrag nopan select-text': isOperating,
           })}
@@ -229,8 +231,6 @@ export const DocumentNode = memo(
           )}
 
           <div
-            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}

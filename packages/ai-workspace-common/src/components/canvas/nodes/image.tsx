@@ -194,6 +194,8 @@ export const ImageNode = memo(
       <div className={isOperating && isHovered ? 'nowheel' : ''}>
         <div
           ref={targetRef}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           style={isPreview ? { width: 288, height: 200 } : safeContainerStyle}
           onClick={onNodeClick}
           className={classNames({
@@ -205,8 +207,6 @@ export const ImageNode = memo(
           )}
 
           <div
-            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
                 w-full
                 h-full

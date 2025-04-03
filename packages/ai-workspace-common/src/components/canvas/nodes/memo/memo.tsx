@@ -310,6 +310,8 @@ export const MemoNode = ({
     <div className={classNames({ nowheel: isFocused && isHovered })}>
       <div
         ref={targetRef}
+        onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+        onMouseLeave={!isPreview ? handleMouseLeave : undefined}
         className="relative"
         onClick={onNodeClick}
         style={{
@@ -328,8 +330,6 @@ export const MemoNode = ({
 
         <div
           style={{ backgroundColor: bgColor }}
-          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           className={`
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}

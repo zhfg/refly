@@ -554,6 +554,8 @@ export const WebsiteNode = memo(
       <div className={classNames({ nowheel: isOperating && isHovered })} data-cy="website-node">
         <div
           ref={targetRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={classNames({
             'relative nodrag nopan select-text': isOperating,
             'pointer-events-none': isResizing,
@@ -566,8 +568,6 @@ export const WebsiteNode = memo(
           )}
 
           <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
             className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })} ${isResizing ? 'pointer-events-none' : ''}`}
           >
             {!isPreview && !hideHandles && (
