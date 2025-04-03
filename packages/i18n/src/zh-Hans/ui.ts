@@ -1296,6 +1296,14 @@ const translations = {
     shareError: '分享代码失败',
     errorCopySuccess: '错误信息已复制到剪贴板',
     errorCopyFailed: '复制错误信息失败',
+    layout: {
+      split: '分栏视图',
+      tabs: '标签视图',
+    },
+    layoutChanged: {
+      split: '已切换到分栏视图模式',
+      tabs: '已切换到标签视图模式',
+    },
     tabs: {
       preview: '预览',
       code: '代码',

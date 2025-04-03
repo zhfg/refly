@@ -1323,6 +1323,14 @@ const translations = {
     shareError: 'Failed to share code!',
     errorCopySuccess: 'Error message copied to clipboard',
     errorCopyFailed: 'Failed to copy error message',
+    layout: {
+      split: 'Split View',
+      tabs: 'Tab View',
+    },
+    layoutChanged: {
+      split: 'Changed to split view mode',
+      tabs: 'Changed to tab view mode',
+    },
     tabs: {
       preview: 'Preview',
       code: 'Code',
