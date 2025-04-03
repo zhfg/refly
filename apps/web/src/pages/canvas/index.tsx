@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Canvas } from '@refly-packages/ai-workspace-common/components/canvas';
 import { Button, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -11,25 +10,16 @@ import { AiOutlineMenuUnfold } from 'react-icons/ai';
 
 const CanvasPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const { canvasId = '' } = useParams();
   const { debouncedCreateCanvas, isCreating } = useCreateCanvas();
-  const {
-    canvasList = [],
-    collapse,
-    setCollapse,
-  } = useSiderStoreShallow((state) => ({
+  const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     canvasList: state.canvasList ?? [],
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
 
-  useEffect(() => {
-    if (canvasId === 'empty' && canvasList.length > 0) {
-      navigate(`/canvas/${canvasList[0].id}`, { replace: true });
-    }
-  }, [canvasId, canvasList, navigate]);
+  console.log('empty', canvasId);
 
   return canvasId && canvasId !== 'empty' ? (
     <Canvas canvasId={canvasId} />
