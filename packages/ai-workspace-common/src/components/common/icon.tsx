@@ -85,6 +85,7 @@ import { MdOutlineMouse } from 'react-icons/md';
 
 import ReflyLogo from '@refly-packages/ai-workspace-common/assets/logo.svg';
 import { memo } from 'react';
+import { IoGitNetworkOutline } from 'react-icons/io5';
 
 export const IconReflyLogo = ReflyLogo;
 export const IconCanvas = TfiBlackboard;
@@ -199,3 +200,7 @@ export const getSkillIcon = (skillName: string, className?: string) => {
 export const MemoizedIcon = memo(({ icon, className }: { icon: string; className?: string }) => (
   <img className={`w-4 h-4 ${className}`} src={icon} alt={icon} />
 ));
+
+export const IconMindMap = (props: React.ComponentProps<typeof IoGitNetworkOutline>) => {
+  return <IoGitNetworkOutline {...props} />;
+};

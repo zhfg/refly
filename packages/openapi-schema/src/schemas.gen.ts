@@ -1301,6 +1301,7 @@ export const CodeArtifactTypeSchema = {
     'text/markdown',
     'application/refly.artifacts.code',
     'text/html',
+    'application/refly.artifacts.mindmap',
   ],
 } as const;
 
@@ -4814,6 +4815,7 @@ export const CanvasNodeTypeSchema = {
     'memo',
     'group',
     'image',
+    'mindMap',
   ],
 } as const;
 
