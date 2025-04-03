@@ -1,5 +1,5 @@
 import { FiRefreshCw, FiDownload, FiCopy, FiCode, FiEye, FiShare2 } from 'react-icons/fi';
-import { FaColumns } from 'react-icons/fa';
+
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button, Tooltip, Divider, message, Select } from 'antd';
 import Renderer from './render';
@@ -14,6 +14,7 @@ import {
   getArtifactTypeOptions,
   getSimpleTypeDescription,
 } from '@refly-packages/ai-workspace-common/modules/artifacts/code-runner/artifact-type-util';
+import { GoColumns } from 'react-icons/go';
 
 export default memo(
   function CodeViewer({
@@ -248,7 +249,7 @@ export default memo(
             <Button
               type="text"
               icon={
-                <FaColumns
+                <GoColumns
                   className={`size-4 ${
                     layoutMode === 'split' ? 'text-green-600' : 'text-gray-600'
                   }`}
