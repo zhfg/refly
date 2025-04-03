@@ -72,6 +72,18 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     }
   }, [colors.bg]);
 
+  // Define the recalculateNodeHeight callback before it's used in dependencies
+  const recalculateNodeHeight = useCallback(() => {
+    if (contentRef.current && nodeRef.current) {
+      const contentHeight = contentRef.current.scrollHeight;
+      const newHeight = Math.max(60, contentHeight + 20); // Add padding
+
+      if (typeof nodeData.onResizeNode === 'function') {
+        nodeData.onResizeNode(id, 400, newHeight);
+      }
+    }
+  }, [id, nodeData]);
+
   // Define content update callback before editor initialization
   const onContentUpdate = useCallback(
     (editor: EditorInstance) => {
@@ -149,16 +161,19 @@ export const CustomNode = memo(({ id, data }: NodeProps) => {
     }
   }, [editor, readonly, isEditing, isOperating]);
 
-  const recalculateNodeHeight = useCallback(() => {
-    if (contentRef.current && nodeRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      const newHeight = Math.max(60, contentHeight + 20); // Add padding
+  // Update editor content when nodeData content changes
+  useEffect(() => {
+    if (editor && (nodeData?.richTextContent || nodeData?.content)) {
+      const newContent = nodeData?.richTextContent || nodeData?.content || label;
+      const currentContent = editor.getHTML();
 
-      if (typeof nodeData.onResizeNode === 'function') {
-        nodeData.onResizeNode(id, 400, newHeight);
+      // Only update if content has actually changed to avoid cursor position issues
+      if (newContent && currentContent !== newContent) {
+        editor.commands.setContent(newContent);
+        recalculateNodeHeight();
       }
     }
-  }, [id, nodeData]);
+  }, [editor, nodeData?.richTextContent, nodeData?.content, label, recalculateNodeHeight]);
 
   // Run height recalculation after component mounts and editor is ready
   useEffect(() => {

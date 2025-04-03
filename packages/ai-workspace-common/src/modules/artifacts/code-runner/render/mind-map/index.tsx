@@ -102,7 +102,7 @@ export default function MindMapRenderer({
     return (
       <div className="flex items-center justify-center h-full p-4 text-gray-500 bg-gray-50">
         <IconLoading className="h-3 w-3 animate-spin text-green-500" />
-        {t('canvas.nodes.mindMap.invalidMindMapData')}
+        <div>{t('canvas.nodes.mindMap.invalidMindMapData')}</div>
       </div>
     );
   }
