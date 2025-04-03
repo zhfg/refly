@@ -34,7 +34,10 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 // icons
-import { IconLibrary } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconLibrary,
+  IconProject,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import { AiOutlineMenuFold, AiOutlineUser } from 'react-icons/ai';
 import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components/subscription/hint';
@@ -46,6 +49,8 @@ import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stor
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 import { SiderLoggedOut } from './sider-logged-out';
+import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
+
 import './layout.scss';
 import { ProjectDirectory } from '../project/project-directory';
 
@@ -157,20 +162,13 @@ const MenuItemContent = (props: {
   hoverContent?: HoverContent;
   canvasId?: string;
 }) => {
-  const { position = 'left', type, hoverContent, canvasId } = props;
+  const { position = 'left', type, hoverContent } = props;
   const { hoverCardEnabled } = useHoverCard();
 
   const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
     setShowCanvasListModal: state.setShowCanvasListModal,
   }));
-
-  const { debouncedCreateCanvas } = useCreateCanvas({
-    projectId: null,
-    afterCreateSuccess: () => {
-      setShowLibraryModal(true);
-    },
-  });
 
   const { setVisible } = useCanvasTemplateModal((state) => ({
     setVisible: state.setVisible,
@@ -180,11 +178,7 @@ const MenuItemContent = (props: {
     if (type === 'Canvas') {
       setShowCanvasListModal(true);
     } else if (type === 'Library') {
-      if (canvasId && canvasId !== 'empty') {
-        setShowLibraryModal(true);
-      } else {
-        debouncedCreateCanvas();
-      }
+      setShowLibraryModal(true);
     } else if (type === 'Template') {
       setVisible(true);
     }
@@ -243,6 +237,34 @@ export const NewCanvasItem = () => {
   );
 };
 
+export const NewProjectItem = () => {
+  const { t } = useTranslation();
+  const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
+  const { loadSiderData } = useHandleSiderData();
+
+  return (
+    <>
+      <MenuItem
+        key="newProject"
+        className="ml-2.5 flex h-8 items-center"
+        onClick={() => setCreateProjectModalVisible(true)}
+      >
+        <Button type="text" icon={<IconPlus className="text-green-600" />} />
+
+        <span className="text-green-600">{t('project.create')}</span>
+      </MenuItem>
+      <CreateProjectModal
+        mode="create"
+        visible={createProjectModalVisible}
+        setVisible={setCreateProjectModalVisible}
+        onSuccess={() => {
+          loadSiderData(true);
+        }}
+      />
+    </>
+  );
+};
+
 export const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -291,6 +313,31 @@ export const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
   );
 };
 
+export const ProjectListItem = ({ project }: { project: SiderData }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleProjectClick = async () => {
+    // Navigate to the project page
+    navigate(`/project/${project.id}?canvasId=empty`);
+  };
+
+  return (
+    <MenuItem
+      key={project.id}
+      className="group relative ml-4 h-8 rounded text-sm leading-8 hover:bg-gray-50"
+      onClick={handleProjectClick}
+    >
+      <div className="flex h-8 w-40 items-center justify-between">
+        <div className="flex items-center gap-3">
+          <IconProject className="text-gray-500" />
+          <div className="w-28 truncate">{project?.name || t('common.untitled')}</div>
+        </div>
+      </div>
+    </MenuItem>
+  );
+};
+
 const getSelectedKey = (pathname: string) => {
   if (pathname.startsWith('/canvas')) {
     const arr = pathname?.split('?')[0]?.split('/');
@@ -319,6 +366,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
   const {
     collapse,
     canvasList,
+    projectsList,
     setCollapse,
     showSettingModal,
     setShowSettingModal,
@@ -327,12 +375,14 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     showSettingModal: state.showSettingModal,
     collapse: state.collapse,
     canvasList: state.canvasList,
+    projectsList: state.projectsList,
     setCollapse: state.setCollapse,
     setShowSettingModal: state.setShowSettingModal,
     setShowLibraryModal: state.setShowLibraryModal,
+    showLibraryModal: state.showLibraryModal,
   }));
 
-  const { isLoadingCanvas } = useHandleSiderData(true);
+  const { isLoadingCanvas, isLoadingProjects } = useHandleSiderData(true);
 
   const { t } = useTranslation();
 
@@ -496,6 +546,39 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                           ) : (
                             canvasList.map((canvas) => (
                               <CanvasListItem key={canvas.id} canvas={canvas} />
+                            ))
+                          )}
+                        </>
+                      )}
+
+                      {item.key === 'Library' && (
+                        <>
+                          <NewProjectItem />
+
+                          {isLoadingProjects ? (
+                            <>
+                              <Skeleton.Input
+                                key="skeleton-1"
+                                active
+                                size="small"
+                                style={{ width: 204 }}
+                              />
+                              <Skeleton.Input
+                                key="skeleton-2"
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                              <Skeleton.Input
+                                key="skeleton-3"
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                            </>
+                          ) : (
+                            projectsList.map((project) => (
+                              <ProjectListItem key={project.id} project={project} />
                             ))
                           )}
                         </>
