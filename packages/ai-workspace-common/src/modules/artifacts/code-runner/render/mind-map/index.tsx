@@ -4,6 +4,8 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { NodeData } from './types';
 import { useThrottledCallback } from 'use-debounce';
 import { jsonrepair } from 'jsonrepair';
+import { useTranslation } from 'react-i18next';
+import { IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface MindMapRendererProps {
   content: string;
@@ -21,6 +23,7 @@ export default function MindMapRenderer({
   onChange,
 }: MindMapRendererProps) {
   const [parsedData, setParsedData] = useState<NodeData | null>(null);
+  const { t } = useTranslation();
 
   // Track the last JSON string to prevent duplicate updates
   const lastJsonString = useRef<string>(content);
@@ -98,7 +101,8 @@ export default function MindMapRenderer({
   if (!parsedData) {
     return (
       <div className="flex items-center justify-center h-full p-4 text-gray-500 bg-gray-50">
-        Invalid mind map data format. Please check your JSON structure.
+        <IconLoading className="h-3 w-3 animate-spin text-green-500" />
+        {t('canvas.nodes.mindMap.invalidMindMapData')}
       </div>
     );
   }
