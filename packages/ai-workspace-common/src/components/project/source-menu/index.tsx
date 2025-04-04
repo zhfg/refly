@@ -1,9 +1,19 @@
 import { AddSources } from '@refly-packages/ai-workspace-common/components/project/add-sources';
 
 import { useTranslation } from 'react-i18next';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, memo } from 'react';
 import { Document, Resource } from '@refly/openapi-schema';
-import { Button, Checkbox, Skeleton, List, Empty, Collapse, Typography, message } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Skeleton,
+  List,
+  Empty,
+  Collapse,
+  Typography,
+  message,
+  Dropdown,
+} from 'antd';
 import {
   IconDocument,
   IconPlus,
@@ -15,8 +25,53 @@ import cn from 'classnames';
 import HeaderActions from '@refly-packages/ai-workspace-common/components/common/header-actions';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
+import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 const { Text } = Typography;
+
+interface AddSourceDropdownProps {
+  onAddSource: () => void;
+  children?: React.ReactNode;
+}
+
+const AddSourceDropdown = memo(({ onAddSource, children }: AddSourceDropdownProps) => {
+  const { t } = useTranslation();
+  const { setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }));
+
+  const items = [
+    {
+      key: 'addExistingSource',
+      label: t('project.action.addExistingSource', 'Add Existing Source'),
+      onClick: () => {
+        onAddSource();
+      },
+    },
+    {
+      key: 'importResource',
+      label: t('project.action.importResource', 'Import Resource'),
+      onClick: () => {
+        setImportResourceModalVisible(true);
+      },
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }} trigger={['click']}>
+      {children || (
+        <Button
+          type="default"
+          size="small"
+          className="text-xs text-gray-600"
+          icon={<IconPlus size={12} className="flex items-center justify-center" />}
+        >
+          {t('project.action.addSource', 'Add Source')}
+        </Button>
+      )}
+    </Dropdown>
+  );
+});
 
 export const SourcesMenu = ({
   sourceList,
@@ -94,7 +149,7 @@ export const SourcesMenu = ({
       message.success(t('project.action.deleteItemsSuccess'));
       onUpdatedItems?.();
     }
-  }, [selectedSources, exitMultiSelectMode]);
+  }, [selectedSources, exitMultiSelectMode, projectId, t, onUpdatedItems]);
 
   const removeSelectedSourcesFromProject = useCallback(async () => {
     const res = await getClient().updateProjectItems({
@@ -112,7 +167,7 @@ export const SourcesMenu = ({
       message.success(t('project.action.removeItemsSuccess'));
       onUpdatedItems?.();
     }
-  }, [selectedSources, projectId, t, onUpdatedItems]);
+  }, [selectedSources, projectId, t, onUpdatedItems, exitSearchMode]);
 
   const addSelectedSourcesToCanvas = useCallback(async () => {
     if (selectedSources.length > 0) {
@@ -131,7 +186,7 @@ export const SourcesMenu = ({
       }
     }
     exitSearchMode();
-  }, [selectedSources]);
+  }, [selectedSources, exitSearchMode]);
 
   const filteredSourceList = useMemo(() => {
     if (!searchValue) return sourceList;
@@ -163,6 +218,19 @@ export const SourcesMenu = ({
       <ResourceIcon url={item?.data?.url} resourceType={item.resourceType} size={14} />
     );
   }, []);
+
+  const addButtonNode = useMemo(
+    () => (
+      <AddSourceDropdown onAddSource={handleAddSource}>
+        <Button
+          type="text"
+          size="small"
+          icon={<IconPlus className="flex items-center justify-center text-gray-500" />}
+        />
+      </AddSourceDropdown>
+    ),
+    [handleAddSource],
+  );
 
   useEffect(() => {
     if (selectedSources?.length === 0) {
@@ -202,6 +270,7 @@ export const SourcesMenu = ({
                   onAddItem={handleAddSource}
                   onAddSelectedSourcesToCanvas={addSelectedSourcesToCanvas}
                   itemCountText={itemCountText}
+                  addButtonNode={addButtonNode}
                 />
                 <div className="flex-grow overflow-y-auto px-3">
                   {isFetching ? (
@@ -223,17 +292,7 @@ export const SourcesMenu = ({
                             image={null}
                             description={t('common.empty')}
                           >
-                            <Button
-                              size="small"
-                              type="default"
-                              className="text-xs"
-                              icon={
-                                <IconPlus size={12} className="flex items-center justify-center" />
-                              }
-                              onClick={handleAddSource}
-                            >
-                              {t('project.addSource')}
-                            </Button>
+                            <AddSourceDropdown onAddSource={handleAddSource} />
                           </Empty>
                         ),
                       }}
