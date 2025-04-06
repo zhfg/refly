@@ -166,6 +166,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
             projectSelectorClassName="max-w-[80px]"
             enableSelectProject={false}
             className="px-3"
+            enableProjectSelector={false}
             onProjectChange={handleProjectChange}
           />
         ) : null}

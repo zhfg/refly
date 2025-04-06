@@ -21,6 +21,7 @@ interface ProjectKnowledgeToggleProps {
   enableSelectProject?: boolean;
   onProjectChange?: (projectId: string) => void;
   onSwitchChange?: (checked: boolean) => void;
+  enableProjectSelector?: boolean;
 }
 
 export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
@@ -30,6 +31,7 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
   enableSelectProject = true,
   onProjectChange,
   onSwitchChange,
+  enableProjectSelector = true,
 }) => {
   const { t } = useTranslation();
   const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -89,63 +91,69 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
           />
 
           {/* Project Selector Dropdown */}
-          <Select
-            loading={loading}
-            className={`project-selector transition-all overflow-hidden ${projectSelectorClassName}`}
-            placeholder={t('project.selectProject')}
-            value={currentProject?.projectId}
-            onChange={handleProjectChange}
-            bordered={false}
-            dropdownStyle={{ minWidth: '250px' }}
-            optionLabelProp="label"
-            suffixIcon={!enableSelectProject ? null : <IconDown size={12} />}
-            disabled={!enableSelectProject}
-            style={{
-              padding: 0,
-            }}
-            dropdownRender={(menu) => (
-              <div className="rounded-md overflow-hidden shadow-lg">
-                <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-100 bg-gray-50">
-                  {t('project.switchProject')}
-                </div>
-                {loading ? (
-                  <div className="flex justify-center items-center py-4">
-                    <Spin size="small" />
+          {enableProjectSelector ? (
+            <Select
+              loading={loading}
+              className={`project-selector transition-all overflow-hidden ${projectSelectorClassName}`}
+              placeholder={t('project.selectProject')}
+              value={currentProject?.projectId}
+              onChange={handleProjectChange}
+              bordered={false}
+              dropdownStyle={{ minWidth: '250px' }}
+              optionLabelProp="label"
+              suffixIcon={!enableSelectProject ? null : <IconDown size={12} />}
+              disabled={!enableSelectProject}
+              style={{
+                padding: 0,
+              }}
+              dropdownRender={(menu) => (
+                <div className="rounded-md overflow-hidden shadow-lg">
+                  <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-100 bg-gray-50">
+                    {t('project.switchProject')}
                   </div>
-                ) : (
-                  menu
-                )}
-              </div>
-            )}
-          >
-            {projects.map((project) => (
-              <Select.Option
-                key={project.projectId}
-                value={project.projectId}
-                label={
-                  <span className="text-sm text-gray-600 truncate inline-block">
-                    {project.name || t('common.untitled')}
-                  </span>
-                }
-              >
-                <div className="flex items-center justify-between py-1">
-                  <div className="flex items-center gap-2">
-                    {project.coverUrl ? (
-                      <Avatar size={20} src={project.coverUrl} className="flex-shrink-0" />
-                    ) : (
-                      <IconProject size={20} className="text-gray-500 flex-shrink-0" />
-                    )}
-                    <span className="truncate max-w-[150px] text-sm">
-                      {project.name || t('common.untitled')}
-                    </span>
-                  </div>
-                  {project.projectId === currentProjectId && (
-                    <LuCheck className="text-[#00968F]" size={16} />
+                  {loading ? (
+                    <div className="flex justify-center items-center py-4">
+                      <Spin size="small" />
+                    </div>
+                  ) : (
+                    menu
                   )}
                 </div>
-              </Select.Option>
-            ))}
-          </Select>
+              )}
+            >
+              {projects.map((project) => (
+                <Select.Option
+                  key={project.projectId}
+                  value={project.projectId}
+                  label={
+                    <span className="text-sm text-gray-600 truncate inline-block">
+                      {project.name || t('common.untitled')}
+                    </span>
+                  }
+                >
+                  <div className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-2">
+                      {project.coverUrl ? (
+                        <Avatar size={20} src={project.coverUrl} className="flex-shrink-0" />
+                      ) : (
+                        <IconProject size={20} className="text-gray-500 flex-shrink-0" />
+                      )}
+                      <span className="truncate max-w-[150px] text-sm">
+                        {project.name || t('common.untitled')}
+                      </span>
+                    </div>
+                    {project.projectId === currentProjectId && (
+                      <LuCheck className="text-[#00968F]" size={16} />
+                    )}
+                  </div>
+                </Select.Option>
+              ))}
+            </Select>
+          ) : (
+            <div className="text-sm text-gray-600 truncate inline-block h-[32px] flex items-center">
+              <span>Ask Project</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0 ml-1">
