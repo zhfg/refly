@@ -11,6 +11,8 @@ import './index.scss';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { useNavigate } from 'react-router-dom';
+import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
+import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
 
 export const iconClassName =
   'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center hover:text-gray-700';
@@ -53,6 +55,11 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   const data = projectDetail?.data;
   const [projectData, setProjectData] = useState(data);
 
+  // Add project selector global state
+  const { setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
+    setSelectedProjectId: state.setSelectedProjectId,
+  }));
+
   const handleRemoveCanvases = useCallback(
     async (canvasIds: string[]) => {
       const newCanvasList = canvasList.filter((item) => !canvasIds.includes(item.id));
@@ -84,15 +91,22 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     getSourceList();
   }, [projectId]);
 
+  // Update global store when project ID changes
+  useEffect(() => {
+    if (projectId) {
+      setSelectedProjectId(projectId);
+    }
+  }, [projectId, setSelectedProjectId]);
+
   return (
     <Layout.Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}
       className={cn(
-        'border border-solid border-gray-100 bg-white shadow-sm',
+        'border border-solid border-gray-100 bg-white shadow-sm relative',
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
       )}
     >
-      <div className="project-directory flex h-full flex-col py-3 overflow-y-auto">
+      <div className="project-directory flex h-full flex-col py-3 pb-0 overflow-y-auto">
         <ProjectSettings
           source={source}
           setCollapse={setCollapse}
@@ -104,21 +118,34 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
 
         <Divider className="my-2" />
 
-        <CanvasMenu
-          isFetching={isLoadingCanvas}
-          canvasList={canvasList}
-          projectId={projectId}
-          onAddCanvasesSuccess={handleAddCanvases}
-          onRemoveCanvases={handleRemoveCanvases}
-        />
-        <SourcesMenu
-          isFetching={loadingSource}
-          sourceList={sourceList}
-          projectId={projectId}
-          documentCount={sourceList.filter((item) => item.entityType === 'document').length || 0}
-          resourceCount={sourceList.filter((item) => item.entityType === 'resource').length || 0}
-          onUpdatedItems={() => {
-            getSourceList();
+        <div className="flex-1 overflow-y-auto">
+          <CanvasMenu
+            isFetching={isLoadingCanvas}
+            canvasList={canvasList}
+            projectId={projectId}
+            onAddCanvasesSuccess={handleAddCanvases}
+            onRemoveCanvases={handleRemoveCanvases}
+          />
+          <SourcesMenu
+            isFetching={loadingSource}
+            sourceList={sourceList}
+            projectId={projectId}
+            documentCount={sourceList.filter((item) => item.entityType === 'document').length || 0}
+            resourceCount={sourceList.filter((item) => item.entityType === 'resource').length || 0}
+            onUpdatedItems={() => {
+              getSourceList();
+            }}
+          />
+        </div>
+
+        {/* Combined Project Knowledge Base Toggle */}
+        <ProjectKnowledgeToggle
+          currentProjectId={projectId}
+          projectSelectorClassName="max-w-[80px]"
+          enableSelectProject={false}
+          className="px-3"
+          onProjectChange={() => {
+            navigate(`/project/${projectId}`);
           }}
         />
       </div>

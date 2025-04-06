@@ -23,6 +23,7 @@ import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/e
 import { cn } from '@refly-packages/utils/cn';
 import classNames from 'classnames';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
 
 // Memoized Premium Banner Component
 const PremiumBanner = memo(() => {
@@ -345,6 +346,7 @@ export const ChatPanel = memo(
             {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
             <div className={cn('px-3')}>{renderContent()}</div>
           </div>
+          <ProjectKnowledgeToggle className="!pb-0" />
         </div>
       );
     }

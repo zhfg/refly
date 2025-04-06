@@ -13,6 +13,7 @@ import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/st
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/recommend-questions-panel';
 import { SkillTemplateConfig } from '@refly/openapi-schema';
+import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
 
 interface LaunchPadProps {
   visible?: boolean;
@@ -104,6 +105,7 @@ export const LaunchPad = memo(
             onClose={() => setRecommendQuestionsOpen(false)}
           />
           {chatPanelComponent}
+          <ProjectKnowledgeToggle projectSelectorClassName="max-w-[150px]" className="!pb-0" />
         </div>
       </div>
     );

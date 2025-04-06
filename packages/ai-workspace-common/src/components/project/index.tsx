@@ -4,7 +4,7 @@ import { NoCanvas } from './no-canvas';
 export const Project = ({ projectId }: { projectId: string }) => {
   const [searchParams] = useSearchParams();
   const canvasId = searchParams.get('canvasId');
-  console.log('projectId', projectId);
+
   if (!canvasId || canvasId === 'empty') {
     return <NoCanvas projectId={projectId} />;
   }
