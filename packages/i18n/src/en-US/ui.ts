@@ -853,6 +853,7 @@ const translations = {
       image: 'Image',
       codeArtifact: 'Code Artifact',
       website: 'Website',
+      mindMap: 'Mind Map',
     },
     export: {
       success: 'Image exported successfully',
@@ -966,6 +967,8 @@ const translations = {
       copyLink: 'Copy Link',
       createWebsite: 'Create Website Node',
       createWebsiteDescription: 'Create a website node to embed a website in your canvas',
+      createMindMap: 'Create Mind Map Node',
+      createMindMapDescription: 'Create a mind map node to embed a mind map in your canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -1125,6 +1128,24 @@ const translations = {
         openInNewTab: 'Open in new tab',
         edit: 'Edit',
         noUrlProvided: 'No website URL provided',
+      },
+      mindMap: {
+        defaultTitle: 'Mind Map',
+        edit: 'Edit Mind Map',
+        preview: 'Preview',
+        jsonData: 'Mind Map JSON Data',
+        jsonRequired: 'Please enter valid JSON data',
+        save: 'Save and View Mind Map',
+        export: 'Export Mind Map',
+        clickToView: 'Click to view mind map',
+        compactMode: 'Mind map in compact mode',
+        nodesCount: '{{count}} nodes',
+        invalidJson: 'Invalid JSON structure',
+        exportFailed: 'Failed to export mind map',
+        addChild: 'Add Child Card',
+        addSibling: 'Add Sibling Card',
+        delete: 'Delete Card',
+        invalidMindMapData: 'Invalid mind map data format. Please check your JSON structure.',
       },
     },
     reflyPilot: {
@@ -1303,6 +1324,14 @@ const translations = {
     shareError: 'Failed to share code!',
     errorCopySuccess: 'Error message copied to clipboard',
     errorCopyFailed: 'Failed to copy error message',
+    layout: {
+      split: 'Split View',
+      tabs: 'Tab View',
+    },
+    layoutChanged: {
+      split: 'Changed to split view mode',
+      tabs: 'Changed to tab view mode',
+    },
     tabs: {
       preview: 'Preview',
       code: 'Code',

@@ -15,9 +15,10 @@ export const useCreateCodeArtifact = () => {
       language?: string;
       type?: string;
       title?: string;
+      activeTab?: string;
       connectTo?: CanvasNodeFilter[];
     }) => {
-      const { codeContent, position, language, type, title, connectTo } = params ?? {};
+      const { codeContent, position, language, type, title, activeTab, connectTo } = params ?? {};
 
       // For code artifacts, we'll use a resource ID since there's no specific prefix for code artifacts
       const stopLoading = message.loading(t('codeArtifact.creating'));
@@ -39,11 +40,13 @@ export const useCreateCodeArtifact = () => {
         node: {
           type: 'codeArtifact',
           data: {
-            title: t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
+            title: title ?? t('canvas.nodeTypes.codeArtifact', 'Code Artifact'),
             entityId: data?.data?.artifactId,
             metadata: {
               status: 'finish',
-              language: 'typescript',
+              language: language ?? 'typescript',
+              type: type ?? 'text/html',
+              activeTab: activeTab ?? 'code',
             },
           },
           position: position,

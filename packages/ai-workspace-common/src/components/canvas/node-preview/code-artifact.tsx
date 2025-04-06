@@ -254,14 +254,6 @@ const CodeArtifactNodePreviewComponent = ({ nodeId }: CodeArtifactNodePreviewPro
 
       if (status !== 'generating' && !canvasReadOnly) {
         updateRemoteArtifact(newCode);
-
-        // Optionally save content to node metadata for persistence
-        if (artifactId) {
-          setNodeDataByEntity(
-            { type: 'codeArtifact', entityId: artifactId },
-            { metadata: { localContent: newCode } },
-          );
-        }
       }
     },
     [status, canvasReadOnly, artifactId, updateRemoteArtifact, setNodeDataByEntity],
