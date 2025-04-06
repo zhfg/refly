@@ -2281,6 +2281,14 @@ const translations = {
     noDescription: 'Quickly fill in the description ~',
     customInstructions: 'Custom Instructions',
     waitingUploadCover: 'Waiting for upload cover',
+    askProject: 'Ask Project',
+    knowledgeToggle: {
+      enabledDesc:
+        'Ask Project is currently enabled. Knowledge from files in "{{projectName}}" will be used as reference when asking questions.',
+      disabledDesc:
+        'Ask Project is currently disabled. Knowledge from files in "{{projectName}}" will not be used as reference when asking questions.',
+    },
+    switchProject: 'Switch Project',
     createModal: {
       createTitle: 'Create Project',
       editTitle: 'Edit Project',

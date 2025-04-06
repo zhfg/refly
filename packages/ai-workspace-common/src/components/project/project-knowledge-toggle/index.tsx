@@ -81,6 +81,8 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
     }
   };
 
+  const projectName = currentProject?.name || t('common.untitled');
+
   return (
     <div className={`project-kb-toggle mt-auto border-t border-gray-100 pt-2 pb-2 ${className}`}>
       <div className="rounded-lg flex items-center justify-between bg-gray-50 p-2 pt-0 pb-0 border border-solid  hover:border-[#00968F]/30 transition-all cursor-pointer">
@@ -151,7 +153,7 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
             </Select>
           ) : (
             <div className="text-sm text-gray-600 truncate inline-block h-[32px] flex items-center">
-              <span>Ask Project</span>
+              <span>{t('project.askProject')}</span>
             </div>
           )}
         </div>
@@ -172,13 +174,12 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
           <Tooltip
             title={
               <div className="p-1 max-w-xs">
-                <div className="font-medium mb-1 text-[#00968F]">Knowledge Base</div>
+                <div className="font-medium mb-1 text-[#00968F]">{t('project.askProject')}</div>
                 <div className="text-xs text-gray-400">
-                  When enabled, your external knowledge base will be used in chat mode.
-                  <br />
                   <span className="mt-1 block">
-                    Seed selection mode is now set to "Off", your external knowledge base will not
-                    be used.
+                    {kbEnabled
+                      ? t('project.knowledgeToggle.enabledDesc', { projectName })
+                      : t('project.knowledgeToggle.disabledDesc', { projectName })}
                   </span>
                 </div>
               </div>

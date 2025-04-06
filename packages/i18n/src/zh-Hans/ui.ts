@@ -2218,6 +2218,14 @@ const translations = {
     noDescription: '快来填写描述吧～',
     customInstructions: '预设提示词',
     waitingUploadCover: '暂未上传封面',
+    askProject: '基于项目提问',
+    knowledgeToggle: {
+      enabledDesc:
+        '基于项目提问当前被设置为开启，"{{projectName}}"内的文件知识会在提问时作为参考内容使用',
+      disabledDesc:
+        '基于项目提问当前被设置为关闭，"{{projectName}}"内的文件知识不会在提问时作为参考内容使用',
+    },
+    switchProject: '切换项目',
     createModal: {
       createTitle: '创建项目',
       editTitle: '编辑项目',
