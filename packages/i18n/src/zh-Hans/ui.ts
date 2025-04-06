@@ -841,6 +841,7 @@ const translations = {
       image: '图片',
       codeArtifact: '代码组件',
       website: '网站',
+      mindMap: '思维导图',
     },
     export: {
       success: '导出图片成功',
@@ -949,6 +950,8 @@ const translations = {
       copyLink: '复制链接',
       createWebsite: '创建网站节点',
       createWebsiteDescription: '创建一个网站节点以在画布中嵌入网站',
+      createMindMap: '创建思维导图节点',
+      createMindMapDescription: '创建一个思维导图节点以在画布中嵌入思维导图',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -1101,6 +1104,24 @@ const translations = {
         openInNewTab: '在新标签页打开',
         edit: '编辑',
         noUrlProvided: '未提供网站 URL',
+      },
+      mindMap: {
+        defaultTitle: '思维导图',
+        edit: '编辑思维导图',
+        preview: '预览',
+        jsonData: '思维导图 JSON 数据',
+        jsonRequired: '请输入有效的 JSON 数据',
+        save: '保存并查看思维导图',
+        export: '导出思维导图',
+        clickToView: '点击查看思维导图',
+        compactMode: '思维导图紧凑模式',
+        nodesCount: '{{count}} 个节点',
+        invalidJson: 'JSON 结构无效',
+        exportFailed: '导出思维导图失败',
+        addChild: '添加子卡片',
+        addSibling: '添加同级卡片',
+        delete: '删除卡片',
+        invalidMindMapData: '思维导图数据格式无效，请检查您的 JSON 结构',
       },
     },
     reflyPilot: {
@@ -1276,6 +1297,14 @@ const translations = {
     shareError: '分享代码失败',
     errorCopySuccess: '错误信息已复制到剪贴板',
     errorCopyFailed: '复制错误信息失败',
+    layout: {
+      split: '分栏视图',
+      tabs: '标签视图',
+    },
+    layoutChanged: {
+      split: '已切换到分栏视图模式',
+      tabs: '已切换到标签视图模式',
+    },
     tabs: {
       preview: '预览',
       code: '代码',

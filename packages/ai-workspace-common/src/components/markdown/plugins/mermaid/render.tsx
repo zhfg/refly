@@ -325,7 +325,7 @@ const MermaidComponent = memo(
     const containerClassName = useMemo(
       () =>
         cn(
-          'mermaid-diagram w-full flex justify-center items-center overflow-x-auto relative group',
+          'mermaid-diagram w-full flex justify-center items-center overflow-x-auto relative group pt-8',
           showOriginalCode && 'bg-gray-50 rounded',
         ),
       [showOriginalCode],
@@ -346,7 +346,7 @@ const MermaidComponent = memo(
 
         {/* Action Buttons - Only show when successfully rendered or in code view */}
         {(rendered || viewMode === 'code') && (
-          <div className="absolute top-2 right-2 z-50 flex transition-all duration-200 ease-in-out bg-white/80 backdrop-blur-sm rounded-md shadow-sm border border-gray-100">
+          <div className="absolute top-0 right-2 z-50 flex transition-all duration-200 ease-in-out bg-white/80 backdrop-blur-sm rounded-md shadow-sm border border-gray-100">
             <Space>
               {viewMode === 'preview' && (
                 <>

@@ -3143,6 +3143,7 @@ components:
         - text/markdown
         - application/refly.artifacts.code
         - text/html
+        - application/refly.artifacts.mindmap
     CodeArtifact:
       type: object
       description: Code artifact
@@ -5631,6 +5632,7 @@ components:
         - memo
         - group
         - image
+        - mindMap
     CanvasNodeData:
       type: object
       required:

@@ -7,13 +7,14 @@ import './monaco-editor.scss';
 
 // Function to map CodeArtifactType to appropriate Monaco editor language
 const getLanguageFromType = (type: CodeArtifactType, language: string): string => {
-  const languageMap: Record<CodeArtifactType, string> = {
+  const languageMap: Record<string, string> = {
     'application/refly.artifacts.react': 'typescript',
     'image/svg+xml': 'xml',
     'application/refly.artifacts.mermaid': 'markdown',
     'text/markdown': 'markdown',
     'application/refly.artifacts.code': language,
     'text/html': 'html',
+    'application/refly.artifacts.mindmap': 'json',
   };
 
   return languageMap[type] ?? language;
