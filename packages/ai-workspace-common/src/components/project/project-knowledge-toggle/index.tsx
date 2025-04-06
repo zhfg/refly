@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Switch, Tooltip, Select, Spin, Avatar } from 'antd';
 import { LuBrain, LuCheck } from 'react-icons/lu';
 import { FiHelpCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { IconDown, IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
-import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Project } from '@refly/openapi-schema';
 import './index.scss';
@@ -34,7 +32,6 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
   onSwitchChange,
 }) => {
   const { t } = useTranslation();
-  const { projectId: contextProjectId } = useGetProjectCanvasId();
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -46,23 +43,8 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
     setKbEnabled: state.updateIsKnowledgeBaseEnabled,
   }));
 
-  // Global project selector state for synchronization
-  const { selectedProjectId, setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
-    selectedProjectId: state.selectedProjectId,
-    setSelectedProjectId: state.setSelectedProjectId,
-  }));
-
-  // Use provided project ID, selected project ID, or the one from context
-  const effectiveProjectId = currentProjectId || selectedProjectId || contextProjectId;
-
-  React.useEffect(() => {
-    if (effectiveProjectId && !selectedProjectId) {
-      setSelectedProjectId(effectiveProjectId);
-    }
-  }, [effectiveProjectId, selectedProjectId, setSelectedProjectId]);
-
   // Fetch project list
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
@@ -74,7 +56,7 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
           setProjects(res.data.data);
 
           // Set current project
-          const current = res.data.data.find((p) => p.projectId === effectiveProjectId);
+          const current = res.data.data.find((p) => p.projectId === currentProjectId);
           if (current) {
             setCurrentProject(current);
           }
@@ -87,13 +69,10 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
     };
 
     fetchProjects();
-  }, [effectiveProjectId]);
+  }, [currentProjectId]);
 
   const handleProjectChange = async (projectId: string) => {
-    if (projectId === effectiveProjectId) return;
-
-    // Update the global selected project ID
-    setSelectedProjectId(projectId);
+    if (projectId === currentProjectId) return;
 
     if (onProjectChange) {
       onProjectChange(projectId);
@@ -160,7 +139,7 @@ export const ProjectKnowledgeToggle: React.FC<ProjectKnowledgeToggleProps> = ({
                       {project.name || t('common.untitled')}
                     </span>
                   </div>
-                  {project.projectId === effectiveProjectId && (
+                  {project.projectId === currentProjectId && (
                     <LuCheck className="text-[#00968F]" size={16} />
                   )}
                 </div>

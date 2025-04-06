@@ -1,6 +1,6 @@
 import { Form } from '@arco-design/web-react';
 import { notification, Button } from 'antd';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useContextPanelStore,
@@ -36,6 +36,8 @@ import { omit } from '@refly-packages/utils/index';
 import { cn } from '@refly-packages/utils/cn';
 import { ActionStatus, SkillTemplateConfig } from '@refly/openapi-schema';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
+import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -128,6 +130,22 @@ export const ChatPanel = ({
     selectedModel: state.selectedModel,
     setSelectedModel: state.setSelectedModel,
   }));
+
+  // Get selectedProjectId from store for initial state
+  const { selectedProjectId, setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
+    selectedProjectId: state.selectedProjectId,
+    setSelectedProjectId: state.setSelectedProjectId,
+  }));
+
+  // Local project state
+  const [projectId, setProjectId] = useState<string | undefined>(selectedProjectId);
+
+  // Initialize projectId from props or store
+  useEffect(() => {
+    if (selectedProjectId) {
+      setProjectId(selectedProjectId);
+    }
+  }, [selectedProjectId]);
 
   // Get setActiveResultId from context panel store
   const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
@@ -343,93 +361,109 @@ export const ChatPanel = ({
     }
   };
 
-  return (
-    <div className="relative w-full" data-cy="launchpad-chat-panel">
-      <div
-        className={cn(
-          'ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden',
-          embeddedMode && 'embedded-chat-panel border border-gray-100',
-        )}
-      >
-        <SelectedSkillHeader
-          skill={selectedSkill}
-          setSelectedSkill={setSelectedSkill}
-          onClose={() => setSelectedSkill(null)}
-        />
-        {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
-        <div className={cn('px-3', embeddedMode && 'px-2')}>
-          <ContextManager
-            className="py-2"
-            contextItems={contextItems}
-            setContextItems={setContextItems}
-            filterErrorInfo={filterErrorInfo}
-          />
+  // Handle project change
+  const handleProjectChange = useCallback(
+    (newProjectId: string) => {
+      setProjectId(newProjectId);
+    },
+    [setSelectedProjectId],
+  );
 
-          <div>
-            <ChatInput
+  return (
+    <>
+      <div className="relative w-full" data-cy="launchpad-chat-panel">
+        <div
+          className={cn(
+            'ai-copilot-chat-container chat-input-container rounded-[7px] overflow-hidden',
+            embeddedMode && 'embedded-chat-panel border border-gray-100',
+          )}
+        >
+          <SelectedSkillHeader
+            skill={selectedSkill}
+            setSelectedSkill={setSelectedSkill}
+            onClose={() => setSelectedSkill(null)}
+          />
+          {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
+          <div className={cn('px-3', embeddedMode && 'px-2')}>
+            <ContextManager
+              className="py-2"
+              contextItems={contextItems}
+              setContextItems={setContextItems}
+              filterErrorInfo={filterErrorInfo}
+            />
+
+            <div>
+              <ChatInput
+                query={chatStore.newQAText}
+                setQuery={chatStore.setNewQAText}
+                selectedSkillName={selectedSkill?.name}
+                autoCompletionPlacement={'topLeft'}
+                handleSendMessage={handleSendMessage}
+                onUploadImage={handleImageUpload}
+                onFocus={handleInputFocus}
+              />
+            </div>
+
+            {selectedSkill?.configSchema?.items?.length ? (
+              <ConfigManager
+                key={selectedSkill?.name}
+                form={form}
+                formErrors={formErrors}
+                setFormErrors={setFormErrors}
+                tplConfig={initialTplConfig}
+                onFormValuesChange={(_, allValues) => {
+                  // Debounce form value changes to prevent cascading updates
+                  const newConfig = allValues.tplConfig;
+                  if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
+                    onUpdateTplConfig?.(newConfig);
+                  }
+                }}
+                schema={selectedSkill?.configSchema}
+                fieldPrefix="tplConfig"
+                configScope="runtime"
+                resetConfig={() => {
+                  if (selectedSkill?.tplConfig) {
+                    form.setFieldValue('tplConfig', selectedSkill.tplConfig);
+                  } else {
+                    const defaultConfig = {};
+                    for (const item of selectedSkill?.configSchema?.items || []) {
+                      if (item.defaultValue !== undefined) {
+                        defaultConfig[item.key] = {
+                          value: item.defaultValue,
+                          label: item.labelDict?.en ?? item.key,
+                          displayValue: String(item.defaultValue),
+                        };
+                      }
+                    }
+                    form.setFieldValue('tplConfig', defaultConfig);
+                  }
+                }}
+              />
+            ) : null}
+
+            <ChatActions
+              className="py-2"
               query={chatStore.newQAText}
-              setQuery={chatStore.setNewQAText}
-              selectedSkillName={selectedSkill?.name}
-              autoCompletionPlacement={'topLeft'}
+              model={chatStore.selectedModel}
+              setModel={chatStore.setSelectedModel}
+              runtimeConfig={runtimeConfig}
+              setRuntimeConfig={setRuntimeConfig}
+              form={form}
               handleSendMessage={handleSendMessage}
+              handleAbort={handleAbort}
+              customActions={customActions}
               onUploadImage={handleImageUpload}
-              onFocus={handleInputFocus}
+              contextItems={contextItems}
             />
           </div>
-
-          {selectedSkill?.configSchema?.items?.length ? (
-            <ConfigManager
-              key={selectedSkill?.name}
-              form={form}
-              formErrors={formErrors}
-              setFormErrors={setFormErrors}
-              tplConfig={initialTplConfig}
-              onFormValuesChange={(_, allValues) => {
-                // Debounce form value changes to prevent cascading updates
-                const newConfig = allValues.tplConfig;
-                if (JSON.stringify(newConfig) !== JSON.stringify(initialTplConfig)) {
-                  onUpdateTplConfig?.(newConfig);
-                }
-              }}
-              schema={selectedSkill?.configSchema}
-              fieldPrefix="tplConfig"
-              configScope="runtime"
-              resetConfig={() => {
-                if (selectedSkill?.tplConfig) {
-                  form.setFieldValue('tplConfig', selectedSkill.tplConfig);
-                } else {
-                  const defaultConfig = {};
-                  for (const item of selectedSkill?.configSchema?.items || []) {
-                    if (item.defaultValue !== undefined) {
-                      defaultConfig[item.key] = {
-                        value: item.defaultValue,
-                        label: item.labelDict?.en ?? item.key,
-                        displayValue: String(item.defaultValue),
-                      };
-                    }
-                  }
-                  form.setFieldValue('tplConfig', defaultConfig);
-                }
-              }}
-            />
-          ) : null}
-
-          <ChatActions
-            className="py-2"
-            query={chatStore.newQAText}
-            model={chatStore.selectedModel}
-            setModel={chatStore.setSelectedModel}
-            runtimeConfig={runtimeConfig}
-            setRuntimeConfig={setRuntimeConfig}
-            form={form}
-            handleSendMessage={handleSendMessage}
-            handleAbort={handleAbort}
-            customActions={customActions}
-            onUploadImage={handleImageUpload}
-            contextItems={contextItems}
-          />
         </div>
       </div>
-    </div>
+      <ProjectKnowledgeToggle
+        projectSelectorClassName="max-w-[150px]"
+        className="!pb-0"
+        currentProjectId={projectId}
+        onProjectChange={handleProjectChange}
+      />
+    </>
   );
 };

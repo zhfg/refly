@@ -55,10 +55,13 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   const data = projectDetail?.data;
   const [projectData, setProjectData] = useState(data);
 
-  // Add project selector global state
+  // Update global store when project ID changes
   const { setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
     setSelectedProjectId: state.setSelectedProjectId,
   }));
+
+  // Internal project ID state - initialized from props
+  const [internalProjectId, setInternalProjectId] = useState(projectId);
 
   const handleRemoveCanvases = useCallback(
     async (canvasIds: string[]) => {
@@ -91,12 +94,30 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     getSourceList();
   }, [projectId]);
 
+  // Update internal state when prop changes
+  useEffect(() => {
+    if (projectId !== internalProjectId) {
+      setInternalProjectId(projectId);
+    }
+  }, [projectId]);
+
   // Update global store when project ID changes
   useEffect(() => {
-    if (projectId) {
-      setSelectedProjectId(projectId);
+    if (internalProjectId) {
+      setSelectedProjectId(internalProjectId);
     }
-  }, [projectId, setSelectedProjectId]);
+  }, [internalProjectId, setSelectedProjectId]);
+
+  // Handle project change from knowledge toggle
+  const handleProjectChange = useCallback(
+    (newProjectId: string) => {
+      if (newProjectId === internalProjectId) return;
+
+      setInternalProjectId(newProjectId);
+      navigate(`/project/${newProjectId}`);
+    },
+    [internalProjectId, navigate],
+  );
 
   return (
     <Layout.Sider
@@ -139,15 +160,15 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
         </div>
 
         {/* Combined Project Knowledge Base Toggle */}
-        <ProjectKnowledgeToggle
-          currentProjectId={projectId}
-          projectSelectorClassName="max-w-[80px]"
-          enableSelectProject={false}
-          className="px-3"
-          onProjectChange={() => {
-            navigate(`/project/${projectId}`);
-          }}
-        />
+        {internalProjectId ? (
+          <ProjectKnowledgeToggle
+            currentProjectId={internalProjectId}
+            projectSelectorClassName="max-w-[80px]"
+            enableSelectProject={false}
+            className="px-3"
+            onProjectChange={handleProjectChange}
+          />
+        ) : null}
       </div>
     </Layout.Sider>
   );

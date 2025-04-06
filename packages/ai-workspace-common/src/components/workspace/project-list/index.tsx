@@ -27,6 +27,7 @@ import { CreateProjectModal } from '@refly-packages/ai-workspace-common/componen
 import { useNavigate } from 'react-router-dom';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { SlPicture } from 'react-icons/sl';
+import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
 
 export const ActionDropdown = ({
   project,
@@ -232,6 +233,11 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
     setShowLibraryModal: state.setShowLibraryModal,
   }));
   const { projectId } = useGetProjectCanvasId();
+  // Get selectedProjectId from store for initial value only
+  const { setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
+    selectedProjectId: state.selectedProjectId,
+    setSelectedProjectId: state.setSelectedProjectId,
+  }));
 
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
@@ -264,6 +270,7 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
         onDelete={() => {
           setDataList(dataList.filter((n) => n.projectId !== item.projectId));
           if (projectId === item.projectId) {
+            setSelectedProjectId(item.projectId);
             navigate('/');
           }
         }}
