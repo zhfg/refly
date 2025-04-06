@@ -1,6 +1,6 @@
 import { Form } from '@arco-design/web-react';
 import { notification, Button } from 'antd';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useContextPanelStore,
@@ -37,7 +37,7 @@ import { cn } from '@refly-packages/utils/cn';
 import { ActionStatus, SkillTemplateConfig } from '@refly/openapi-schema';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
-import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
+import { useAskProject } from '@refly-packages/ai-workspace-common/hooks/canvas/use-ask-project';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -130,22 +130,7 @@ export const ChatPanel = ({
     selectedModel: state.selectedModel,
     setSelectedModel: state.setSelectedModel,
   }));
-
-  // Get selectedProjectId from store for initial state
-  const { selectedProjectId, setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
-    selectedProjectId: state.selectedProjectId,
-    setSelectedProjectId: state.setSelectedProjectId,
-  }));
-
-  // Local project state
-  const [projectId, setProjectId] = useState<string | undefined>(selectedProjectId);
-
-  // Initialize projectId from props or store
-  useEffect(() => {
-    if (selectedProjectId) {
-      setProjectId(selectedProjectId);
-    }
-  }, [selectedProjectId]);
+  const { projectId, handleProjectChange, getFinalProjectId } = useAskProject();
 
   // Get setActiveResultId from context panel store
   const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
@@ -233,6 +218,7 @@ export const ChatPanel = ({
     const query = userInput || newQAText.trim();
 
     const { contextItems } = useContextPanelStore.getState();
+    const finalProjectId = getFinalProjectId();
 
     // Generate new message IDs using the provided function
     const { resultId: newResultId, nodeId } = onGenerateMessageIds?.() ?? {
@@ -260,6 +246,7 @@ export const ChatPanel = ({
               structuredData: {
                 query,
               },
+              projectId: finalProjectId,
             },
           },
         },
@@ -280,6 +267,7 @@ export const ChatPanel = ({
         contextItems,
         tplConfig,
         runtimeConfig,
+        projectId: finalProjectId,
       },
       {
         entityType: 'canvas',
@@ -360,14 +348,6 @@ export const ChatPanel = ({
       ]);
     }
   };
-
-  // Handle project change
-  const handleProjectChange = useCallback(
-    (newProjectId: string) => {
-      setProjectId(newProjectId);
-    },
-    [setSelectedProjectId],
-  );
 
   return (
     <>

@@ -24,7 +24,6 @@ import { cn } from '@refly-packages/utils/cn';
 import classNames from 'classnames';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
-import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
 
 // Memoized Premium Banner Component
 const PremiumBanner = memo(() => {
@@ -136,6 +135,8 @@ export interface ChatPanelProps {
   className?: string;
   mode?: 'node' | 'list';
   resultId?: string;
+  projectId?: string;
+  handleProjectChange?: (newProjectId: string) => void;
 }
 
 export const ChatPanel = memo(
@@ -160,28 +161,14 @@ export const ChatPanel = memo(
     className = '',
     mode = 'node',
     resultId,
+    projectId,
+    handleProjectChange,
   }: ChatPanelProps) => {
     const [form] = Form.useForm();
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const chatInputRef = useRef<HTMLDivElement>(null);
     const userProfile = useUserStoreShallow((state) => state.userProfile);
     const isList = mode === 'list';
-
-    // Get selectedProjectId from store for initial state
-    const { selectedProjectId, setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
-      selectedProjectId: state.selectedProjectId,
-      setSelectedProjectId: state.setSelectedProjectId,
-    }));
-
-    // Local project state
-    const [projectId, setProjectId] = useState<string | undefined>(selectedProjectId);
-
-    // Initialize projectId from props or store once
-    useEffect(() => {
-      if (selectedProjectId) {
-        setProjectId(selectedProjectId);
-      }
-    }, [selectedProjectId]);
 
     // Get setActiveResultId from context panel store
     const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
@@ -265,14 +252,6 @@ export const ChatPanel = memo(
       }
       handleSendMessage();
     }, [handleSendMessage, resultId, setActiveResultId]);
-
-    // Handle project change
-    const handleProjectChange = useCallback(
-      (newProjectId: string) => {
-        setProjectId(newProjectId);
-      },
-      [setSelectedProjectId],
-    );
 
     const renderContent = () => (
       <>
