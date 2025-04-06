@@ -390,6 +390,11 @@ export const ChatPanel = memo(
           setSelectedSkill={setSelectedSkill}
         />
         {renderContent()}
+        <ProjectKnowledgeToggle
+          className="!pb-0 !pt-0"
+          currentProjectId={projectId}
+          onProjectChange={handleProjectChange}
+        />
       </div>
     );
   },
