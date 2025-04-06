@@ -13,6 +13,10 @@ import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks
 import { useNavigate } from 'react-router-dom';
 import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
 import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
+import {
+  useCanvasStore,
+  useCanvasStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const iconClassName =
   'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center hover:text-gray-700';
@@ -47,6 +51,9 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     canvasList: state.canvasList,
     collapse: state.collapse,
     setCollapse: state.setCollapse,
+  }));
+  const { setShowReflyPilot } = useCanvasStoreShallow((state) => ({
+    setShowReflyPilot: state.setShowReflyPilot,
   }));
 
   const { data: projectDetail } = useGetProjectDetail({ query: { projectId } }, null, {
@@ -119,6 +126,20 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
     [internalProjectId, navigate],
   );
 
+  const handleSwitchChange = useCallback(
+    (checked: boolean) => {
+      const { config, showReflyPilot } = useCanvasStore.getState();
+      const hasNodePreviews = config?.[canvasId]?.nodePreviews?.length > 0;
+
+      if (checked) {
+        if (!showReflyPilot && !hasNodePreviews) {
+          setShowReflyPilot(true);
+        }
+      }
+    },
+    [canvasId],
+  );
+
   return (
     <Layout.Sider
       width={source === 'sider' ? (collapse ? 0 : 220) : 220}
@@ -168,6 +189,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
             className="px-3"
             enableProjectSelector={false}
             onProjectChange={handleProjectChange}
+            onSwitchChange={handleSwitchChange}
           />
         ) : null}
       </div>
