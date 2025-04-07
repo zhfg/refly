@@ -2288,6 +2288,7 @@ const translations = {
       disabledDesc:
         'Ask Project is currently disabled. Knowledge from files in "{{projectName}}" will not be used as reference when asking questions.',
     },
+    selectProject: 'Select project',
     switchProject: 'Switch Project',
     createModal: {
       createTitle: 'Create Project',

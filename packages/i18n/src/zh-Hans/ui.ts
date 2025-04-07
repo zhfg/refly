@@ -2225,6 +2225,7 @@ const translations = {
       disabledDesc:
         '基于项目提问当前被设置为关闭，"{{projectName}}"内的文件知识不会在提问时作为参考内容使用',
     },
+    selectProject: '选择项目',
     switchProject: '切换项目',
     createModal: {
       createTitle: '创建项目',

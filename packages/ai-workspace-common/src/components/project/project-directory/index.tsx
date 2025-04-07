@@ -129,7 +129,9 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
   const handleSwitchChange = useCallback(
     (checked: boolean) => {
       const { config, showReflyPilot } = useCanvasStore.getState();
-      const hasNodePreviews = config?.[canvasId]?.nodePreviews?.length > 0;
+      const hasNodePreviews =
+        config?.[canvasId]?.nodePreviews?.filter((item) => item?.type === 'skillResponse')?.length >
+        0;
 
       if (checked) {
         if (!showReflyPilot && !hasNodePreviews) {
