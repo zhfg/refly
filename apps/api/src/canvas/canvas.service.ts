@@ -61,7 +61,7 @@ export class CanvasService {
       where: {
         uid: user.uid,
         deletedAt: null,
-        projectId,
+        projectId: projectId || null,
       },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * pageSize,
