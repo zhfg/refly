@@ -11,9 +11,12 @@ import { buildCitationRules } from '../common/citationRules';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
 import { buildFormatDisplayInstruction } from '../common/format';
-import { buildSimpleDetailedExplanationInstruction } from '../common/personalization';
+import {
+  buildSimpleDetailedExplanationInstruction,
+  buildCustomProjectInstructions,
+} from '../common/personalization';
 
-export const buildNoContextCommonQnASystemPrompt = () => {
+export const buildNoContextCommonQnASystemPrompt = (customInstructions?: string) => {
   return `You are an AI assistant developed by Refly. Your task is to provide helpful, accurate, and concise information to users' queries.
 
 Guidelines:
@@ -39,10 +42,11 @@ When appropriate, inform users about your main capabilities:
 Your goal is to provide clear, accurate, and helpful responses to the user's questions, while also guiding them on how to best utilize your capabilities.
 
 ${buildSpecificQueryInstruction()}
+${buildCustomProjectInstructions(customInstructions)}
 `;
 };
 
-export const buildContextualCommonQnASystemPrompt = () => {
+export const buildContextualCommonQnASystemPrompt = (customInstructions?: string) => {
   const systemPrompt = `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, and answering questions based on context. Your core mission is to help users effectively understand and utilize information.
 
   ## Query Priority and Context Relevance:
@@ -102,16 +106,22 @@ export const buildContextualCommonQnASystemPrompt = () => {
   ${buildContextDisplayInstruction()}
 
   ${buildSpecificQueryInstruction()}
+  
+  ${buildCustomProjectInstructions(customInstructions)}
   `;
 
   return systemPrompt;
 };
 
-export const buildCommonQnASystemPrompt = (_locale: string, needPrepareContext: boolean) => {
+export const buildCommonQnASystemPrompt = (
+  _locale: string,
+  needPrepareContext: boolean,
+  customInstructions?: string,
+) => {
   if (!needPrepareContext) {
-    return buildNoContextCommonQnASystemPrompt();
+    return buildNoContextCommonQnASystemPrompt(customInstructions);
   }
-  return buildContextualCommonQnASystemPrompt();
+  return buildContextualCommonQnASystemPrompt(customInstructions);
 };
 
 export const buildCommonQnAUserPrompt = ({

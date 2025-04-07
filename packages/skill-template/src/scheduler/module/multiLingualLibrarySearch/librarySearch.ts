@@ -17,6 +17,7 @@ interface BatchSearchParams {
   engine: SkillEngine;
   enableTranslateQuery: boolean;
   enableSearchWholeSpace?: boolean;
+  projectId?: string;
 }
 
 // Helper to chunk array into batches
@@ -156,6 +157,7 @@ const performBatchLibrarySearch = async ({
   engine,
   enableTranslateQuery,
   enableSearchWholeSpace,
+  projectId,
 }: BatchSearchParams): Promise<Source[]> => {
   // Use the general search method with appropriate options
   const results = await Promise.all(
@@ -170,6 +172,7 @@ const performBatchLibrarySearch = async ({
           domains: ['resource', 'document'] as SearchDomain[],
           // If enableSearchWholeSpace is true, don't specify entities to search the whole space
           entities: enableSearchWholeSpace ? [] : undefined,
+          projectId,
         },
         // Pass options as any to avoid type errors with locale
         { enableReranker: false } as any,
@@ -202,6 +205,7 @@ export const performConcurrentLibrarySearch = async ({
   engine,
   enableTranslateQuery,
   enableSearchWholeSpace,
+  projectId,
 }: {
   queryMap: Record<string, string[]>;
   searchLimit: number;
@@ -210,6 +214,7 @@ export const performConcurrentLibrarySearch = async ({
   engine: any;
   enableTranslateQuery: boolean;
   enableSearchWholeSpace?: boolean;
+  projectId?: string;
 }): Promise<Source[]> => {
   // Convert queryMap to array of query objects
   const allQueries = Object.entries(queryMap).flatMap(([locale, queries]) =>
@@ -237,6 +242,7 @@ export const performConcurrentLibrarySearch = async ({
           engine,
           enableTranslateQuery,
           enableSearchWholeSpace,
+          projectId,
         }),
       ),
     );

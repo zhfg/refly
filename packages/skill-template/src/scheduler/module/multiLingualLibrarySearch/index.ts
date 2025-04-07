@@ -82,6 +82,7 @@ export const callMultiLingualLibrarySearch = async (
   const enableDeepSearch = params.enableDeepSearch || false;
   const enableSearchWholeSpace = params.enableSearchWholeSpace || false;
   const timeTracker = new TimeTracker();
+  const projectId = config.configurable.project?.projectId;
   let finalResults: Source[] = [];
 
   const model = engine.chatModel({ temperature: 0.1 }, true);
@@ -223,6 +224,7 @@ export const callMultiLingualLibrarySearch = async (
       allResults = await performConcurrentLibrarySearch({
         queryMap,
         searchLimit,
+        projectId,
         concurrencyLimit: libraryConcurrencyLimit,
         user: config.configurable.user,
         engine: engine,
