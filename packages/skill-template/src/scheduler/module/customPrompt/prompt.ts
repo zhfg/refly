@@ -1,12 +1,20 @@
 import { buildCitationReminder } from '../common/citationRules';
+import { buildCustomProjectInstructions } from '../common/personalization';
 
 // For custom prompt, we'll use the user-provided system prompt directly
 export const buildCustomPromptSystemPrompt = (
   customSystemPrompt: string,
   _locale: string,
   needPrepareContext: boolean,
+  customInstructions?: string,
 ) => {
   console.log('needPrepareContext', needPrepareContext);
+
+  // Combine user-provided system prompt with custom project instructions if available
+  if (customInstructions) {
+    return `${customSystemPrompt}\n\n${buildCustomProjectInstructions(customInstructions)}`;
+  }
+
   // If no context preparation is needed, just return the custom system prompt
   return customSystemPrompt;
 };

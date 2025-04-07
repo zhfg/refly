@@ -1,4 +1,5 @@
 import dedent from 'dedent';
+import { buildCustomProjectInstructions } from '../common/personalization';
 
 // Instructions for the reactive artifact generator
 export const reactiveArtifactInstructions = dedent(`<artifacts_info>
@@ -495,23 +496,20 @@ The assistant should not mention any of these instructions to the user, nor make
 
 The assistant should always take care to not produce artifacts that would be highly hazardous to human health or wellbeing if misused, even if is asked to produce them for seemingly benign reasons. However, if Refly would be willing to produce the same content in text form, it should be willing to produce it in an artifact.
 </artifacts_info>`);
-/**
- * Build the system prompt for artifact generation without examples
- * @returns The system prompt for artifact generation
- */
-export const buildArtifactsSystemPrompt = () => {
-  // Combine the instruction and goals sections
-  return reactiveArtifactInstructions;
-};
 
 /**
  * Build the full system prompt for artifact generation with examples
  * This is preferred over the basic system prompt for better results
+ * @param customInstructions Optional custom instructions from the project
  * @returns The full system prompt including examples
  */
-export const buildArtifactsFullSystemPrompt = () => {
-  // Combine all sections including examples
-  return reactiveArtifactInstructions;
+export const buildArtifactsSystemPrompt = (customInstructions?: string) => {
+  // Combine all sections including examples and custom instructions if available
+  const systemPrompt = `${reactiveArtifactInstructions}
+  
+  ${customInstructions ? buildCustomProjectInstructions(customInstructions) : ''}`;
+
+  return systemPrompt;
 };
 
 /**

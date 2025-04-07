@@ -10,6 +10,7 @@ import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '..
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
 import { buildFormatDisplayInstruction } from '../common/format';
+import { buildCustomProjectInstructions } from '../common/personalization';
 
 export const buildGenerateDocumentCommonPrompt = (example: string) => `
 ## Core Capabilities and Goals
@@ -113,12 +114,25 @@ ${buildGenerateDocumentCommonPrompt(contextualExamples())}
 ${buildSpecificQueryInstruction()}
 `;
 
-export const buildGenerateDocumentSystemPrompt = (_locale: string, needPrepareContext: boolean) => {
+export const buildGenerateDocumentSystemPrompt = (
+  _locale: string,
+  needPrepareContext: boolean,
+  customInstructions?: string,
+) => {
+  let basePrompt = '';
+
   if (needPrepareContext) {
-    return buildContextualGenerateDocumentPrompt();
+    basePrompt = buildContextualGenerateDocumentPrompt();
+  } else {
+    basePrompt = buildNoContextGenerateDocumentPrompt();
   }
 
-  return buildNoContextGenerateDocumentPrompt();
+  // Add custom project instructions if available
+  if (customInstructions) {
+    return `${basePrompt}\n\n${buildCustomProjectInstructions(customInstructions)}`;
+  }
+
+  return basePrompt;
 };
 
 export const buildGenerateDocumentUserPrompt = ({
