@@ -240,6 +240,30 @@ export class ModelNotSupportedError extends BaseError {
   };
 }
 
+export class ModelProviderError extends BaseError {
+  code = 'E3001';
+  messageDict = {
+    en: 'Model provider error, please try again later',
+    'zh-CN': '模型提供方出错，请稍后重试',
+  };
+}
+
+export class ModelProviderRateLimitExceeded extends BaseError {
+  code = 'E3002';
+  messageDict = {
+    en: 'Request rate limit exceeded for the model provider. Please try again later.',
+    'zh-CN': '已超出模型提供方请求速率限制，请稍后重试',
+  };
+}
+
+export class ModelProviderTimeout extends BaseError {
+  code = 'E3003';
+  messageDict = {
+    en: 'Model provider timed out, please try again later',
+    'zh-CN': '模型提供方响应超时，请稍后重试',
+  };
+}
+
 // Create a mapping of error codes to error classes
 const errorMap = {
   E0000: UnknownError,
@@ -272,6 +296,9 @@ const errorMap = {
   E2003: ModelNotSupportedError,
   E2004: ContentTooLargeError,
   E2005: PayloadTooLargeError,
+  E3001: ModelProviderError,
+  E3002: ModelProviderRateLimitExceeded,
+  E3003: ModelProviderTimeout,
 };
 
 export function getErrorMessage(code: string, locale: string): string {

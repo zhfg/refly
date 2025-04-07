@@ -38,12 +38,12 @@ const PremiumBanner = memo(() => {
 
   if (!showPremiumBanner) return null;
 
-  const handleUpgrade = () => {
+  const handleUpgrade = useCallback(() => {
     setSubscribeModalVisible(true);
-  };
+  }, [setSubscribeModalVisible]);
 
   return (
-    <div className="flex items-center justify-between px-3 py-0.5 bg-gray-100 border-b">
+    <div className="flex items-center justify-between px-2 py-0.5 bg-gray-100 border-b">
       <div className="flex items-center justify-between gap-2 w-full">
         <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">
           {t('copilot.premiumBanner.message')}
@@ -52,7 +52,7 @@ const PremiumBanner = memo(() => {
           <Button
             type="text"
             size="small"
-            className="text-xs text-green-600 px-2"
+            className="text-xs text-green-600 px-1"
             onClick={handleUpgrade}
           >
             {t('copilot.premiumBanner.upgrade')}

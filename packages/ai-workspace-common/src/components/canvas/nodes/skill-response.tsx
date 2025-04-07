@@ -55,6 +55,7 @@ import { ReasoningContentPreview } from './shared/reasoning-content-preview';
 import { useUpdateNodeTitle } from '@refly-packages/ai-workspace-common/hooks/use-update-node-title';
 import { truncateContent } from '@refly-packages/ai-workspace-common/utils/content';
 import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas';
+import { useSkillError } from '@refly-packages/ai-workspace-common/hooks/use-skill-error';
 
 const POLLING_WAIT_TIME = 15000;
 
@@ -239,6 +240,7 @@ export const SkillResponseNode = memo(
     const { canvasId, readonly } = useCanvasContext();
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
+    const { errMsg } = useSkillError(metadata?.errors?.[0]);
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
@@ -381,9 +383,12 @@ export const SkillResponseNode = memo(
     ]);
 
     const insertToDoc = useInsertToDocument(entityId);
-    const handleInsertToDoc = useCallback(async () => {
-      await insertToDoc('insertBelow', content);
-    }, [insertToDoc, content]);
+    const handleInsertToDoc = useCallback(
+      async (content: string) => {
+        await insertToDoc('insertBelow', content);
+      },
+      [insertToDoc],
+    );
 
     const { deleteNode } = useDeleteNode();
 
@@ -582,7 +587,7 @@ export const SkillResponseNode = memo(
       // Create node-specific event handlers
       const handleNodeRerun = () => handleRerun();
       const handleNodeAddToContext = () => handleAddToContext();
-      const handleNodeInsertToDoc = () => handleInsertToDoc();
+      const handleNodeInsertToDoc = (content: string) => handleInsertToDoc(content);
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
       const handleNodeAskAI = () => handleAskAI();
@@ -593,7 +598,9 @@ export const SkillResponseNode = memo(
       nodeActionEmitter.on(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+      nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), (event) =>
+        handleNodeInsertToDoc(event.content),
+      );
       nodeActionEmitter.on(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
 
@@ -603,7 +610,9 @@ export const SkillResponseNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+        nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), (event) =>
+          handleNodeInsertToDoc(event.content),
+        );
         nodeActionEmitter.off(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
 
@@ -632,6 +641,8 @@ export const SkillResponseNode = memo(
       >
         <div
           ref={targetRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={classNames({
             'relative nodrag nopan select-text': isOperating,
           })}
@@ -642,11 +653,7 @@ export const SkillResponseNode = memo(
             <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={selected && isHovered} />
           )}
 
-          <div
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}
-          >
+          <div className={`h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
@@ -690,7 +697,7 @@ export const SkillResponseNode = memo(
                     >
                       <IconError className="h-4 w-4 text-red-500" />
                       <span className="text-xs text-red-500 max-w-48 truncate">
-                        {t('canvas.skillResponse.executionFailed')}
+                        {errMsg || t('canvas.skillResponse.executionFailed')}
                       </span>
                     </div>
                   )}

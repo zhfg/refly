@@ -152,9 +152,17 @@ export const DocumentNode = memo(
 
     const { duplicateDocument } = useCreateDocument();
 
-    const handleDuplicateDocument = useCallback(() => {
-      duplicateDocument(data.title, data.contentPreview || '', data.entityId, data.metadata);
-    }, [data, duplicateDocument]);
+    const handleDuplicateDocument = useCallback(
+      (event: { content?: string }) => {
+        duplicateDocument(
+          data.title,
+          event?.content ?? data?.contentPreview ?? '',
+          data.entityId,
+          data.metadata,
+        );
+      },
+      [data, duplicateDocument],
+    );
 
     const updateTitle = (newTitle: string) => {
       if (newTitle === node.data?.title) {
@@ -170,7 +178,8 @@ export const DocumentNode = memo(
       const handleNodeDelete = () => handleDelete();
       const handleNodeDeleteFile = () => handleDeleteFile();
       const handleNodeAskAI = () => handleAskAI();
-      const handleNodeDuplicateDocument = () => handleDuplicateDocument();
+      const handleNodeDuplicateDocument = (event: { content?: string }) =>
+        handleDuplicateDocument(event);
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
@@ -209,6 +218,8 @@ export const DocumentNode = memo(
       <div className={classNames({ nowheel: isOperating && isHovered })}>
         <div
           ref={targetRef}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           className={classNames({
             'relative nodrag nopan select-text': isOperating,
           })}
@@ -220,8 +231,6 @@ export const DocumentNode = memo(
           )}
 
           <div
-            onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-            onMouseLeave={!isPreview ? handleMouseLeave : undefined}
             className={`
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}

@@ -1,5 +1,6 @@
 import { useEffect, useState, memo, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
+import { useSearchParams } from 'react-router-dom';
 
 import './index.scss';
 import { Input, Spin } from '@arco-design/web-react';
@@ -31,6 +32,107 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+
+// Define the table of contents item type
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+  element: HTMLElement;
+  isActive?: boolean;
+  index?: string; // For displaying numbering of toc items
+  parentIndex?: number; // To determine parent toc item
+}
+
+// Simplified TOC component
+const DocumentToc = memo(() => {
+  const { t } = useTranslation();
+  const [items, setItems] = useState<TocItem[]>([]);
+
+  // Handle TOC item click
+  const handleTocItemClick = (item: TocItem) => {
+    if (item.element) {
+      item.element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Process TOC items hierarchy and numbering
+  const processTocItems = (tocItems: TocItem[]): TocItem[] => {
+    return tocItems.map((item) => {
+      return {
+        ...item,
+        index: '',
+      };
+    });
+  };
+
+  // Extract headings from document
+  useEffect(() => {
+    const extractHeadings = () => {
+      // Find editor container
+      const editorContent = document.querySelector('.ai-note-editor-content-container');
+      if (!editorContent) return;
+
+      // Find all heading elements
+      const headings = editorContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      if (headings.length === 0) {
+        setItems([]);
+        return;
+      }
+
+      const tocItems: TocItem[] = [];
+
+      headings.forEach((heading, index) => {
+        const element = heading as HTMLElement;
+        const level = Number.parseInt(element.tagName.substring(1), 10);
+        const text = element.textContent || '';
+        const id = `toc-heading-${index}`;
+
+        // Set ID for navigation
+        element.id = id;
+
+        tocItems.push({
+          id,
+          text,
+          level,
+          element,
+          isActive: false,
+        });
+      });
+
+      // Process TOC hierarchy and numbering
+      const processedItems = processTocItems(tocItems);
+      setItems(processedItems);
+    };
+
+    // Wait for DOM to complete loading
+    setTimeout(extractHeadings);
+  }, []);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="w-60 border-l border-gray-200">
+      <div className="toc-container">
+        <div className="text-lg">{t('document.tableOfContents', 'Table of contents')}</div>
+        <div className="toc-list">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className={`toc-item cursor-pointer ${item.isActive ? 'active' : ''}`}
+              data-level={item.level}
+              onClick={() => handleTocItemClick(item)}
+            >
+              {item.text}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const StatusBar = memo(
   ({ docId }: { docId: string }) => {
@@ -182,7 +284,11 @@ const StatusBar = memo(
         <div className="flex items-center gap-1">
           <Tooltip
             placement="bottom"
-            title={readOnly ? t('document.enableEdit') : t('document.setReadOnly')}
+            title={
+              readOnly
+                ? t('document.enableEdit', 'Enable editing')
+                : t('document.setReadOnly', 'Set to read-only')
+            }
           >
             <Button
               type="text"
@@ -303,6 +409,8 @@ const DocumentBody = memo(
   ({ docId }: { docId: string }) => {
     const { t } = useTranslation();
     const { readonly, isLoading } = useDocumentContext();
+    const [searchParams] = useSearchParams();
+    const isMaximized = searchParams.get('isMaximized') === 'true';
 
     const { config } = useDocumentStoreShallow((state) => ({
       config: state.config[docId],
@@ -320,7 +428,17 @@ const DocumentBody = memo(
           <div className="ai-note-editor">
             <div className="ai-note-editor-container">
               <DocumentEditorHeader docId={docId} readonly={readonly} />
-              {readonly ? <ReadonlyEditor docId={docId} /> : <CollaborativeEditor docId={docId} />}
+
+              <div className="flex flex-row w-full">
+                <div className={`flex-1 ${isMaximized ? 'mr-4' : ''}`}>
+                  {readonly ? (
+                    <ReadonlyEditor docId={docId} />
+                  ) : (
+                    <CollaborativeEditor docId={docId} />
+                  )}
+                </div>
+                {isMaximized && <DocumentToc />}
+              </div>
             </div>
           </div>
         </Spin>
@@ -331,7 +449,11 @@ const DocumentBody = memo(
 );
 
 export const DocumentEditor = memo(
-  ({ docId, shareId, readonly }: { docId: string; shareId?: string; readonly?: boolean }) => {
+  ({
+    docId,
+    shareId,
+    readonly,
+  }: { docId: string; shareId?: string; readonly?: boolean; _isMaximized?: boolean }) => {
     const { resetState } = useDocumentStoreShallow((state) => ({
       resetState: state.resetState,
     }));
@@ -353,6 +475,6 @@ export const DocumentEditor = memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.docId === nextProps.docId;
+    return prevProps.docId === nextProps.docId && prevProps._isMaximized === nextProps._isMaximized;
   },
 );

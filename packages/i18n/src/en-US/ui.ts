@@ -814,6 +814,11 @@ const translations = {
     shareLoading: 'Loading shared document...',
     notFound: 'Document Not Found',
     notFoundDesc: 'The document you are looking for does not exist or has been removed.',
+    tableOfContents: 'Table of contents',
+    sharing: 'Sharing document...',
+    shareSuccess: 'Document shared successfully! Link copied to clipboard.',
+    shareError: 'Failed to share document',
+    noHeadings: 'No headings found',
   },
   artifact: {
     generating: 'Generating',
@@ -2137,6 +2142,8 @@ const translations = {
       premium: 'Pro Models',
       standard: 'Standard Models',
       free: 'Free Models',
+      freeModelHint:
+        'Free models are susceptible to downtime and usage restrictions. We recommend utilizing them solely for testing purposes.',
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
@@ -2163,7 +2170,7 @@ const translations = {
     },
     premiumBanner: {
       message: 'Need more requests? Get higher limits with Premium.',
-      upgrade: 'Upgrade Plan',
+      upgrade: 'Upgrade',
     },
   },
   hooks: {

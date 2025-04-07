@@ -8,13 +8,10 @@ import {
   InvokeSkillRequest,
   SkillEvent,
 } from '@refly/openapi-schema';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
-import { LOCALE } from '@refly/common-types';
 import { getRuntime } from '@refly/utils/env';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import {
@@ -361,11 +358,7 @@ export const useInvokeAction = () => {
 
   const onSkillError = (skillEvent: SkillEvent) => {
     const runtime = getRuntime();
-    const { localSettings } = useUserStore.getState();
-    const locale = localSettings?.uiLocale as LOCALE;
-
-    const { error, resultId } = skillEvent;
-    showErrorNotification(error, locale);
+    const { originError, resultId } = skillEvent;
 
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
@@ -377,7 +370,7 @@ export const useInvokeAction = () => {
     const updatedResult = {
       ...result,
       status: 'failed' as const,
-      errors: [error?.errMsg],
+      errors: [originError],
     };
     onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
 
@@ -392,7 +385,7 @@ export const useInvokeAction = () => {
       }
     }
 
-    abortAction(error?.errMsg);
+    abortAction(originError);
   };
 
   const abortAction = useCallback(

@@ -2253,8 +2253,13 @@ export type SkillEvent = {
   node?: CanvasNode;
   /**
    * Error data. Only present when `event` is `error`.
+   * @deprecated
    */
   error?: BaseResponse;
+  /**
+   * Original error message. Only present when `event` is `error`.
+   */
+  originError?: string;
 };
 
 export type ShareRecord = {

@@ -3060,6 +3060,11 @@ export const SkillEventSchema = {
     error: {
       description: 'Error data. Only present when `event` is `error`.',
       $ref: '#/components/schemas/BaseResponse',
+      deprecated: true,
+    },
+    originError: {
+      type: 'string',
+      description: 'Original error message. Only present when `event` is `error`.',
     },
   },
 } as const;
