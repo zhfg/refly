@@ -7,7 +7,9 @@ export interface SiderData {
   id: string;
   name: string;
   updatedAt: string;
-  type: 'canvas' | 'document' | 'resource';
+  type: 'canvas' | 'document' | 'resource' | 'project';
+  description?: string;
+  coverUrl?: string;
 }
 
 export enum SettingsModalActiveTab {
@@ -21,6 +23,7 @@ interface SiderState {
   collapse: boolean;
   showSiderDrawer: boolean;
   canvasList: SiderData[];
+  projectsList: SiderData[];
   sourceList: sourceObject[];
   showCanvasListModal: boolean;
   showLibraryModal: boolean;
@@ -31,6 +34,7 @@ interface SiderState {
   setCollapse: (val: boolean) => void;
   setShowSiderDrawer: (val: boolean) => void;
   setCanvasList: (val: SiderData[]) => void;
+  setProjectsList: (val: SiderData[]) => void;
   setSourceList: (val: sourceObject[]) => void;
   setShowCanvasListModal: (val: boolean) => void;
   setShowLibraryModal: (val: boolean) => void;
@@ -44,6 +48,7 @@ export const useSiderStore = create<SiderState>()(
     collapse: false,
     showSiderDrawer: false,
     canvasList: [],
+    projectsList: [],
     sourceList: [],
     showLibraryModal: false,
     showCanvasListModal: false,
@@ -53,6 +58,7 @@ export const useSiderStore = create<SiderState>()(
     setCollapse: (val: boolean) => set({ collapse: val }),
     setShowSiderDrawer: (val: boolean) => set({ showSiderDrawer: val }),
     setCanvasList: (val: SiderData[]) => set({ canvasList: val }),
+    setProjectsList: (val: SiderData[]) => set({ projectsList: val }),
     setSourceList: (val: sourceObject[]) => set({ sourceList: val }),
     setShowCanvasListModal: (val: boolean) => set({ showCanvasListModal: val }),
     setShowLibraryModal: (val: boolean) => set({ showLibraryModal: val }),

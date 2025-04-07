@@ -36,6 +36,7 @@ export interface KnowledgeBaseState {
   tabs: KnowledgeBaseTab[];
   activeTab: string;
   resourcePanelVisible: boolean;
+  isKnowledgeBaseEnabled: boolean;
 
   currentResource: null | Resource;
 
@@ -59,6 +60,7 @@ export interface KnowledgeBaseState {
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
+  updateIsKnowledgeBaseEnabled: (enabled: boolean) => void;
   resetState: () => void;
   resetTabs: () => void;
 
@@ -76,6 +78,7 @@ export const defaultState = {
   ] as KnowledgeBaseTab[],
   activeTab: 'key1',
   resourcePanelVisible: false,
+  isKnowledgeBaseEnabled: false,
   convModalVisible: false,
   kbModalVisible: false,
   sourceListDrawer: {
@@ -146,6 +149,8 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       set((state) => ({ ...state, notePanelVisible: visible })),
     updateLibraryModalActiveKey: (key: LibraryModalActiveKey) =>
       set((state) => ({ ...state, libraryModalActiveKey: key })),
+    updateIsKnowledgeBaseEnabled: (enabled: boolean) =>
+      set((state) => ({ ...state, isKnowledgeBaseEnabled: enabled })),
   })),
 );
 

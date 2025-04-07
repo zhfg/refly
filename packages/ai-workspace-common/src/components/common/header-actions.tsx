@@ -1,13 +1,12 @@
 import React, { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Popconfirm, Button, Input } from 'antd';
+import { Popconfirm, Button, Input, Tooltip } from 'antd';
 import {
   IconDelete,
   IconRemove,
   IconPlus,
   IconSearch,
   IconExit,
-  IconEdit,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import cn from 'classnames';
@@ -60,47 +59,55 @@ const HeaderActions = ({
                 {t('project.sourceList.selectedCount', { count: selectedItems?.length ?? 0 })}
               </div>
               <div className="flex items-center gap-1">
-                <Popconfirm
-                  title={t('project.sourceList.deleteConfirm')}
-                  onConfirm={onDeleteSelected}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<IconDelete className={cn(iconClassName, 'text-red-500')} />}
-                  />
-                </Popconfirm>
+                <Tooltip title={t('project.action.delete')}>
+                  <Popconfirm
+                    title={t('project.sourceList.deleteConfirm')}
+                    onConfirm={onDeleteSelected}
+                    okText={t('common.confirm')}
+                    cancelText={t('common.cancel')}
+                  >
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<IconDelete className={cn(iconClassName, 'text-red-500')} />}
+                    />
+                  </Popconfirm>
+                </Tooltip>
 
-                <Popconfirm
-                  title={t('project.sourceList.removeConfirm')}
-                  onConfirm={onRemoveSelected}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<IconRemove className={cn(iconClassName, 'text-gray-500')} />}
-                  />
-                </Popconfirm>
+                <Tooltip title={t('project.action.remove')}>
+                  <Popconfirm
+                    title={t('project.sourceList.removeConfirm')}
+                    onConfirm={onRemoveSelected}
+                    okText={t('common.confirm')}
+                    cancelText={t('common.cancel')}
+                  >
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<IconRemove className={cn(iconClassName, 'text-gray-500')} />}
+                    />
+                  </Popconfirm>
+                </Tooltip>
 
                 {source === 'source' && (
+                  <Tooltip title={t('project.action.addToCanvas')}>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<IconPlus className={cn(iconClassName, 'text-gray-500')} />}
+                      onClick={() => onAddSelectedSourcesToCanvas?.()}
+                    />
+                  </Tooltip>
+                )}
+
+                <Tooltip title={t('project.action.exit')}>
                   <Button
                     type="text"
                     size="small"
-                    icon={<IconEdit className={cn(iconClassName, 'text-gray-500')} />}
-                    onClick={() => onAddSelectedSourcesToCanvas?.()}
+                    icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
+                    onClick={onExitMultiSelectMode}
                   />
-                )}
-
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
-                  onClick={onExitMultiSelectMode}
-                />
+                </Tooltip>
               </div>
             </div>
           )}

@@ -2281,6 +2281,15 @@ const translations = {
     noDescription: 'Quickly fill in the description ~',
     customInstructions: 'Custom Instructions',
     waitingUploadCover: 'Waiting for upload cover',
+    askProject: 'Ask Project',
+    knowledgeToggle: {
+      enabledDesc:
+        'Ask Project is currently enabled. Knowledge from files in "{{projectName}}" will be used as reference when asking questions.',
+      disabledDesc:
+        'Ask Project is currently disabled. Knowledge from files in "{{projectName}}" will not be used as reference when asking questions.',
+    },
+    selectProject: 'Select project',
+    switchProject: 'Switch Project',
     createModal: {
       createTitle: 'Create Project',
       editTitle: 'Edit Project',
@@ -2306,6 +2315,10 @@ const translations = {
       addCanvas: 'Add Canvas',
       createCanvas: 'Create New Canvas',
       addExistingCanvas: 'Add Existing Canvas',
+      delete: 'Delete',
+      remove: 'Remove from project',
+      addToCanvas: 'Add to Canvas',
+      exit: 'Exit',
     },
     addSources: {
       title: 'Add Files',

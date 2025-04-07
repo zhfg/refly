@@ -9,18 +9,26 @@ const DATA_NUM_CANVAS_FOR_PROJECT = 1000;
 
 export const useHandleSiderData = (initData?: boolean) => {
   const { projectId } = useGetProjectCanvasId();
-  const { canvasList, updateCanvasList, sourceList, updateSourceList } = useSiderStoreShallow(
-    (state) => ({
-      canvasList: state.canvasList,
-      updateCanvasList: state.setCanvasList,
-      sourceList: state.sourceList,
-      updateSourceList: state.setSourceList,
-    }),
-  );
+  const {
+    canvasList,
+    updateCanvasList,
+    sourceList,
+    updateSourceList,
+    projectsList,
+    updateProjectsList,
+  } = useSiderStoreShallow((state) => ({
+    canvasList: state.canvasList,
+    updateCanvasList: state.setCanvasList,
+    sourceList: state.sourceList,
+    updateSourceList: state.setSourceList,
+    projectsList: state.projectsList,
+    updateProjectsList: state.setProjectsList,
+  }));
 
   const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
   const [isLoadingResource, setIsLoadingResource] = useState(false);
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
   const requestCanvasList = async () => {
     const { data: res, error } = await getClient().listCanvases({
@@ -46,6 +54,34 @@ export const useHandleSiderData = (initData?: boolean) => {
     }));
     updateCanvasList(formattedCanvases);
     return formattedCanvases;
+  };
+
+  const requestProjectsList = async () => {
+    const { data: res, error } = await getClient().listProjects({
+      query: { page: 1, pageSize: DATA_NUM },
+    });
+    if (error) {
+      console.error('getProjectsList error', error);
+      return [];
+    }
+    return res?.data || [];
+  };
+
+  const getProjectsList = async (setLoading?: boolean) => {
+    setLoading && setIsLoadingProjects(true);
+
+    const projects = await requestProjectsList();
+    setLoading && setIsLoadingProjects(false);
+    const formattedProjects = projects.map((project) => ({
+      id: project.projectId,
+      name: project.name,
+      description: project.description,
+      updatedAt: project.updatedAt,
+      coverUrl: project.coverUrl,
+      type: 'project' as const,
+    }));
+    updateProjectsList(formattedProjects);
+    return formattedProjects;
   };
 
   const getResourceList = async () => {
@@ -108,6 +144,7 @@ export const useHandleSiderData = (initData?: boolean) => {
 
   const loadSiderData = async (setLoading?: boolean) => {
     getCanvasList(setLoading);
+    getProjectsList(setLoading);
   };
 
   useEffect(() => {
@@ -125,6 +162,10 @@ export const useHandleSiderData = (initData?: boolean) => {
     canvasList,
     isLoadingCanvas,
     updateCanvasList,
+    getProjectsList,
+    projectsList,
+    isLoadingProjects,
+    updateProjectsList,
     sourceList,
     loadingSource,
     getSourceList,

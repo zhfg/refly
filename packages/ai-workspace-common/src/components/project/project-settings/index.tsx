@@ -9,11 +9,9 @@ import { useState } from 'react';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
-import { IconRight } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { SlPicture } from 'react-icons/sl';
-import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
-import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
+import { IconDown } from '@arco-design/web-react/icon';
 
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
@@ -33,14 +31,6 @@ export const ProjectSettings = ({
   const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
-  const { projectId, canvasId } = useGetProjectCanvasId();
-
-  const { debouncedCreateCanvas } = useCreateCanvas({
-    projectId: projectId,
-    afterCreateSuccess: () => {
-      setShowLibraryModal(true);
-    },
-  });
 
   const handleEditSettings = () => {
     setCreateProjectModalVisible(true);
@@ -94,14 +84,10 @@ export const ProjectSettings = ({
             <Button
               type="text"
               size="small"
-              icon={<IconRight className={cn(iconClassName, 'text-gray-500')} />}
+              icon={<IconDown className={cn(iconClassName, 'text-gray-500')} />}
               onClick={(e) => {
                 e.stopPropagation();
-                if (canvasId && canvasId !== 'empty') {
-                  setShowLibraryModal(true);
-                } else {
-                  debouncedCreateCanvas();
-                }
+                setShowLibraryModal(true);
               }}
             />
           </Tooltip>

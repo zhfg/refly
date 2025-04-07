@@ -291,7 +291,7 @@ export const CanvasMenu = ({
                     renderItem={(item) => (
                       <List.Item
                         className={cn(
-                          '!py-2 !px-1 rounded-md hover:bg-gray-50 cursor-pointer',
+                          '!py-1 !px-2 rounded-md hover:bg-gray-50 cursor-pointer',
                           canvasId === item.id ? 'bg-gray-100' : '',
                           selectedCanvases.some((canvas) => canvas.id === item.id) && 'bg-gray-50',
                         )}

@@ -68,7 +68,7 @@ export const LibraryModal = (props: LibraryModalProps) => {
         children: <ResourceList />,
       },
     ],
-    [activeKey, t, refreshProjectList],
+    [activeKey, t, refreshProjectList, projectId],
   );
 
   return (
