@@ -415,6 +415,7 @@ export class SkillService {
       param.resultHistory ??= safeParseJSON(existingResult.history);
       param.tplConfig ??= safeParseJSON(existingResult.tplConfig);
       param.runtimeConfig ??= safeParseJSON(existingResult.runtimeConfig);
+      param.projectId ??= existingResult.projectId;
     }
 
     param.input ||= { query: '' };
