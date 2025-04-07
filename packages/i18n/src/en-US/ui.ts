@@ -2314,6 +2314,10 @@ const translations = {
       addCanvas: 'Add Canvas',
       createCanvas: 'Create New Canvas',
       addExistingCanvas: 'Add Existing Canvas',
+      delete: 'Delete',
+      remove: 'Remove from project',
+      addToCanvas: 'Add to Canvas',
+      exit: 'Exit',
     },
     addSources: {
       title: 'Add Files',

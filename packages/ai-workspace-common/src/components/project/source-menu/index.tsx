@@ -13,11 +13,15 @@ import {
   Typography,
   message,
   Dropdown,
+  Popconfirm,
 } from 'antd';
 import {
   IconDocument,
   IconPlus,
   IconFiles,
+  IconMoreHorizontal,
+  IconDelete,
+  IconDownloadFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { sourceObject } from '@refly-packages/ai-workspace-common/components/project/project-directory';
@@ -26,6 +30,10 @@ import HeaderActions from '@refly-packages/ai-workspace-common/components/common
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { nodeOperationsEmitter } from '@refly-packages/ai-workspace-common/events/nodeOperations';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { LuPlus, LuExternalLink } from 'react-icons/lu';
+import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
+import type { MenuProps, DropdownProps } from 'antd';
+import { useMatch } from 'react-router-dom';
 
 const { Text } = Typography;
 
@@ -72,6 +80,202 @@ const AddSourceDropdown = memo(({ onAddSource, children }: AddSourceDropdownProp
     </Dropdown>
   );
 });
+
+interface SourceItemActionDropdownProps {
+  item: sourceObject;
+  projectId: string;
+  onUpdatedItems?: () => void;
+}
+
+const SourceItemActionDropdown = memo(
+  ({ item, projectId, onUpdatedItems }: SourceItemActionDropdownProps) => {
+    const { t } = useTranslation();
+    const [popupVisible, setPopupVisible] = useState(false);
+    const { downloadFile } = useDownloadFile();
+    const isShareCanvas = useMatch('/share/canvas/:canvasId');
+    const isDocument = item.entityType === 'document';
+
+    // Resource-specific properties
+    const resourceItem = !isDocument
+      ? (item as { entityType: 'resource'; entityId: string } & Resource)
+      : null;
+    const hasUrl = resourceItem?.data?.url;
+    const isFileResource = resourceItem?.resourceType === 'file';
+    const hasDownloadUrl = resourceItem?.downloadURL;
+
+    const handleDelete = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const { data } = await getClient().deleteProjectItems({
+        body: {
+          projectId,
+          items: [
+            {
+              entityType: item.entityType,
+              entityId: item.entityId,
+            },
+          ],
+        },
+      });
+      if (data?.success) {
+        message.success(t('project.action.deleteItemsSuccess'));
+        setPopupVisible(false);
+        onUpdatedItems?.();
+      }
+    };
+
+    const handleRemoveFromProject = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const res = await getClient().updateProjectItems({
+        body: {
+          projectId,
+          items: [
+            {
+              entityType: item.entityType,
+              entityId: item.entityId,
+            },
+          ],
+        },
+      });
+      const { data } = res || {};
+      if (data?.success) {
+        message.success(t('project.action.removeItemsSuccess'));
+        setPopupVisible(false);
+        onUpdatedItems?.();
+      }
+    };
+
+    const handleAddToCanvas = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      nodeOperationsEmitter.emit('addNode', {
+        node: {
+          type: item.entityType,
+          data: {
+            title: item.title,
+            entityId: item.entityId,
+          },
+        },
+        needSetCenter: true,
+        shouldPreview: true,
+      });
+      setPopupVisible(false);
+    };
+
+    const handleOpenWebpage = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (hasUrl && resourceItem?.data?.url) {
+        window.open(resourceItem.data.url, '_blank');
+        setPopupVisible(false);
+      }
+    };
+
+    const handleDownloadFile = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (resourceItem) {
+        downloadFile(resourceItem);
+        setPopupVisible(false);
+      }
+    };
+
+    const items: MenuProps['items'] = [
+      !isShareCanvas && {
+        label: (
+          <div className="flex items-center flex-grow">
+            <LuPlus size={16} className="mr-2" />
+            {t('workspace.addToCanvas')}
+          </div>
+        ),
+        key: 'addToCanvas',
+        onClick: ({ domEvent }) => handleAddToCanvas(domEvent as React.MouseEvent),
+      },
+      !isDocument && {
+        label: (
+          <div className="flex items-center flex-grow">
+            <LuExternalLink size={16} className="mr-2" />
+            {t('workspace.openWebpage')}
+          </div>
+        ),
+        key: 'openWebpage',
+        onClick: ({ domEvent }) => handleOpenWebpage(domEvent as React.MouseEvent),
+        disabled: !hasUrl,
+      },
+      !isDocument &&
+        isFileResource &&
+        hasDownloadUrl && {
+          label: (
+            <div className="flex items-center flex-grow">
+              <IconDownloadFile size={16} className="mr-2" />
+              {t('workspace.downloadFile')}
+            </div>
+          ),
+          key: 'downloadFile',
+          onClick: ({ domEvent }) => handleDownloadFile(domEvent as React.MouseEvent),
+        },
+      {
+        label: (
+          <div className="flex items-center flex-grow">
+            <IconDelete size={16} className="mr-2 text-gray-600" />
+            {t('project.action.remove', 'Remove from Project')}
+          </div>
+        ),
+        key: 'removeFromProject',
+        onClick: ({ domEvent }) => handleRemoveFromProject(domEvent as React.MouseEvent),
+      },
+      {
+        label: (
+          <Popconfirm
+            placement="bottomLeft"
+            title={t(`canvas.nodeActions.${isDocument ? 'document' : 'resource'}DeleteConfirm`, {
+              title: item.title || t('common.untitled'),
+            })}
+            onConfirm={handleDelete}
+            onCancel={(e?: React.MouseEvent) => {
+              e?.stopPropagation();
+              setPopupVisible(false);
+            }}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+            overlayStyle={{ maxWidth: '300px' }}
+          >
+            <div
+              className="flex items-center text-red-600 flex-grow"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <IconDelete size={16} className="mr-2" />
+              {t('workspace.deleteDropdownMenu.delete')}
+            </div>
+          </Popconfirm>
+        ),
+        key: 'delete',
+      },
+    ];
+
+    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setPopupVisible(open);
+      }
+    };
+
+    return (
+      <Dropdown
+        trigger={['click']}
+        open={popupVisible}
+        onOpenChange={handleOpenChange}
+        menu={{ items }}
+      >
+        <Button
+          type="text"
+          size="small"
+          icon={<IconMoreHorizontal className="text-gray-500" />}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        />
+      </Dropdown>
+    );
+  },
+);
+
+SourceItemActionDropdown.displayName = 'SourceItemActionDropdown';
 
 export const SourcesMenu = ({
   sourceList,
@@ -171,17 +375,42 @@ export const SourcesMenu = ({
 
   const addSelectedSourcesToCanvas = useCallback(async () => {
     if (selectedSources.length > 0) {
-      for (const item of selectedSources) {
-        nodeOperationsEmitter.emit('addNode', {
-          node: {
-            type: item.entityType,
-            data: {
-              title: item.title,
-              entityId: item.entityId,
+      // Store the reference position for node placement
+      let referencePosition = null;
+
+      for (let i = 0; i < selectedSources.length; i++) {
+        const item = selectedSources[i];
+
+        // For the first node, let the system calculate the position
+        // For subsequent nodes, provide an offset based on the previous node
+        const position = referencePosition
+          ? {
+              x: referencePosition.x,
+              y: referencePosition.y + 150, // Add vertical spacing between nodes
+            }
+          : undefined;
+
+        await new Promise<void>((resolve) => {
+          nodeOperationsEmitter.emit('addNode', {
+            node: {
+              type: item.entityType,
+              data: {
+                title: item.title,
+                entityId: item.entityId,
+              },
+              position,
             },
-          },
-          needSetCenter: true,
-          shouldPreview: true,
+            needSetCenter: i === selectedSources.length - 1, // Only center on the last node
+            shouldPreview: i === selectedSources.length - 1, // Only preview the last node
+            // Capture the position of each node to use for positioning the next node
+            positionCallback: (newPosition) => {
+              referencePosition = newPosition;
+              resolve();
+            },
+          });
+
+          // Add a timeout in case the callback doesn't fire
+          setTimeout(() => resolve(), 100);
         });
       }
     }
@@ -307,14 +536,16 @@ export const SourcesMenu = ({
                             onMouseEnter={() => handleSourceHover(item.entityId)}
                             onMouseLeave={() => handleSourceHover(null)}
                           >
-                            <div className="flex items-center gap-1 w-full">
+                            <div className="w-full relative">
                               <div
-                                className="flex items-center gap-1.5 flex-grow"
+                                className="flex items-center gap-1.5 w-full overflow-hidden"
                                 onClick={() => toggleSourceSelection(item)}
                               >
-                                {getItemIcon(item)}
+                                <div className="flex-shrink-0 flex items-center">
+                                  {getItemIcon(item)}
+                                </div>
                                 <Text
-                                  className="text-[13px] w-[120px] text-gray-700"
+                                  className="text-[13px] text-gray-700 truncate"
                                   ellipsis={{
                                     tooltip: true,
                                   }}
@@ -324,22 +555,27 @@ export const SourcesMenu = ({
                               </div>
                               <div
                                 className={cn(
-                                  'flex-shrink-0 flex items-center gap-1 transition-opacity duration-200',
+                                  'absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-200 z-10 bg-gray-50 px-1',
                                   isMultiSelectMode || hoveredSourceId === item.entityId
                                     ? 'opacity-100'
                                     : 'opacity-0',
                                 )}
                               >
                                 <Checkbox
+                                  className="mr-1"
                                   checked={selectedSources.some(
                                     (source) => source.entityId === item.entityId,
                                   )}
                                   onChange={() => toggleSourceSelection(item)}
                                   onClick={(e) => e.stopPropagation()}
                                 />
-                                {/* {!isMultiSelectMode && (
-                                  <IconMoreHorizontal className="w-4 h-3 text-gray-500 font-bond hover:text-green-600" />
-                                )} */}
+                                {!isMultiSelectMode && (
+                                  <SourceItemActionDropdown
+                                    item={item}
+                                    projectId={projectId}
+                                    onUpdatedItems={onUpdatedItems}
+                                  />
+                                )}
                               </div>
                             </div>
                           </List.Item>
