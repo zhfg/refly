@@ -117,16 +117,6 @@ export class CodeArtifacts extends BaseSkill {
     // Get configuration values
     const artifactType = tplConfig?.artifactType?.value ?? 'auto';
 
-    // Update tplConfig with knowledge base search setting if needed
-    config.configurable.tplConfig = {
-      ...config.configurable.tplConfig,
-      enableKnowledgeBaseSearch: {
-        value: enableKnowledgeBaseSearch,
-        label: 'Knowledge Base Search',
-        displayValue: enableKnowledgeBaseSearch ? 'true' : 'false',
-      },
-    };
-
     config.metadata.step = { name: 'analyzeQuery' };
 
     // Use shared query processor
@@ -194,7 +184,14 @@ export class CodeArtifacts extends BaseSkill {
           config,
           ctxThis: this,
           state,
-          tplConfig: config?.configurable?.tplConfig || {},
+          tplConfig: {
+            ...config.configurable.tplConfig,
+            enableKnowledgeBaseSearch: {
+              value: enableKnowledgeBaseSearch,
+              label: 'Knowledge Base Search',
+              displayValue: enableKnowledgeBaseSearch ? 'true' : 'false',
+            },
+          },
         },
       );
 
@@ -215,10 +212,18 @@ export class CodeArtifacts extends BaseSkill {
     const module = {
       // Custom system prompt that includes examples
       buildSystemPrompt: () => {
-        return buildArtifactsSystemPrompt(customInstructions);
+        return buildArtifactsSystemPrompt();
       },
       buildContextUserPrompt: buildArtifactsContextUserPrompt,
-      buildUserPrompt: buildArtifactsUserPrompt,
+      buildUserPrompt: ({ originalQuery, optimizedQuery, rewrittenQueries, locale }) => {
+        return buildArtifactsUserPrompt({
+          originalQuery,
+          optimizedQuery,
+          rewrittenQueries,
+          customInstructions,
+          locale,
+        });
+      },
     };
 
     // Modify query to include instructions if provided

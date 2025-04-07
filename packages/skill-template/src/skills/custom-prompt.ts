@@ -226,12 +226,7 @@ export class CustomPrompt extends BaseSkill {
     // Build messages for the model using the customPrompt module
     const module = {
       buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
-        customPrompt.buildCustomPromptSystemPrompt(
-          customSystemPrompt,
-          locale,
-          needPrepareContext,
-          customInstructions,
-        ),
+        customPrompt.buildCustomPromptSystemPrompt(customSystemPrompt, locale, needPrepareContext),
       buildContextUserPrompt: customPrompt.buildCustomPromptContextUserPrompt,
       buildUserPrompt: customPrompt.buildCustomPromptUserPrompt,
     };

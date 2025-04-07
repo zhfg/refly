@@ -146,7 +146,7 @@ export class WebSearch extends BaseSkill {
     // Build messages for the model
     const module = {
       buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
-        webSearch.buildWebSearchSystemPrompt(locale, needPrepareContext, customInstructions),
+        webSearch.buildWebSearchSystemPrompt(locale, needPrepareContext),
       buildContextUserPrompt: webSearch.buildWebSearchContextUserPrompt,
       buildUserPrompt: webSearch.buildWebSearchUserPrompt,
     };

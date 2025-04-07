@@ -18,11 +18,13 @@ export interface SkillPromptModule {
     optimizedQuery,
     rewrittenQueries,
     locale,
+    customInstructions,
   }: {
     originalQuery: string;
     optimizedQuery: string;
     rewrittenQueries: string[];
     locale: string;
+    customInstructions?: string;
   }) => string;
 }
 
@@ -74,13 +76,14 @@ export const buildFinalRequestMessages = ({
   modelInfo?: ModelInfo;
   customInstructions?: string;
 }) => {
-  const systemPrompt = module.buildSystemPrompt(locale, needPrepareContext, customInstructions);
+  const systemPrompt = module.buildSystemPrompt(locale, needPrepareContext);
   const contextUserPrompt = module.buildContextUserPrompt?.(context, needPrepareContext) || '';
   const userPrompt = module.buildUserPrompt({
     originalQuery,
     optimizedQuery,
     rewrittenQueries,
     locale,
+    customInstructions,
   });
 
   // Create context messages

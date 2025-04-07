@@ -10,7 +10,7 @@ import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '..
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
 import { buildFormatDisplayInstruction } from '../common/format';
-import { buildCustomProjectInstructions } from '../common/personalization';
+import { buildCustomProjectInstructionsForUserPrompt } from '../common/personalization';
 
 export const buildGenerateDocumentCommonPrompt = (example: string) => `
 ## Core Capabilities and Goals
@@ -114,22 +114,13 @@ ${buildGenerateDocumentCommonPrompt(contextualExamples())}
 ${buildSpecificQueryInstruction()}
 `;
 
-export const buildGenerateDocumentSystemPrompt = (
-  _locale: string,
-  needPrepareContext: boolean,
-  customInstructions?: string,
-) => {
+export const buildGenerateDocumentSystemPrompt = (_locale: string, needPrepareContext: boolean) => {
   let basePrompt = '';
 
   if (needPrepareContext) {
     basePrompt = buildContextualGenerateDocumentPrompt();
   } else {
     basePrompt = buildNoContextGenerateDocumentPrompt();
-  }
-
-  // Add custom project instructions if available
-  if (customInstructions) {
-    return `${basePrompt}\n\n${buildCustomProjectInstructions(customInstructions)}`;
   }
 
   return basePrompt;
@@ -140,14 +131,18 @@ export const buildGenerateDocumentUserPrompt = ({
   optimizedQuery,
   rewrittenQueries,
   locale,
+  customInstructions,
 }: {
   originalQuery: string;
   optimizedQuery: string;
   rewrittenQueries: string[];
   locale: string;
+  customInstructions?: string;
 }) => {
+  let prompt = '';
+
   if (originalQuery === optimizedQuery) {
-    return `## User Query
+    prompt = `## User Query
      ${originalQuery}
 
 
@@ -161,9 +156,8 @@ export const buildGenerateDocumentUserPrompt = ({
 
      ${buildFormatDisplayInstruction()}
      `;
-  }
-
-  return `## User Query
+  } else {
+    prompt = `## User Query
 
 ### Original User Query
 ${originalQuery}
@@ -186,6 +180,14 @@ ${buildQueryIntentAnalysisInstruction()}
 
  ${buildFormatDisplayInstruction()}
  `;
+  }
+
+  // Add custom instructions to user prompt if available
+  if (customInstructions) {
+    prompt += `\n${buildCustomProjectInstructionsForUserPrompt(customInstructions)}`;
+  }
+
+  return prompt;
 };
 
 export const buildGenerateDocumentContextUserPrompt = (

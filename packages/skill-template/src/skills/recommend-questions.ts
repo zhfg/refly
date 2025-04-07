@@ -12,7 +12,6 @@ import {
   Source,
 } from '@refly-packages/openapi-schema';
 import { prepareContext } from '../scheduler/utils/context';
-import { buildCustomProjectInstructions } from '../scheduler/module/common/personalization';
 
 // Schema for recommended questions with reasoning
 const recommendQuestionsSchema = z.object({
@@ -142,7 +141,7 @@ export class RecommendQuestions extends BaseSkill {
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     // Build the system prompt with customInstructions if available
-    let systemPrompt = `## Role
+    const systemPrompt = `## Role
 You are an expert at analyzing conversations and generating relevant recommended questions.
 
 ## Task
@@ -184,11 +183,6 @@ ${context ? '3. If context exists: Use context information to generate more info
 ${context ? '4. If multiple sources exist: Combine insights to generate comprehensive questions' : ''}
 ${!context ? '3' : '5'}. If none exists: Generate engaging questions about general knowledge topics`;
 
-    // Add custom project instructions if available
-    if (customInstructions) {
-      systemPrompt += `\n\n${buildCustomProjectInstructions(customInstructions)}`;
-    }
-
     try {
       // Prepare messages for context
       const contextMessages = [...usedChatHistory, ...messages]
@@ -210,6 +204,8 @@ ${
     ? 'NOTE: No context or query provided. Generate interesting general knowledge questions that could spark engaging conversations.\n'
     : ''
 }
+
+${customInstructions ? `## Custom Instructions:\n${customInstructions}\n` : ''}
 
 Please generate relevant recommended questions in ${locale} language.`;
 

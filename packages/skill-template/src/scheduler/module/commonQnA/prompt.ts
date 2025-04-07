@@ -13,10 +13,10 @@ import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
 import { buildFormatDisplayInstruction } from '../common/format';
 import {
   buildSimpleDetailedExplanationInstruction,
-  buildCustomProjectInstructions,
+  buildCustomProjectInstructionsForUserPrompt,
 } from '../common/personalization';
 
-export const buildNoContextCommonQnASystemPrompt = (customInstructions?: string) => {
+export const buildNoContextCommonQnASystemPrompt = () => {
   return `You are an AI assistant developed by Refly. Your task is to provide helpful, accurate, and concise information to users' queries.
 
 Guidelines:
@@ -42,11 +42,10 @@ When appropriate, inform users about your main capabilities:
 Your goal is to provide clear, accurate, and helpful responses to the user's questions, while also guiding them on how to best utilize your capabilities.
 
 ${buildSpecificQueryInstruction()}
-${buildCustomProjectInstructions(customInstructions)}
 `;
 };
 
-export const buildContextualCommonQnASystemPrompt = (customInstructions?: string) => {
+export const buildContextualCommonQnASystemPrompt = () => {
   const systemPrompt = `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, and answering questions based on context. Your core mission is to help users effectively understand and utilize information.
 
   ## Query Priority and Context Relevance:
@@ -106,22 +105,16 @@ export const buildContextualCommonQnASystemPrompt = (customInstructions?: string
   ${buildContextDisplayInstruction()}
 
   ${buildSpecificQueryInstruction()}
-  
-  ${buildCustomProjectInstructions(customInstructions)}
   `;
 
   return systemPrompt;
 };
 
-export const buildCommonQnASystemPrompt = (
-  _locale: string,
-  needPrepareContext: boolean,
-  customInstructions?: string,
-) => {
+export const buildCommonQnASystemPrompt = (_locale: string, needPrepareContext: boolean) => {
   if (!needPrepareContext) {
-    return buildNoContextCommonQnASystemPrompt(customInstructions);
+    return buildNoContextCommonQnASystemPrompt();
   }
-  return buildContextualCommonQnASystemPrompt(customInstructions);
+  return buildContextualCommonQnASystemPrompt();
 };
 
 export const buildCommonQnAUserPrompt = ({
@@ -129,14 +122,18 @@ export const buildCommonQnAUserPrompt = ({
   optimizedQuery,
   rewrittenQueries,
   locale,
+  customInstructions,
 }: {
   originalQuery: string;
   optimizedQuery: string;
   rewrittenQueries: string[];
   locale: string;
+  customInstructions?: string;
 }) => {
+  let prompt = '';
+
   if (originalQuery === optimizedQuery) {
-    return `## User Query
+    prompt = `## User Query
     ${originalQuery}
 
     ## Important
@@ -148,9 +145,8 @@ export const buildCommonQnAUserPrompt = ({
     ${buildFormatDisplayInstruction()}
     ${buildSimpleDetailedExplanationInstruction()}
     `;
-  }
-
-  return `## User Query
+  } else {
+    prompt = `## User Query
 
 ### Original User Query
 ${originalQuery}
@@ -170,6 +166,14 @@ ${chatHistoryReminder()}
 ## Hint
 ${buildLocaleFollowInstruction(locale)}
 `;
+  }
+
+  // Add custom instructions to user prompt if available
+  if (customInstructions) {
+    prompt += `\n${buildCustomProjectInstructionsForUserPrompt(customInstructions)}`;
+  }
+
+  return prompt;
 };
 
 export const buildCommonQnAContextUserPrompt = (context: string, needPrepareContext: boolean) => {

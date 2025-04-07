@@ -1,21 +1,15 @@
 import { buildCitationReminder } from '../common/citationRules';
-import { buildCustomProjectInstructions } from '../common/personalization';
+import { buildCustomProjectInstructionsForUserPrompt } from '../common/personalization';
 
 // For custom prompt, we'll use the user-provided system prompt directly
 export const buildCustomPromptSystemPrompt = (
   customSystemPrompt: string,
   _locale: string,
   needPrepareContext: boolean,
-  customInstructions?: string,
 ) => {
   console.log('needPrepareContext', needPrepareContext);
 
-  // Combine user-provided system prompt with custom project instructions if available
-  if (customInstructions) {
-    return `${customSystemPrompt}\n\n${buildCustomProjectInstructions(customInstructions)}`;
-  }
-
-  // If no context preparation is needed, just return the custom system prompt
+  // No longer adding custom instructions to system prompt
   return customSystemPrompt;
 };
 
@@ -23,19 +17,22 @@ export const buildCustomPromptUserPrompt = ({
   originalQuery,
   optimizedQuery,
   rewrittenQueries,
+  customInstructions,
 }: {
   originalQuery: string;
   optimizedQuery: string;
   rewrittenQueries: string[];
   locale?: string;
+  customInstructions?: string;
 }) => {
+  let prompt = '';
+
   if (originalQuery === optimizedQuery) {
-    return `## User Query
+    prompt = `## User Query
 ${originalQuery}
 `;
-  }
-
-  return `## User Query
+  } else {
+    prompt = `## User Query
 
 ### Original User Query
 ${originalQuery}
@@ -46,6 +43,14 @@ ${optimizedQuery}
 ### Rewritten User Queries
 ${rewrittenQueries.map((query) => `- ${query}`).join('\n')}
 `;
+  }
+
+  // Add custom instructions to user prompt if available
+  if (customInstructions) {
+    prompt += `\n${buildCustomProjectInstructionsForUserPrompt(customInstructions)}`;
+  }
+
+  return prompt;
 };
 
 export const buildCustomPromptContextUserPrompt = (

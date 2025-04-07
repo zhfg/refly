@@ -271,20 +271,13 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
     state: GraphState,
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
-    const { currentSkill, user, project } = config.configurable;
-
-    // Extract customInstructions from project if available
-    const customInstructions = project?.customInstructions;
+    const { currentSkill, user } = config.configurable;
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const module = {
       buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
-        generateDocument.buildGenerateDocumentSystemPrompt(
-          locale,
-          needPrepareContext,
-          customInstructions,
-        ),
+        generateDocument.buildGenerateDocumentSystemPrompt(locale, needPrepareContext),
       buildUserPrompt: generateDocument.buildGenerateDocumentUserPrompt,
       buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
     };

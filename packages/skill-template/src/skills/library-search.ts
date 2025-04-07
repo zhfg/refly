@@ -131,11 +131,7 @@ export class LibrarySearch extends BaseSkill {
     // Build messages for the model
     const module = {
       buildSystemPrompt: (locale: string, needPrepareContext: boolean) =>
-        librarySearch.buildLibrarySearchSystemPrompt(
-          locale,
-          needPrepareContext,
-          customInstructions,
-        ),
+        librarySearch.buildLibrarySearchSystemPrompt(locale, needPrepareContext),
       buildContextUserPrompt: librarySearch.buildLibrarySearchContextUserPrompt,
       buildUserPrompt: librarySearch.buildLibrarySearchUserPrompt,
     };
