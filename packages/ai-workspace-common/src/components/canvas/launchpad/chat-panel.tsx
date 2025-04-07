@@ -38,7 +38,6 @@ import { ActionStatus, SkillTemplateConfig } from '@refly/openapi-schema';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
 import { useAskProject } from '@refly-packages/ai-workspace-common/hooks/canvas/use-ask-project';
-import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -110,7 +109,6 @@ export const ChatPanel = ({
     formErrors: state.formErrors,
     setFormErrors: state.setFormErrors,
   }));
-  const { projectId: isInProject } = useGetProjectCanvasId();
 
   // stores
   const userProfile = useUserStoreShallow((state) => state.userProfile);
@@ -440,14 +438,12 @@ export const ChatPanel = ({
           </div>
         </div>
       </div>
-      {isInProject ? (
-        <ProjectKnowledgeToggle
-          projectSelectorClassName="max-w-[150px]"
-          className="!pb-0"
-          currentProjectId={projectId}
-          onProjectChange={handleProjectChange}
-        />
-      ) : null}
+      <ProjectKnowledgeToggle
+        projectSelectorClassName="max-w-[150px]"
+        className="!pb-0"
+        currentProjectId={projectId}
+        onProjectChange={handleProjectChange}
+      />
     </>
   );
 };

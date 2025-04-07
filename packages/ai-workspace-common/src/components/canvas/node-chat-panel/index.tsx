@@ -24,7 +24,6 @@ import { cn } from '@refly-packages/utils/cn';
 import classNames from 'classnames';
 import { ContextTarget } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ProjectKnowledgeToggle } from '@refly-packages/ai-workspace-common/components/project/project-knowledge-toggle';
-import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 
 // Memoized Premium Banner Component
 const PremiumBanner = memo(() => {
@@ -170,8 +169,6 @@ export const ChatPanel = memo(
     const chatInputRef = useRef<HTMLDivElement>(null);
     const userProfile = useUserStoreShallow((state) => state.userProfile);
     const isList = mode === 'list';
-
-    const { projectId: isInProject } = useGetProjectCanvasId();
 
     // Get setActiveResultId from context panel store
     const { setActiveResultId } = useContextPanelStoreShallow((state) => ({
@@ -353,13 +350,11 @@ export const ChatPanel = memo(
             {subscriptionEnabled && !userProfile?.subscription && <PremiumBanner />}
             <div className={cn('px-3')}>{renderContent()}</div>
           </div>
-          {isInProject ? (
-            <ProjectKnowledgeToggle
-              className="!pb-0"
-              currentProjectId={projectId}
-              onProjectChange={handleProjectChange}
-            />
-          ) : null}
+          <ProjectKnowledgeToggle
+            className="!pb-0"
+            currentProjectId={projectId}
+            onProjectChange={handleProjectChange}
+          />
         </div>
       );
     }
@@ -374,13 +369,11 @@ export const ChatPanel = memo(
           setSelectedSkill={setSelectedSkill}
         />
         {renderContent()}
-        {isInProject ? (
-          <ProjectKnowledgeToggle
-            className="!pb-0 !pt-0"
-            currentProjectId={projectId}
-            onProjectChange={handleProjectChange}
-          />
-        ) : null}
+        <ProjectKnowledgeToggle
+          className="!pb-0 !pt-0"
+          currentProjectId={projectId}
+          onProjectChange={handleProjectChange}
+        />
       </div>
     );
   },
