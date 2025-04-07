@@ -10,10 +10,17 @@ import { buildContextFormat } from './context';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 import { buildQueryIntentAnalysisInstruction } from '../../utils/common-prompt';
 import { buildFormatDisplayInstruction } from '../common/format';
-import { buildSimpleDetailedExplanationInstruction } from '../common/personalization';
+import {
+  buildSimpleDetailedExplanationInstruction,
+  buildCustomProjectInstructions,
+} from '../common/personalization';
 
-export const buildLibrarySearchSystemPrompt = () => {
-  return `You are an AI assistant developed by Refly, specializing in knowledge base search and information retrieval. Your task is to provide accurate answers based on the organization's internal knowledge base.
+export const buildLibrarySearchSystemPrompt = (
+  _locale: string,
+  _needPrepareContext: boolean,
+  customInstructions?: string,
+) => {
+  const systemPrompt = `You are an AI assistant developed by Refly, specializing in knowledge base search and information retrieval. Your task is to provide accurate answers based on the organization's internal knowledge base.
 
 ${buildCitationRules()}
 
@@ -52,7 +59,11 @@ ${buildLibrarySearchChatHistoryExamples()}
 ${buildContextFormat()}
 
 ${buildSpecificQueryInstruction()}
+
+${customInstructions ? buildCustomProjectInstructions(customInstructions) : ''}
 `;
+
+  return systemPrompt;
 };
 
 export const buildLibrarySearchUserPrompt = ({
