@@ -484,7 +484,7 @@ export const SourcesMenu = ({
               </div>
             ),
             children: (
-              <div className="h-full flex flex-col">
+              <div className="h-full flex flex-col overflow-hidden">
                 <HeaderActions
                   source="source"
                   isSearchMode={isSearchMode}
@@ -500,8 +500,10 @@ export const SourcesMenu = ({
                   onAddSelectedSourcesToCanvas={addSelectedSourcesToCanvas}
                   itemCountText={itemCountText}
                   addButtonNode={addButtonNode}
+                  useAffix={true}
+                  target={() => document.querySelector('.project-directory-content') as HTMLElement}
                 />
-                <div className="flex-grow overflow-y-auto px-3">
+                <div className="flex-grow overflow-y-auto px-3 source-list-container">
                   {isFetching ? (
                     <div className="flex justify-center h-full pt-4">
                       <Skeleton active paragraph={{ rows: 8 }} title={false} />
