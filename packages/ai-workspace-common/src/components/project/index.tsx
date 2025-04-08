@@ -17,7 +17,7 @@ export const Project = ({ projectId }: { projectId: string }) => {
   };
 
   const goCanvas = async () => {
-    if (canvasId === 'empty') {
+    if (canvasId === 'empty' || !canvasId) {
       const canvases = await getProjectCanvases(projectId);
       if (canvases?.[0]?.canvasId) {
         navigate(`/project/${projectId}?canvasId=${canvases[0]?.canvasId}`, { replace: true });

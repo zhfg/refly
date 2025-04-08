@@ -13,7 +13,7 @@ import { SlPicture } from 'react-icons/sl';
 import { IconDown } from '@arco-design/web-react/icon';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 
-const { Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 export const ProjectSettings = ({
   source,
   setCollapse,
@@ -75,9 +75,13 @@ export const ProjectSettings = ({
             </div>
           )}
 
-          <div className="flex flex-col">
-            <span className="text-sm">{data?.name || t('common.untitled')}</span>
-          </div>
+          <Text
+            className="text-sm"
+            ellipsis={{ tooltip: { placement: 'right', align: { offset: [40, 0] } } }}
+          >
+            {data?.name || t('common.untitled')}
+          </Text>
+
           <Tooltip title={t('project.viewAllProjects')}>
             <Button
               type="text"

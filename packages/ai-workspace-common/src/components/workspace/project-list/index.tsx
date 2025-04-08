@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { SlPicture } from 'react-icons/sl';
 import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 export const ActionDropdown = ({
   project,
@@ -53,7 +54,6 @@ export const ActionDropdown = ({
   };
 
   const handleEdit = () => {
-    console.log('handleEdit');
     setEditProjectModalVisible(true);
   };
 
@@ -197,7 +197,13 @@ const ProjectCard = ({
   );
 };
 
-const CreateCard = ({ reload }: { reload: () => void }) => {
+const CreateCard = ({
+  reload,
+  setVisible,
+}: {
+  reload: () => void;
+  setVisible: (visible: boolean) => void;
+}) => {
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
   return (
@@ -217,6 +223,7 @@ const CreateCard = ({ reload }: { reload: () => void }) => {
         setVisible={setCreateProjectModalVisible}
         onSuccess={() => {
           reload();
+          setVisible(false);
         }}
       />
     </div>
@@ -244,6 +251,10 @@ const ProjectList = ({
   const { setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
     selectedProjectId: state.selectedProjectId,
     setSelectedProjectId: state.setSelectedProjectId,
+  }));
+
+  const { updateProjectsList } = useSiderStoreShallow((state) => ({
+    updateProjectsList: state.setProjectsList,
   }));
 
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
@@ -300,6 +311,18 @@ const ProjectList = ({
     }
   }, [refresh]);
 
+  useEffect(() => {
+    const formattedProjects = dataList.map((project) => ({
+      id: project.projectId,
+      name: project.name,
+      description: project.description,
+      updatedAt: project.updatedAt,
+      coverUrl: project.coverUrl,
+      type: 'project' as const,
+    }));
+    updateProjectsList(formattedProjects);
+  }, [dataList]);
+
   const emptyState = (
     <div className="h-full flex items-center justify-center">
       <Empty description={t('common.empty')}>
@@ -318,6 +341,7 @@ const ProjectList = ({
         setVisible={setCreateProjectModalVisible}
         onSuccess={() => {
           reload();
+          setShowLibraryModal(false);
         }}
       />
     </div>
@@ -336,7 +360,7 @@ const ProjectList = ({
             scrollableTarget="resourceScrollableDiv"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-              <CreateCard reload={reload} />
+              <CreateCard reload={reload} setVisible={setShowLibraryModal} />
               {projectCards}
             </div>
           </InfiniteScroll>
