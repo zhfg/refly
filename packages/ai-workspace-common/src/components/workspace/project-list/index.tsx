@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Project } from '@refly/openapi-schema';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { useNavigate } from 'react-router-dom';
@@ -146,7 +145,11 @@ const ProjectCard = ({
     >
       <div className="h-36 px-4 py-3 overflow-hidden">
         {project?.coverUrl ? (
-          <Image src={project?.coverUrl} alt={project?.name || t('common.untitled')} />
+          <Image
+            src={project?.coverUrl}
+            alt={project?.name || t('common.untitled')}
+            preview={false}
+          />
         ) : (
           <div className="flex items-center justify-center h-full flex-col">
             <SlPicture size={48} className="text-gray-300" />
@@ -223,16 +226,20 @@ const CreateCard = ({ reload }: { reload: () => void }) => {
 interface ProjectListProps {
   refresh: boolean;
   setRefresh: (refresh: boolean) => void;
+  setShowLibraryModal: (showLibraryModal: boolean) => void;
+  showLibraryModal: boolean;
 }
-const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
+const ProjectList = ({
+  refresh,
+  setRefresh,
+  showLibraryModal,
+  setShowLibraryModal,
+}: ProjectListProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
-  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    showLibraryModal: state.showLibraryModal,
-    setShowLibraryModal: state.setShowLibraryModal,
-  }));
   const { projectId } = useGetProjectCanvasId();
+
   // Get selectedProjectId from store for initial value only
   const { setSelectedProjectId } = useProjectSelectorStoreShallow((state) => ({
     selectedProjectId: state.selectedProjectId,
@@ -249,17 +256,9 @@ const ProjectList = ({ refresh, setRefresh }: ProjectListProps) => {
     pageSize: 12,
   });
 
-  const getProjectCanvases = async (projectId: string) => {
-    const res = await getClient().listCanvases({
-      query: { projectId, page: 1, pageSize: 1000 },
-    });
-    return res?.data?.data || [];
-  };
-
   const handleCardClick = async (project: Project) => {
-    const canvases = await getProjectCanvases(project.projectId);
     setShowLibraryModal(false);
-    navigate(`/project/${project.projectId}?canvasId=${canvases?.[0]?.canvasId || 'empty'}`);
+    navigate(`/project/${project.projectId}?canvasId=empty`);
   };
 
   const projectCards = useMemo(() => {

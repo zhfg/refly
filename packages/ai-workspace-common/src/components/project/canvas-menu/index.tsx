@@ -302,7 +302,12 @@ export const CanvasMenu = ({
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
-                            <Text className="w-[120px] text-[13px] text-gray-700 truncate">
+                            <Text
+                              className="w-[120px] text-[13px] text-gray-700"
+                              ellipsis={{
+                                tooltip: { placement: 'right', align: { offset: [50, 0] } },
+                              }}
+                            >
                               {item.name || t('common.untitled')}
                             </Text>
                           </div>
