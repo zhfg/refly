@@ -8,6 +8,7 @@ import { MdLibraryBooks } from 'react-icons/md';
 
 import { BiSolidEdit } from 'react-icons/bi';
 import { Project } from '@refly/openapi-schema';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateProjectModalProps {
   mode?: 'create' | 'edit';
@@ -38,6 +39,7 @@ export const CreateProjectModal = ({
   const [loadingCoverPicture, setLoadingCoverPicture] = useState(false);
   const [coverPictureUrl, setCoverPictureUrl] = useState(coverPicture);
   const [coverStorageKey, setCoverStorageKey] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const submitRequest = async (payload: any) => {
     if (projectId) {
@@ -76,6 +78,9 @@ export const CreateProjectModal = ({
     if (data?.success) {
       setVisible(false);
       message.success(t(`project.action.${mode}Success`));
+      if (mode === 'create') {
+        navigate(`/project/${data?.data?.projectId}?canvasId=empty`);
+      }
       onSuccess?.(data?.data);
     }
   };

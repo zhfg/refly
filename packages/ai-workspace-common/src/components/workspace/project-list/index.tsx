@@ -197,7 +197,13 @@ const ProjectCard = ({
   );
 };
 
-const CreateCard = ({ reload }: { reload: () => void }) => {
+const CreateCard = ({
+  reload,
+  setVisible,
+}: {
+  reload: () => void;
+  setVisible: (visible: boolean) => void;
+}) => {
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
   return (
@@ -217,6 +223,7 @@ const CreateCard = ({ reload }: { reload: () => void }) => {
         setVisible={setCreateProjectModalVisible}
         onSuccess={() => {
           reload();
+          setVisible(false);
         }}
       />
     </div>
@@ -318,6 +325,7 @@ const ProjectList = ({
         setVisible={setCreateProjectModalVisible}
         onSuccess={() => {
           reload();
+          setShowLibraryModal(false);
         }}
       />
     </div>
@@ -336,7 +344,7 @@ const ProjectList = ({
             scrollableTarget="resourceScrollableDiv"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-              <CreateCard reload={reload} />
+              <CreateCard reload={reload} setVisible={setShowLibraryModal} />
               {projectCards}
             </div>
           </InfiniteScroll>
