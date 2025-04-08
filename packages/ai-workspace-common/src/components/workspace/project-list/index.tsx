@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks/use-get-project-canvasId';
 import { SlPicture } from 'react-icons/sl';
 import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 export const ActionDropdown = ({
   project,
@@ -53,7 +54,6 @@ export const ActionDropdown = ({
   };
 
   const handleEdit = () => {
-    console.log('handleEdit');
     setEditProjectModalVisible(true);
   };
 
@@ -253,6 +253,10 @@ const ProjectList = ({
     setSelectedProjectId: state.setSelectedProjectId,
   }));
 
+  const { updateProjectsList } = useSiderStoreShallow((state) => ({
+    updateProjectsList: state.setProjectsList,
+  }));
+
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listProjects({
@@ -306,6 +310,18 @@ const ProjectList = ({
       setRefresh(false);
     }
   }, [refresh]);
+
+  useEffect(() => {
+    const formattedProjects = dataList.map((project) => ({
+      id: project.projectId,
+      name: project.name,
+      description: project.description,
+      updatedAt: project.updatedAt,
+      coverUrl: project.coverUrl,
+      type: 'project' as const,
+    }));
+    updateProjectsList(formattedProjects);
+  }, [dataList]);
 
   const emptyState = (
     <div className="h-full flex items-center justify-center">
