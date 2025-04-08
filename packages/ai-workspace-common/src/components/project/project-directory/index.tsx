@@ -150,7 +150,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
       )}
     >
-      <div className="project-directory flex h-full flex-col py-3 pb-0 overflow-y-auto">
+      <div className="project-directory flex h-full flex-col py-3 pb-0 overflow-y-auto overflow-x-hidden">
         <ProjectSettings
           source={source}
           setCollapse={setCollapse}
@@ -162,7 +162,7 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
 
         <Divider className="my-2" />
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden project-directory-content">
           <CanvasMenu
             isFetching={isLoadingCanvas}
             canvasList={canvasList}

@@ -1,6 +1,6 @@
 import React, { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Popconfirm, Button, Input, Tooltip } from 'antd';
+import { Popconfirm, Button, Input, Tooltip, Affix } from 'antd';
 import {
   IconDelete,
   IconRemove,
@@ -29,6 +29,8 @@ export interface HeaderActionsProps {
   onAddSelectedSourcesToCanvas?: () => void;
   addButtonNode?: ReactNode;
   itemCountText?: string;
+  useAffix?: boolean;
+  target: () => HTMLElement;
 }
 
 const HeaderActions = ({
@@ -46,6 +48,8 @@ const HeaderActions = ({
   onAddSelectedSourcesToCanvas,
   addButtonNode,
   itemCountText,
+  useAffix = false,
+  target,
 }: HeaderActionsProps) => {
   const { t } = useTranslation();
 
@@ -169,16 +173,28 @@ const HeaderActions = ({
     addButtonNode,
     onAddItem,
     t,
+    source,
+    onAddSelectedSourcesToCanvas,
   ]);
 
-  return (
+  const headerContent = (
     <div
-      className={`mb-2 px-3 ${isMultiSelectMode || isSearchMode ? '' : 'flex justify-between items-center'}`}
+      className={`mb-2 px-3 ${isMultiSelectMode || isSearchMode ? '' : 'flex justify-between items-center'} ${useAffix ? 'bg-white py-2 z-20 w-full shadow-sm' : ''}`}
     >
       {itemCountText && <div className="text-[10px] text-gray-500">{itemCountText}</div>}
       {actions}
     </div>
   );
+
+  if (useAffix) {
+    return (
+      <Affix offsetTop={0} className="z-20 w-full" target={target}>
+        <div className="w-full overflow-hidden">{headerContent}</div>
+      </Affix>
+    );
+  }
+
+  return headerContent;
 };
 
 export default React.memo(HeaderActions);

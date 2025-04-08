@@ -113,7 +113,7 @@ export const ProjectSettings = ({
         {data?.customInstructions && (
           <Paragraph
             className="text-xs p-1 mt-1 !mb-0 bg-gray-50 text-gray-400 rounded-md"
-            ellipsis={{ rows: 1, tooltip: { placement: 'right' } }}
+            ellipsis={{ rows: 3, tooltip: { placement: 'right' } }}
           >
             {data?.customInstructions}
           </Paragraph>
