@@ -9,9 +9,9 @@ import { useState } from 'react';
 import { AiOutlineMenuFold } from 'react-icons/ai';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
 import { ActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { SlPicture } from 'react-icons/sl';
 import { IconDown } from '@arco-design/web-react/icon';
+import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 
 const { Paragraph } = Typography;
 export const ProjectSettings = ({
@@ -28,9 +28,7 @@ export const ProjectSettings = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
-  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    setShowLibraryModal: state.setShowLibraryModal,
-  }));
+  const [showLibraryModal, setShowLibraryModal] = useState(false);
 
   const handleEditSettings = () => {
     setCreateProjectModalVisible(true);
@@ -131,6 +129,8 @@ export const ProjectSettings = ({
           onUpdate(data);
         }}
       />
+
+      <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
     </div>
   );
 };

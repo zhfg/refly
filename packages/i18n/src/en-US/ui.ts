@@ -2326,6 +2326,9 @@ const translations = {
       remove: 'Remove from project',
       addToCanvas: 'Add to Canvas',
       exit: 'Exit',
+      addSource: 'Add File',
+      addExistingSource: 'Add Existing File',
+      importResource: 'Import Resource',
     },
     addSources: {
       title: 'Add Files',

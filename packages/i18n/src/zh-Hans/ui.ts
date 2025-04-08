@@ -2262,6 +2262,9 @@ const translations = {
       remove: '从项目移除',
       addToCanvas: '添加到画布',
       exit: '退出操作',
+      addSource: '添加文件',
+      addExistingSource: '添加已有文件',
+      importResource: '导入资源',
     },
     addSources: {
       title: '添加文件',

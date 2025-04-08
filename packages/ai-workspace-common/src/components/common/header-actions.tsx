@@ -122,12 +122,14 @@ const HeaderActions = ({
                 value={searchValue}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
-              <Button
-                type="text"
-                size="small"
-                icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
-                onClick={onToggleSearchMode}
-              />
+              <Tooltip title={t('project.action.exit')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconExit className={cn(iconClassName, 'text-gray-500')} />}
+                  onClick={onToggleSearchMode}
+                />
+              </Tooltip>
             </div>
           )}
         </>

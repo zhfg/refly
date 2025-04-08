@@ -22,6 +22,7 @@ import {
   IconMoreHorizontal,
   IconDelete,
   IconDownloadFile,
+  IconRemove,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { sourceObject } from '@refly-packages/ai-workspace-common/components/project/project-directory';
@@ -213,7 +214,7 @@ const SourceItemActionDropdown = memo(
       {
         label: (
           <div className="flex items-center flex-grow">
-            <IconDelete size={16} className="mr-2 text-gray-600" />
+            <IconRemove size={16} className="mr-2 text-gray-600" />
             {t('project.action.remove', 'Remove from Project')}
           </div>
         ),
@@ -547,7 +548,7 @@ export const SourcesMenu = ({
                                 <Text
                                   className="text-[13px] text-gray-700 truncate"
                                   ellipsis={{
-                                    tooltip: true,
+                                    tooltip: { placement: 'right' },
                                   }}
                                 >
                                   {item.title || t('common.untitled')}
