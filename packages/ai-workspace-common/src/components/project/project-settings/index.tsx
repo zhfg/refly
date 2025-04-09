@@ -87,6 +87,7 @@ export const ProjectSettings = ({
           </Text>
           <Tooltip title={t('project.viewAllProjects')}>
             <Button
+              className="flex-shrink-0"
               type="text"
               size="small"
               icon={<IconDown className={cn(iconClassName, 'text-gray-500')} />}
