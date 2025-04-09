@@ -2250,7 +2250,7 @@ const translations = {
     },
     action: {
       deleteSuccess: '删除成功',
-      deleteConfirm: '确定删除项目 "{{name}}" 吗？',
+      deleteConfirm: '确定删除知识库 "{{name}}" 吗？',
       createSuccess: '创建成功',
       editSuccess: '编辑成功',
       removeItemsSuccess: '已移除所选项',
