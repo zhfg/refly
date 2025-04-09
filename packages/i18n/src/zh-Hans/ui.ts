@@ -2273,7 +2273,7 @@ const translations = {
     sourceList: {
       selectedCount: '已选择 {{count}} 项',
       removeConfirm: '确定从当前知识库中移除所选项吗？',
-      deleteConfirm: '将从知识库删除所选项，确定删除吗？',
+      deleteConfirm: '确认要删除吗？该操作会永久删除所选项。',
       searchPlaceholder: '输入关键词搜索...',
       sourceCount: '{{resourceCount}} 个资源 · {{documentCount}} 个文档',
     },

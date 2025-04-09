@@ -247,6 +247,7 @@ export const CanvasMenu = ({
           children: (
             <div className="flex flex-col">
               <HeaderActions
+                source="canvas"
                 isSearchMode={isSearchMode}
                 isMultiSelectMode={isMultiSelectMode}
                 searchValue={searchValue}
@@ -299,13 +300,13 @@ export const CanvasMenu = ({
                         onMouseLeave={() => handleCanvasHover(null)}
                         onClick={() => handleCanvasClick(item.id, item)}
                       >
-                        <div className="flex items-center justify-between w-full">
+                        <div className="w-full relative">
                           <div className="flex items-center gap-2">
                             <IconCanvas className={cn(iconClassName, 'text-gray-500')} />
                             <Text
-                              className="w-[120px] text-[13px] text-gray-700"
+                              className="text-[13px] text-gray-700"
                               ellipsis={{
-                                tooltip: { placement: 'right', align: { offset: [50, 0] } },
+                                tooltip: { placement: 'right' },
                               }}
                             >
                               {item.name || t('common.untitled')}
@@ -313,10 +314,11 @@ export const CanvasMenu = ({
                           </div>
                           <div
                             className={cn(
-                              'flex items-center gap-1 transition-opacity duration-200',
+                              'absolute -right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-200 z-10 px-1',
                               isMultiSelectMode || hoveredCanvasId === item.id
                                 ? 'opacity-100'
                                 : 'opacity-0',
+                              isMultiSelectMode ? '' : 'bg-gray-50',
                             )}
                           >
                             <Checkbox

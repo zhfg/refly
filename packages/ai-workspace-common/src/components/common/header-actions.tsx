@@ -30,7 +30,7 @@ export interface HeaderActionsProps {
   addButtonNode?: ReactNode;
   itemCountText?: string;
   useAffix?: boolean;
-  target: () => HTMLElement;
+  target?: () => HTMLElement;
 }
 
 const HeaderActions = ({
@@ -65,7 +65,11 @@ const HeaderActions = ({
               <div className="flex items-center gap-1">
                 <Tooltip title={t('project.action.delete')}>
                   <Popconfirm
-                    title={t('project.sourceList.deleteConfirm')}
+                    title={
+                      <div className="max-w-[300px] text-sm">
+                        {t('project.sourceList.deleteConfirm')}
+                      </div>
+                    }
                     onConfirm={onDeleteSelected}
                     okText={t('common.confirm')}
                     cancelText={t('common.cancel')}
@@ -80,7 +84,11 @@ const HeaderActions = ({
 
                 <Tooltip title={t('project.action.remove')}>
                   <Popconfirm
-                    title={t('project.sourceList.removeConfirm')}
+                    title={
+                      <div className="max-w-[300px] text-sm">
+                        {t('project.sourceList.removeConfirm')}
+                      </div>
+                    }
                     onConfirm={onRemoveSelected}
                     okText={t('common.confirm')}
                     cancelText={t('common.cancel')}

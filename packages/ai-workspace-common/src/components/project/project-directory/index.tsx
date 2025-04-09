@@ -162,25 +162,23 @@ export const ProjectDirectory = ({ projectId, source }: ProjectDirectoryProps) =
 
         <Divider className="my-2" />
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden project-directory-content">
-          <CanvasMenu
-            isFetching={isLoadingCanvas}
-            canvasList={canvasList}
-            projectId={projectId}
-            onAddCanvasesSuccess={handleAddCanvases}
-            onRemoveCanvases={handleRemoveCanvases}
-          />
-          <SourcesMenu
-            isFetching={loadingSource}
-            sourceList={sourceList}
-            projectId={projectId}
-            documentCount={sourceList.filter((item) => item.entityType === 'document').length || 0}
-            resourceCount={sourceList.filter((item) => item.entityType === 'resource').length || 0}
-            onUpdatedItems={() => {
-              getSourceList();
-            }}
-          />
-        </div>
+        <CanvasMenu
+          isFetching={isLoadingCanvas}
+          canvasList={canvasList}
+          projectId={projectId}
+          onAddCanvasesSuccess={handleAddCanvases}
+          onRemoveCanvases={handleRemoveCanvases}
+        />
+        <SourcesMenu
+          isFetching={loadingSource}
+          sourceList={sourceList}
+          projectId={projectId}
+          documentCount={sourceList.filter((item) => item.entityType === 'document').length || 0}
+          resourceCount={sourceList.filter((item) => item.entityType === 'resource').length || 0}
+          onUpdatedItems={() => {
+            getSourceList();
+          }}
+        />
 
         {/* Combined Project Knowledge Base Toggle */}
         {internalProjectId ? (

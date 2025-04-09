@@ -2337,7 +2337,8 @@ const translations = {
     sourceList: {
       selectedCount: 'Selected {{count}} items',
       removeConfirm: 'Are you sure you want to remove the selected items from the project?',
-      deleteConfirm: 'Will remove the selected items from the knowledge base, are you sure?',
+      deleteConfirm:
+        'Are you sure you want to delete the selected items? This action cannot be undone',
       searchPlaceholder: 'Search Sources...',
       sourceCount: '{{resourceCount}} resources · {{documentCount}} documents',
     },

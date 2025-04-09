@@ -558,10 +558,11 @@ export const SourcesMenu = ({
                               </div>
                               <div
                                 className={cn(
-                                  'absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-200 z-10 bg-gray-50 px-1',
+                                  'absolute -right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-200 z-10 px-1',
                                   isMultiSelectMode || hoveredSourceId === item.entityId
                                     ? 'opacity-100'
                                     : 'opacity-0',
+                                  isMultiSelectMode ? '' : 'bg-gray-50',
                                 )}
                               >
                                 <Checkbox
