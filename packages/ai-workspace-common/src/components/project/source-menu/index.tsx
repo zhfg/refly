@@ -339,22 +339,29 @@ export const SourcesMenu = ({
     setIsMultiSelectMode(false);
   }, []);
 
-  const deleteSelectedSources = useCallback(async () => {
-    const { data } = await getClient().deleteProjectItems({
-      body: {
-        projectId,
-        items: selectedSources.map((item) => ({
-          entityType: item.entityType,
-          entityId: item.entityId,
-        })),
-      },
-    });
-    if (data?.success) {
-      exitSearchMode();
-      message.success(t('project.action.deleteItemsSuccess'));
-      onUpdatedItems?.();
-    }
-  }, [selectedSources, exitMultiSelectMode, projectId, t, onUpdatedItems]);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const deleteSelectedSources = useCallback(
+    async (afterDelete?: () => void) => {
+      setIsDeleteLoading(true);
+      const { data } = await getClient().deleteProjectItems({
+        body: {
+          projectId,
+          items: selectedSources.map((item) => ({
+            entityType: item.entityType,
+            entityId: item.entityId,
+          })),
+        },
+      });
+      if (data?.success) {
+        exitSearchMode();
+        message.success(t('project.action.deleteItemsSuccess'));
+        onUpdatedItems?.();
+        afterDelete?.();
+      }
+      setIsDeleteLoading(false);
+    },
+    [selectedSources, exitMultiSelectMode, projectId, t, onUpdatedItems, exitSearchMode],
+  );
 
   const removeSelectedSourcesFromProject = useCallback(async () => {
     const res = await getClient().updateProjectItems({
@@ -496,6 +503,7 @@ export const SourcesMenu = ({
                   onToggleSearchMode={toggleSearchMode}
                   onExitMultiSelectMode={exitMultiSelectMode}
                   onDeleteSelected={deleteSelectedSources}
+                  isDeleteLoading={isDeleteLoading}
                   onRemoveSelected={removeSelectedSourcesFromProject}
                   onAddItem={handleAddSource}
                   onAddSelectedSourcesToCanvas={addSelectedSourcesToCanvas}

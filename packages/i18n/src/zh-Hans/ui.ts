@@ -2265,6 +2265,8 @@ const translations = {
       addSource: '添加文件',
       addExistingSource: '添加已有文件',
       importResource: '导入资源',
+      onlyImageAllowed: '只允许上传 {{type}} 类型的图片',
+      imageSizeLimited: '图片大小限制为 {{size}} MB',
     },
     addSources: {
       title: '添加文件',
@@ -2273,7 +2275,7 @@ const translations = {
     sourceList: {
       selectedCount: '已选择 {{count}} 项',
       removeConfirm: '确定从当前知识库中移除所选项吗？',
-      deleteConfirm: '确认要删除吗？该操作会永久删除所选项。',
+      deleteConfirm: '所选项将被永久删除，是否要继续？',
       searchPlaceholder: '输入关键词搜索...',
       sourceCount: '{{resourceCount}} 个资源 · {{documentCount}} 个文档',
     },

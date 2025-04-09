@@ -639,11 +639,6 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
         </Menu>
 
         <SettingModal visible={showSettingModal} setVisible={setShowSettingModal} />
-
-        <SettingsGuideModal />
-        <TourModal />
-        <StorageExceededModal />
-        <CanvasTemplateModal />
       </div>
     </Sider>
   );
@@ -657,13 +652,22 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   const isProject = useMatch('/project/:projectId');
   const projectId = location.pathname.split('/').pop();
 
-  return isLogin ? (
-    isProject ? (
-      <ProjectDirectory projectId={projectId} source={source} />
-    ) : (
-      <SiderLoggedIn source={source} />
-    )
-  ) : (
-    <SiderLoggedOut source={source} />
+  return (
+    <>
+      <SettingsGuideModal />
+      <TourModal />
+      <StorageExceededModal />
+      <CanvasTemplateModal />
+
+      {isLogin ? (
+        isProject ? (
+          <ProjectDirectory projectId={projectId} source={source} />
+        ) : (
+          <SiderLoggedIn source={source} />
+        )
+      ) : (
+        <SiderLoggedOut source={source} />
+      )}
+    </>
   );
 };

@@ -1,6 +1,6 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Popconfirm, Button, Input, Tooltip, Affix } from 'antd';
+import { Popconfirm, Button, Input, Tooltip, Affix, Modal } from 'antd';
 import {
   IconDelete,
   IconRemove,
@@ -10,6 +10,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import cn from 'classnames';
+import { IoAlertCircle } from 'react-icons/io5';
 
 export const iconClassName =
   'w-3.5 h-3.5 flex-shrink-0 flex items-center justify-center hover:text-gray-700';
@@ -23,7 +24,8 @@ export interface HeaderActionsProps {
   onSearchChange: (value: string) => void;
   onToggleSearchMode: () => void;
   onExitMultiSelectMode: () => void;
-  onDeleteSelected: () => void;
+  onDeleteSelected: (afterDelete?: () => void) => void;
+  isDeleteLoading: boolean;
   onRemoveSelected: () => void;
   onAddItem?: () => void;
   onAddSelectedSourcesToCanvas?: () => void;
@@ -43,6 +45,7 @@ const HeaderActions = ({
   onToggleSearchMode,
   onExitMultiSelectMode,
   onDeleteSelected,
+  isDeleteLoading,
   onRemoveSelected,
   onAddItem,
   onAddSelectedSourcesToCanvas,
@@ -52,6 +55,7 @@ const HeaderActions = ({
   target,
 }: HeaderActionsProps) => {
   const { t } = useTranslation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const actions = useMemo(() => {
     if (isSearchMode || isMultiSelectMode) {
@@ -64,22 +68,12 @@ const HeaderActions = ({
               </div>
               <div className="flex items-center gap-1">
                 <Tooltip title={t('project.action.delete')}>
-                  <Popconfirm
-                    title={
-                      <div className="max-w-[300px] text-sm">
-                        {t('project.sourceList.deleteConfirm')}
-                      </div>
-                    }
-                    onConfirm={onDeleteSelected}
-                    okText={t('common.confirm')}
-                    cancelText={t('common.cancel')}
-                  >
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<IconDelete className={cn(iconClassName, 'text-red-500')} />}
-                    />
-                  </Popconfirm>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<IconDelete className={cn(iconClassName, 'text-red-500')} />}
+                    onClick={() => setIsModalOpen(true)}
+                  />
                 </Tooltip>
 
                 <Tooltip title={t('project.action.remove')}>
@@ -183,6 +177,7 @@ const HeaderActions = ({
     t,
     source,
     onAddSelectedSourcesToCanvas,
+    setIsModalOpen,
   ]);
 
   const headerContent = (
@@ -191,6 +186,25 @@ const HeaderActions = ({
     >
       {itemCountText && <div className="text-[10px] text-gray-500">{itemCountText}</div>}
       {actions}
+      <Modal
+        centered
+        width={416}
+        open={isModalOpen}
+        onOk={() => onDeleteSelected(() => setIsModalOpen(false))}
+        okText={t('common.confirm')}
+        okButtonProps={{ danger: true, loading: isDeleteLoading }}
+        cancelText={t('common.cancel')}
+        onCancel={() => setIsModalOpen(false)}
+        confirmLoading={isDeleteLoading}
+        title={
+          <div className="flex items-center gap-2">
+            <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
+            {t('common.deleteConfirmMessage')}
+          </div>
+        }
+      >
+        <p>{t('project.sourceList.deleteConfirm')}</p>
+      </Modal>
     </div>
   );
 

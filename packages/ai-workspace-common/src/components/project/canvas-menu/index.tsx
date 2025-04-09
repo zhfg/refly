@@ -152,23 +152,30 @@ export const CanvasMenu = ({
     setHoveredCanvasId(null);
   }, []);
 
-  const deleteSelectedCanvases = useCallback(async () => {
-    const { data } = await getClient().deleteProjectItems({
-      body: {
-        projectId,
-        items: selectedCanvases.map((item) => ({
-          entityType: 'canvas',
-          entityId: item.id,
-        })),
-      },
-    });
-    if (data?.success) {
-      onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
-      setSelectedCanvases([]);
-      setHoveredCanvasId(null);
-      message.success(t('project.action.deleteItemsSuccess'));
-    }
-  }, [selectedCanvases, exitMultiSelectMode, onRemoveCanvases]);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const deleteSelectedCanvases = useCallback(
+    async (afterDelete?: () => void) => {
+      setIsDeleteLoading(true);
+      const { data } = await getClient().deleteProjectItems({
+        body: {
+          projectId,
+          items: selectedCanvases.map((item) => ({
+            entityType: 'canvas',
+            entityId: item.id,
+          })),
+        },
+      });
+      if (data?.success) {
+        onRemoveCanvases?.(selectedCanvases.map((item) => item.id));
+        setSelectedCanvases([]);
+        setHoveredCanvasId(null);
+        message.success(t('project.action.deleteItemsSuccess'));
+        afterDelete?.();
+      }
+      setIsDeleteLoading(false);
+    },
+    [selectedCanvases, exitMultiSelectMode, onRemoveCanvases, t],
+  );
 
   const removeSelectedCanvasesFromProject = useCallback(async () => {
     const res = await getClient().updateProjectItems({
@@ -256,6 +263,7 @@ export const CanvasMenu = ({
                 onToggleSearchMode={toggleSearchMode}
                 onExitMultiSelectMode={exitMultiSelectMode}
                 onDeleteSelected={deleteSelectedCanvases}
+                isDeleteLoading={isDeleteLoading}
                 onRemoveSelected={removeSelectedCanvasesFromProject}
                 addButtonNode={addButtonNode}
                 itemCountText={itemCountText}

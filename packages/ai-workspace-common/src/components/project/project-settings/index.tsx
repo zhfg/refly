@@ -70,18 +70,21 @@ export const ProjectSettings = ({
           {data?.coverUrl ? (
             <img src={data?.coverUrl} alt="Refly" className="w-10 h-10 rounded-md" />
           ) : (
-            <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
               <SlPicture size={24} className="text-gray-500" />
             </div>
           )}
 
           <Text
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLibraryModal(true);
+            }}
             className="text-sm"
             ellipsis={{ tooltip: { placement: 'right', align: { offset: [40, 0] } } }}
           >
             {data?.name || t('common.untitled')}
           </Text>
-
           <Tooltip title={t('project.viewAllProjects')}>
             <Button
               type="text"
@@ -113,7 +116,7 @@ export const ProjectSettings = ({
         {data?.customInstructions && (
           <Paragraph
             className="text-xs p-1 mt-1 !mb-0 bg-gray-50 text-gray-400 rounded-md"
-            ellipsis={{ rows: 3, tooltip: { placement: 'right' } }}
+            ellipsis={{ rows: 1, tooltip: { placement: 'right' } }}
           >
             {data?.customInstructions}
           </Paragraph>
