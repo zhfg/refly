@@ -2329,6 +2329,8 @@ const translations = {
       addSource: 'Add File',
       addExistingSource: 'Add Existing File',
       importResource: 'Import Resource',
+      onlyImageAllowed: 'Only {{type}} images are allowed',
+      imageSizeLimited: 'Image size limited to {{size}} MB',
     },
     addSources: {
       title: 'Add Files',
@@ -2337,7 +2339,7 @@ const translations = {
     sourceList: {
       selectedCount: 'Selected {{count}} items',
       removeConfirm: 'Are you sure you want to remove the selected items from the project?',
-      deleteConfirm: 'Will remove the selected items from the knowledge base, are you sure?',
+      deleteConfirm: 'The selected {{count}} items will be permanently deleted, continue?',
       searchPlaceholder: 'Search Sources...',
       sourceCount: '{{resourceCount}} resources · {{documentCount}} documents',
     },

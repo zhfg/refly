@@ -81,7 +81,7 @@ export const CreateProjectModal = ({
       if (mode === 'create') {
         navigate(`/project/${data?.data?.projectId}?canvasId=empty`);
       }
-      onSuccess?.(data?.data);
+      onSuccess?.({ ...data?.data, coverUrl: coverPictureUrl });
     }
   };
 
