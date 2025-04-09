@@ -203,7 +203,19 @@ const HeaderActions = ({
           </div>
         }
       >
-        <p>{t('project.sourceList.deleteConfirm')}</p>
+        <div>
+          {t('project.sourceList.deleteConfirm', {
+            count: selectedItems.length,
+          })}
+        </div>
+        <div className="mt-2 px-4 text-xs text-gray-500">
+          {selectedItems.slice(0, 10).map((item, index) => (
+            <div key={item.id}>
+              {index + 1}. {item.title || item.name || t('common.untitled')}
+            </div>
+          ))}
+          {selectedItems.length > 10 && <div>...</div>}
+        </div>
       </Modal>
     </div>
   );

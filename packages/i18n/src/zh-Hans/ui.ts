@@ -2275,7 +2275,7 @@ const translations = {
     sourceList: {
       selectedCount: '已选择 {{count}} 项',
       removeConfirm: '确定从当前知识库中移除所选项吗？',
-      deleteConfirm: '所选项将被永久删除，是否要继续？',
+      deleteConfirm: '所选 {{count}} 项将被永久删除，是否要继续？',
       searchPlaceholder: '输入关键词搜索...',
       sourceCount: '{{resourceCount}} 个资源 · {{documentCount}} 个文档',
     },

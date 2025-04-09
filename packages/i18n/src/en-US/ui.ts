@@ -2339,7 +2339,7 @@ const translations = {
     sourceList: {
       selectedCount: 'Selected {{count}} items',
       removeConfirm: 'Are you sure you want to remove the selected items from the project?',
-      deleteConfirm: 'The selected items will be permanently deleted, continue?',
+      deleteConfirm: 'The selected {{count}} items will be permanently deleted, continue?',
       searchPlaceholder: 'Search Sources...',
       sourceCount: '{{resourceCount}} resources · {{documentCount}} documents',
     },
