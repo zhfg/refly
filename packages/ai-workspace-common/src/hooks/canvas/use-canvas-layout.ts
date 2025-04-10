@@ -19,9 +19,12 @@ const getLayoutedElements = (
     marginy: 50,
   });
 
+  // First, add all edges to the graph
   for (const edge of edges) {
     g.setEdge(edge.source, edge.target);
   }
+
+  // Add all nodes to the graph
   for (const node of nodes) {
     g.setNode(node.id, {
       ...node,
@@ -30,11 +33,24 @@ const getLayoutedElements = (
     });
   }
 
+  // Run the layout algorithm
   Dagre.layout(g);
 
+  // Process nodes and preserve group node positions
   return {
     nodes: nodes.map((node) => {
       const nodeWithPosition = g.node(node.id);
+
+      // If the node is inside a group, preserve its relative position
+      if (node.parentId) {
+        const parentNode = nodes.find((n) => n.id === node.parentId);
+        if (parentNode) {
+          // Keep the original relative position within the group
+          return node;
+        }
+      }
+
+      // For non-group nodes, apply the new layout position
       return {
         ...node,
         position: { x: nodeWithPosition.x, y: nodeWithPosition.y },
