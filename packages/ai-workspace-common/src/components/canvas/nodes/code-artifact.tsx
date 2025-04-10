@@ -276,9 +276,8 @@ export const CodeArtifactNode = memo(
 
     // Update size when content changes
     useEffect(() => {
-      if (!targetRef.current) return;
-
       requestAnimationFrame(() => {
+        if (!targetRef.current) return;
         const { offsetWidth, offsetHeight } = targetRef.current;
         resizeMoveable(offsetWidth, offsetHeight);
       });
