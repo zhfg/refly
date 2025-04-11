@@ -529,10 +529,6 @@ export const useCanvasLayout = () => {
       const layoutWidth = maxX - minX;
       const layoutHeight = maxY - minY;
 
-      // Add padding
-      const paddingX = 40;
-      const paddingY = 40;
-
       // Calculate translation to center the layout
       const translateX = (groupWidth - layoutWidth) / 2 - minX;
       const translateY = (groupHeight - layoutHeight) / 2 - minY;
@@ -551,8 +547,9 @@ export const useCanvasLayout = () => {
             return {
               ...node,
               position: {
-                x: nodeWithPosition.x - nodeSize.width / 2 + translateX + paddingX,
-                y: nodeWithPosition.y - nodeSize.height / 2 + translateY + paddingY,
+                // Center the layout by applying the translation
+                x: nodeWithPosition.x - nodeSize.width / 2 + translateX,
+                y: nodeWithPosition.y - nodeSize.height / 2 + translateY,
               },
             };
           }
