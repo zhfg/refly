@@ -40,6 +40,11 @@ const AddSourcesMemo = React.memo(
     const [selectedItems, setSelectedItems] = useState<SelectedItems[]>([]);
     const [loading, setLoading] = useState(false);
     const [activeKey, setActiveKey] = useState(defaultActiveKey || 'document');
+    const [internalVisible, setInternalVisible] = useState(visible);
+
+    useEffect(() => {
+      setInternalVisible(visible);
+    }, [visible]);
 
     useEffect(() => {
       if (defaultActiveKey) {
@@ -92,50 +97,56 @@ const AddSourcesMemo = React.memo(
       console.log('selectedItems', selectedItems);
     }, [selectedItems]);
 
-    const sourceTabs = [
-      {
-        key: 'document',
-        label: t('common.document'),
-        icon: <IconDocument style={{ transform: 'translateY(2px)' }} />,
-        children: (
-          <Documents
-            visible={visible && activeKey === 'document'}
-            selectedItems={selectedItems.filter((item) => item.entityType === 'document')}
-            onSelectedItemsChange={setSelectedItems}
-            existingItems={existingItems}
-          />
-        ),
-      },
-      {
-        key: 'resource',
-        label: t('common.resource'),
-        icon: <IconResource style={{ transform: 'translateY(2px)' }} />,
-        children: (
-          <Resources
-            visible={visible && activeKey === 'resource'}
-            selectedItems={selectedItems.filter((item) => item.entityType === 'resource')}
-            onSelectedItemsChange={setSelectedItems}
-            existingItems={existingItems}
-          />
-        ),
-      },
-    ];
+    const sourceTabs = useCallback(
+      () => [
+        {
+          key: 'document',
+          label: t('common.document'),
+          icon: <IconDocument style={{ transform: 'translateY(2px)' }} />,
+          children: (
+            <Documents
+              visible={visible && activeKey === 'document'}
+              selectedItems={selectedItems.filter((item) => item.entityType === 'document')}
+              onSelectedItemsChange={setSelectedItems}
+              existingItems={existingItems}
+            />
+          ),
+        },
+        {
+          key: 'resource',
+          label: t('common.resource'),
+          icon: <IconResource style={{ transform: 'translateY(2px)' }} />,
+          children: (
+            <Resources
+              visible={visible && activeKey === 'resource'}
+              selectedItems={selectedItems.filter((item) => item.entityType === 'resource')}
+              onSelectedItemsChange={setSelectedItems}
+              existingItems={existingItems}
+            />
+          ),
+        },
+      ],
+      [t, visible, activeKey, selectedItems, existingItems],
+    );
 
-    const canvasTabs = [
-      {
-        key: 'canvas',
-        label: t('common.canvas'),
-        icon: <IconCanvas style={{ transform: 'translateY(2px)' }} />,
-        children: (
-          <Canvases
-            visible={visible && activeKey === 'canvas'}
-            selectedItems={selectedItems.filter((item) => item.entityType === 'canvas')}
-            onSelectedItemsChange={setSelectedItems}
-            existingItems={existingItems}
-          />
-        ),
-      },
-    ];
+    const canvasTabs = useCallback(
+      () => [
+        {
+          key: 'canvas',
+          label: t('common.canvas'),
+          icon: <IconCanvas style={{ transform: 'translateY(2px)' }} />,
+          children: (
+            <Canvases
+              visible={visible && activeKey === 'canvas'}
+              selectedItems={selectedItems.filter((item) => item.entityType === 'canvas')}
+              onSelectedItemsChange={setSelectedItems}
+              existingItems={existingItems}
+            />
+          ),
+        },
+      ],
+      [t, visible, activeKey, selectedItems, existingItems],
+    );
 
     const handleTabChange = (key: string) => {
       setActiveKey(key);
@@ -145,11 +156,12 @@ const AddSourcesMemo = React.memo(
 
     return (
       <Modal
-        open={visible}
+        open={internalVisible}
         onCancel={handleCancel}
         title={t('project.addSources.title')}
         width={600}
         className="add-sources-modal"
+        destroyOnClose={true}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
             {t('common.cancel')}
@@ -166,7 +178,7 @@ const AddSourcesMemo = React.memo(
         ]}
       >
         <Tabs
-          items={domain === 'source' ? sourceTabs : canvasTabs}
+          items={domain === 'source' ? sourceTabs() : canvasTabs()}
           activeKey={activeKey}
           onChange={handleTabChange}
         />
