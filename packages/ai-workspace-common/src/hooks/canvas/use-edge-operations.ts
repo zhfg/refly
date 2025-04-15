@@ -4,6 +4,7 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { useEdgeStyles, getEdgeStyles } from '../../components/canvas/constants';
 import { useCanvasSync } from './use-canvas-sync';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { edgeEventsEmitter } from '@refly-packages/ai-workspace-common/events/edge';
 
 export const useEdgeOperations = () => {
   const { getState, setState } = useStoreApi<CanvasNode<any>>();
@@ -22,7 +23,12 @@ export const useEdgeOperations = () => {
     (changes: EdgeChange<Edge>[]) => {
       const { edges } = getState();
       const updatedEdges = applyEdgeChanges(changes, edges);
+
       updateEdgesWithSync(updatedEdges);
+      edgeEventsEmitter.emit('edgeChange', {
+        oldEdges: edges,
+        newEdges: updatedEdges,
+      });
     },
     [getState, updateEdgesWithSync],
   );
@@ -54,7 +60,12 @@ export const useEdgeOperations = () => {
       };
 
       const updatedEdges = [...edges, newEdge];
+
       updateEdgesWithSync(updatedEdges);
+      edgeEventsEmitter.emit('edgeChange', {
+        oldEdges: edges,
+        newEdges: updatedEdges,
+      });
     },
     [getState, updateEdgesWithSync],
   );
