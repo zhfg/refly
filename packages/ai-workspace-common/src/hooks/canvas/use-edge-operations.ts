@@ -1,22 +1,30 @@
 import { useCallback } from 'react';
-import { Connection, Edge, applyEdgeChanges, EdgeChange, useReactFlow } from '@xyflow/react';
+import { Connection, Edge, applyEdgeChanges, EdgeChange, useStoreApi } from '@xyflow/react';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useEdgeStyles, getEdgeStyles } from '../../components/canvas/constants';
 import { useCanvasSync } from './use-canvas-sync';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
-export const useEdgeOperations = (_selectedCanvasId?: string) => {
-  const { getEdges, setEdges } = useReactFlow();
+export const useEdgeOperations = () => {
+  const { getState, setState } = useStoreApi<CanvasNode<any>>();
   const edgeStyles = useEdgeStyles();
   const { throttledSyncEdgesToYDoc } = useCanvasSync();
 
+  const updateEdgesWithSync = useCallback(
+    (edges: Edge[]) => {
+      setState({ edges });
+      throttledSyncEdgesToYDoc(edges);
+    },
+    [setState, throttledSyncEdgesToYDoc],
+  );
+
   const onEdgesChange = useCallback(
     (changes: EdgeChange<Edge>[]) => {
-      const edges = getEdges();
+      const { edges } = getState();
       const updatedEdges = applyEdgeChanges(changes, edges);
-      setEdges(updatedEdges);
-      throttledSyncEdgesToYDoc(updatedEdges);
+      updateEdgesWithSync(updatedEdges);
     },
-    [setEdges, throttledSyncEdgesToYDoc],
+    [getState, updateEdgesWithSync],
   );
 
   const onConnect = useCallback(
@@ -26,7 +34,7 @@ export const useEdgeOperations = (_selectedCanvasId?: string) => {
         return;
       }
 
-      const edges = getEdges();
+      const { edges } = getState();
 
       // check if the edge already exists
       const connectionExists = edges?.some(
@@ -46,24 +54,22 @@ export const useEdgeOperations = (_selectedCanvasId?: string) => {
       };
 
       const updatedEdges = [...edges, newEdge];
-      setEdges(updatedEdges);
-      throttledSyncEdgesToYDoc(updatedEdges);
+      updateEdgesWithSync(updatedEdges);
     },
-    [setEdges, edgeStyles, throttledSyncEdgesToYDoc],
+    [getState, updateEdgesWithSync],
   );
 
   const updateAllEdgesStyle = useCallback(
     (showEdges: boolean) => {
-      const edges = getEdges();
+      const { edges } = getState();
       const edgeStyles = getEdgeStyles(showEdges);
       const updatedEdges = edges.map((edge) => ({
         ...edge,
         style: edgeStyles.default,
       }));
-      setEdges(updatedEdges);
-      throttledSyncEdgesToYDoc(updatedEdges);
+      updateEdgesWithSync(updatedEdges);
     },
-    [setEdges, throttledSyncEdgesToYDoc],
+    [getState, updateEdgesWithSync],
   );
 
   return {
