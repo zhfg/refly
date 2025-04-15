@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Menu } from '@arco-design/web-react';
-import { Avatar, Button, Layout, Skeleton, Divider, Tag } from 'antd';
+import { Avatar, Button, Layout, Skeleton, Divider, Tag, Menu } from 'antd';
 import {
   useLocation,
   useMatch,
@@ -41,8 +40,6 @@ import {
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import { AiOutlineMenuFold, AiOutlineUser } from 'react-icons/ai';
 import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components/subscription/hint';
-import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
-import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
@@ -115,10 +112,6 @@ export const SiderLogo = (props: {
   );
 };
 
-const MenuItemTooltipContent = (props: { title: string }) => {
-  return <div>{props.title}</div>;
-};
-
 const SettingItem = () => {
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
@@ -153,87 +146,22 @@ const SettingItem = () => {
   );
 };
 
-const MenuItemContent = (props: {
-  icon?: React.ReactNode;
-  title?: string;
-  type: string;
-  collapse?: boolean;
-  position?: 'left' | 'right';
-  hoverContent?: HoverContent;
-  canvasId?: string;
-}) => {
-  const { position = 'left', type, hoverContent } = props;
-  const { hoverCardEnabled } = useHoverCard();
-
-  const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow((state) => ({
-    setShowLibraryModal: state.setShowLibraryModal,
-    setShowCanvasListModal: state.setShowCanvasListModal,
-  }));
-
-  const { setVisible } = useCanvasTemplateModal((state) => ({
-    setVisible: state.setVisible,
-  }));
-
-  const handleNavClick = () => {
-    if (type === 'Canvas') {
-      setShowCanvasListModal(true);
-    } else if (type === 'Library') {
-      setShowLibraryModal(true);
-    } else if (type === 'Template') {
-      setVisible(true);
-    }
-  };
-
-  const content = (
-    <div
-      className="relative flex items-center"
-      style={{
-        zIndex: 2,
-      }}
-      onClick={() => handleNavClick()}
-    >
-      <div className="flex flex-1 flex-nowrap items-center">
-        {position === 'left' && props.icon}
-        <span className="sider-menu-title">{props.title}</span>
-        {position === 'right' && props.icon}
-      </div>
-    </div>
-  );
-
-  if (hoverContent && hoverCardEnabled) {
-    return (
-      <HoverCard
-        title={hoverContent?.title}
-        description={hoverContent?.description}
-        videoUrl={hoverContent?.videoUrl}
-        placement={hoverContent?.placement || 'right'}
-      >
-        {content}
-      </HoverCard>
-    );
-  }
-
-  return content;
-};
-
 export const NewCanvasItem = () => {
   const { t } = useTranslation();
   const { debouncedCreateCanvas, isCreating: createCanvasLoading } = useCreateCanvas();
 
   return (
-    <MenuItem
-      key="newCanvas"
-      className="ml-2.5 flex h-8 items-center"
-      onClick={debouncedCreateCanvas}
-    >
+    <div className="w-full px-1" onClick={debouncedCreateCanvas}>
       <Button
+        className="w-full"
+        key="newCanvas"
         loading={createCanvasLoading}
         type="text"
         icon={<IconPlus className="text-green-600" />}
-      />
-
-      <span className="text-green-600">{t('loggedHomePage.siderMenu.newCanvas')}</span>
-    </MenuItem>
+      >
+        <span className="text-green-600">{t('loggedHomePage.siderMenu.newCanvas')}</span>
+      </Button>
+    </div>
   );
 };
 
@@ -244,15 +172,16 @@ export const NewProjectItem = () => {
 
   return (
     <>
-      <MenuItem
+      <div
         key="newProject"
-        className="ml-2.5 flex h-8 items-center"
+        className="w-full px-1"
         onClick={() => setCreateProjectModalVisible(true)}
       >
-        <Button type="text" icon={<IconPlus className="text-green-600" />} />
+        <Button type="text" icon={<IconPlus className="text-green-600" />} className="w-full">
+          <span className="text-green-600">{t('project.create')}</span>
+        </Button>
+      </div>
 
-        <span className="text-green-600">{t('project.create')}</span>
-      </MenuItem>
       <CreateProjectModal
         mode="create"
         visible={createProjectModalVisible}
@@ -278,16 +207,16 @@ export const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
   }, []);
 
   return (
-    <MenuItem
+    <div
       key={canvas.id}
-      className={cn('group relative ml-4 h-8 rounded text-sm leading-8 hover:bg-gray-50', {
+      className={cn('group relative m-1 px-2 rounded text-sm leading-7 hover:bg-gray-50', {
         '!bg-gray-100 font-medium !text-green-600': selectedKey === canvas.id,
       })}
       onClick={() => {
         navigate(`/canvas/${canvas.id}`);
       }}
     >
-      <div className="flex h-8 w-40 items-center justify-between">
+      <div className="flex w-40 items-center justify-between">
         <div className="flex items-center gap-3">
           <IconCanvas className={cn({ 'text-green-600': selectedKey === canvas.id })} />
           <div className="w-28 truncate">{canvas?.name || t('common.untitled')}</div>
@@ -309,7 +238,7 @@ export const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
           />
         </div>
       </div>
-    </MenuItem>
+    </div>
   );
 };
 
@@ -323,18 +252,18 @@ export const ProjectListItem = ({ project }: { project: SiderData }) => {
   };
 
   return (
-    <MenuItem
+    <div
       key={project.id}
-      className="group relative ml-4 h-8 rounded text-sm leading-8 hover:bg-gray-50"
+      className="group relative m-1 px-2 rounded text-sm leading-7 hover:bg-gray-50"
       onClick={handleProjectClick}
     >
-      <div className="flex h-8 w-40 items-center justify-between">
+      <div className="flex w-40 items-center justify-between">
         <div className="flex items-center gap-3">
           <IconProject className="text-gray-500" />
           <div className="w-28 truncate">{project?.name || t('common.untitled')}</div>
         </div>
       </div>
-    </MenuItem>
+    </div>
   );
 };
 
@@ -390,7 +319,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
 
   const selectedKey = useMemo(() => getSelectedKey(location.pathname), [location.pathname]);
 
-  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library', 'Template'], []);
+  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library'], []);
 
   const canvasId = location.pathname.split('/').pop();
   const { debouncedCreateCanvas } = useCreateCanvas({
@@ -406,7 +335,6 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     icon: React.ReactNode;
     showDivider?: boolean;
     onClick?: () => void;
-    hoverContent?: HoverContent;
   }
 
   const siderSections: SiderCenterProps[] = [
@@ -419,22 +347,11 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
       key: 'Canvas',
       name: 'canvas',
       icon: <IconCanvas key="canvas" className="arco-icon" style={{ fontSize: 20 }} />,
-      hoverContent: {
-        title: t('loggedHomePage.siderMenu.canvasTitle'),
-        description: t('loggedHomePage.siderMenu.canvasDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm',
-        placement: 'rightBottom',
-      },
     },
     {
       key: 'Library',
       name: 'library',
       icon: <IconLibrary key="library" className="arco-icon" style={{ fontSize: 20 }} />,
-      hoverContent: {
-        title: t('loggedHomePage.siderMenu.libraryTitle'),
-        description: t('loggedHomePage.siderMenu.libraryDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm',
-      },
     },
   ];
 
@@ -479,6 +396,9 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     setShowLibraryModal,
     setShowSettingModal,
     setSettingsModalActiveTab,
+    debouncedCreateCanvas,
+    canvasId,
+    updateLibraryModalActiveKey,
   ]);
 
   return (
@@ -489,154 +409,140 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
       )}
     >
-      <div className="flex h-full flex-col overflow-y-auto">
+      <div className="flex h-full flex-col overflow-hidden">
         <SiderLogo source={source} navigate={(path) => navigate(path)} setCollapse={setCollapse} />
 
         <SearchQuickOpenBtn />
 
-        <Menu
-          className="flex-1 border-r-0 bg-transparent"
-          openKeys={defaultOpenKeys}
-          selectedKeys={selectedKey ? [selectedKey] : []}
-          defaultSelectedKeys={selectedKey ? [selectedKey] : []}
-        >
-          <div className="flex h-full flex-col justify-between">
-            <div className="flex-1 overflow-y-auto">
-              <div className="sider-section">
-                {siderSections.map((item, itemIndex) => (
-                  <React.Fragment key={item.key}>
-                    <SubMenu
-                      key={item.key}
-                      className="[&_.arco-menu-icon-suffix_.arco-icon-down]:z-[1] [&_.arco-menu-icon-suffix_.arco-icon-down]:rotate-90 [&_.arco-menu-inline-header]:pr-0"
-                      title={
-                        <MenuItemContent
-                          canvasId={canvasId}
-                          type={item.key}
-                          icon={item.icon}
-                          title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                          hoverContent={item.hoverContent}
-                        />
-                      }
-                    >
-                      {item.key === 'Canvas' && (
-                        <>
-                          <NewCanvasItem />
-
-                          {isLoadingCanvas ? (
-                            <>
-                              <Skeleton.Input
-                                key="skeleton-1"
-                                active
-                                size="small"
-                                style={{ width: 204 }}
-                              />
-                              <Skeleton.Input
-                                key="skeleton-2"
-                                active
-                                size="small"
-                                style={{ marginTop: 8, width: 204 }}
-                              />
-                              <Skeleton.Input
-                                key="skeleton-3"
-                                active
-                                size="small"
-                                style={{ marginTop: 8, width: 204 }}
-                              />
-                            </>
-                          ) : (
-                            canvasList.map((canvas) => (
-                              <CanvasListItem key={canvas.id} canvas={canvas} />
-                            ))
-                          )}
-                        </>
-                      )}
-
-                      {item.key === 'Library' && (
-                        <>
-                          <NewProjectItem />
-
-                          {isLoadingProjects ? (
-                            <>
-                              <Skeleton.Input
-                                key="skeleton-1"
-                                active
-                                size="small"
-                                style={{ width: 204 }}
-                              />
-                              <Skeleton.Input
-                                key="skeleton-2"
-                                active
-                                size="small"
-                                style={{ marginTop: 8, width: 204 }}
-                              />
-                              <Skeleton.Input
-                                key="skeleton-3"
-                                active
-                                size="small"
-                                style={{ marginTop: 8, width: 204 }}
-                              />
-                            </>
-                          ) : (
-                            projectsList.map((project) => (
-                              <ProjectListItem key={project.id} project={project} />
-                            ))
-                          )}
-                        </>
-                      )}
-                    </SubMenu>
-                    {itemIndex < siderSections.length - 1 && (
-                      <Divider
-                        key={`divider-${item.key}`}
-                        style={{
-                          margin: '6px 0',
-                        }}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-auto">
-              <Divider style={{ margin: '6px 0' }} />
-
-              {subscriptionEnabled && planType === 'free' && (
-                <div className="mb-2 flex flex-col gap-2">
-                  <SubscriptionHint />
+        {/* Main menu section with flexible layout */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-[200px]">
+          <Menu
+            className="flex-1 border-r-0 bg-transparent overflow-hidden flex flex-col"
+            mode="inline"
+            defaultOpenKeys={defaultOpenKeys}
+            selectedKeys={selectedKey ? [selectedKey] : []}
+            style={{ height: '100%' }}
+          >
+            {siderSections.map((section) => {
+              const sectionTitle = (
+                <div className="flex items-center gap-2">
+                  {section.icon}
+                  <span>{t(`loggedHomePage.siderMenu.${section.name}`)}</span>
                 </div>
-              )}
+              );
 
-              <span
-                onClick={() =>
-                  window.open('https://github.com/refly-ai/refly/releases/tag/v0.5.0', '_blank')
-                }
-                className="mb-2 flex items-start text-[#00968F] hover:bg-gray-50 whitespace-normal h-auto cursor-pointer"
-              >
-                <span className="flex items-start gap-2 leading-6 w-full ">
-                  <Tag
-                    color="green"
-                    className="w-full whitespace-normal !h-auto !py-1 !mr-0 text-center"
+              // Template is a single menu item without submenu
+              if (section.key === 'Template') {
+                return (
+                  <MenuItem
+                    key={section.key}
+                    onClick={() => {
+                      const { setVisible } = useCanvasTemplateModal.getState();
+                      setVisible(true);
+                    }}
                   >
-                    {t('landingPage.simpleMessageText')}
-                  </Tag>
-                </span>
-              </span>
+                    {sectionTitle}
+                  </MenuItem>
+                );
+              }
 
-              {!!userProfile?.uid && (
-                <MenuItem
-                  key="Settings"
-                  className="flex h-12 items-center justify-between"
-                  data-cy="settings-menu-item"
-                  renderItemInTooltip={() => (
-                    <MenuItemTooltipContent title={t('loggedHomePage.siderMenu.settings')} />
+              const sectionContent = (
+                <div className="overflow-y-auto max-h-[200px] pb-2 pl-5 pr-2 bg-white">
+                  {section.key === 'Canvas' && (
+                    <>
+                      <NewCanvasItem />
+
+                      {isLoadingCanvas ? (
+                        <Skeleton
+                          key="skeleton-1"
+                          active
+                          title={false}
+                          paragraph={{ rows: 3 }}
+                          className="px-[12px] w-[200px]"
+                        />
+                      ) : (
+                        <div className="overflow-y-auto">
+                          {canvasList.map((canvas) => (
+                            <CanvasListItem key={canvas.id} canvas={canvas} />
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
+
+                  {section.key === 'Library' && (
+                    <>
+                      <NewProjectItem />
+
+                      {isLoadingProjects ? (
+                        <Skeleton
+                          key="skeleton-1"
+                          active
+                          title={false}
+                          paragraph={{ rows: 3 }}
+                          className="px-[12px] w-[200px]"
+                        />
+                      ) : (
+                        <div className="overflow-y-auto">
+                          {projectsList.map((project) => (
+                            <ProjectListItem key={project.id} project={project} />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+
+              return (
+                <SubMenu
+                  key={section.key}
+                  title={sectionTitle}
+                  className="overflow-hidden"
+                  onTitleClick={() => {
+                    if (section.onClick) section.onClick();
+                  }}
                 >
-                  <SettingItem />
-                </MenuItem>
-              )}
+                  {sectionContent}
+                </SubMenu>
+              );
+            })}
+          </Menu>
+        </div>
+
+        <div className="sider-footer mt-auto px-2">
+          <Divider style={{ margin: '6px 0' }} />
+          {subscriptionEnabled && planType === 'free' && (
+            <div className="mb-2 flex flex-col gap-2">
+              <SubscriptionHint />
             </div>
+          )}
+
+          <div
+            onClick={() =>
+              window.open('https://github.com/refly-ai/refly/releases/tag/v0.5.0', '_blank')
+            }
+            className="mb-2 flex items-start text-[#00968F] hover:bg-gray-50 whitespace-normal h-auto cursor-pointer"
+          >
+            <span className="flex items-start gap-2 leading-6 w-full ">
+              <Tag
+                color="green"
+                className="w-full whitespace-normal !h-auto !py-1 !mr-0 text-center"
+              >
+                {t('landingPage.simpleMessageText')}
+              </Tag>
+            </span>
           </div>
-        </Menu>
+
+          {!!userProfile?.uid && (
+            <div
+              className="flex h-12 items-center justify-between cursor-pointer hover:bg-gray-100 rounded-md px-2"
+              data-cy="settings-menu-item"
+            >
+              <SettingItem />
+            </div>
+          )}
+        </div>
 
         <SettingModal visible={showSettingModal} setVisible={setShowSettingModal} />
       </div>
