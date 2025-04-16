@@ -28,7 +28,7 @@ import { useGetProjectCanvasId } from '@refly-packages/ai-workspace-common/hooks
 import { SlPicture } from 'react-icons/sl';
 import { useProjectSelectorStoreShallow } from '@refly-packages/ai-workspace-common/stores/project-selector';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-
+import { DATA_NUM } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 export const ActionDropdown = ({
   project,
   afterDelete,
@@ -321,7 +321,7 @@ const ProjectList = ({
         coverUrl: project.coverUrl,
         type: 'project' as const,
       }))
-      .slice(0, 4);
+      .slice(0, DATA_NUM);
     updateProjectsList(formattedProjects);
   }, [dataList]);
 

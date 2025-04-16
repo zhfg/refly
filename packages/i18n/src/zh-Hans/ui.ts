@@ -85,6 +85,7 @@ const translations = {
     readonlyWarning: '只读模式',
     readonlyDragDescription: '当前画布为只读模式，不支持修改',
     preview: '预览',
+    viewAll: '查看全部',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',

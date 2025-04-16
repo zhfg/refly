@@ -47,7 +47,7 @@ import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/e
 import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 import { SiderLoggedOut } from './sider-logged-out';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
-import { BsGrid1X2 } from 'react-icons/bs';
+import { LuList } from 'react-icons/lu';
 
 import './layout.scss';
 import { ProjectDirectory } from '../project/project-directory';
@@ -168,7 +168,7 @@ export const NewCanvasItem = () => {
 export const NewProjectItem = () => {
   const { t } = useTranslation();
   const [createProjectModalVisible, setCreateProjectModalVisible] = useState(false);
-  const { loadSiderData } = useHandleSiderData();
+  const { getProjectsList } = useHandleSiderData();
 
   return (
     <>
@@ -191,7 +191,7 @@ export const NewProjectItem = () => {
         visible={createProjectModalVisible}
         setVisible={setCreateProjectModalVisible}
         onSuccess={() => {
-          loadSiderData(true);
+          getProjectsList(true);
         }}
       />
     </>
@@ -268,6 +268,20 @@ export const ProjectListItem = ({ project }: { project: SiderData }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+const ViewAllButton = ({ onClick }: { onClick: () => void }) => {
+  const { t } = useTranslation();
+  return (
+    <Button
+      className="w-full px-2 text-gray-500 text-xs mb-2"
+      type="text"
+      size="small"
+      onClick={onClick}
+    >
+      {t('common.viewAll')}
+    </Button>
   );
 };
 
@@ -352,14 +366,14 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
       key: 'Canvas',
       name: 'canvas',
       icon: <IconCanvas key="canvas" style={{ fontSize: 20 }} />,
-      actionIcon: <BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />,
+      actionIcon: <LuList size={16} className="text-gray-500 hover:text-gray-700" />,
       actionHandler: () => setShowCanvasListModal(true),
     },
     {
       key: 'Library',
       name: 'library',
       icon: <IconLibrary key="library" style={{ fontSize: 20 }} />,
-      actionIcon: <BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />,
+      actionIcon: <LuList size={16} className="text-gray-500 hover:text-gray-700" />,
       actionHandler: () => setShowLibraryModal(true),
     },
   ];
@@ -418,7 +432,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
         source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
       )}
     >
-      <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex h-full flex-col overflow-y-auto">
         <SiderLogo source={source} navigate={(path) => navigate(path)} setCollapse={setCollapse} />
 
         <SearchQuickOpenBtn />
@@ -432,16 +446,11 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
               <IconTemplate key="template" style={{ fontSize: 20 }} />
               <span>{t('loggedHomePage.siderMenu.template')}</span>
             </div>
-            <Button
-              size="small"
-              type="text"
-              icon={<BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />}
-            />
           </div>
         </div>
 
         {/* Main menu section with flexible layout */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-[200px]">
+        <div className="flex-1 overflow-hidden flex flex-col min-h-[250px]">
           <Menu
             className="flex-1 border-r-0 bg-transparent overflow-hidden flex flex-col"
             mode="inline"
@@ -451,7 +460,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
           >
             {siderSections.map((section) => {
               const sectionTitle = (
-                <div className="flex items-center justify-between w-full text-gray-600">
+                <div className="flex items-center justify-between w-full text-gray-600 group select-none">
                   <div className="flex items-center gap-2">
                     {section.icon}
                     <span>{t(`loggedHomePage.siderMenu.${section.name}`)}</span>
@@ -460,7 +469,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                     <Button
                       type="text"
                       size="small"
-                      className="px-1 text-gray-500"
+                      className="px-1 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       icon={section.actionIcon}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -474,12 +483,15 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
               );
 
               const sectionContent = (
-                <div className="overflow-y-auto max-h-[200px] pb-2 pl-5 pr-2 bg-white">
-                  {section.key === 'Canvas' && (
-                    <>
-                      <NewCanvasItem />
+                <div className="flex-1 overflow-hidden flex flex-col bg-white select-none">
+                  <div className="flex-none pl-5 pr-2">
+                    {section.key === 'Canvas' && <NewCanvasItem />}
+                    {section.key === 'Library' && <NewProjectItem />}
+                  </div>
 
-                      {isLoadingCanvas ? (
+                  <div className="flex-1 overflow-y-auto pl-5 pr-2 min-h-0">
+                    {section.key === 'Canvas' &&
+                      (isLoadingCanvas ? (
                         <Skeleton
                           key="skeleton-1"
                           active
@@ -487,22 +499,17 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                           paragraph={{ rows: 3 }}
                           className="px-[12px] w-[200px]"
                         />
-                      ) : (
-                        <div className="overflow-y-auto">
-                          {canvasList?.length > 0 &&
-                            canvasList.map((canvas) => (
-                              <CanvasListItem key={canvas.id} canvas={canvas} />
-                            ))}
+                      ) : canvasList?.length > 0 ? (
+                        <div>
+                          {canvasList.map((canvas) => (
+                            <CanvasListItem key={canvas.id} canvas={canvas} />
+                          ))}
+                          <ViewAllButton onClick={() => setShowCanvasListModal(true)} />
                         </div>
-                      )}
-                    </>
-                  )}
+                      ) : null)}
 
-                  {section.key === 'Library' && (
-                    <>
-                      <NewProjectItem />
-
-                      {isLoadingProjects ? (
+                    {section.key === 'Library' &&
+                      (isLoadingProjects ? (
                         <Skeleton
                           key="skeleton-1"
                           active
@@ -510,16 +517,16 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                           paragraph={{ rows: 3 }}
                           className="px-[12px] w-[200px]"
                         />
-                      ) : (
-                        <div className="overflow-y-auto">
-                          {projectsList?.length > 0 &&
-                            projectsList.map((project) => (
-                              <ProjectListItem key={project.id} project={project} />
-                            ))}
+                      ) : projectsList?.length > 0 ? (
+                        <div>
+                          {projectsList.map((project) => (
+                            <ProjectListItem key={project.id} project={project} />
+                          ))}
+
+                          <ViewAllButton onClick={() => setShowLibraryModal(true)} />
                         </div>
-                      )}
-                    </>
-                  )}
+                      ) : null)}
+                  </div>
                 </div>
               );
 
@@ -527,7 +534,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                 <SubMenu
                   key={section.key}
                   title={sectionTitle}
-                  className="overflow-hidden"
+                  className="ant-menu-submenu-adaptive overflow-hidden"
                   onTitleClick={() => {
                     if (section.onClick) section.onClick();
                   }}
