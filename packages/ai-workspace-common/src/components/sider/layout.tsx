@@ -36,6 +36,7 @@ import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canva
 import {
   IconLibrary,
   IconProject,
+  IconRight,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import { AiOutlineMenuUnfold, AiOutlineUser } from 'react-icons/ai';
@@ -275,10 +276,14 @@ const ViewAllButton = ({ onClick }: { onClick: () => void }) => {
   const { t } = useTranslation();
   return (
     <Button
-      className="w-full px-2 text-gray-500 text-xs mb-2"
+      className="group w-full px-2 text-gray-500 text-xs mb-2 !bg-transparent hover:!text-green-600"
       type="text"
       size="small"
       onClick={onClick}
+      iconPosition="end"
+      icon={
+        <IconRight className="flex items-center text-gray-500 hover:text-green-600 group-hover:text-green-600" />
+      }
     >
       {t('common.viewAll')}
     </Button>
