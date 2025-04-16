@@ -38,21 +38,21 @@ import {
   IconProject,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
-import { AiOutlineMenuFold, AiOutlineUser } from 'react-icons/ai';
+import { AiOutlineMenuUnfold, AiOutlineUser } from 'react-icons/ai';
 import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components/subscription/hint';
 import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
+import { useCanvasTemplateModalShallow } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
 import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 import { SiderLoggedOut } from './sider-logged-out';
 import { CreateProjectModal } from '@refly-packages/ai-workspace-common/components/project/project-create';
+import { BsGrid1X2 } from 'react-icons/bs';
 
 import './layout.scss';
 import { ProjectDirectory } from '../project/project-directory';
 
 const Sider = Layout.Sider;
-const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
 
 export const SiderLogo = (props: {
@@ -78,6 +78,16 @@ export const SiderLogo = (props: {
 
   return (
     <div className="flex items-center justify-between p-3">
+      {source === 'sider' && (
+        <div>
+          <Button
+            type="text"
+            icon={<AiOutlineMenuUnfold size={16} className="text-gray-500" />}
+            onClick={() => setCollapse(true)}
+          />
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         <div
           className="flex cursor-pointer flex-row items-center gap-1.5"
@@ -98,16 +108,6 @@ export const SiderLogo = (props: {
           {starCount}
         </Button>
       </div>
-
-      {source === 'sider' && (
-        <div>
-          <Button
-            type="text"
-            icon={<AiOutlineMenuFold size={16} className="text-gray-500" />}
-            onClick={() => setCollapse(true)}
-          />
-        </div>
-      )}
     </div>
   );
 };
@@ -153,7 +153,7 @@ export const NewCanvasItem = () => {
   return (
     <div className="w-full px-1" onClick={debouncedCreateCanvas}>
       <Button
-        className="w-full"
+        className="w-full justify-start px-2"
         key="newCanvas"
         loading={createCanvasLoading}
         type="text"
@@ -177,7 +177,11 @@ export const NewProjectItem = () => {
         className="w-full px-1"
         onClick={() => setCreateProjectModalVisible(true)}
       >
-        <Button type="text" icon={<IconPlus className="text-green-600" />} className="w-full">
+        <Button
+          type="text"
+          icon={<IconPlus className="text-green-600" />}
+          className="w-full justify-start px-2"
+        >
           <span className="text-green-600">{t('project.create')}</span>
         </Button>
       </div>
@@ -283,10 +287,6 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     updateLibraryModalActiveKey: state.updateLibraryModalActiveKey,
   }));
 
-  const { setSettingsModalActiveTab } = useSiderStoreShallow((state) => ({
-    setSettingsModalActiveTab: state.setSettingsModalActiveTab,
-  }));
-
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
@@ -300,6 +300,8 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     showSettingModal,
     setShowSettingModal,
     setShowLibraryModal,
+    setShowCanvasListModal,
+    setSettingsModalActiveTab,
   } = useSiderStoreShallow((state) => ({
     showSettingModal: state.showSettingModal,
     collapse: state.collapse,
@@ -309,6 +311,12 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     setShowSettingModal: state.setShowSettingModal,
     setShowLibraryModal: state.setShowLibraryModal,
     showLibraryModal: state.showLibraryModal,
+    setShowCanvasListModal: state.setShowCanvasListModal,
+    setSettingsModalActiveTab: state.setSettingsModalActiveTab,
+  }));
+
+  const { setVisible: setShowCanvasTemplateModal } = useCanvasTemplateModalShallow((state) => ({
+    setVisible: state.setVisible,
   }));
 
   const { isLoadingCanvas, isLoadingProjects } = useHandleSiderData(true);
@@ -333,25 +341,26 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
     key: string;
     name: string;
     icon: React.ReactNode;
+    actionIcon?: React.ReactNode;
+    actionHandler?: () => void;
     showDivider?: boolean;
     onClick?: () => void;
   }
 
   const siderSections: SiderCenterProps[] = [
     {
-      key: 'Template',
-      name: 'template',
-      icon: <IconTemplate key="template" className="arco-icon" style={{ fontSize: 20 }} />,
-    },
-    {
       key: 'Canvas',
       name: 'canvas',
-      icon: <IconCanvas key="canvas" className="arco-icon" style={{ fontSize: 20 }} />,
+      icon: <IconCanvas key="canvas" style={{ fontSize: 20 }} />,
+      actionIcon: <BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />,
+      actionHandler: () => setShowCanvasListModal(true),
     },
     {
       key: 'Library',
       name: 'library',
-      icon: <IconLibrary key="library" className="arco-icon" style={{ fontSize: 20 }} />,
+      icon: <IconLibrary key="library" style={{ fontSize: 20 }} />,
+      actionIcon: <BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />,
+      actionHandler: () => setShowLibraryModal(true),
     },
   ];
 
@@ -414,6 +423,23 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
 
         <SearchQuickOpenBtn />
 
+        <div
+          className="flex-shrink-0 h-10 m-1 flex items-center justify-between pl-6 pr-[34px] text-gray-600 hover:bg-gray-100 cursor-pointer rounded-lg"
+          onClick={() => setShowCanvasTemplateModal(true)}
+        >
+          <div className="flex justify-between items-center w-full">
+            <div className="flex items-center gap-2">
+              <IconTemplate key="template" style={{ fontSize: 20 }} />
+              <span>{t('loggedHomePage.siderMenu.template')}</span>
+            </div>
+            <Button
+              size="small"
+              type="text"
+              icon={<BsGrid1X2 size={12} className="text-gray-500 hover:text-gray-700" />}
+            />
+          </div>
+        </div>
+
         {/* Main menu section with flexible layout */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-[200px]">
           <Menu
@@ -425,26 +451,27 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
           >
             {siderSections.map((section) => {
               const sectionTitle = (
-                <div className="flex items-center gap-2">
-                  {section.icon}
-                  <span>{t(`loggedHomePage.siderMenu.${section.name}`)}</span>
+                <div className="flex items-center justify-between w-full text-gray-600">
+                  <div className="flex items-center gap-2">
+                    {section.icon}
+                    <span>{t(`loggedHomePage.siderMenu.${section.name}`)}</span>
+                  </div>
+                  {section.actionIcon && (
+                    <Button
+                      type="text"
+                      size="small"
+                      className="px-1 text-gray-500"
+                      icon={section.actionIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (section.actionHandler) {
+                          section.actionHandler();
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               );
-
-              // Template is a single menu item without submenu
-              if (section.key === 'Template') {
-                return (
-                  <MenuItem
-                    key={section.key}
-                    onClick={() => {
-                      const { setVisible } = useCanvasTemplateModal.getState();
-                      setVisible(true);
-                    }}
-                  >
-                    {sectionTitle}
-                  </MenuItem>
-                );
-              }
 
               const sectionContent = (
                 <div className="overflow-y-auto max-h-[200px] pb-2 pl-5 pr-2 bg-white">
@@ -462,9 +489,10 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                         />
                       ) : (
                         <div className="overflow-y-auto">
-                          {canvasList.map((canvas) => (
-                            <CanvasListItem key={canvas.id} canvas={canvas} />
-                          ))}
+                          {canvasList?.length > 0 &&
+                            canvasList.map((canvas) => (
+                              <CanvasListItem key={canvas.id} canvas={canvas} />
+                            ))}
                         </div>
                       )}
                     </>
@@ -484,9 +512,10 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
                         />
                       ) : (
                         <div className="overflow-y-auto">
-                          {projectsList.map((project) => (
-                            <ProjectListItem key={project.id} project={project} />
-                          ))}
+                          {projectsList?.length > 0 &&
+                            projectsList.map((project) => (
+                              <ProjectListItem key={project.id} project={project} />
+                            ))}
                         </div>
                       )}
                     </>
