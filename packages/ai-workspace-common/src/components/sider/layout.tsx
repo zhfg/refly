@@ -438,7 +438,7 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
         <SearchQuickOpenBtn />
 
         <div
-          className="flex-shrink-0 h-10 m-1 flex items-center justify-between pl-6 pr-[34px] text-gray-600 hover:bg-gray-100 cursor-pointer rounded-lg"
+          className="flex-shrink-0 h-10 m-1 flex items-center justify-between pl-6 pr-3 text-gray-600 hover:bg-gray-100 cursor-pointer rounded-lg"
           onClick={() => setShowCanvasTemplateModal(true)}
         >
           <div className="flex justify-between items-center w-full">
@@ -446,6 +446,12 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
               <IconTemplate key="template" style={{ fontSize: 20 }} />
               <span>{t('loggedHomePage.siderMenu.template')}</span>
             </div>
+            <Button
+              type="text"
+              size="small"
+              className="px-1 text-gray-500"
+              icon={<LuList size={16} className="text-gray-900 hover:text-gray-700" />}
+            />
           </div>
         </div>
 
