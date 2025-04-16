@@ -366,14 +366,18 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
       key: 'Canvas',
       name: 'canvas',
       icon: <IconCanvas key="canvas" style={{ fontSize: 20 }} />,
-      actionIcon: <LuList size={16} className="text-gray-500 hover:text-gray-700" />,
+      actionIcon: (
+        <LuList size={16} className="flex items-center text-gray-500 hover:text-gray-700" />
+      ),
       actionHandler: () => setShowCanvasListModal(true),
     },
     {
       key: 'Library',
       name: 'library',
       icon: <IconLibrary key="library" style={{ fontSize: 20 }} />,
-      actionIcon: <LuList size={16} className="text-gray-500 hover:text-gray-700" />,
+      actionIcon: (
+        <LuList size={16} className="flex items-center text-gray-500 hover:text-gray-700" />
+      ),
       actionHandler: () => setShowLibraryModal(true),
     },
   ];
@@ -450,7 +454,9 @@ const SiderLoggedIn = (props: { source: 'sider' | 'popover' }) => {
               type="text"
               size="small"
               className="px-1 text-gray-500"
-              icon={<LuList size={16} className="text-gray-900 hover:text-gray-700" />}
+              icon={
+                <LuList size={16} className="flex items-center text-gray-900 hover:text-gray-700" />
+              }
             />
           </div>
         </div>

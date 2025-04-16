@@ -351,15 +351,15 @@ const ProjectList = ({
 
   return (
     <Spin className="w-full h-full" spinning={isRequesting && dataList.length === 0}>
-      <div id="resourceScrollableDiv" className="w-full h-[calc(60vh-60px)] overflow-y-auto">
+      <div id="projectScrollableDiv" className="w-full h-[calc(60vh-60px)] overflow-y-auto">
         {dataList.length > 0 ? (
           <InfiniteScroll
             dataLength={dataList.length}
             next={handleLoadMore}
             hasMore={hasMore}
-            loader={<Spinner />}
+            loader={isRequesting ? <Spinner /> : null}
             endMessage={<EndMessage />}
-            scrollableTarget="resourceScrollableDiv"
+            scrollableTarget="projectScrollableDiv"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               <CreateCard reload={reload} setVisible={setShowLibraryModal} />
