@@ -77,6 +77,7 @@ const translations = {
     readonlyWarning: 'Read-Only Mode',
     readonlyDragDescription: 'Canvas is in read-only mode, modifications are not allowed.',
     preview: 'Preview',
+    viewAll: 'View All',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
