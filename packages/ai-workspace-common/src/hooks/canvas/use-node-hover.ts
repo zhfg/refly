@@ -30,10 +30,10 @@ export const useNodeHoverEffect = (nodeId: string) => {
             return { ...node, zIndex: ZINDEX_ON_GROUP };
           }
 
-          // // Reset other nodes when they're not part of the current operation
-          // if (!isHovered && !selected && node.parentId === nodeId) {
-          //   return { ...node, zIndex: 0 };
-          // }
+          // Reset other nodes when they're not part of the current operation
+          if (!isHovered && !selected && node.parentId === nodeId) {
+            return { ...node, zIndex: 0 };
+          }
 
           return node;
         });
