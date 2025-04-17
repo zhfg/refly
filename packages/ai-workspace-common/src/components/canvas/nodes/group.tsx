@@ -325,11 +325,11 @@ export const GroupNode = memo(
       setNodes((nodes) =>
         nodes.map((node) => {
           if (node.id === id || type === 'destory') {
-            return { ...node, zIndex: newZIndex };
+            return { ...node, style: { ...node.style, zIndex: newZIndex } };
           }
           // Also set child nodes zIndex when parent group is selected
           if (node.parentId === id && selected) {
-            return { ...node, zIndex: zIndexForGroup };
+            return { ...node, style: { ...node.style, zIndex: zIndexForGroup } };
           }
           return node;
         }),
