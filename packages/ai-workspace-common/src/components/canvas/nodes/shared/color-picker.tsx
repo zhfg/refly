@@ -15,6 +15,7 @@ export const presetColors = [
   '#fee1c7', // Orange
   '#ffede7', // Pink
   '#f2f4f7', // Gray
+  '#ffffff', // White
 ];
 
 interface CommonColorPickerProps {
