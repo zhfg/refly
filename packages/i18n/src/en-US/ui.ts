@@ -985,6 +985,10 @@ const translations = {
       deleteSuccess: 'Canvas deleted successfully',
       addSuccess: 'Canvas added successfully, start creating!',
       duplicateSuccess: 'Canvas duplicated successfully',
+      nodeLimitReached:
+        'Canvas has reached the maximum limit of {{max}} nodes. Please remove some nodes before adding new ones.',
+      approachingNodeLimit:
+        'Canvas is approaching the node limit ({{current}}/{{max}}). Consider removing unnecessary nodes.',
     },
     skill: {
       askAI: 'Ask AI',

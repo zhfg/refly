@@ -968,6 +968,8 @@ const translations = {
       deleteSuccess: '删除画布成功',
       addSuccess: '画布添加好啦，开始创作吧~',
       duplicateSuccess: '复制画布成功',
+      nodeLimitReached: '画布已达到最大节点数限制 ({{max}})，请删除一些节点后再添加新节点。',
+      approachingNodeLimit: '画布节点数量接近上限 ({{current}}/{{max}})，建议移除不必要的节点。',
     },
     skill: {
       askAI: 'AI 提问',
