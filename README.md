@@ -27,7 +27,7 @@ Refly is an open-source AI-native creation engine powered by 13+ leading AI mode
     <a href="https://www.typescriptlang.org/" target="_blank">
         <img alt="TypeScript-version-icon" src="https://img.shields.io/badge/TypeScript-^5.3.3-blue"></a>
     <a href="https://gitpod.io#https://github.com/refly-ai/refly">
-        <img alt="Open in gitpod" src="https://www.pngrepo.com/download/373626/gitpod.png" /></a>
+        <img alt="Open in gitpod" src="https://www.gitpod.io/favicon192.png" /></a>
 </p>
 
 <p align="center">
