@@ -1,17 +1,18 @@
 tasks:
   - init: |
-      docker-compose pull -f deploy/docker/docker-compose.yml
+      cp apps/api/.env.example deploy/docker/.env
+      docker compose -f deploy/docker/docker-compose.yml pull
   - command: | 
-      docker-compose up -f deploy/docker/docker-compose.yml
+      docker compose -f deploy/docker/docker-compose.yml up
 
 
 ports:
-  - port: 5000
-    onOpen: ignore
-  - port: 5601
+  - port: 5700
     onOpen: open-browser
-  - port: 9200
-    onOpen: open-preview
+  - port: 5801
+    onOpen: open-browser
+  - port: 5800
+    onOpen:  open-browser
   - port: 9300
     onOpen: ignore
   - port: 9600
